@@ -1,0 +1,55 @@
+services:
+  app:
+    container_name: SharaaDates
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "9000:9000"
+    volumes:
+      - .:/var/www/html
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
+    depends_on:
+      - mysql
+      - phpmyadmin
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  mysql:
+    container_name: SharaaDates_DB
+    image: mysql:8.0
+    restart: always
+    command: "--innodb_use_native_aio=0"
+    environment:
+      MYSQL_ROOT_PASSWORD: default
+      MYSQL_DATABASE: dates
+    volumes:
+      - ./db-data:/var/lib/mysql
+    ports:
+      - "4306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      - PMA_HOST=mysql
+      - PMA_ARBITRARY=1
+      - UPLOAD_LIMIT=99999K
+    depends_on:
+      - mysql
+
+  nginx:
+    image: nginx:1.21-alpine
+    container_name: SharaaDates-nginx
+    volumes:
+      - .:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8000:80"
+    depends_on:
+      - app
+      - mysql
