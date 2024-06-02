@@ -10,9 +10,38 @@
 
     .header-area.sticky {
         background-color: #fff;
-        /* Adjust the background color as needed */
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        /* Adjust the box shadow as needed */
+    }
+
+    .search-area {
+        visibility: hidden;
+        height: 0;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        box-sizing: border-box;
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: all 0.3s ease, transform 0.3s ease;
+    }
+
+    .search-area.show {
+        visibility: visible;
+        height: auto;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .search-icon {
+        cursor: pointer;
+        font-size: 24px;
+        margin: 0 10px;
+        margin-top: 10px;
+        color: #942326;
     }
 </style>
 
@@ -22,11 +51,27 @@
         <div class="header-middle">
             <div class="header-middle-wrap">
                 <div class="brand-area">
-                    <a class="brand-logo" href="{{ route('front') }}"><img class="brand-image"
-                            src="{{ asset(IMG_LOGO_PATH . $allsettings['main_logo']) }}"
-                            alt="{{ $allsettings['app_title'] }}" /></a>
+                    <a class="brand-logo" href="{{ route('front') }}">
+                        <img class="brand-image" src="{{ asset(IMG_LOGO_PATH . $allsettings['main_logo']) }}"
+                            alt="{{ $allsettings['app_title'] }}" />
+                    </a>
                 </div>
-                
+
+
+                <i class="search-icon flaticon-search"></i>
+
+
+                <div class="search-area">
+                    <form action="{{ route('category.product') }}" method="get">
+                        <div class="search-wrap">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="search" name="search"
+                                    placeholder="{{ __('Search Here') }}" />
+                                <button type="submit" class="search-btn"><i class="flaticon-search"></i></button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
 
                 <div class="header-bottom">
                     <nav class="menu-area">
@@ -38,54 +83,9 @@
                             </li>
                             @endforeach
                         </ul>
-                        {{-- <ul class="main-menu">
-                            @foreach ($all_menus as $menu)
-                            @if ($menu->submenus->count() == 0)
-                            <li class="menu-item"><a class="menu-link" href="{{ url($menu->url) }}">{{
-                                    langConverter($menu->en_name, $menu->fr_name) }}</a>
-                            </li>
-                            @else
-                            <li class="menu-item menu-item-has-children">
-                                <a class="menu-link" href="#">{{ langConverter($menu->en_name, $menu->fr_name) }} <i
-                                        class="arrow-icon fas fa-angle-down"></i></a>
-
-                                @if ($menu->url === 'categories')
-                                <ul class="sub-menu">
-                                    @foreach (Category_Des_Icon() as $category)
-                                    <li class="sub-menu-item"><a class="sub-menu-link"
-                                            href="{{ route('category.product', $category->id) }}">{{
-                                            langConverter($category->en_Category_Name, $category->fr_Category_Name)
-                                            }}</a>
-                                    </li>
-                                    @endforeach
-                                </ul>
-                                @else
-                                <ul class="sub-menu">
-                                    @foreach ($menu->submenus as $submenu)
-                                    <li class="sub-menu-item"><a class="sub-menu-link" href="{{ $submenu->url }}">{{
-                                            langConverter($submenu->en_name, $submenu->fr_name) }}</a>
-                                    </li>
-                                    @endforeach
-                                </ul>
-                                @endif
-                            </li>
-                            @endif
-                            @endforeach
-                        </ul> --}}
                     </nav>
                 </div>
 
-                <div class="search-area">
-                    <form action="{{ route('category.product') }}" method="get">
-                        <div class="search-wrap">
-                            <div class="form-group">
-                                <input type="text" class="form-control" id="search" name="search"
-                                       placeholder="{{ __('Search Here') }}" />
-                                <button type="submit" class="search-btn"><i class="flaticon-search"></i></button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
 
                 <div class="flex items-center gap-5">
                     <div class="header-right">
@@ -93,18 +93,15 @@
                             <a href="{{ route('wishlist') }}" class="wishlist-btn header-btn">
                                 <div class="btn-left">
                                     <i class="btn-icon flaticon-like"></i>
-                                    <span class="count wishListCuntFromController">{{ auth()->check() ? wishlistCount()
-                                        : '0' }}</span>
+                                    <span class="count wishListCuntFromController">{{ auth()->check() ? wishlistCount() : '0' }}</span>
                                 </div>
                                 <div class="btn-right">
                                     <span class="btn-text">{{ __('Wishlist') }}</span>
-                                    <span class="item-count wishListCuntFromController">{{ auth()->check() ?
-                                        wishlistCount() : '0' }}
+                                    <span class="item-count wishListCuntFromController">{{ auth()->check() ? wishlistCount() : '0' }}
                                         {{ __('items') }}</span>
                                 </div>
                             </a>
                         </div>
-
 
                         <div class="cart single-btn">
                             <a data-bs-toggle="offcanvas" href="#cartOffcanvasSidebar" role="button"
@@ -132,13 +129,6 @@
                     </div>
 
                     <div class="header-top-right flex items-center gap-5">
-                        <!-- <div class="top-bar-menu">
-                                <ul class="menu-list">
-                                    <li class="menu-item"><a class="menu-link" href="javascript:void(0)"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#trackOrderModal">{{ __('Track Order') }}</a></li>
-                                </ul>
-                            </div> -->
                         <div class="switcher-lang-currency flex items-center gap-5">
                             <div class="lang-switcher">
                                 @if (app()->getLocale() == 'en')
@@ -197,11 +187,6 @@
                             <a href="javascript:void(0)" class="lang">{{ Auth::user()->name }} <i
                                     class="fas fa-angle-down"></i></a>
                             <ul class="account-list">
-                                {{-- @if (Auth::user()->is_admin == ACTIVE)
-                                <li class="single-lang"><a class="lang-text" href="{{ route('admin.dashboard') }}">{{
-                                        __('Dashboard') }}</a>
-                                </li>
-                                @else --}}
                                 <li class="single-lang">
                                     <a class="lang-text" href="{{ route('user.profile.edit') }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -214,10 +199,9 @@
                                         {{ __('Profile') }}
                                     </a>
                                 </li>
-                                {{-- @endif --}}
                                 <li class="single-lang">
                                     <a class="lang-text" href="{{ route('user.logout') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        <svg xmlns="http://www0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mb-2.5">
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
@@ -242,38 +226,12 @@
 
 <script>
     window.addEventListener('scroll', function() {
-  var header = document.querySelector('.header-area');
-  header.classList.toggle('sticky', window.scrollY > 0);
-});
+        var header = document.querySelector('.header-area');
+        header.classList.toggle('sticky', window.scrollY > 0);
+    });
 
-// Smooth scroll animation
-function scrollToElement(element, duration) {
-  var startingY = window.pageYOffset;
-  var elementY = element.offsetTop - (header.offsetHeight || 0);
-  var diff = elementY - startingY;
-  var start;
-
-  window.requestAnimationFrame(function step(timestamp) {
-    if (!start) start = timestamp;
-    var time = timestamp - start;
-    var percent = Math.min(time / duration, 1);
-    window.scrollTo(0, startingY + diff * percent);
-
-    if (time < duration) {
-      window.requestAnimationFrame(step);
-    }
-  });
-}
-
-// // Add click event listeners to navigation links
-// var navLinks = document.querySelectorAll('.menu-link, .sub-menu-link');
-// navLinks.forEach(function(link) {
-//   link.addEventListener('click', function(e) {
-//     e.preventDefault();
-//     var target = document.querySelector(this.hash);
-//     if (target) {
-//       scrollToElement(target, 500); // Adjust the duration (in milliseconds) as needed
-//     }
-//   });
-// });
+    document.querySelector('.search-icon').addEventListener('click', function() {
+        var searchArea = document.querySelector('.search-area');
+        searchArea.classList.toggle('show');
+    });
 </script>
