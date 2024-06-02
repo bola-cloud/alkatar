@@ -82,7 +82,7 @@
     <div class="section-header-area">
         <div class="flex items-center gap-5 justify-center max-w-full px-10">
             {{-- dotted line --}}
-            <img src="{{asset("assets/images/dash-line.png")}}" alt="dash line"  />
+            <img src="{{asset("assets/images/dash-line.png")}}" alt="dash line" />
 
             <h2 class="section-title">
                 {{ langConverter(siteContentHomePage('best_selling')->en_Description_One,
@@ -134,15 +134,16 @@
             {{-- <div class="text-gray-300 hidden lg:flex items-center"> --}}
                 {{-- <img src="{{asset('/title_icons/featuredTitle.png')}}" /> --}}
                 {{-- <div class="left-dashes"></div> --}}
-                <img src="{{asset("assets/images/dash-line.png")}}" alt="dash line"  />
-            {{-- </div> --}}
+                <img src="{{asset("assets/images/dash-line.png")}}" alt="dash line" />
+                {{--
+            </div> --}}
 
             <h2 class="section-title">
                 {{ langConverter(siteContentHomePage('featured')->en_Description_One,
                 siteContentHomePage('featured')->fr_Description_One) }}
             </h2>
 
-            <img src="{{asset("assets/images/dash-line.png")}}" alt="dash line"  />
+            <img src="{{asset("assets/images/dash-line.png")}}" alt="dash line" />
         </div>
     </div>
 
@@ -165,14 +166,14 @@
     <div class="section-header-area">
         <div class="flex items-center justify-center gap-5 max-w-full px-20">
             {{-- <div class="text-gray-300 left-dashes hidden lg:inline-block"></div> --}}
-            <img src="{{asset("assets/images/dash-line.png")}}" alt="dash line"  />
+            <img src="{{asset("assets/images/dash-line.png")}}" alt="dash line" />
 
             <h2 class="section-title">
                 {{ langConverter(siteContentHomePage('new_arrival')->en_Description_One,
                 siteContentHomePage('new_arrival')->fr_Description_One) }}
             </h2>
 
-            <img src="{{asset("assets/images/dash-line.png")}}" alt="dash line"  />
+            <img src="{{asset("assets/images/dash-line.png")}}" alt="dash line" />
 
             {{-- <div class="text-gray-300 hidden lg:flex items-center">
                 <div class="right-dashes"></div>
@@ -196,27 +197,29 @@
 <!-- New Arrival end here  -->
 
 
-  {{-- <div class="modal fade" id="sizeSelectionModal" tabindex="-1" aria-labelledby="sizeSelectionModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="sizeSelectionModalLabel">{{ __('Select Size') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="sizeOptions">
-                        <!-- Size options will be dynamically inserted here -->
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Close') }}</button>
-                    <button type="button" class="btn btn-primary" id="addToCartWithSize">{{ __('Add To Cart')
-                        }}</button>
+
+
+{{-- <div class="modal fade" id="sizeSelectionModal" tabindex="-1" aria-labelledby="sizeSelectionModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sizeSelectionModalLabel">{{ __('Select Size') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="sizeOptions">
+                    <!-- Size options will be dynamically inserted here -->
                 </div>
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Close') }}</button>
+                <button type="button" class="btn btn-primary" id="addToCartWithSize">{{ __('Add To Cart')
+                    }}</button>
+            </div>
         </div>
-    </div> --}}
+    </div>
+</div> --}}
 
 <!-- Testimonial ara start here  -->
 {{-- <div class="testimonial-area section section-bg">

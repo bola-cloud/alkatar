@@ -7,7 +7,7 @@
 
     <!-- checkout page area start here  -->
     <section class="page-content section">
-        <h1 class="text-6xl font-bold text-center mb-10 text-primary-red">Checkout Page</h1>
+        <h1 class="text-6xl font-bold text-center mb-10 text-primary-red">{{__("Checkout Page")}}</h1>
         <div class="checkout">
             <div class="container">
                 <div class="row">
@@ -21,7 +21,10 @@
                                         <div class="col-lg-12 mb-3">
                                             <div
                                                 class="checkout-page-login-box d-flex justify-content-between align-items-center mb-30">
-                                                <h2 class="mb-0 text-capitalize fw-bold">Returning buyer? Please login:</h2>
+                                                <h2 class="mb-0 text-capitalize fw-bold">
+                                                    {{__("Returning buyer? Please login:")}}
+
+                                                </h2>
                                                 <button type="button" class="primary-btn" data-bs-toggle="modal"
                                                     data-bs-target="#loginModal">Login</button>
                                             </div>
@@ -421,16 +424,19 @@
                                 @foreach ($content as $item)
                                     <li class="single-cart-product d-flex justify-content-between">
                                         <div class="product-info">
-                                            <h3 class="flex items-center gap-3"><span class="text-white bg-primary-red font-bold size-10 rounded-full flex justify-center items-center pt-1">{{ $item->qty }}</span> {{ $item->name }}</h3>
+                                            <img  src="{{ asset(ProductImage() . $item->options->image) }}" alt="{{ $item->name }}" class="product-image">
+
+                                            <h3 class="flex items-center gap-3"><span class="text-white bg-primary-red font-bold size-10 rounded-full flex justify-center items-center pt-1">{{ $item->qty }}</span> <span class="!mt-3">{{ $item->name }}</span> </h3>
                                             <p>{{ __('Size:') }}
                                                 {{ is_null($item->options->size) ? __('Free Size') : $item->options->size }}
                                             </p>
-                                            <p class="checkout-page-color-show">{{ __('Color:') }} @if (is_null($item->options->color))
+                                            {{-- <p class="checkout-page-color-show">{{ __('Color:') }} @if (is_null($item->options->color))
                                                     {{ __('Any Color') }}
                                                 @else
                                                     <span style="background:{{ $item->options->color }};"></span>
                                                 @endif
-                                            </p>
+                                            </p> --}}
+                                            
                                         </div>
                                         <div class="price-area">
                                             <h3 class="price">

@@ -180,22 +180,47 @@ class ProductController extends Controller
         return view('front.pages.product.filter_leftsidebar', compact('filters'));
     }
 
-    public function CategoryWiseProduct($id)
+    public function CategoryWiseProduct($id = null)
     {
         $data['tags'] = ProductTag::with('product')->latest()->get();
-        // $data['sizes'] = Size::with('products')->latest()->get();
-        $products = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('status', 1)->where('Category_Id', $id)->latest()->paginate(9);
-        $data['products'] = $products;
+
+        // Retrieve SEO settings
         $seo = SeoSetting::where('slug', 'all-products')->first();
         $data['title'] = $seo->title;
         $data['description'] = $seo->description;
         $data['keywords'] = $seo->keywords;
-        
-        if ($products) {
-            return view('front.pages.product.category_wise_product', $data);
+
+        if ($id) {
+            // Category-specific search
+            $category = Category::findOrFail($id);
+            $products = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')
+                ->where('status', 1)
+                ->where('Category_Id', $id)
+                ->latest()
+                ->paginate(9);
+            $data['category'] = $category;
+        } else {
+            // General search across all categories
+            $search = request()->input('search');
+            $products = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')
+                ->where('status', 1)
+                ->where(function ($query) use ($search) {
+                    $query->where('en_Product_Name', 'LIKE', "%{$search}%")
+                        ->orWhere('fr_Product_Name', 'LIKE', "%{$search}%");
+                })
+                ->latest()
+                ->paginate(9);
         }
-        return view('front.pages.product.empty-product', $data);
+
+        $data['products'] = $products;
+
+        if ($products->count() > 0) {
+            return view('front.pages.product.category_wise_product', $data);
+        } else {
+            return view('front.pages.product.empty-product', $data);
+        }
     }
+
 
     public function CategoryWiseProductLeft($id)
     {
@@ -257,7 +282,6 @@ class ProductController extends Controller
 
     public function CategorySearchProduct(Request $request)
     {
-        $cat = $request->category;
         $search = $request->search;
         $tags = ProductTag::with('product')->latest()->get();
         $colors = Color::with('products')->latest()->get();
@@ -267,13 +291,11 @@ class ProductController extends Controller
         $products = Product::query();
         $products = $products->with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('status', 1);
 
-        $products = $products->where(function($q) use ($search){
+        $products = $products->where(function ($q) use ($search) {
             $q->where('en_Product_Name', 'LIKE', "%{$search}%")
-            ->orWhere('fr_Product_Name', 'LIKE', "%{$search}%");
+                ->orWhere('fr_Product_Name', 'LIKE', "%{$search}%");
         });
-        if ($cat) {
-            $products = $products->where('Category_Id', $cat);
-        }
+
         $products = $products->latest()->paginate(9);
         if (count($products) > 0) {
             return view('front.pages.product.search-result', compact('products', 'category', 'colors', 'sizes', 'brands'));

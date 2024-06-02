@@ -177,7 +177,7 @@
                                     <div class="cart-plus-minus w-full">
                                         <div class="dec qtybutton btn">-</div>
                                         <input class="cart-plus-minus-box" type="text" name="qtybutton"
-                                            id="product_quantity" value="1" readonly />
+                                            id="product_quantity" value="1"  />
                                         <div class="inc qtybutton btn">{{ __('+') }}</div>
                                     </div>
                                     {{-- <a class="product-btn MyWishList" data-id="{{ $products->id }}"
@@ -190,9 +190,9 @@
                                             data-id="{{ $products->id }}">{{ __('Buy Now') }}</a> -->
                                         <a href="javascript:void(0)" title="{{ __('Add To Cart') }}"
                                             class="add-cart addCart" 
-                                            data-id="{{ $products->id }}"
-                                            data-selected-price="0" 
-                                            data-selected-size="0"
+                                            data-product-id="{{ $products->id }}"
+                                            data-price="0" 
+                                            data-size-id="0"
                                             >{{ __('Add To Cart')
                                             }}
                                             <i class="icon fas fa-plus-circle"></i></a>
@@ -355,8 +355,8 @@ Copy code
         // On render, get the first size price and update the displayed price and data attributes
         var firstSizePrice = $('.single-size input[type="radio"]:checked').val();
         $('.product-price .price').text('OMR ' + (originalPrice + parseFloat(firstSizePrice)).toFixed(2));
-        $('.addCart').attr('data-selected-price', firstSizePrice);
-        $('.addCart').attr('data-selected-size', $('.single-size input[type="radio"]:checked').data('size'));
+        $('.addCart').attr('data-price', firstSizePrice);
+        $('.addCart').attr('data-size-id', $('.single-size input[type="radio"]:checked').data('size'));
 
         // Update price and data attributes when a size is selected
         $('.single-size').on('click', function() {
@@ -364,8 +364,8 @@ Copy code
             sizeRadio.prop('checked', true);
             var newPrice = originalPrice + parseFloat(sizeRadio.val());
             $('.product-price .price').text('OMR ' + newPrice.toFixed(2));
-            $('.addCart').attr('data-selected-price', sizeRadio.val());
-            $('.addCart').attr('data-selected-size', sizeRadio.data('size'));
+            $('.addCart').attr('data-price', sizeRadio.val());
+            $('.addCart').attr('data-size-id', sizeRadio.data('size'));
         });
     });
 </script>

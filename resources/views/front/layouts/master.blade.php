@@ -113,12 +113,38 @@
         </div>
     </div>
 
+    
+<!-- Size Selection Modal -->
+<div class="modal fade" id="sizeModal" tabindex="-1" aria-labelledby="sizeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sizeModalLabel">Select Size</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h1>{{__("Size Options")}}:</h1>
+                <div id="sizeOptionsContainer" class="d-flex flex-wrap gap-2">
+                    <!-- Size options will be injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
     {{-- route url --}}
     <div id="DoNotSubscribe" data-url="{{ route('do.not.subscribe') }}"></div>
     <div id="SubscribeStore" data-url="{{ route('admin.subscribe.store') }}"></div>
     {{-- include file --}}
+    <script>
+        var localizedText = {
+          productAddedToCart: @json(__('Product Added to Cart Successfully')),
+          selectSize: @json(__('Select Size for Product'))
+      };
+    </script>
     @include('front.layouts.include.script')
     @stack('post_script')
+
     {{-- @include('sweetalert::alert') --}}
 
 </body>

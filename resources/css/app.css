@@ -576,25 +576,78 @@ h3 {
     -moz-appearance: none;
   }
   
-  /* Style the arrow */
-  .custom-select {
-    background-image: url('data:image/svg+xml;charset=UTF-8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-    background-size: 16px;
-    padding-right: 32px;
-    margin-bottom: 10px;
-  }
-  
-  /* Remove default arrow for Firefox */
-  .custom-select:-moz-focusring {
-    color: transparent;
-    text-shadow: 0 0 0 #000;
-  }
-  
-  /* Add hover and focus styles */
-  .custom-select:hover,
-  .custom-select:focus {
-    border-color: #888;
-    outline: none;
-  }
+/* Custom styles for the modal and size options */
+.modal-content {
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.modal-title {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-body h1 {
+    font-size: 2.75rem;
+    font-weight: bold;
+    margin: 20px 0;
+    @apply text-primary-red underline;
+}
+
+#sizeOptionsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.size-option {
+    padding: 1rem 2rem;
+    font-size: 2rem;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    background-color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    @apply text-primary-red;
+}
+
+.size-option:hover {
+    @apply bg-primary-red text-white;
+}
+
+.size-option.active {
+    @apply bg-primary-red text-white;
+}
+
+.product-single-area .product-single-details .product-info .product-bottom-button .primary-btn, .product-single-area .product-single-details .product-info .product-bottom-button .add-cart {
+    @apply bg-primary-red hover:bg-primary-red/90 rounded-lg text-white;
+}
+
+.checkout .cart-summary .cart-product-list .single-cart-product {
+    @apply items-center justify-between;
+}
+
+.checkout .cart-summary .cart-product-list .single-cart-product .product-info {
+    @apply flex gap-16 items-center;
+}
+
+.checkout .cart-summary .cart-product-list .single-cart-product img {
+    @apply w-32 h-32;
+}

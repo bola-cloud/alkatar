@@ -103,7 +103,7 @@
     "Cash On Delivery": "\u0627\u0644\u062f\u0641\u0639 \u0639\u0646\u062f \u0627\u0644\u0627\u0633\u062a\u0644\u0627\u0645",
     "By clicking the button you agree to our": "\u0628\u0627\u0644\u0636\u063a\u0637 \u0639\u0644\u0649 \u0627\u0644\u0632\u0631 \u0641\u0625\u0646\u0643 \u062a\u0648\u0627\u0641\u0642 \u0639\u0644\u0649",
     "Terms & Conditions": "\u0627\u0644\u0628\u0646\u0648\u062f \u0648 \u0627\u0644\u0638\u0631\u0648\u0641",
-    "Place Order": "\u0645\u0643\u0627\u0646 \u0627\u0644\u0627\u0645\u0631",
+    "Place Order": "اتمام الطلب",
     "Razorpay Confirmation": "\u062a\u0623\u0643\u064a\u062f Razorpay",
     "Edit": "\u064a\u062d\u0631\u0631",
     "Cart Summary": "\u0645\u0644\u062e\u0635 \u0627\u0644\u0639\u0631\u0628\u0629",
@@ -252,5 +252,10 @@
     "Total Results:": "العثور على :count نتيجة",
     "Your Cart List Is Empty": "السلة فارغة",
     "Cart is empty. Please go to your home page for listing it.": "السلة فارغة يرجى اضافة منتجات",
-    "*All the amount is in USD currency.": "*جميع المبالغ بالاريال العماني."
+    "*All the amount is in USD currency.": "*جميع المبالغ بالاريال العماني.",
+    "Size Options": "خيارات الحجم",
+    "Select Size for Product": "اختر الحجم للمنتج",
+    "Product Added to Cart Successfully": "تمت إضافة المنتج إلى السلة بنجاح",
+    "Returning buyer? Please login:": "عميل حالي؟ الرجاء تسجيل الدخول:",
+    "Checkout Page": "صفحة الدفع"
 }

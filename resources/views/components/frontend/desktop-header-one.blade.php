@@ -26,6 +26,8 @@
                             src="{{ asset(IMG_LOGO_PATH . $allsettings['main_logo']) }}"
                             alt="{{ $allsettings['app_title'] }}" /></a>
                 </div>
+                
+
                 <div class="header-bottom">
                     <nav class="menu-area">
                         <ul class="main-menu">
@@ -73,9 +75,20 @@
                     </nav>
                 </div>
 
+                <div class="search-area">
+                    <form action="{{ route('category.product') }}" method="get">
+                        <div class="search-wrap">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="search" name="search"
+                                       placeholder="{{ __('Search Here') }}" />
+                                <button type="submit" class="search-btn"><i class="flaticon-search"></i></button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
                 <div class="flex items-center gap-5">
                     <div class="header-right">
-
                         <div class="wishlist single-btn">
                             <a href="{{ route('wishlist') }}" class="wishlist-btn header-btn">
                                 <div class="btn-left">

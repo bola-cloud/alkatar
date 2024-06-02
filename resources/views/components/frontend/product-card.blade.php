@@ -1,4 +1,3 @@
-<!-- resources/views/components/product-card.blade.php -->
 @props(['product'])
 
 <div class="single-grid-product ms-4" data-product-id="{{ $product->id }}">
@@ -50,21 +49,9 @@
 
         {!! productReview($product->id) !!}
 
-        <!-- Size selection dropdown -->
-        <div class="size-selection">
-            <label for="sizeSelect-{{ $product->id }}">{{ __('Select Size') }}</label>
-            <select id="sizeSelect-{{ $product->id }}" class="form-control sizeSelect custom-select"
-                data-product-id="{{ $product->id }}">
-                <option value="">{{ __('Select Size') }}</option>
-                @foreach ($product->sizes as $size)
-                <option value="{{ $size->id }}">{{ $size->Size }} - {{ currencyConverter($size->pivot->price) }}
-                </option>
-                @endforeach
-            </select>
-        </div>
-
         <a href="javascript:void(0)" title="{{ __('Add To Cart') }}" class="add-cart addCart"
-            data-id="{{ $product->id }}" style="display: none;" data-selected-price="0" data-selected-size="0">
+            data-id="{{ $product->id }}" data-name="{{ $product->en_Product_Name }}"
+            data-sizes="{{ json_encode($product->sizes) }}">
             <svg fill="#000000" class="size-8 hover:fill-white transition-colors" version="1.1" id="Capa_1"
                 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 483.1 483.1"
                 xml:space="preserve">

@@ -82,6 +82,7 @@ class CartController extends Controller
             }
         }
     }
+    
     public function cartContent()
     {
         $content = Cart::content();

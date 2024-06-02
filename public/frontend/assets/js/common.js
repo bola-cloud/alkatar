@@ -169,52 +169,195 @@
         });
     });
 
-    //add to cart
-    $(".addCart").on("click", function () {
-        var $this = $(this);
-        var product_id = $this.attr("data-id");
-        var selectedSize = $this.attr("data-selected-size");
-        var price = $this.attr("data-selected-price");
-        let quantity = $("#product_quantity").val();
-        let colorSelector = document.querySelector(
-            'input[name="productColor"]:checked'
-        );
+    $(document).ready(function () {
+        var isProductDetailsPage = $(".product-single-area").length > 0;
 
-        
+        if (isProductDetailsPage) {
+            $(".addCart").on("click", function () {
+                var originalPrice = parseFloat(
+                    $(".product-price .price")
+                        .text()
+                        .replace(/[^0-9.-]+/g, "")
+                );
 
-        console.log("selectedSize", selectedSize);
+                var firstSizePrice = $(
+                    '.single-size input[type="radio"]:checked'
+                ).val();
+                $(".product-price .price").text(
+                    "OMR " +
+                        (originalPrice + parseFloat(firstSizePrice)).toFixed(2)
+                );
+                $(".addCart").attr("data-selected-price", firstSizePrice);
+                $(".addCart").attr(
+                    "data-selected-size",
+                    $('.single-size input[type="radio"]:checked').data("size")
+                );
 
-        let color;
-        let size;
+                // Update price and data attributes when a size is selected
+                $(".single-size").on("click", function () {
+                    var sizeRadio = $(this).find(".size-radio");
+                    sizeRadio.prop("checked", true);
+                    var newPrice = originalPrice + parseFloat(sizeRadio.val());
+                    $(".product-price .price").text(
+                        "OMR " + newPrice.toFixed(2)
+                    );
+                    $(".addCart").attr("data-price", sizeRadio.val());
+                    $(".addCart").attr("data-size-id", sizeRadio.data("size"));
+                });
 
-        if (colorSelector) {
-            color = colorSelector.value;
+                var productId = $(".addCart").attr("data-product-id");
+                var sizeId = $(".addCart").attr("data-size-id");
+                var price = $(".addCart").attr("data-price");
+
+                var quantity = $("#product_quantity").val();
+
+                let colorSelector = document.querySelector(
+                    'input[name="productColor"]:checked'
+                );
+
+                let color;
+                if (colorSelector) {
+                    color = colorSelector.value;
+                } else {
+                    color = null;
+                }
+
+                $.ajax({
+                    url: $("#AddToCartIntoSession").data("url"),
+                    method: "POST",
+                    data: {
+                        product_id: productId,
+                        quantity: quantity,
+                        color_id: color,
+                        size_id: sizeId,
+                        selectedSize: sizeId,
+                        price: price,
+                        _token: $('meta[name="csrf-token"]').attr("content"),
+                    },
+                    success: function (data) {
+                        $(".totalCountItem").html(data[0]);
+                        $(".totalAmount").html(currencyPrice(data[1]));
+                        let Img = $("#productImgAsset").data("url");
+                        let obj = data[2];
+                        let bodyData = "";
+                        let bodyArray = [];
+                        let i = 1;
+                        Object.keys(obj).forEach(function (key) {
+                            bodyData =
+                                '<div class="product-item cart-product-item"><div class="single-grid-product"><div class="product-top"><a href="#"><img class="product-thumbnal" src="' +
+                                Img +
+                                "/" +
+                                obj[key]["options"]["image"] +
+                                '" alt="cart"></a></div><div class="product-info"><div class="product-name-part"><h3 class="product-name"><a class="product-link" href="#">' +
+                                obj[key]["name"] +
+                                '</a></h3><div class="cart-quantity input-group"><div class="increase-btn dec qtybutton btn qty_decrease" data-id="' +
+                                obj[key]["rowId"] +
+                                '">-</div><input class="qty-input cart-plus-minus-box qty_value" type="text" name="qtybutton" id="qty_value" value="' +
+                                obj[key]["qty"] +
+                                '" readonly /><div class="increase-btn inc qtybutton btn qty_increase" data-id="' +
+                                obj[key]["rowId"] +
+                                '">+</div></div><button class="cart-remove-btn deleteItem" data-id="' +
+                                obj[key]["rowId"] +
+                                '">Remove</button></div><div class="product-price"><span class="regular-price mr-0">' +
+                                currencyPrice(
+                                    obj[key]["weight"] * obj[key]["qty"]
+                                ) +
+                                '</span><span class="price">' +
+                                currencyPrice(
+                                    obj[key]["price"] * obj[key]["qty"]
+                                ) +
+                                "</span></div></div></div></div>";
+                            bodyArray.push(bodyData);
+                        });
+                        $("#bodyData").html(bodyArray);
+
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: "bottom-end",
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener(
+                                    "mouseenter",
+                                    Swal.stopTimer
+                                );
+                                toast.addEventListener(
+                                    "mouseleave",
+                                    Swal.resumeTimer
+                                );
+                            },
+                        });
+                        Toast.fire({
+                            icon: "success",
+                            title: localizedText.productAddedToCart,
+                            position: "top-end",
+                        });
+                    },
+                });
+            });
         } else {
-            color = null;
-        }
-        if (sizeid) {
-            size = sizeid;
-        } else {
-            size = null;
+            // Show the modal when the "Add to Cart" button is clicked
+
+            $(".addCart").on("click", function () {
+                var productId = $(this).data("id");
+                var productName = $(this).data("name");
+                var sizes = $(this).data("sizes");
+
+                // Update modal title
+                $("#sizeModalLabel").text(`${localizedText.selectSize}`);
+
+                // Populate the modal with sizes
+                var sizeOptionsContainer = $("#sizeOptionsContainer");
+                sizeOptionsContainer.empty();
+
+                sizes.forEach(function (size) {
+                    var sizeOption = `<button class="btn btn-outline-primary size-option" data-product-id="${productId}" data-size-id="${size.id}" data-price="${size.pivot.price}">
+                                    ${size.Size} - ${size.pivot.price}
+                                  </button>`;
+                    sizeOptionsContainer.append(sizeOption);
+                });
+
+                // Show the modal
+                $("#sizeModal").modal("show");
+            });
         }
 
-        var totalAmount = $(".totalAmount");
+        // Handle size selection within the modal
+        $(document).on("click", ".size-option", function () {
+            var productId = $(this).data("product-id");
+            var sizeId = $(this).data("size-id");
+            var price = $(this).data("price");
 
-        $this.each(function () {
+            // Close the modal
+            $("#sizeModal").modal("hide");
+
+            // Proceed to add the product to the cart
+            var quantity = $("#product_quantity").val();
+            let colorSelector = document.querySelector(
+                'input[name="productColor"]:checked'
+            );
+
+            let color;
+            if (colorSelector) {
+                color = colorSelector.value;
+            } else {
+                color = null;
+            }
+
             $.ajax({
                 url: $("#AddToCartIntoSession").data("url"),
                 method: "POST",
                 data: {
-                    product_id: product_id,
+                    product_id: productId,
                     quantity: quantity,
                     color_id: color,
-                    size_id: size,
-                    selectedSize: selectedSize,
+                    size_id: sizeId,
+                    selectedSize: sizeId,
                     price: price,
                     _token: $('meta[name="csrf-token"]').attr("content"),
                 },
                 success: function (data) {
-                    // let currsym = currencySymbol();
                     $(".totalCountItem").html(data[0]);
                     $(".totalAmount").html(currencyPrice(data[1]));
                     let Img = $("#productImgAsset").data("url");
@@ -268,7 +411,8 @@
                     });
                     Toast.fire({
                         icon: "success",
-                        title: "Product Added to Cart Successfully",
+                        title: localizedText.productAddedToCart,
+                        position: "top-end",
                     });
                 },
             });
