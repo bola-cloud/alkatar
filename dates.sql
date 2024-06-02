@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: mysql
--- Generation Time: May 28, 2024 at 11:49 PM
+-- Generation Time: Jun 02, 2024 at 09:07 AM
 -- Server version: 8.0.37
 -- PHP Version: 8.2.18
 
@@ -688,16 +688,6 @@ CREATE TABLE `menus` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `order` int NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `menus`
---
-
-INSERT INTO `menus` (`id`, `en_name`, `fr_name`, `slug`, `is_static`, `url`, `status`, `created_at`, `updated_at`, `order`) VALUES
-(1, 'Home', 'الرئيسية', 'home', 0, '/', 1, '2024-03-24 20:23:47', '2024-04-14 20:59:08', 1),
-(2, 'About Us', 'من نحن', 'about-us', 0, 'about-us', 1, '2024-03-24 20:23:47', '2024-04-14 20:59:01', 3),
-(4, 'Contact', 'اتصل بنا', 'contact', 0, 'contact-us', 1, '2024-03-24 20:23:47', '2024-04-14 20:57:40', 4),
-(5, 'Categories', 'الاقسام', 'shop', 0, 'categories', 1, '2024-03-24 20:23:47', '2024-04-14 20:59:24', 2);
 
 -- --------------------------------------------------------
 
@@ -1577,13 +1567,6 @@ CREATE TABLE `sub_menus` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `sub_menus`
---
-
-INSERT INTO `sub_menus` (`id`, `en_name`, `fr_name`, `url`, `menu_id`, `status`, `created_at`, `updated_at`) VALUES
-(2, 'd', 'dd', 'd', 5, 1, '2024-04-30 06:30:54', '2024-04-30 06:30:54');
 
 -- --------------------------------------------------------
 
