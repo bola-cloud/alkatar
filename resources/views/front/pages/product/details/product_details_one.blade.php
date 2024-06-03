@@ -177,7 +177,7 @@
                                     <div class="cart-plus-minus w-full">
                                         <div class="dec qtybutton btn">-</div>
                                         <input class="cart-plus-minus-box" type="text" name="qtybutton"
-                                            id="product_quantity" value="1"  />
+                                            id="product_quantity" value="1" min="0"  />
                                         <div class="inc qtybutton btn">{{ __('+') }}</div>
                                     </div>
                                     {{-- <a class="product-btn MyWishList" data-id="{{ $products->id }}"

@@ -158,3 +158,7 @@ Route::post('/fail', [SslCommerzPaymentController::class, 'fail']);
 Route::post('/cancel', [SslCommerzPaymentController::class, 'cancel']);
 Route::post('/ipn', [SslCommerzPaymentController::class, 'ipn']);
 //SSLCOMMERZ END
+
+
+// Thawani pay
+Route::get("/thawani-success", [CheckoutController::class, "paymentSuccess"])->name("thawani.success");

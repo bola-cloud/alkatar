@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\PaymentController;
 use App\Http\Requests\CheckoutOrderRequest;
 use App\Http\Services\BasePaymentService;
 use App\Http\Services\InstamojoService;
@@ -25,17 +26,24 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use Razorpay\Api\Api;
+use Illuminate\Support\Facades\Http;
 
 class CheckoutController extends Controller
 {
     private $grand_total;
     private $discount;
     protected $paymentPlatformResolver;
-    public function __construct(PaymentPlatformResolver $paymentPlatformResolver)
+    protected $paymentController;
+
+
+
+    public function __construct(PaymentPlatformResolver $paymentPlatformResolver, PaymentController $paymentController)
     {
         $this->discount = 0;
         $this->paymentPlatformResolver = $paymentPlatformResolver;
+        $this->paymentController = $paymentController;
     }
+
     public function checkoutPage()
     {
         $check = Cart::count();
@@ -90,6 +98,7 @@ class CheckoutController extends Controller
             $user_id = Auth::id();
             try {
                 $subtotal = Cart::subtotal();
+                $cartItems = Cart::content();
                 $tax = tax_amount($subtotal, $request->billing_country);
                 $shipping_charge = delivery_charge($request->billing_country);
                 $this->grand_total = $subtotal + $tax + $shipping_charge;
@@ -100,7 +109,7 @@ class CheckoutController extends Controller
                 } else {
                     $billing_create = $this->createBillingAddress($request, $user_id);
                 }
-                
+
                 // if (hasShippingAddress($user_id) == 1) {
                 //     $shipping_create = $this->updateShippingAddress($request, $user_id);
                 // } else {
@@ -144,6 +153,9 @@ class CheckoutController extends Controller
                         $this->discount = $coupon->Amount;
                     }
                 }
+
+
+
 
                 session()->put('order_number', $order_number);
                 session()->put('shipping_charge', $shipping_charge);
@@ -197,8 +209,76 @@ class CheckoutController extends Controller
                         $payment_options = array();
                     }
                 } elseif ($request->payment == 'paypal') {
-                    session()->put('payment_method_name', PAYPAL);
-                    return  $this->pay($this->grand_total * (conversion_rate('USD') ? conversion_rate('USD') : 0), $this->discount, 'USD', 1, $request->payment_method);
+                    $checkoutProduct = [];
+
+                    foreach ($cartItems as $item) {
+                        $checkoutProduct[] = [
+                            'name' => $item->name,
+                            'quantity' => $item->qty,
+                            'unit_amount' => $item->price * 1000,
+                        ];
+                    }
+
+                    $checkoutProduct[] = [
+                        'name' => 'Shipping Charge',
+                        'quantity' => 1,
+                        'unit_amount' => $shipping_charge * 1000,
+                    ];
+
+
+                    $response = Http::withHeaders([
+                        'Accept' => 'application/json',
+                        'Content-Type' => 'application/json',
+                        'thawani-api-key' => env('THAWANI_TEST_SECRET_KEY'),
+                    ])->post(env('THAWANI_TEST_CHECKOUT_URL') . '/checkout/session', [
+                        'client_reference_id' => $order_number,
+                        'mode' => 'payment',
+                        'products' => $checkoutProduct,
+                        'success_url' => route('thawani.success', [
+                            'order_number' => $order_number,
+                        ]),
+                        'cancel_url' => 'https://company.com/cancel',
+                        'metadata' => [
+                            'order_number' => $order_number,
+                            'shipping_charge' => $shipping_charge,
+                            'subtotal' => $subtotal,
+                            'discount' => $this->discount,
+                            'grand_total' => $this->grand_total,
+                            'tax' => $tax,
+                        ]
+                    ]);
+
+                    // dd($response);
+
+                    if ($response->successful()) {
+                        $paymentJsonData =  $response->json();
+
+                        // create new request body for create payment
+                        $payment = [
+                            'session_id' => $paymentJsonData['data']['session_id'],
+                            'user_id' => $user_id,
+                            'order_number' => $order_number,
+                            'amount' => $this->grand_total,
+                            'status' => 'CREATED',
+                        ];
+
+
+                        $paymentRequest = new Request($payment);
+
+                        // dd($paymentRequest);
+
+                        // create payment
+                        $this->paymentController->createPayment($paymentRequest);
+
+
+                        $paymentUrl = env('THAWANI_TEST_PAY_URL') . $paymentJsonData['data']['session_id'] . '?key=' . env("THAWANI_TEST_PUBLIC_KEY");
+                        $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, THAWANI);
+
+                        return redirect()->away($paymentUrl);
+                    } else {
+                        // Handle the error case
+                        return response()->json(['error' => 'Failed to create session'], 500);
+                    }
                 } elseif ($request->payment == MOLLIE) {
                     $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, MOLLIE);
                     $object = [
@@ -687,5 +767,19 @@ class CheckoutController extends Controller
         $data['description'] = __('Order Track');
         $data['keywords'] = __('Order Track');
         return view('front.pages.checkout.order-track', $data);
+    }
+
+    public function paymentSuccess(Request $request)
+    {
+        $data = $request->all();
+
+        $order = Order::where('Order_Number', $data['order_number'])->first();
+
+        $order->Is_Order_Successful = true;
+        $order->Is_Order_Completed = true;
+
+        $order->save();
+
+        return redirect()->route('checkout.thankyou_page')->with('success', 'Order successfully created!');
     }
 }

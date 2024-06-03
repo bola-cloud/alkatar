@@ -37,6 +37,7 @@ const MOLLIE = 'mollie';
 const BANK = 'bank';
 const INSTAMOJO = 'instamojo';
 const PAYSTACK = 'paystack';
+const THAWANI = 'thawani';
 
 function getPaymentMethodName($input = null)
 {
