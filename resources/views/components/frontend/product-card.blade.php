@@ -38,12 +38,20 @@
         @if($product->points > 0)
         <p class="product_points">{{ __("Win Points", ['points' => $product->points]) }}</p>
         @endif
+
         <div class="product-price">
-            @if ($product->Price == $product->Discount_Price)
-            <span class="price">{{ currencyConverter($product->Price) }}</span>
+            @if ($product->sizes->count() > 0)
+            @php
+                $firstSize = $product->sizes->first();
+
+                // dd($firstSize);
+            @endphp
+            @if ($firstSize->pivot->price == $product->Discount_Price)
+                <span class="price">{{ currencyConverter($firstSize->pivot->price) }}</span>
             @else
-            <span class="regular-price">{{ currencyConverter($product->Price) }}</span>
-            <span class="price">{{ currencyConverter($product->Discount_Price) }}</span>
+            <span class="regular-price">{{ currencyConverter($product->Discount_Price) }}</span>
+            <span class="price">{{ currencyConverter($firstSize->pivot->price) }}</span>
+            @endif
             @endif
         </div>
 
