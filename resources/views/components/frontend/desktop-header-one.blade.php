@@ -84,11 +84,13 @@
                     </nav>
                 </div>
 
-                <i class="search-icon flaticon-search"></i>
 
 
                 <div class="flex items-center gap-5">
                     <div class="header-right">
+                
+                        <i class="search-icon flaticon-search" style="margin-inline: 40px;"></i>
+                
                         <div class="wishlist single-btn">
                             <a href="{{ route('wishlist') }}" class="wishlist-btn header-btn">
                                 <div class="btn-left">

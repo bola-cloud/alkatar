@@ -3,20 +3,6 @@
 @section('description', isset($description) ? $description : '')
 @section('keywords', isset($keywords) ? $keywords : '')
 @section('content')
-    <!-- breadcrumb area start here  -->
-    <div class="breadcrumb-area">
-        <div class="container">
-            <div class="breadcrumb-wrap text-center">
-                <h2 class="page-title">{{__('Cart')}}</h2>
-                <ul class="breadcrumb-pages">
-                    <li class="page-item"><a class="page-item-link" href="{{route('front')}}">{{__('Home')}}</a></li>
-                    <li class="page-item">{{__('Shopping Cart')}}</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    <!-- breadcrumb area end here  -->
-
     <!-- empty-wish-list area start here  -->
     <div class="empty-wish-list section">
         <div class="container">
