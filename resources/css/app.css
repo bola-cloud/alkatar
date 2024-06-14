@@ -242,7 +242,7 @@ h3 {
 }
 
 .auth-btn {
-    @apply bg-primary-red hover:bg-primary-red/90;
+    @apply !bg-primary-red hover:!bg-primary-red/90 active:!bg-primary-red/90 !rounded-lg !text-white;
 }
 
 .login-wrap h1 {
@@ -659,3 +659,4 @@ h3 {
 .auth-btn {
     @apply bg-primary-red hover:bg-primary-red/90 rounded-lg text-white;
 }
+

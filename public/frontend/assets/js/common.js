@@ -463,7 +463,7 @@
         let id = $(this).attr("data-id");
         let $this = $(this);
         let quantity = $this.parent().find(".qty_value").val();
-        if (quantity > 1) {
+        if (quantity >= 1) {
             $.ajax({
                 method: "GET",
                 url: $("#CartDecrementFromSession").data("url"),

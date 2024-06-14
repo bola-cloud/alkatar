@@ -58,9 +58,6 @@
                 </div>
 
 
-                <i class="search-icon flaticon-search"></i>
-
-
                 <div class="search-area">
                     <form action="{{ route('category.product') }}" method="get">
                         <div class="search-wrap">
@@ -78,13 +75,16 @@
                         <ul class="main-menu">
                             @foreach (Category_Des_Icon() as $category)
                             <li class="menu-item">
-                                <a class="menu-link" href="{{ route("category.product", $category->id)}}">
-                                    {{langConverter($category->en_Category_Name, $category->fr_Category_Name) }}</a>
+                                <a class="menu-link" href="{{ route('category.product', $category->id) }}">
+                                    {{ langConverter($category->en_Category_Name, $category->fr_Category_Name) }}
+                                </a>
                             </li>
                             @endforeach
                         </ul>
                     </nav>
                 </div>
+
+                <i class="search-icon flaticon-search"></i>
 
 
                 <div class="flex items-center gap-5">
@@ -95,55 +95,15 @@
                                     <i class="btn-icon flaticon-like"></i>
                                     <span class="count wishListCuntFromController">{{ auth()->check() ? wishlistCount() : '0' }}</span>
                                 </div>
-                                {{-- <div class="btn-right">
-                                    <span class="btn-text">{{ __('Wishlist') }}</span>
-                                    <span class="item-count wishListCuntFromController">{{ auth()->check() ? wishlistCount() : '0' }}
-                                        {{ __('items') }}</span> --}}
-                                {{-- </div> --}}
                             </a>
                         </div>
 
                         <div class="cart single-btn">
-                            {{-- <a data-bs-toggle="offcanvas" href="#cartOffcanvasSidebar" role="button"
-                                aria-controls="cartOffcanvasSidebar" class="cart-btn header-btn">
+                            <a role="button" class="cart-btn header-btn" href="{{ route('cart.content') }}">
                                 <div class="btn-left">
                                     <i class="btn-icon flaticon-shopping-bag"></i>
                                     <span class="count totalCountItem">{{ cartCountItem() }}</span>
                                 </div>
-                                <div class="btn-right">
-                                    <span class="btn-text">{{ __('Your Cart') }}</span>
-                                    @php
-                                    $content = Cart::content();
-                                    $total = 0;
-                                    @endphp
-                                    @foreach ($content as $item)
-                                    @php
-                                    $total += $item->subtotal;
-                                    @endphp
-                                    @endforeach
-                                    <span class="price totalAmount">
-                                        {{ currencyConverter($total) }}</span>
-                                </div>
-                            </a> --}}
-                            <a  role="button" class="cart-btn header-btn" href="{{route("cart.content")}}">
-                                <div class="btn-left">
-                                    <i class="btn-icon flaticon-shopping-bag"></i>
-                                    <span class="count totalCountItem">{{ cartCountItem() }}</span>
-                                </div>
-                                {{-- <div class="btn-right">
-                                    <span class="btn-text">{{ __('Your Cart') }}</span>
-                                    @php
-                                    $content = Cart::content();
-                                    $total = 0;
-                                    @endphp
-                                    @foreach ($content as $item)
-                                    @php
-                                    $total += $item->subtotal;
-                                    @endphp
-                                    @endforeach
-                                    <span class="price totalAmount">
-                                        {{ currencyConverter($total) }}</span>
-                                </div> --}}
                             </a>
                         </div>
                     </div>
@@ -157,19 +117,16 @@
                                         alt="united-states" />
                                 </span>
                                 <a href="javascript:void(0)" class="lang">
-                                    {{-- {{ getLanguage('en')->name }} --}}
                                     @if (getLanguage('en')->status == 1 && getLanguage('fr')->status == 1)
                                     <i class="fas fa-angle-down"></i>
                                     @endif
                                 </a>
-
                                 @elseif(app()->getLocale() == 'fr')
                                 <span class="flag">
                                     <img src="{{ asset(IMG_LANGUAGE . getLanguage('fr')->thumb) }}"
                                         alt="india" />
-                                    </span>
+                                </span>
                                 <a href="javascript:void(0)" class="lang">
-                                    {{-- {{ getLanguage('fr')->name }} --}}
                                     @if (getLanguage('en')->status == 1 && getLanguage('fr')->status == 1)
                                     <i class="fas fa-angle-down"></i>
                                     @endif
@@ -179,34 +136,27 @@
                                     class="{{ getLanguage('en')->status != 1 || getLanguage('fr')->status != 1 ? null : 'lang-list' }}">
                                     @if (app()->getLocale() == 'en')
                                     @if (getLanguage('fr')->status == 1)
-                                    <a class="lang-text" href="{{ route('locale.switch', 'fr') }}">
                                     <li class="single-lang">
-                                        {{-- <span class="flag"> --}}
-                                   
-                                            <img
-                                            src="{{ asset(IMG_LANGUAGE . getLanguage('fr')->thumb) }}"
-                                            alt="india">
-                                        {{-- </span> --}}
-                                        {{-- {{ getLanguage('fr')->name}} --}}
+                                        <a class="lang-text" href="{{ route('locale.switch', 'fr') }}">
+                                            <img src="{{ asset(IMG_LANGUAGE . getLanguage('fr')->thumb) }}"
+                                                alt="india">
+                                        </a>
                                     </li>
-                                </a>
                                     @endif
                                     @elseif(app()->getLocale() == 'fr')
                                     @if (getLanguage('en')->status == 1)
-                                    <a class="lang-text" href="{{ route('locale.switch', 'en') }}">
-
                                     <li class="single-lang">
-                                            <img
-                                                src="{{ asset(IMG_LANGUAGE . getLanguage('en')->thumb) }}"
+                                        <a class="lang-text" href="{{ route('locale.switch', 'en') }}">
+                                            <img src="{{ asset(IMG_LANGUAGE . getLanguage('en')->thumb) }}"
                                                 alt="united-states" />
-                                             
+                                        </a>
                                     </li>
-                                </a>
                                     @endif
                                     @endif
                                 </ul>
                             </div>
                         </div>
+
                         @if (Auth::user())
                         <div class="account-switcher text-center">
                             <span class="flag">
@@ -231,7 +181,7 @@
                                 </li>
                                 <li class="single-lang">
                                     <a class="lang-text" href="{{ route('user.logout') }}">
-                                        <svg xmlns="http://www0 0 24 24"
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mb-2.5">
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />

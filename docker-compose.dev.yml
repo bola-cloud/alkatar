@@ -1,7 +1,6 @@
 services:
   app:
     container_name: SharaaDates
-    restart: always
     user: "1000:1000"
     build:
       context: .
@@ -21,7 +20,6 @@ services:
   mysql:
     container_name: SharaaDates_DB
     image: mysql:8.0
-    restart: always
     command: "--innodb_use_native_aio=0"
     environment:
       MYSQL_ROOT_PASSWORD: default
@@ -32,8 +30,7 @@ services:
       - "4306:3306"
 
   phpmyadmin:
-    image: phpmyadmin
-    restart: always
+    image: phpmyadmin:5.1
     ports:
       - 8080:80
     environment:

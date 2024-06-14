@@ -277,13 +277,11 @@ class AuthController extends Controller
     public function otpSignInPost(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|exists:users',
-            'password' => 'required|string|min:6|confirmed',
-            'password_confirmation' => 'required'
+            'phone_number' => 'required',
         ]);
 
         $response = Http::post(
-            'https://google.com',
+            'https://muscatapps.smsoman.com/api/GenOTP',
             [
                 "UserName" => "Mufraji",
                 "Password" => "Mufraji123",
@@ -293,6 +291,8 @@ class AuthController extends Controller
         );
 
         $data = $response->json();
+
+        info($data);
 
 
         if ($data['StatusDesc'] == 'Success') {
@@ -342,10 +342,12 @@ class AuthController extends Controller
                 $user = User::create([
                     'name' => $phone_number,
                     'email' => 'default' . $phone_number . '@default.com',
-                    'password' => Hash::make($phone_number)
+                    'password' => Hash::make($phone_number),
+                    'Number' => $phone_number,
                 ]);
 
                 if ($user) {
+                    Auth::login($user);
                     return redirect()->route('front')->with('success', __('Sign Up Successfully !'));
                 } 
             }

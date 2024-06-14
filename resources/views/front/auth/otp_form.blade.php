@@ -39,6 +39,19 @@
                                 __('Submit Code') }}</button>
                         </div>
                     </form>
+
+                    {{-- resend button --}}
+                    <form class="login-form" method="post" action="{{ route('user.sign.otp') }}">
+                        @csrf
+                        <input type="hidden" name="phone_number" value="{{ $phone_number }}">
+                        <input type="hidden" name="ref_no" value="{{ $RefNo }}">
+                        <div class="form-group">
+                            <button type="submit"
+                                class="form-control rounded submit px-3 primary-btn !text-primary-red !bg-transparent hover:!bg-transparent">{{
+                                __('Resend Code') }}</button>
+                        </div>
+                    </form>
+
                 </div>
             </div>
         </div>
