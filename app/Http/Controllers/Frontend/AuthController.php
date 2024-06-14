@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -268,8 +269,73 @@ class AuthController extends Controller
 
     public function otpSignInPost(Request $request)
     {
-        return view('front.auth.otp_form', [
-            'phone_number' => $request->input('phone_number')
-        ]);
+
+        $response = Http::post(
+            'https://muscatapps.smsoman.com/api/GenOTP',
+            [
+                "UserName" => "Mufraji",
+                "Password" => "Mufraji123",
+                "Phoneno" => $request->input('phone_number'),
+                "MsgTemplate" => "{OTP} is your verification code for Sharaa Dates. Do not share this code with anyone."
+            ]
+        );
+
+        $data = $response->json();
+
+        if ($data['StatusDesc'] == 'Success') {
+            return redirect()->route('user.otp.verify.get', [
+            'phone_number' => $request->input('phone_number'),
+            'RefNo' => $data['RefNo']
+            ]);
+        } else {
+            return redirect()->back()->with('error', 'Something went wrong! SMS not sent');
+        }
+    }
+
+    public function otpVerify(Request $request)
+    {
+        $data['phone_number'] = $request->phone_number;
+        $data['RefNo'] = $request->RefNo;
+
+        return view('front.auth.otp_form', $data);
+    }
+
+    public function otpVerifyPost(Request $request)
+    {
+
+        $response = Http::post(
+            'https://muscatapps.smsoman.com/api/VerifyOTP',
+            [
+                "UserName" => "Mufraji",
+                "Password" => "Mufraji123",
+                "RefNo" => $request->input('ref_no'),
+                "OTP" => $request->input('otp'),
+                "Phoneno" => $request->input('phone_number'),
+            ]
+        );
+
+        $data = $response->json();
+
+
+        if ($data['StatusDesc'] == 'Success') {
+            $user = User::where('phone_number', $request->input('phone_number'))->first();
+
+            if ($user) {
+                if ($user->status == INACTIVE) {
+                    return  redirect()->route('front')->with('error', __('User is blocked by admin.'));
+                }
+                Auth::login($user);
+                return redirect()->route('front')->with('success', __('Login Successfully!'));
+            } else {
+                $newUser = User::create([
+                    'phone_number' => $request->input('phone_number'),
+                    'password' => Hash::make('123456')
+                ]);
+                Auth::login($newUser);
+                return redirect()->route('front')->with('success', __('Login Successfully!'));
+            }
+        } else {
+            return redirect()->back()->with('error', 'Invalid OTP');
+        }
     }
 }

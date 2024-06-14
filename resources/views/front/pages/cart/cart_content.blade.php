@@ -4,7 +4,7 @@
 @section('keywords', isset($keywords) ? $keywords : '')
 @section('content')
 <!-- wish-list area start here  -->
-<div class="wish-list-area cart-page-area section">
+<div class="wish-list-area cart-page-area section px-10">
 
     <div class="row">
         <div class="col-12 wish-list-table">
@@ -77,9 +77,9 @@
                                     </td>
                                     <td>
                                         <div class="product-price text-center">
-                                            <h4 class="regular-price">
+                                            {{-- <h4 class="regular-price">
                                                 {{ currencyConverter($item->weight) }}
-                                            </h4>
+                                            </h4> --}}
                                             <h3 class="price ">
                                                 <span class="mainPrice">{{ currencyConverter($item->price) }}</span>
                                             </h3>

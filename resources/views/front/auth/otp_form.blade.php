@@ -12,14 +12,27 @@
                     <h1 class="text-center mb-0">{{ __('Verify Phone Number') }}</h1>
                     <p id="helper-text-explanation" class="mt-10 text-3xl font-medium text-gray-500 text-center ">
                         {{__("We sent a verification code to number to", ['phone_number' => $phone_number])}}</p>
-                    <form class="login-form" method="post" action="{{ route('user.sign.otp') }}">
+                    <form class="login-form" method="post" action="{{ route('user.otp.verify') }}">
                         @csrf
                         <div class="otpForm my-20">
-                            <input type="text" maxlength="1" class="otp-input" id="digit1">
-                            <input type="text" maxlength="1" class="otp-input" id="digit2">
-                            <input type="text" maxlength="1" class="otp-input" id="digit3">
-                            <input type="text" maxlength="1" class="otp-input" id="digit4" autofocus>
+                            @if(app()->getLocale() == 'en')
+                                <input type="text" maxlength="1" class="otp-input" id="digit1" autofocus>
+                                <input type="text" maxlength="1" class="otp-input" id="digit2">
+                                <input type="text" maxlength="1" class="otp-input" id="digit3">
+                                <input type="text" maxlength="1" class="otp-input" id="digit4">
+                                <input type="text" maxlength="1" class="otp-input" id="digit5">
+                            @elseif(app()->getLocale() == 'fr')
+                                <input type="text" maxlength="1" class="otp-input" id="digit1">
+                                <input type="text" maxlength="1" class="otp-input" id="digit2">
+                                <input type="text" maxlength="1" class="otp-input" id="digit3">
+                                <input type="text" maxlength="1" class="otp-input" id="digit4">
+                                <input type="text" maxlength="1" class="otp-input" id="digit5" autofocus>
+                            @endif
                         </div>
+
+                        <input type="hidden" name="phone_number" value="{{ $phone_number }}">
+                        <input type="hidden" name="ref_no" value="{{ $RefNo }}">
+                        <input type="hidden" name="otp" id="otp" value="">
                         <div class="form-group mt-24">
                             <button type="submit"
                                 class="form-control btn btn-primary rounded submit px-3 primary-btn auth-btn">{{
@@ -47,5 +60,17 @@
                 $(this).next('.otp-input').focus();
             }
         });
+
+        // Get the OTP value
+        $('.otp-input').keyup(function() {
+            var otp = '';
+            $('.otp-input').each(function() {
+                otp += $(this).val();
+            });
+
+            $('#otp').val(otp);
+        });
+
+
     });
 </script>

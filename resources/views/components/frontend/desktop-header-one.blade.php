@@ -104,8 +104,28 @@
                         </div>
 
                         <div class="cart single-btn">
-                            <a data-bs-toggle="offcanvas" href="#cartOffcanvasSidebar" role="button"
+                            {{-- <a data-bs-toggle="offcanvas" href="#cartOffcanvasSidebar" role="button"
                                 aria-controls="cartOffcanvasSidebar" class="cart-btn header-btn">
+                                <div class="btn-left">
+                                    <i class="btn-icon flaticon-shopping-bag"></i>
+                                    <span class="count totalCountItem">{{ cartCountItem() }}</span>
+                                </div>
+                                <div class="btn-right">
+                                    <span class="btn-text">{{ __('Your Cart') }}</span>
+                                    @php
+                                    $content = Cart::content();
+                                    $total = 0;
+                                    @endphp
+                                    @foreach ($content as $item)
+                                    @php
+                                    $total += $item->subtotal;
+                                    @endphp
+                                    @endforeach
+                                    <span class="price totalAmount">
+                                        {{ currencyConverter($total) }}</span>
+                                </div>
+                            </a> --}}
+                            <a  role="button" class="cart-btn header-btn" href="{{route("cart.content")}}">
                                 <div class="btn-left">
                                     <i class="btn-icon flaticon-shopping-bag"></i>
                                     <span class="count totalCountItem">{{ cartCountItem() }}</span>

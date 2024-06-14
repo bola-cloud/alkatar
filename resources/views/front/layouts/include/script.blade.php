@@ -52,9 +52,9 @@
         @endforeach
     </script>
 @endif
-@if (env('APP_DEMO') == true)
+{{-- @if (env('APP_DEMO') == true) --}}
     {{-- for sandbox sslcommerz --}}
-    <script>
+    {{-- <script>
         (function(window, document) {
             var loader = function() {
                 var script = document.createElement("script"),
@@ -68,9 +68,9 @@
                 loader);
         })(window, document);
     </script>
-@else
+@else --}}
     {{-- for live sslcommerz --}}
-    <script>
+    {{-- <script>
         (function(window, document) {
             var loader = function() {
                 var script = document.createElement("script"),
@@ -84,4 +84,4 @@
                 loader);
         })(window, document);
     </script>
-@endif
+@endif --}}

@@ -651,3 +651,11 @@ h3 {
 .checkout .cart-summary .cart-product-list .single-cart-product img {
     @apply w-32 h-32;
 }
+
+.checkout-page-login-box .primary-btn {
+    @apply bg-primary-red hover:bg-primary-red/90 rounded-lg text-white;
+}
+
+.auth-btn {
+    @apply bg-primary-red hover:bg-primary-red/90 rounded-lg text-white;
+}

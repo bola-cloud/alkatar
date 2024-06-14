@@ -25,8 +25,7 @@
                                                     {{__("Returning buyer? Please login:")}}
 
                                                 </h2>
-                                                <button type="button" class="primary-btn" data-bs-toggle="modal"
-                                                    data-bs-target="#loginModal">Login</button>
+                                                <a type="button" class="primary-btn text-center" href={{route("login")}} >{{__("Login")}}</button>
                                             </div>
                                         </div>
                                     @endif
