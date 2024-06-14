@@ -61,6 +61,7 @@ Route::group(['middleware' => ['is_user']], function () {
         Route::post('otp', [AuthController::class, 'otpSignInPost'])->name("user.sign.otp");
         Route::get('otp-verify', [AuthController::class, 'otpVerify'])->name("user.otp.verify.get");
         Route::post('otp-verify', [AuthController::class, 'otpVerifyPost'])->name("user.otp.verify");
+        Route::get("complete-registration", [AuthController::class, 'completeRegistration'])->name("user.complete.registration");
         Route::post('login-modal', [AuthController::class, 'loginModal'])->name('user.sign.modal');
         Route::get('sign-up', [AuthController::class, 'userSignUp'])->name('user.sign.up');
         Route::post('sign-up', [AuthController::class, 'userSignUpPost'])->name('user.sign.up.post');

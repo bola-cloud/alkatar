@@ -35,7 +35,7 @@
                                                     class="product-thumbnal"
                                                     src="{{ asset(ProductImage() . $item->options->image) }}"
                                                     alt="cart"></a>
-                                            <div class="product-flags">
+                                            {{-- <div class="product-flags">
                                                 @if ($item->options->item_tag)
                                                 <span class="product-flag sale">{{ $item->options->item_tag
                                                     }}</span>
@@ -44,7 +44,7 @@
                                                 <span class="product-flag discount">-{{
                                                     $item->options->discount_parcent }}%</span>
                                                 @endif
-                                            </div>
+                                            </div> --}}
 
                                         </div>
                                     </td>

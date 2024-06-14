@@ -3,64 +3,84 @@
 @section('description', isset($description) ? $description : '')
 @section('keywords', isset($keywords) ? $keywords : '')
 @section('content')
-    <!-- breadcrumb area start here  -->
-    <div class="breadcrumb-area">
-        <div class="container">
-            <div class="breadcrumb-wrap text-center">
-                <h2 class="page-title">{{ __('Sign Up')}}</h2>
-                <ul class="breadcrumb-pages">
-                    <li class="page-item"><a class="page-item-link" href="{{route('front')}}">{{ __('Home')}}</a></li>
-                    <li class="page-item">{{ __('Sign Up')}}</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    <!-- breadcrumb area end here  -->
 
-    <!-- about us area start here  -->
-    <div class="sign-in-page sign-up-page section">
-        <div class="container">
-            <div class="row align-items-center justify-content-center">
-                <div class="col-12 col-lg-5">
-                    <div class="login-wrap">
-                        <div class="icon d-flex align-items-center justify-content-center">
-                            <span class="far fa-user"></span>
+<div class="sign-in-page section">
+    <div class="container">
+        <div class="row align-items-center justify-content-center">
+            <div class="col-12 col-lg-7">
+                <div class="login-wrap h-[600px]">
+                    <h1 class="text-center mb-0">{{ __('Register') }}</h1>
+                    <form class="login-form" method="post" action="{{ route('user.sign.otp') }}">
+                        @csrf
+                        <div class="mt-32 mb-20">
+                            <label for="phone_number"
+                                class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+                                {{__("Phone Number")}}:</label>
+                            <div class="flex items-center">
+                                <button id="dropdown-phone-button" data-dropdown-toggle="dropdown-phone"
+                                    class="flex-shrink-0 z-10 flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600 h-20 placeholder:mt-2"
+                                    type="button">
+                                    <span class="text-2xl mt-2">968+</span>
+                                    <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"
+                                        xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img"
+                                        class="h-10 w-10 me-3" preserveAspectRatio="xMidYMid meet" fill="#000000">
+                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
+                                        </g>
+                                        <g id="SVGRepo_iconCarrier">
+                                            <path fill="green" d="M8 31h24a4 4 0 0 0 4-4v-4H8v8z"> </path>
+                                            <path fill="#EEE" d="M32 5H8v8h28V9a4 4 0 0 0-4-4z"> </path>
+                                            <path fill="#DB161B"
+                                                d="M36 13H9V5H4a4 4 0 0 0-4 4v18a4 4 0 0 0 4 4h5v-8h27V13z"> </path>
+                                            <g fill="#EEE">
+                                                <path
+                                                    d="M3.625 8.453c.313.567.313.789.222.839c-.09.05-.238-.09-.55-.657c-.313-.567-.672-1.345-.582-1.395c.091-.051.597.647.91 1.213zm1.891-.349c-.313.567-.493 1.067-.402 1.117c.09.05.417-.369.73-.935c.312-.567.493-1.067.402-1.117c-.091-.05-.418.369-.73.935zm-.563.912l-.297-1.422l-.028-.006c.103-.049.184-.126.184-.237c0-.16-.147-.289-.328-.289s-.328.13-.328.29c0 .108.075.193.175.243l-.284 1.436l.906-.015z">
+                                                </path>
+                                                <path
+                                                    d="M6.703 11.766c-.271-.226-1.349-1.159-1.861-1.716c.046-.16.073-.332.062-.516h.017v.008h.891v.172h1.094v-.531H5.812v.172h-.89v.008h-.031v-.269h-.813v.269H3.75v.016h-.641v-.22H2.078v.578h1.031v-.218h.641v.016h.276l-.036.374s-1.039.046-1.318.091c-.688.109-.469.312.094.5c.259.086.517.12.761.133c-.397.424-1.207 1.053-1.402 1.164c-.219.125-.219.281.203.188c.409-.091 1.355-.926 1.684-1.348l.285-.012c.15-.006.269-.1.369-.224c.427.505 1.264 1.254 1.6 1.458c.359.219.527.214.654.193c.127-.021.064-.052-.217-.286z">
+                                                </path>
+                                            </g>
+                                        </g>
+                                    </svg>
+                                </button>
+                                <div class="relative w-full">
+                                    <input type="text" id="phone-input" name="phone_number"
+                                        aria-describedby="helper-text-explanation"
+                                        class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 !rounded-none border border-gray-300 focus:ring-primary-red focus:border-primary-red dark:bg-gray-700 dark:border-s-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-primary-red placeholder:!pt-3"
+                                        pattern="[1-9]\d{7}"
+                                        title="Please enter a valid Omani Phone Number with 8 digits (excluding +968)."
+                                        placeholder="{{__("Phone Number")}}" required />
+                                </div>
+                            </div>
+                            <p id="helper-text-explanation" class="mt-6 text-xl text-gray-500 dark:text-gray-400">
+                                {{__("We will send you an SMS with a verification code.")}}</p>
                         </div>
-                        <h1 class="text-center mb-4">{{ __('Sign Up')}}</h1>
-                        <form class="login-form" action="{{route('user.sign.up.post')}}" method="post">
-                            @csrf
-                            <div class="form-group">
-                                <input type="text" class="form-control rounded-left" placeholder="{{__('Name')}}" name="name" required="">
+                        <div class="mb-20">
+                            <label for="password"
+                                class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">{{__("Password")}}:</label>
+                            <div class="relative w-full">
+                                <input type="password" id="password" name="password"
+                                    aria-describedby="password-helper-text"
+                                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 !rounded-none border border-gray-300 focus:ring-primary-red focus:border-primary-red dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-primary-red placeholder:!pt-3"
+                                    placeholder="{{__("Password")}}" required />
                             </div>
-                            <div class="form-group">
-                                <input type="email" class="form-control rounded-left" placeholder="{{__('Email')}}" name="email" required="">
-                            </div>
-                            <div class="form-group d-flex">
-                                <input type="password" class="form-control rounded-left" placeholder="{{__('Password')}}" name="password" required="">
-                            </div>
-                            <div class="form-group d-flex">
-                                <input type="password" class="form-control rounded-left" placeholder="{{__('Confirm Password')}}" name="confirm_password" required="">
-                            </div>
-                            <div class="form-group">
-                                <button type="submit" class="form-control btn btn-primary rounded submit px-3 primary-btn auth-btn">{{ __('Sign Up')}}</button>
-                            </div>
-                            <hr>
-                            <div class="form-group">
-                                <a href="{{route('user.redirect_google')}}" class="form-control btn btn-primary rounded submit px-3 google-btn"><i class="fab fa-google"></i> {{ __('Login With Google')}}</a>
-                            </div>
-                            <div class="form-group">
-                                <a href="{{route('user.redirect_facebook')}}" class="form-control btn btn-primary rounded submit px-3 facebook-btn"><i class="fab fa-facebook-f fa-fw"></i> {{ __('Login With Facebook')}}</a>
-                            </div>
-                            <hr>
+                            {{-- <p id="password-helper-text" class="mt-6 text-xl text-gray-500 dark:text-gray-400">
+                                {{__("Enter your account password")}}</p> --}}
+                        </div>
+                        <div class="form-group">
+                            <button type="submit"
+                                class="form-control btn btn-primary rounded submit px-3 primary-btn auth-btn">{{
+                                __('Login') }}</button>
+                        </div>
+                    </form>
 
-                            <div class="already-have-account">
-                               {{ __('Already have an account?')}}<a href="{{route('login')}}" class="forget-password-link">{{ __('Sign In')}}</a>
-                            </div>
-                        </form>
-                    </div>
+                    <p class="text-center my-5">
+                        <span>{{__("Dont have an account?")}}</span>
+                        <a href={{route("user.sign.up")}} class="text-primary-red text-3xl"> {{__("Register")}}</a>
+                    </p>
                 </div>
             </div>
         </div>
     </div>
-    <!-- about us area end here  -->
+</div>
 @endsection

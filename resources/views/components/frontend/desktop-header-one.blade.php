@@ -95,11 +95,11 @@
                                     <i class="btn-icon flaticon-like"></i>
                                     <span class="count wishListCuntFromController">{{ auth()->check() ? wishlistCount() : '0' }}</span>
                                 </div>
-                                <div class="btn-right">
+                                {{-- <div class="btn-right">
                                     <span class="btn-text">{{ __('Wishlist') }}</span>
                                     <span class="item-count wishListCuntFromController">{{ auth()->check() ? wishlistCount() : '0' }}
-                                        {{ __('items') }}</span>
-                                </div>
+                                        {{ __('items') }}</span> --}}
+                                {{-- </div> --}}
                             </a>
                         </div>
 
@@ -130,7 +130,7 @@
                                     <i class="btn-icon flaticon-shopping-bag"></i>
                                     <span class="count totalCountItem">{{ cartCountItem() }}</span>
                                 </div>
-                                <div class="btn-right">
+                                {{-- <div class="btn-right">
                                     <span class="btn-text">{{ __('Your Cart') }}</span>
                                     @php
                                     $content = Cart::content();
@@ -143,7 +143,7 @@
                                     @endforeach
                                     <span class="price totalAmount">
                                         {{ currencyConverter($total) }}</span>
-                                </div>
+                                </div> --}}
                             </a>
                         </div>
                     </div>
@@ -157,16 +157,19 @@
                                         alt="united-states" />
                                 </span>
                                 <a href="javascript:void(0)" class="lang">
-                                    {{ getLanguage('en')->name }}
+                                    {{-- {{ getLanguage('en')->name }} --}}
                                     @if (getLanguage('en')->status == 1 && getLanguage('fr')->status == 1)
                                     <i class="fas fa-angle-down"></i>
                                     @endif
                                 </a>
+
                                 @elseif(app()->getLocale() == 'fr')
-                                <span class="flag"><img src="{{ asset(IMG_LANGUAGE . getLanguage('fr')->thumb) }}"
-                                        alt="india" /></span>
+                                <span class="flag">
+                                    <img src="{{ asset(IMG_LANGUAGE . getLanguage('fr')->thumb) }}"
+                                        alt="india" />
+                                    </span>
                                 <a href="javascript:void(0)" class="lang">
-                                    {{ getLanguage('fr')->name }}
+                                    {{-- {{ getLanguage('fr')->name }} --}}
                                     @if (getLanguage('en')->status == 1 && getLanguage('fr')->status == 1)
                                     <i class="fas fa-angle-down"></i>
                                     @endif
@@ -176,22 +179,29 @@
                                     class="{{ getLanguage('en')->status != 1 || getLanguage('fr')->status != 1 ? null : 'lang-list' }}">
                                     @if (app()->getLocale() == 'en')
                                     @if (getLanguage('fr')->status == 1)
-                                    <li class="single-lang"><span class="flag"><img
-                                                src="{{ asset(IMG_LANGUAGE . getLanguage('fr')->thumb) }}"
-                                                alt="india"></span>
-                                        <a class="lang-text" href="{{ route('locale.switch', 'fr') }}">
-                                            {{ getLanguage('fr')->name}}
-                                        </a>
+                                    <a class="lang-text" href="{{ route('locale.switch', 'fr') }}">
+                                    <li class="single-lang">
+                                        {{-- <span class="flag"> --}}
+                                   
+                                            <img
+                                            src="{{ asset(IMG_LANGUAGE . getLanguage('fr')->thumb) }}"
+                                            alt="india">
+                                        {{-- </span> --}}
+                                        {{-- {{ getLanguage('fr')->name}} --}}
                                     </li>
+                                </a>
                                     @endif
                                     @elseif(app()->getLocale() == 'fr')
                                     @if (getLanguage('en')->status == 1)
-                                    <li class="single-lang"><span class="flag"><img
+                                    <a class="lang-text" href="{{ route('locale.switch', 'en') }}">
+
+                                    <li class="single-lang">
+                                            <img
                                                 src="{{ asset(IMG_LANGUAGE . getLanguage('en')->thumb) }}"
-                                                alt="united-states" /></span><a class="lang-text"
-                                            href="{{ route('locale.switch', 'en') }}">{{ getLanguage('en')->name
-                                            }}</a>
+                                                alt="united-states" />
+                                             
                                     </li>
+                                </a>
                                     @endif
                                     @endif
                                 </ul>

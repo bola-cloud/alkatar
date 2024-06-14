@@ -7,24 +7,23 @@
 <div class="sign-in-page section">
     <div class="container">
         <div class="row align-items-center justify-content-center">
-            <div class="col-12 col-lg-5">
-                <div class="login-wrap h-[470px]">
-                    <h1 class="text-center mb-0">{{ __('Sign In') }}</h1>
+            <div class="col-12 col-lg-7">
+                <div class="login-wrap h-[560px]">
+                    <h1 class="text-center mb-0">{{ __('Login') }}</h1>
                     <form class="login-form" method="post" action="{{ route('user.sign.otp') }}">
                         @csrf
-                        <div class="my-32">
-                        <label for="phone_number"
-                        class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">{{__("Phone Number")}}:</label>
+                        <div class="mt-32 mb-20">
+                            <label for="phone_number"
+                                class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+                                {{__("Phone Number")}}:</label>
                             <div class="flex items-center">
                                 <button id="dropdown-phone-button" data-dropdown-toggle="dropdown-phone"
                                     class="flex-shrink-0 z-10 flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600 h-20 placeholder:mt-2"
                                     type="button">
                                     <span class="text-2xl mt-2">968+</span>
-
                                     <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"
                                         xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img"
-                                        class="h-10 w-10 me-3" preserveAspectRatio="xMidYMid meet"
-                                        fill="#000000">
+                                        class="h-10 w-10 me-3" preserveAspectRatio="xMidYMid meet" fill="#000000">
                                         <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                                         <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
                                         </g>
@@ -43,25 +42,43 @@
                                             </g>
                                         </g>
                                     </svg>
-                               
-
                                 </button>
-                            
                                 <div class="relative w-full">
-                                    <input type="text" id="phone-input" name="phone_number" aria-describedby="helper-text-explanation"
-                                        class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 !rounded-none border border-gray-300 focus:ring-primary-red focus:border-primary-red dark:bg-gray-700 dark:border-s-gray-700  dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-primary-red placeholder:!pt-3"
-                                        pattern="[1-9]\d{7}" title="Please enter a valid Omani Phone Number with 8 digits (excluding +968)."  placeholder="{{__("Phone Number")}}" required />
+                                    <input type="text" id="phone-input" name="phone_number"
+                                        aria-describedby="helper-text-explanation"
+                                        class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 !rounded-none border border-gray-300 focus:ring-primary-red focus:border-primary-red dark:bg-gray-700 dark:border-s-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-primary-red placeholder:!pt-3"
+                                        pattern="[1-9]\d{7}"
+                                        title="Please enter a valid Omani Phone Number with 8 digits (excluding +968)."
+                                        placeholder="{{__("Phone Number")}}" required />
                                 </div>
                             </div>
                             <p id="helper-text-explanation" class="mt-6 text-xl text-gray-500 dark:text-gray-400">
                                 {{__("We will send you an SMS with a verification code.")}}</p>
+                        </div>
+                        {{-- <div class="mb-20">
+                            <label for="password"
+                                class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">{{__("Password")}}:</label>
+                            <div class="relative w-full">
+                                <input type="password" id="password" name="password"
+                                    aria-describedby="password-helper-text"
+                                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 !rounded-none border border-gray-300 focus:ring-primary-red focus:border-primary-red dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-primary-red placeholder:!pt-3"
+                                    placeholder="{{__("Password")}}" required />
                             </div>
+                             <p id="password-helper-text" class="mt-6 text-xl text-gray-500 dark:text-gray-400">
+                                {{__("Enter your account password")}}</p> 
+                        </div> --}}
+
                         <div class="form-group">
                             <button type="submit"
                                 class="form-control btn btn-primary rounded submit px-3 primary-btn auth-btn">{{
                                 __('Login') }}</button>
                         </div>
                     </form>
+
+                    {{-- <p class="text-center my-5">
+                        <span>{{__("Dont have an account?")}}</span>
+                        <a href={{route("user.sign.up")}} class="text-primary-red text-3xl"> {{__("Register")}}</a>
+                    </p> --}}
                 </div>
             </div>
         </div>

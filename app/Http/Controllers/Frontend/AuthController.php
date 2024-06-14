@@ -38,16 +38,20 @@ class AuthController extends Controller
     {
         $request->validate([
             'phone_number' => 'required',
+            'password' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->where('is_admin', 0)->first(); //check user
+
+        $user = User::where('Number', $request->phone_number)->where('is_admin', 0)->first(); //check user
+
+
 
         if ($user) {
             if ($user->status == INACTIVE) {
                 return  redirect()->route('front')->with('error', __('User is blocked by admin.'));
             }
             if (Hash::check($request->password, $user->password)) {
-                if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+                if (Auth::attempt(['Number' => $request->phone_number, 'password' => $request->password])) {
                     if (Auth::user()->is_admin == 0) {
                         return redirect()->route('front');
                     } else {
@@ -57,11 +61,14 @@ class AuthController extends Controller
                 }
             }
         }
+
         return redirect()->back()->with('error', __('Credential Not Match'));
     }
 
     public function userSignUp()
     {
+
+        return redirect()->route('login');
         $seo = SeoSetting::where('slug', 'sign-up')->first();
         $data['title'] = $seo->title;
         $data['description'] = $seo->description;
@@ -269,9 +276,14 @@ class AuthController extends Controller
 
     public function otpSignInPost(Request $request)
     {
+        $request->validate([
+            'email' => 'required|email|exists:users',
+            'password' => 'required|string|min:6|confirmed',
+            'password_confirmation' => 'required'
+        ]);
 
         $response = Http::post(
-            'https://muscatapps.smsoman.com/api/GenOTP',
+            'https://google.com',
             [
                 "UserName" => "Mufraji",
                 "Password" => "Mufraji123",
@@ -281,6 +293,7 @@ class AuthController extends Controller
         );
 
         $data = $response->json();
+
 
         if ($data['StatusDesc'] == 'Success') {
             return redirect()->route('user.otp.verify.get', [
@@ -303,6 +316,8 @@ class AuthController extends Controller
     public function otpVerifyPost(Request $request)
     {
 
+        $phone_number = $request->input('phone_number');
+
         $response = Http::post(
             'https://muscatapps.smsoman.com/api/VerifyOTP',
             [
@@ -310,7 +325,7 @@ class AuthController extends Controller
                 "Password" => "Mufraji123",
                 "RefNo" => $request->input('ref_no'),
                 "OTP" => $request->input('otp'),
-                "Phoneno" => $request->input('phone_number'),
+                "Phoneno" => $phone_number,
             ]
         );
 
@@ -318,24 +333,52 @@ class AuthController extends Controller
 
 
         if ($data['StatusDesc'] == 'Success') {
-            $user = User::where('phone_number', $request->input('phone_number'))->first();
+            $user = User::where('Number', $phone_number)->where("is_admin", 0)->first();
 
             if ($user) {
-                if ($user->status == INACTIVE) {
-                    return  redirect()->route('front')->with('error', __('User is blocked by admin.'));
-                }
                 Auth::login($user);
-                return redirect()->route('front')->with('success', __('Login Successfully!'));
+                return redirect()->route('front')->with('success', 'Login Successfully');
             } else {
-                $newUser = User::create([
-                    'phone_number' => $request->input('phone_number'),
-                    'password' => Hash::make('123456')
+                $user = User::create([
+                    'name' => $phone_number,
+                    'email' => 'default' . $phone_number . '@default.com',
+                    'password' => Hash::make($phone_number)
                 ]);
-                Auth::login($newUser);
-                return redirect()->route('front')->with('success', __('Login Successfully!'));
+
+                if ($user) {
+                    return redirect()->route('front')->with('success', __('Sign Up Successfully !'));
+                } 
             }
         } else {
             return redirect()->back()->with('error', 'Invalid OTP');
+        }
+    }
+
+    public function completeRegistration()
+    {
+        return view('front.auth.completeRegistration');
+    }
+
+    public function completeRegistrationPost(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email',
+            'phone_number' => 'required',
+            'password' => 'required|confirmed',
+        ]);
+
+        $user = User::create([
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'phone_number' => $request->input('phone_number'),
+            'password' => Hash::make($request->input('password')),
+        ]);
+
+        if ($user) {
+            return redirect()->route('front')->with('success', 'Registration Successfully');
+        } else {
+            return redirect()->back()->with('error', 'Something went wrong');
         }
     }
 }
