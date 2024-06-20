@@ -1,38 +1,42 @@
 services:
   app:
     container_name: SharaaDates
-    user: "1000:1000"
     build:
       context: .
       dockerfile: Dockerfile.dev
+      args:
+        USER_ID: ${USER_ID:-1000}
+        GROUP_ID: ${GROUP_ID:-1000}
     ports:
       - "9000:9000"
     volumes:
       - .:/var/www/html
-      - /var/www/html/vendor
-      - /var/www/html/node_modules
     depends_on:
       - mysql
-      - phpmyadmin
+    environment:
+      - DB_HOST=mysql
+      - DB_DATABASE=dates
+      - DB_USERNAME=root
+      - DB_PASSWORD=default
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
   mysql:
     container_name: SharaaDates_DB
     image: mysql:8.0
-    command: "--innodb_use_native_aio=0"
+    command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: default
       MYSQL_DATABASE: dates
     volumes:
       - ./db-data:/var/lib/mysql
     ports:
-      - "4306:3306"
+      - "3306:3306"
 
   phpmyadmin:
     image: phpmyadmin:5.2.1
     ports:
-      - 8080:80
+      - "8080:80"
     environment:
       - PMA_HOST=mysql
       - PMA_ARBITRARY=1
@@ -50,4 +54,3 @@ services:
       - "8000:80"
     depends_on:
       - app
-      - mysql
