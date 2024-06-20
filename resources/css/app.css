@@ -486,7 +486,8 @@ h3 {
     @apply flex flex-col;
 }
 
-.product-single-area .product-single-details .product-info .size-switch {
+.product-single-area .product-single-details .product-info .size-switch,
+.product-single-area .product-single-details .product-info .addition-switch {
     @apply flex flex-col gap-5 w-max;
 }
 
@@ -494,7 +495,13 @@ h3 {
     .product-single-details
     .product-info
     .size-switch
-    .single-size {
+    .single-size,
+    .product-single-area
+    .product-single-details
+    .product-info
+    .addition-switch
+    .single-addition
+     {
     @apply bg-white border-2 border-gray-300 rounded-xl px-5 py-4 h-20 flex items-center justify-center gap-5;
 }
 
@@ -574,10 +581,10 @@ h3 {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-  }
-  
+}
+
 /* Custom styles for the modal and size options */
-.modal-content {
+/* .modal-content {
     border-radius: 10px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
@@ -636,7 +643,123 @@ h3 {
     @apply bg-primary-red text-white;
 }
 
-.product-single-area .product-single-details .product-info .product-bottom-button .primary-btn, .product-single-area .product-single-details .product-info .product-bottom-button .add-cart {
+.size-option,
+.addition-option {
+    cursor: pointer;
+}
+
+.size-option.selected,
+.addition-option.selected {
+    @apply bg-primary-red;
+    color: white;
+}
+
+#submitSelection {
+    @apply bg-primary-red;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+#submitSelection:hover {
+    @apply bg-primary-red/10;
+} */
+
+.modal-content {
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-title {
+    font-size: 1.75rem;
+    font-weight: bold;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-body h6 {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+#sizeOptionsContainer, #additionOptionsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.size-option, .addition-option {
+    padding: 1rem 2rem;
+    font-size: 1.25rem;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.size-option:hover, .addition-option:hover {
+    background-color: var(--bs-primary);
+    color: #ffffff;
+}
+
+.modal-body .size-option.selected, .modal-body .addition-option.selected {
+    background-color: var(--bs-primary);
+    color: #ffffff;
+}
+
+#submitSelection {
+    background-color: var(--bs-primary);
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.25rem;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+    margin-top: 1rem;
+}
+
+#submitSelection:hover {
+    background-color: var(--bs-primary-dark);
+}
+
+/* Custom CSS Variable for Primary Color */
+:root {
+    --bs-primary: #d9534f;
+    --bs-primary-dark: #c9302c;
+}
+
+
+.product-single-area
+    .product-single-details
+    .product-info
+    .product-bottom-button
+    .primary-btn,
+.product-single-area
+    .product-single-details
+    .product-info
+    .product-bottom-button
+    .add-cart {
     @apply bg-primary-red hover:bg-primary-red/90 rounded-lg text-white;
 }
 
@@ -660,3 +783,119 @@ h3 {
     @apply bg-primary-red hover:bg-primary-red/90 rounded-lg text-white;
 }
 
+/* Base styles for options */
+.size-option, .addition-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1.5rem;
+    transition: background-color 0.3s ease;
+}
+
+
+
+/* Hide the default input */
+.size-radio, .addition-checkbox {
+    appearance: none;
+    position: absolute;
+    opacity: 0;
+}
+
+/* Custom radio button */
+.size-radio + .size-label:before {
+    content: '';
+    display: inline-block;
+    margin-inline-end: 10px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #dee2e6;
+    vertical-align: middle;
+    transition: background-color 0.3s ease;
+}
+
+.size-radio:checked + .size-label:before {
+    background-color:  var(--bs-primary-dark)
+}
+
+/* Custom checkbox */
+.addition-checkbox + .addition-label:before {
+    content: '';
+    display: inline-block;
+    margin-inline-end: 10px;
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    border: 2px solid #333; /* Dark border for square */
+    vertical-align: middle;
+    transition: background-color 0.3s ease;
+}
+
+.addition-checkbox:checked + .addition-label:before {
+    background-color:  var(--bs-primary-dark);
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTIiIHZpZXdCb3g9IjAgMCAxNiAxMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEuNzAzNDQgNi4wNzgyTDYuMDc4NDQgMTAuNDI1TDE0LjMwOTQgMi4xOTcyIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=');
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+
+.addition-switch {
+    margin-top: 20px;
+}
+
+.addition-option {
+    position: relative;
+    display: inline-block;
+    padding-left: 30px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    user-select: none;
+}
+
+.addition-option input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.addition-option .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    background-color: #eee;
+    border-radius: 4px;
+}
+
+.addition-option:hover input ~ .checkmark {
+    background-color: #ccc;
+}
+
+.addition-option input:checked ~ .checkmark {
+    background-color: var(--bs-primary-dark);
+}
+
+.addition-option .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.addition-option input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.addition-option .checkmark:after {
+    left: 7px;
+    top: 3px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+}

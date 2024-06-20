@@ -44,7 +44,7 @@
 
                             </div>
                         </div>
-                        
+
                         <div class="product-thumbnail-image">
                             <ul class="product-thumb-silide slider slider-nav">
 
@@ -60,8 +60,7 @@
                                 @if ($products->Image3)
                                 <li class="single-item"><img class="single-item-image"
                                         src="{{ asset(ProductImage() . $products->Image3) }}"
-                                        alt="{{ __('product') }}" />
-                                </li>
+                                        alt="{{ __('product') }}" /></li>
                                 @endif
                                 @if ($products->Image5)
                                 <li class="single-item"><img class="single-item-image"
@@ -75,7 +74,7 @@
                                 @endif
                             </ul>
                         </div>
-                       
+
                     </div>
                 </div>
                 <div class="col-lg-6">
@@ -131,19 +130,38 @@
                             </div>
 
                             <div class="product-size-area border-t pt-16">
-                                <h4 class="size-title">{{ __('Size:') }}</h4>
+                                <h4 class="size-title">{{ __('Size') }}:</h4>
                                 <div class="size-switch ">
                                     @foreach ($products->sizes as $size)
-                                        <div class="single-size border-primary-red">
-                                            <input type="radio" name="size" value="{{ $size->pivot->price }}" class="size-radio" data-size="{{ $size->id }}" id="size-{{ $size->id }}" {{ $loop->first ? 'checked' : '' }}>
-                                            <label for="size-{{ $size->id }}" class="mt-2">
-                                                <span class="size-label font-bold">{{ $size->Size }}</span> - 
-                                                <span class="size-price">{{ currencyConverter($size->pivot->price) }}</span>
-                                            </label>
-                                        </div>
+                                    <div>
+                                        <label for="size-{{ $size->id }}" class="size-option">
+                                            <input type="radio" name="size" value="{{ $size->pivot->price }}"
+                                                class="size-radio" data-size="{{ $size->id }}" id="size-{{ $size->id }}"
+                                                {{ $loop->first ? 'checked' : '' }}>
+                                            <span class="size-label font-bold">{{ $size->Size }}</span> -
+                                            <span class="size-price">{{ currencyConverter($size->pivot->price) }}</span>
+                                        </label>
+                                    </div>
                                     @endforeach
                                 </div>
                             </div>
+
+                            <div class="product-addition-area border-t pt-16">
+                                <h4 class="addition-title">{{ __('Additions') }}:</h4>
+                                <div class="addition-switch">
+                                    @foreach ($products->additions as $addition)
+                                    <label for="addition-{{ $addition->id }}" class="addition-option">
+                                        <input type="checkbox" name="addition[]" value="{{ $addition->price }}"
+                                            class="addition-checkbox" data-addition="{{ $addition->id }}"
+                                            id="addition-{{ $addition->id }}">
+                                        <span class="addition-label font-bold">{{ langConverter($addition->name,
+                                            $addition->name_ar) }}</span> -
+                                        <span class="addition-price">{{ currencyConverter($addition->price) }}</span>
+                                    </label>
+                                    @endforeach
+                                </div>
+                            </div>
+
 
 
                         </div>
@@ -177,7 +195,7 @@
                                     <div class="cart-plus-minus w-full">
                                         <div class="dec qtybutton btn">-</div>
                                         <input class="cart-plus-minus-box" type="text" name="qtybutton"
-                                            id="product_quantity" value="1" min="0"  />
+                                            id="product_quantity" value="1" min="0" />
                                         <div class="inc qtybutton btn">{{ __('+') }}</div>
                                     </div>
                                     {{-- <a class="product-btn MyWishList" data-id="{{ $products->id }}"
@@ -189,11 +207,8 @@
                                         <!-- <a href="javascript:void(0)" class="primary-btn buyNow"
                                             data-id="{{ $products->id }}">{{ __('Buy Now') }}</a> -->
                                         <a href="javascript:void(0)" title="{{ __('Add To Cart') }}"
-                                            class="add-cart addCart" 
-                                            data-product-id="{{ $products->id }}"
-                                            data-price="0" 
-                                            data-size-id="0"
-                                            >{{ __('Add To Cart')
+                                            class="add-cart addCart" data-product-id="{{ $products->id }}"
+                                            data-price="0" data-size-id="0">{{ __('Add To Cart')
                                             }}
                                             <i class="icon fas fa-plus-circle"></i></a>
                                     </div>
@@ -344,29 +359,69 @@
 @endsection
 
 @push('post_script')
-{{-- jquery --}}
-
-Copy code
 <script>
-    $(document).ready(function() {
-        // Get the original price from the page
-        var originalPrice = parseFloat($('.product-price .price').text().replace(/[^0-9.-]+/g, ""));
+    // $(document).ready(function() {
+    //     // Get the original price from the page
+    //     var originalPrice = parseFloat($('.single-size input[type="radio"]:checked').val());
+    //     var additionPrice = 0;
 
-        // On render, get the first size price and update the displayed price and data attributes
-        var firstSizePrice = $('.single-size input[type="radio"]:checked').val();
-        $('.product-price .price').text('OMR ' + (originalPrice + parseFloat(firstSizePrice)).toFixed(2));
-        $('.addCart').attr('data-price', firstSizePrice);
-        $('.addCart').attr('data-size-id', $('.single-size input[type="radio"]:checked').data('size'));
+    //     // Set the initial price based on the first selected size
+    //     $('.product-price .price').text('OMR ' + originalPrice.toFixed(2));
+    //     $('.addCart').attr('data-price', originalPrice);
+    //     $('.addCart').attr('data-size-id', $('.single-size input[type="radio"]:checked').data('size'));
+
+    //     // Update price and data attributes when a size is selected
+    //     $('.single-size').on('click', function() {
+    //         var sizeRadio = $(this).find('.size-radio');
+    //         sizeRadio.prop('checked', true);
+    //         originalPrice = parseFloat(sizeRadio.val());
+    //         $('.product-price .price').text('OMR ' + (originalPrice + additionPrice).toFixed(2));
+    //         $('.addCart').attr('data-price', originalPrice + additionPrice);
+    //         $('.addCart').attr('data-size-id', sizeRadio.data('size'));
+    //     });
+
+    //     // Update price and data attributes when an addition is selected
+    //     $('.single-addition').on('click', function() {
+    //         var additionRadio = $(this).find('.addition-radio');
+    //         additionRadio.prop('checked', true);
+    //         additionPrice = parseFloat(additionRadio.val());
+    //         $('.product-price .price').text('OMR ' + (originalPrice + additionPrice).toFixed(2));
+    //         $('.addCart').attr('data-price', originalPrice + additionPrice);
+    //         $('.addCart').attr('data-addition-id', additionRadio.data('addition'));
+    //     });
+    // });
+    $(document).ready(function() {
+        // Get the initial price from the first selected size
+        var sizePrice = parseFloat($('.size-switch input[type="radio"]:checked').val());
+        var additionPrices = {};
+
+        // Set the initial total price
+        updateTotalPrice();
 
         // Update price and data attributes when a size is selected
-        $('.single-size').on('click', function() {
-            var sizeRadio = $(this).find('.size-radio');
-            sizeRadio.prop('checked', true);
-            var newPrice = originalPrice + parseFloat(sizeRadio.val());
-            $('.product-price .price').text('OMR ' + newPrice.toFixed(2));
-            $('.addCart').attr('data-price', sizeRadio.val());
-            $('.addCart').attr('data-size-id', sizeRadio.data('size'));
+        $('.size-switch input[type="radio"]').on('change', function() {
+            sizePrice = parseFloat($(this).val());
+            updateTotalPrice();
+            $('.addCart').attr('data-size-id', $(this).data('size'));
         });
+
+        // Handle addition selection
+        $('.addition-switch input[type="checkbox"]').on('change', function() {
+            var additionId = $(this).data('addition');
+            if ($(this).is(':checked')) {
+                additionPrices[additionId] = parseFloat($(this).val());
+            } else {
+                delete additionPrices[additionId];
+            }
+            updateTotalPrice();
+        });
+
+        // Function to update the total price display
+        function updateTotalPrice() {
+            var totalPrice = sizePrice + Object.values(additionPrices).reduce((a, b) => a + b, 0);
+            $('.product-price .price').text('OMR ' + totalPrice.toFixed(2));
+            $('.addCart').attr('data-price', totalPrice);
+        }
     });
 </script>
 @endpush

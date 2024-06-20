@@ -59,7 +59,7 @@
 
         <a href="javascript:void(0)" title="{{ __('Add To Cart') }}" class="add-cart addCart"
             data-id="{{ $product->id }}" data-name="{{ $product->en_Product_Name }}"
-            data-sizes="{{ json_encode($product->sizes) }}">
+            data-sizes="{{ json_encode($product->sizes) }}" data-additions="{{json_encode($product->additions)}}">
             <svg fill="#000000" class="size-8 hover:fill-white transition-colors" version="1.1" id="Capa_1"
                 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 483.1 483.1"
                 xml:space="preserve">
