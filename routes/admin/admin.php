@@ -139,8 +139,13 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin', 'en.loca
         Route::get('', [ProductController::class, 'product'])->name('product')->middleware(['permission:product-list|product-create|product-edit|product-delete']);
         Route::get('/create', [ProductController::class, 'productCreate'])->name('product.create')->middleware(['permission:product-create']);
         Route::get('/physical/create', [ProductController::class, 'physicalProductCreate'])->name('physical.product.create')->middleware(['permission:product-create']);
+        Route::get('/addition', [AdditionController::class, 'index'])->name('physical.product.addition.index');
         Route::get('/addition/create', [AdditionController::class, 'create'])->name('physical.product.addition.create');
         Route::post('/addition/store', [AdditionController::class, 'store'])->name('physical.product.addition.store');
+        Route::get('/addition/{id}/edit', [AdditionController::class, 'edit'])->name('physical.product.addition.edit');
+        Route::put('/addition/{id}', [AdditionController::class, 'update'])->name('physical.product.addition.update');
+        Route::post('/addition/store', [AdditionController::class, 'store'])->name('physical.product.addition.store');
+        Route::get('/addition/{id}/delete', [AdditionController::class, 'delete'])->name('physical.product.addition.delete');
         Route::get('/digital/create', [ProductController::class, 'digitalProductCreate'])->name('digital.product.create')->middleware(['permission:product-create']);
         Route::get('/license/create', [ProductController::class, 'licenseProductCreate'])->name('license.product.create')->middleware(['permission:product-create']);
         Route::get('/affiliate/create', [ProductController::class, 'affiliateProductCreate'])->name('affiliate.product.create')->middleware(['permission:product-create']);

@@ -107,13 +107,6 @@
                     </a>
                 </li> --}}
 
-                <li class="{{ isset($submenu) && $submenu == 'add_addition' ? 'mm-active' : '' }}">
-                    <a href="{{ route('admin.physical.product.addition.create') }}">
-                        <i class="fa fa-circle"></i>
-                        <span>{{ __('Add Additions') }}</span>
-                    </a>
-                </li>
-
                 {{-- <li class="{{ isset($submenu) && $submenu == 'color' ? 'mm-active' : '' }}">
                     <a href="{{ route('admin.product.color') }}">
                         <i class="fa fa-circle"></i>
@@ -129,6 +122,31 @@
             </ul>
         </li>
         @endcanany
+
+        @canany(['product-list'])
+        <li class="{{ isset($menu) && $menu == 'products' ? 'mm-active' : '' }}">
+            <a class="has-arrow" href="#">
+                <i class="fab fa-product-hunt"></i>
+                <span>{{ __('Additions') }}</span>
+            </a>
+            <ul>
+                <li class="{{ isset($submenu) && $submenu == 'add_addition' ? 'mm-active' : '' }}">
+                    <a href="{{ route('admin.physical.product.addition.create') }}">
+                        <i class="fa fa-circle"></i>
+                        <span>{{ __('Add Additions') }}</span>
+                    </a>
+                </li>
+
+                <li class="{{ isset($submenu) && $submenu == 'addition_list' ? 'mm-active' : '' }}">
+                    <a href="{{ route('admin.physical.product.addition.index') }}">
+                        <i class="fa fa-circle"></i>
+                        <span>{{ __('Additions List') }}</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        @endcanany
+
         @canany(['order-list'])
         <li class="{{ isset($menu) && $menu == 'shipment' ? 'mm-active' : '' }}">
             <a class="has-arrow" href="#">
