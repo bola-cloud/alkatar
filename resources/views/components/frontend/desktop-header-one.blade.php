@@ -88,14 +88,15 @@
 
                 <div class="flex items-center gap-5">
                     <div class="header-right">
-                
+
                         <i class="search-icon flaticon-search" style="margin-inline: 40px;"></i>
-                
+
                         <div class="wishlist single-btn">
                             <a href="{{ route('wishlist') }}" class="wishlist-btn header-btn">
                                 <div class="btn-left">
                                     <i class="btn-icon flaticon-like"></i>
-                                    <span class="count wishListCuntFromController">{{ auth()->check() ? wishlistCount() : '0' }}</span>
+                                    <span class="count wishListCuntFromController">{{ auth()->check() ? wishlistCount()
+                                        : '0' }}</span>
                                 </div>
                             </a>
                         </div>
@@ -125,8 +126,7 @@
                                 </a>
                                 @elseif(app()->getLocale() == 'fr')
                                 <span class="flag">
-                                    <img src="{{ asset(IMG_LANGUAGE . getLanguage('fr')->thumb) }}"
-                                        alt="india" />
+                                    <img src="{{ asset(IMG_LANGUAGE . getLanguage('fr')->thumb) }}" alt="india" />
                                 </span>
                                 <a href="javascript:void(0)" class="lang">
                                     @if (getLanguage('en')->status == 1 && getLanguage('fr')->status == 1)
@@ -140,8 +140,7 @@
                                     @if (getLanguage('fr')->status == 1)
                                     <li class="single-lang">
                                         <a class="lang-text" href="{{ route('locale.switch', 'fr') }}">
-                                            <img src="{{ asset(IMG_LANGUAGE . getLanguage('fr')->thumb) }}"
-                                                alt="india">
+                                            <img src="{{ asset(IMG_LANGUAGE . getLanguage('fr')->thumb) }}" alt="india">
                                         </a>
                                     </li>
                                     @endif
@@ -194,10 +193,11 @@
                             </ul>
                         </div>
                         @else
-                        <div class="account-switcher bg-primary-red h-[50px] w-[170px] rounded-md text-center">
-                            <a href="{{ route('login') }}" class="lang text-white w-100 !text-2xl !font-bold">{{
-                                __('My Account') }}</a>
-                        </div>
+                        <a href="{{ route('login') }}" class="lang text-white w-100 !text-2xl !font-bold">
+                            <div class="account-switcher bg-primary-red h-[50px] w-[170px] rounded-md text-center">
+                                {{__('My Account') }}
+                            </div>
+                        </a>
                         @endif
                     </div>
                 </div>

@@ -146,6 +146,7 @@
                                 </div>
                             </div>
 
+                            @if ($products->additions->count() > 0)
                             <div class="product-addition-area border-t pt-16">
                                 <h4 class="addition-title">{{ __('Additions') }}:</h4>
                                 <div class="addition-switch">
@@ -161,6 +162,7 @@
                                     @endforeach
                                 </div>
                             </div>
+                            @endif
 
 
 
@@ -198,11 +200,7 @@
                                             id="product_quantity" value="1" min="0" />
                                         <div class="inc qtybutton btn">{{ __('+') }}</div>
                                     </div>
-                                    {{-- <a class="product-btn MyWishList" data-id="{{ $products->id }}"
-                                        title="{{ __('Add To Wishlist') }}"><i class="icon flaticon-like"></i></a>
-                                    <a class="product-btn CompareList" data-id="{{ $products->id }}"
-                                        title="{{ __('Add To Compare') }}"><i class="icon flaticon-bar-chart"></i></a>
-                                    --}}
+
                                     <div class="product-bottom-button d-flex w-full">
                                         <!-- <a href="javascript:void(0)" class="primary-btn buyNow"
                                             data-id="{{ $products->id }}">{{ __('Buy Now') }}</a> -->
@@ -215,21 +213,6 @@
                                 </div>
 
                             </div>
-                            {{--
-                            <div class="share-area mt-30">
-                                <h3 class="share-title">{{ __('SHARE:') }}</h3>
-                                <ul class="social-media a2a_kit">
-                                    <li class="media-item"><a class="media-link facebook a2a_button_facebook"
-                                            href="javascript:void(0)"><i class="fab fa-facebook-f"></i></a></li>
-                                    <li class="media-item"><a class="media-link twitter a2a_button_twitter"
-                                            href="javascript:void(0)"><i class="fab fa-twitter"></i></a></li>
-                                    <li class="media-item"><a class="media-link linkedin a2a_button_linkedin"
-                                            href="javascript:void(0)"><i class="fab fa-linkedin-in"></i></a></li>
-                                    <li class="media-item"><a class="media-link pinterest a2a_button_pinterest"
-                                            href="javascript:void(0)"><i class="fab fa-pinterest-p"></i></a></li>
-                                </ul>
-                                <script async src="https://static.addtoany.com/menu/page.js"></script>
-                            </div> --}}
                         </div>
                     </div>
                 </div>
@@ -393,7 +376,7 @@
     $(document).ready(function() {
         // Get the initial price from the first selected size
         var sizePrice = parseFloat($('.size-switch input[type="radio"]:checked').val());
-        var additionPrices = {};
+        var selectedAdditions = [];
 
         // Set the initial total price
         updateTotalPrice();
@@ -406,22 +389,24 @@
         });
 
         // Handle addition selection
-        $('.addition-switch input[type="checkbox"]').on('change', function() {
-            var additionId = $(this).data('addition');
-            if ($(this).is(':checked')) {
-                additionPrices[additionId] = parseFloat($(this).val());
-            } else {
-                delete additionPrices[additionId];
-            }
-            updateTotalPrice();
-        });
+      $('.addition-switch input[type="checkbox"]').on('change', function() {
+        var additionId = $(this).data('addition');
+        var additionPrice = parseFloat($(this).val());
+        
+        if ($(this).is(':checked')) {
+            selectedAdditions.push({ id: additionId, price: additionPrice });
+        } else {
+            selectedAdditions = selectedAdditions.filter(addition => addition.id !== additionId);
+        }
+        updateTotalPrice();
+    });
 
         // Function to update the total price display
         function updateTotalPrice() {
-            var totalPrice = sizePrice + Object.values(additionPrices).reduce((a, b) => a + b, 0);
-            $('.product-price .price').text('OMR ' + totalPrice.toFixed(2));
-            $('.addCart').attr('data-price', totalPrice);
-        }
+        var totalPrice = sizePrice + selectedAdditions.reduce((sum, addition) => sum + addition.price, 0);
+        $('.product-price .price').text('OMR ' + totalPrice.toFixed(2));
+        $('.addCart').attr('data-price', totalPrice);
+    }
     });
 </script>
 @endpush
