@@ -3113,16 +3113,16 @@
         },
         {
             "name": "mollie/mollie-api-php",
-            "version": "v2.68.0",
+            "version": "v2.69.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mollie/mollie-api-php.git",
-                "reference": "a3c383a76b20e3efaa39377c22e570396714830d"
+                "reference": "9a53f8bd6c89ae3e62982921a2f9d8ed68f9900d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mollie/mollie-api-php/zipball/a3c383a76b20e3efaa39377c22e570396714830d",
-                "reference": "a3c383a76b20e3efaa39377c22e570396714830d",
+                "url": "https://api.github.com/repos/mollie/mollie-api-php/zipball/9a53f8bd6c89ae3e62982921a2f9d8ed68f9900d",
+                "reference": "9a53f8bd6c89ae3e62982921a2f9d8ed68f9900d",
                 "shasum": ""
             },
             "require": {
@@ -3199,9 +3199,9 @@
             ],
             "support": {
                 "issues": "https://github.com/mollie/mollie-api-php/issues",
-                "source": "https://github.com/mollie/mollie-api-php/tree/v2.68.0"
+                "source": "https://github.com/mollie/mollie-api-php/tree/v2.69.0"
             },
-            "time": "2024-06-10T09:50:59+00:00"
+            "time": "2024-06-24T11:52:46+00:00"
         },
         {
             "name": "moneyphp/money",
@@ -4552,16 +4552,16 @@
         },
         {
             "name": "phpseclib/phpseclib",
-            "version": "3.0.38",
+            "version": "3.0.39",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpseclib/phpseclib.git",
-                "reference": "b18b8788e51156c4dd97b7f220a31149a0052067"
+                "reference": "211ebc399c6e73c225a018435fe5ae209d1d1485"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/b18b8788e51156c4dd97b7f220a31149a0052067",
-                "reference": "b18b8788e51156c4dd97b7f220a31149a0052067",
+                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/211ebc399c6e73c225a018435fe5ae209d1d1485",
+                "reference": "211ebc399c6e73c225a018435fe5ae209d1d1485",
                 "shasum": ""
             },
             "require": {
@@ -4642,7 +4642,7 @@
             ],
             "support": {
                 "issues": "https://github.com/phpseclib/phpseclib/issues",
-                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.38"
+                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.39"
             },
             "funding": [
                 {
@@ -4658,7 +4658,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-06-17T10:11:32+00:00"
+            "time": "2024-06-24T06:27:33+00:00"
         },
         {
             "name": "psr/cache",
