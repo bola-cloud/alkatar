@@ -24,7 +24,7 @@ class SliderRequest extends FormRequest
     public function rules()
     {
         return [
-            // 'background_image'=>['required', 'mimes:jpg,png,webp,jpeg,gif,bmp'],
+            'background_image'=>['required', 'mimes:jpg,png,webp,jpeg,gif,bmp'],
             // 'thumbnail'=>['required', 'mimes:jpg,png,webp,jpeg,gif,bmp'],
 
             'en_title'=>'required',

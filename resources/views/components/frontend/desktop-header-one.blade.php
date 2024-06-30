@@ -73,13 +73,14 @@
                 <div class="header-bottom">
                     <nav class="menu-area">
                         <ul class="main-menu">
-                            @foreach (Category_Des_Icon() as $category)
+                            @foreach (Category_Des_Icon()->take(8) as $category)
                             <li class="menu-item">
                                 <a class="menu-link" href="{{ route('category.product', $category->id) }}">
                                     {{ langConverter($category->en_Category_Name, $category->fr_Category_Name) }}
                                 </a>
                             </li>
                             @endforeach
+                        </ul>
                         </ul>
                     </nav>
                 </div>

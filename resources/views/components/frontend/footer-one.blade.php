@@ -1,6 +1,6 @@
 <!-- footer area start here -->
 <footer class="footer-area relative">
-    <div class="footer-widget-area z-20">
+    <div class="footer-widget-area z-20 !px-10 md:px-0">
         <div>
             <div class="row">
                 <div class="col-xl-3 col-lg-4 col-md-4 col-sm-4">
