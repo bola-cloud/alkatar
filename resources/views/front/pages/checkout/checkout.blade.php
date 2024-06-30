@@ -6,280 +6,150 @@
 
 <!-- checkout page area start here  -->
 <section class="page-content section">
-    <h1 class="text-6xl font-bold text-center mb-10 text-primary-red">{{ __("Checkout Page") }}</h1>
+    <h1 class="text-5xl md:text-7xl font-bold text-center text-primary-red mb-8">{{ __("Checkout Page") }}</h1>
     <div class="checkout">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-6 col-md-6">
-                    <div class="checkout-form">
+        <div class="container mx-auto px-4">
+                    <div class="grid lg:grid-cols-2 lg:gap-8 checkout-form bg-white p-6 rounded-lg shadow-md lg:h-full">
                         <form method="post" action="{{ route('checkout.order') }}" id="paymentForm">
                             @csrf
-                            <div class="row">
+                            <div class="space-y-6">
                                 @if (!auth()->check())
-                                <div class="col-lg-12 mb-3">
-                                    <div class="checkout-page-login-box d-flex justify-content-between align-items-center mb-30">
-                                        <h2 class="mb-0 text-capitalize fw-bold">{{ __("Returning buyer? Please login:") }}</h2>
-                                        <a type="button" class="primary-btn text-center !bg-primary-red" href={{ route("login") }}>{{ __("Login") }}</a>
+                                <div class="mb-6">
+                                    <div class="flex flex-col sm:flex-row justify-between items-center mb-4">
+                                        <h2 class="text-3xl xl:text-4xl text-black font-bold mb-2 lg:mb-0">{{ __("Returning buyer? Please login:") }}</h2>
+                                        <a class="primary-btn text-center bg-primary-red text-white px-5 py-3 lg:py-4 rounded text-lg xl:text-xl" href="{{ route("login") }}">{{ __("Login") }}</a>
                                     </div>
                                 </div>
                                 @endif
 
-                                <div class="col-lg-12">
-                                    <h2 class="checkout-title">{{ __('Billing Address') }}</h2>
+                                <div>
+                                    <h2 class="text-3xl lg:text-4xl font-bold mb-4">{{ __('Billing Address') }}</h2>
                                 </div>
-                                <div class="col-lg-12">
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" id="billing_name" name="billing_name"
-                                            placeholder="{{ __('Your Name Here') }}"
-                                            value="{{ isset($billing) ? $billing->Name ?? $billing->name : '' }}" required />
+                                <div class="space-y-4">
+                                    <input type="text" class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_name" name="billing_name" placeholder="{{ __('Name') }}" value="{{ isset($billing) ? $billing->Name ?? $billing->name : '' }}" required />
+                                    <input type="email" class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_email" name="billing_email" placeholder="{{ __('Email Address') }}" value="{{ isset($billing) ? $billing->Email ?? $billing->email : '' }}" required />
+                                    <input type="text" class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_street_address" name="billing_street_address" placeholder="{{ __('Street Address') }}" value="{{ isset($billing) ? $billing->Street : '' }}" required />
+                                    <div class="flex flex-col sm:flex-row gap-4">
+                                      <input type="text" class="w-full sm:w-1/2 p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_state" name="billing_state" placeholder="{{ __('State') }}" value="{{ isset($billing) ? $billing->State : '' }}" required />
+                                      <input type="text" class="w-full sm:w-1/2 p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_zipcode" name="billing_zipcode" placeholder="{{ __('Zip/Postal Code') }}" value="{{ isset($billing) ? $billing->Zipcode : '' }}" required />
                                     </div>
-                                </div>
-                                <div class="col-lg-12">
-                                    <div class="form-group">
-                                        <input type="email" class="form-control" id="billing_email" name="billing_email"
-                                            placeholder="{{ __('Email Address') }}"
-                                            value="{{ isset($billing) ? $billing->Email ?? $billing->email : '' }}" required />
-                                    </div>
-                                </div>
-                                <div class="col-lg-12">
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" id="billing_street_address"
-                                            name="billing_street_address" placeholder="{{ __('Street Address') }}"
-                                            value="{{ isset($billing) ? $billing->Street : '' }}" required />
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" id="billing_state" name="billing_state"
-                                            placeholder="{{ __('State') }}"
-                                            value="{{ isset($billing) ? $billing->State : '' }}" required />
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" id="billing_zipcode"
-                                            name="billing_zipcode" placeholder="{{ __('Zip/Postal Code') }}"
-                                            value="{{ isset($billing) ? $billing->Zipcode : '' }}" required />
-                                    </div>
-                                </div>
-                                <div class="col-lg-12">
-                                    <select class="form-select" id="billing_country" name="billing_country" required>
-                                        <option>{{ __('Country') }}</option>
+                                    <div class="relative">
+                                      <select class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_country" name="billing_country" required>
+                                        <option>{{ __('Governorate') }}</option>
                                         @foreach (country() as $cnt)
-                                        <option value="{{ $cnt }}" {{ isset($billing) && $billing->Country == $cnt ? 'selected' : '' }}>
-                                            {{ $cnt }}</option>
+                                          <option value="{{ $cnt }}" {{ isset($billing) && $billing->Country == $cnt ? 'selected' : '' }}>
+                                            {{ $cnt }}
+                                          </option>
                                         @endforeach
-                                    </select>
-                                </div>
-                            </div>
+                                      </select>
+                                    </div>
+                                  </div>
 
-                            <div class="pt-5"></div>
-                            {{-- Shipping Address section (commented out) --}}
-                            {{-- 
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <h2 class="checkout-title">{{ __('Shipping Address') }}</h2>
-                                </div>
-                                <div class="form-group form-check terms-agree">
-                                    <input type="checkbox" class="form-check-input" id="copy_address" />
-                                    <label class="form-check-label" for="copy_address">{{ __('Same as billing address') }}</label>
-                                </div>
-                                <div class="pt-2"></div>
-                                <div class="col-lg-12">
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" id="shipping_name" name="shipping_name"
-                                            placeholder="{{ __('Your Name Here') }}" value="" />
-                                        @error('shipping_name')
-                                        <span class="text-danger">{{ $message }}</span>
-                                        @enderror
+                            <div class="mt-8">
+                                <h2 class="text-3xl lg:text-4xl font-bold mb-4">{{ __('Payment Method') }}</h2>
+                                <div class="space-y-4">
+                                    @foreach ($paymentPlatforms as $payment)
+                                    @if ($payment->slug == 'paypal')
+                                    <div class="flex items-center justify-between p-3 lg:p-4 border rounded">
+                                        <div class="flex gap-2 mt-2">
+                                        <input class="form-check-input" type="radio" name="payment" id="paypal" value="paypal" />
+                                        <label class="form-check-label text-lg lg:text-2xl" for="paypal">{{ langConverter('Thawani Payment', 'بوابة ثواني') }}</label>
+                                        </div>
+                                        <img src="{{ asset(IMG_PAYMENT_GATEWAY . $payment->image) }}" alt="paypal" class="size-48" />
                                     </div>
-                                </div>
-                                <div class="col-lg-12">
-                                    <div class="form-group">
-                                        <input type="email" class="form-control" id="shipping_email" name="shipping_email"
-                                            placeholder="{{ __('Email Address') }}" value="" />
-                                        @error('shipping_email')
-                                        <span class="text-danger">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-lg-12">
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" id="shipping_street_address"
-                                            name="shipping_street_address" placeholder="{{ __('Street Address') }}" value="" />
-                                        @error('shipping_street_address')
-                                        <span class="text-danger">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" id="shipping_state" name="shipping_state"
-                                            placeholder="{{ __('State') }}" value="" />
-                                        @error('shipping_state')
-                                        <span class="text-danger">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" id="shipping_zipcode"
-                                            name="shipping_zipcode" placeholder="{{ __('Zip/Postal Code') }}" value="" />
-                                        @error('shipping_zipcode')
-                                        <span class="text-danger">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-lg-12">
-                                    <select class="form-select" id="shipping_country" name="shipping_country">
-                                        <option>{{ __('Country') }}</option>
-                                        @foreach (country() as $cnt)
-                                        <option value="{{ $cnt }}">{{ $cnt }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('shipping_country')
-                                    <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                            </div> 
-                            --}}
+                                    @endif
+                                    @endforeach
 
-                            <div class="payment-method">
-                                <div class="row">
-                                    <div class="col-lg-12">
-                                        <h2 class="checkout-title">{{ __('Payment Method') }}</h2>
+                                    @if (env('COD_STATUS') == '1')
+                                    <div class="flex items-center justify-between p-3 lg:p-4 border rounded">
+                                        <div class="flex gap-2 mt-2">
+                                        <input class="form-check-input" type="radio" name="payment" id="COD" value="COD" />
+                                        <label class="form-check-label text-lg lg:text-2xl" for="COD">{{ langConverter('Cash on delivery', 'دفع عند التوصيل') }}</label>
+                                        </div>
+                                        <img src="{{ asset(IMG_PAYMENT_GATEWAY . env('COD_IMAGE')) }}" alt="{{ env('COD_NAME') }}" class="size-48" />
                                     </div>
-                                    <div class="col-lg-12">
-                                        @foreach ($paymentPlatforms as $payment)
-                                        @if ($payment->slug == 'paypal')
-                                        <div class="form-group">
-                                            <div class="form-check card-check">
-                                                <input class="form-check-input" type="radio" name="payment" id="paypal" value="paypal" />
-                                                <label class="form-check-label" for="paypal">{{ $payment->name }}</label>
-                                                <div class="input-icon">
-                                                    <img src="{{ asset(IMG_PAYMENT_GATEWAY . $payment->image) }}" alt="paypal" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        @endif
-                                        @endforeach
+                                    @endif
 
-                                        @if (env('COD_STATUS') == '1')
-                                        <div class="form-group">
-                                            <div class="form-check card-check">
-                                                <input class="form-check-input" type="radio" name="payment" id="COD" value="COD" />
-                                                <label class="form-check-label" for="COD">{{ env('COD_NAME') }}</label>
-                                                <div class="input-icon">
-                                                    <img src="{{ asset(IMG_PAYMENT_GATEWAY . env('COD_IMAGE')) }}" alt="{{ env('COD_NAME') }}" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        @endif
-
-                                        <div class="form-group form-check terms-agree">
-                                            <input type="checkbox" class="form-check-input" id="agree" required />
-                                            <label class="form-check-label" for="agree">{{ __('By clicking the button you agree to our') }}
-                                                <a href="{{ route('terms.conditions') }}">{{ __('Terms & Conditions') }}</a></label>
-                                        </div>
-                                        @if (auth()->check())
-                                        <button type="submit" id="payButton" class="checkout-btn form-btn">{{ __('Place Order') }}</button>
-                                        <button type="button" id="payButtonN" class="checkout-btn form-btn d-none buy_now">{{ __('Place Order') }}</button>
-                                        @else
-                                        <button type="button" class="checkout-btn" data-bs-toggle="modal" data-bs-target="#loginModal">{{ __('Place Order') }}</button>
-                                        @endif
+                                    <div class="flex gap-3 space-x-2 mt-4">
+                                        <input type="checkbox" class="form-check-input" id="agree" required />
+                                        <label class="form-check-label text-lg lg:text-xl" for="agree">
+                                            {{ __('By clicking the button you agree to our') }}
+                                            <a href="{{ route('terms.conditions') }}" class="text-primary-red">{{ __('Terms & Conditions') }}</a>
+                                        </label>
                                     </div>
-                                </div>
-                            </div>
 
-                            <div class="modal fade common-modal" id="show-razor-thanks" data-bs-backdrop="static"
-                                data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel"
-                                aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="staticBackdropLabel">{{ __('Razorpay Confirmation') }}</h5>
-                                        </div>
-                                        <div class="modal-body">
-                                            {{ __('Your payment is authorized. For capturing your order click') }}
-                                            <b>{{ __('Place Order') }}</b>
-                                            <div class="modal-btn-wrap text-end">
-                                                <button type="submit" class="primary-btn">{{ __('Place Order') }}</button>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    @if (auth()->check())
+                                    <button type="submit" id="payButton" class="w-full bg-primary-red text-white py-3 lg:py-4 px-4 rounded hover:bg-red-600 transition duration-300 text-lg lg:text-xl">{{ __('Place Order') }}</button>
+                                    <button type="button" id="payButtonN" class="w-full bg-primary-red text-white py-3 lg:py-4 px-4 rounded hover:bg-red-600 transition duration-300 d-none buy_now text-lg lg:text-xl">{{ __('Place Order') }}</button>
+                                    @else
+                                    <button type="button" class="w-full bg-primary-red text-white py-3 lg:py-4 px-4 rounded hover:bg-red-600 transition duration-300 text-lg lg:text-xl" data-bs-toggle="modal" data-bs-target="#loginModal">{{ __('Place Order') }}</button>
+                                    @endif
                                 </div>
                             </div>
                         </form>
                     </div>
-                </div>
 
-                <div class="col-lg-6 col-md-6">
-                    <div class="cart-summary">
-                        <div class="summary-top d-flex">
-                            <h2>{{ __('Cart Summary') }}</h2>
-                            <a class="edite-btn" href="{{ route('cart.content') }}">{{ __('Edit') }}</a>
+                    <div class="cart-summary bg-white p-6 lg:p-8 rounded-lg shadow-md lg:h-full">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl lg:text-4xl font-bold">{{ __('Cart Summary') }}</h2>
+                            <a class="text-primary-red hover:underline text-lg lg:text-xl" href="{{ route('cart.content') }}">{{ __('Edit') }}</a>
                         </div>
-                        <ul class="cart-product-list">
+                        <ul class="space-y-4">
                             @php $total = 0; @endphp
                             @foreach ($content as $item)
-                            <li class="single-cart-product d-flex justify-content-between">
-                                <div class="product-info">
-                                    <img src="{{ asset(ProductImage() . $item->options->image) }}" alt="{{ $item->name }}" class="product-image">
-                                    <h3 class="flex items-center gap-3">
-                                        <span class="text-white bg-primary-red font-bold size-10 rounded-full flex justify-center items-center pt-1">{{ $item->qty }}</span>
-                                        <span class="!mt-3">{{ $item->name }}</span>
-                                    </h3>
-                                    <p>{{ __('Size:') }} {{ is_null($item->options->size) ? __('Free Size') : $item->options->size }}</p>
-                                    {{-- <p class="checkout-page-color-show">{{ __('Color:') }} @if (is_null($item->options->color)) {{ __('Any Color') }} @else <span style="background:{{ $item->options->color }};"></span> @endif </p> --}}
+                            <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4">
+                                <div class="flex items-center space-x-4 mb-2 sm:mb-0">
+                                    <img src="{{ asset(ProductImage() . $item->options->image) }}" alt="{{ $item->name }}" class="w-20 h-20 xl:w-32 xl:h-32 object-cover rounded">
+                                    <div class="!ms-10">
+                                        <h3 class="font-bold text-2xl xl:text-4xl">
+                                            {{langConverter($item->name, $item->options->name_ar)}}
+                                        </h3>
+                                        <p class="text-2xl xl:text-4xl text-gray-600">{{ __('Size') }}: {{ is_null($item->options->size) ? __('Free Size') : $item->options->size }}</p>
+                                        <p class="text-2xl xl:text-4xl text-gray-600">{{ __('Quantity') }}: {{ $item->qty }}</p>
+                                    </div>
                                 </div>
-                                <div class="price-area">
-                                    <h3 class="price">{{ currencyConverter($item->price * $item->qty) }}</h3>
+                                <div class="text-right mt-2 sm:mt-0">
+                                    <h3 class="font-bold text-black text-2xl xl:text-4xl">{{ currencyConverter($item->price * $item->qty) }}</h3>
                                 </div>
                             </li>
                             @endforeach
                         </ul>
-                        <!-- Cart page bottom box -->
-                        <div class="col-lg-12 col-md-12">
-                            <div class="checkout-discount-box">
-                                <h2 class="mb-3">{{ __('Discount Codes') }}</h2>
-                                <form action="{{ route('apply.coupon') }}" method="post">
-                                    @csrf
-                                    <div class="input-group mb-2">
-                                        <input type="text" class="form-control" name="coupon_code" placeholder="{{ __('Enter your coupon code') }}" required />
-                                        <button type="submit" class="bg-primary-red px-4 py-2 !rounded-lg text-white mx-2">{{ __('Apply Coupon') }}</button>
-                                    </div>
-                                </form>
-                            </div>
+                        <div class="mt-6">
+                            <h2 class="text-2xl xl:text-4xl font-bold mb-3">{{ __('Discount Codes') }}</h2>
+                            <form action="{{ route('apply.coupon') }}" method="post" class="flex space-x-2">
+                                @csrf
+                                <input type="text" class="flex-grow p-2 lg:p-3 border rounded h-14 lg:h-16 text-lg xl:text-3xl" name="coupon_code" placeholder="{{ __('Enter your coupon code') }}" required />
+                                <button type="submit" class="bg-primary-red text-white px-4 py-3 lg:py-4 rounded hover:bg-red-600 transition duration-300 text-lg xl:text-2xl">{{ __('Apply Coupon') }}</button>
+                            </form>
                         </div>
-                        <ul class="summary-list">
-                            <li>{{ __('Subtotal') }} <span>{{ currencyConverter(\Cart::subtotal()) }}</span></li>
-                            <li>{{ __('Shipping Cost') }} <span id="delivery-charge-curr"></span></li>
-                            <li>{{ __('VAT/Tax ') }} <span id="tax-show-curr">{{ currencyConverter(tax_amount(\Cart::subtotal())) }}</span></li>
-
+                        <ul class="mt-10 lg:mt-20 space-y-2 text-2xl xl:text-4xl">
+                            <li class="flex justify-between"><span>{{ __('Subtotal') }}</span> <span>{{ currencyConverter(\Cart::subtotal()) }}</span></li>
+                            <li class="flex justify-between"><span>{{ __('Shipping Cost') }}</span> <span id="delivery-charge-curr"></span></li>
+                            <li class="flex justify-between"><span>{{ __('VAT/Tax') }}</span> <span id="tax-show-curr">{{ currencyConverter(tax_amount(\Cart::subtotal())) }}</span></li>
                             @if (!empty(Session::get('CouponAmount')))
-                            <li>{{ __('Coupon Discount (-)') }} <span>{{ currencyConverter(Session::get('CouponAmount')) }}</span></li>
+                            <li class="flex justify-between"><span>{{ __('Coupon Discount (-)') }}</span> <span>{{ currencyConverter(Session::get('CouponAmount')) }}</span></li>
                             @endif
                         </ul>
-                        <div class="total-amount">
-                            <h3>{{ __('Total Cost') }}
-                                <span class="float-right" id="total-cost-curr">{{ currencyConverter(\Cart::subtotal() + allsetting()['shipping_charge'] + tax_amount(\Cart::subtotal()) - Session::get('CouponAmount')) }}</span>
+                        <div class="mt-6 pt-4 border-t">
+                            <h3 class="text-2xl xl:text-3xl font-bold flex justify-between">
+                                <span>{{ __('Total Cost') }}</span>
+                                <span id="total-cost-curr">{{ currencyConverter(\Cart::subtotal() + allsetting()['shipping_charge'] + tax_amount(\Cart::subtotal()) - Session::get('CouponAmount')) }}</span>
                             </h3>
                         </div>
                     </div>
-                </div>
-            </div>
+               
         </div>
     </div>
 </section>
+
 <div id="stripe-collapse" data-stripe="{{ route('stripe_collapse') }}"></div>
 <div id="stripe-key" data-key="{{ config('services.stripe.key') }}"></div>
 <div id="user-name" data-key="{{ auth()->check() ? auth()->user()->name : 'Guest User' }}"></div>
 <div id="user-email" data-key="{{ auth()->check() ? auth()->user()->email : 'guest@gmail.com' }}"></div>
 <div id="get-tax-amount" data-url="{{ route('checkout.get_tax_amount') }}"></div>
 <!-- checkout page area end here  -->
+
 @push('post_script')
-{{-- <script src="https://js.stripe.com/v3/"></script>
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script> --}}
 <script src="{{ asset('frontend/assets/js/pages/checkout.js') }}"></script>
 @endpush
 @endsection

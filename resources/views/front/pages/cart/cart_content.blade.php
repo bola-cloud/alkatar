@@ -42,8 +42,7 @@
                                         <div class="product-info text-center">
                                             <h3 class="product-name">
                                                 <a class="product-link"
-                                                    href="{{ route('single.product', $item->options->slug ?? '') }}">{{
-                                                    $item->name }}</a>
+                                                    href="{{ route('single.product', $item->options->slug ?? '') }}">{{ langConverter($item->name, $item->options->name_ar) }}</a>
                                             </h3>
                                             @if ($item->options->color)
                                             <div class="variable-single-item color-switch">

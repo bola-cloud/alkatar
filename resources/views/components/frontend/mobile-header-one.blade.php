@@ -22,8 +22,7 @@
                                 class="count CompareCuntFromController">{{ session()->has('compare') ? count(session()->get('compare')) : '0' }}</span>
                         </div>
                     </a> --}}
-                    <a data-bs-toggle="offcanvas" href="#cartOffcanvasSidebar" role="button"
-                        aria-controls="cartOffcanvasSidebar" class="cart-btn header-btn">
+                    <a role="button" class="cart-btn header-btn" href="{{ route('cart.content') }}">
                         <div class="btn-left">
                             <i class="btn-icon flaticon-shopping-bag"></i>
                             <span class="count totalCountItem">{{ cartCountItem() }}</span>

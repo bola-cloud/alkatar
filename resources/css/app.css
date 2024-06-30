@@ -945,9 +945,13 @@ h3 {
 }
 
 .wish-list-area .wish-list-table .product-price .price {
-    @apply !text-2xl;
+    @apply !text-3xl;
 }
 
 .cart-page-area .cart-page-item .product-info .product-name .product-link {
-    @apply !text-2xl;
+    @apply !text-3xl;
+}
+
+.cart-page-area .bottom-box-title {
+    @apply !text-3xl;
 }
