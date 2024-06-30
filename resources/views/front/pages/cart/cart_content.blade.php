@@ -29,27 +29,16 @@
                                 @endphp
                                 @foreach ($content as $item)
                                 <tr class="cart-page-item">
-                                    <td>
+                                    <td data-label="{{ __('Product Image') }}">
                                         <div class="product-top">
                                             <a href="{{ route('single.product', $item->options->slug ?? '') }}"><img
                                                     class="product-thumbnal"
                                                     src="{{ asset(ProductImage() . $item->options->image) }}"
                                                     alt="cart"></a>
-                                            {{-- <div class="product-flags">
-                                                @if ($item->options->item_tag)
-                                                <span class="product-flag sale">{{ $item->options->item_tag
-                                                    }}</span>
-                                                @endif
-                                                @if ($item->options->discount_parcent > 0)
-                                                <span class="product-flag discount">-{{
-                                                    $item->options->discount_parcent }}%</span>
-                                                @endif
-                                            </div> --}}
-
                                         </div>
                                     </td>
 
-                                    <td>
+                                    <td data-label="{{__("Product Name")}}">
                                         <div class="product-info text-center">
                                             <h3 class="product-name">
                                                 <a class="product-link"
@@ -75,17 +64,15 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="{{ __('Price') }}">
                                         <div class="product-price text-center">
-                                            {{-- <h4 class="regular-price">
-                                                {{ currencyConverter($item->weight) }}
-                                            </h4> --}}
+                                            
                                             <h3 class="price ">
                                                 <span class="mainPrice">{{ currencyConverter($item->price) }}</span>
                                             </h3>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="{{ __('Quantity') }}">
                                         <div class="cart-quantity input-group">
                                             <div class="increase-btn dec qtybutton btn qty_decrease"
                                                 data-id="{{ $item->rowId }}">-</div>
@@ -95,12 +82,12 @@
                                                 data-id="{{ $item->rowId }}">+</div>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="{{ __('Total') }}">
                                         <h1 class="cart-table-item-total SubTotalAmount">
                                             {{ currencyConverter($item->subtotal) }}
                                         </h1>
                                     </td>
-                                    <td>
+                                    <td data-label="{{ __('Remove') }}">
                                         <button class="delet-btn deleteItemCart" title="{{ __('Delete Item') }}"
                                             data-id="{{ $item->rowId }}">
                                             <img src="{{ asset('frontend/assets/images/close.svg') }}" alt="close" />

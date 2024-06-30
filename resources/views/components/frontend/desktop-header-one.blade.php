@@ -90,7 +90,7 @@
                 <div class="flex items-center gap-5">
                     <div class="header-right">
 
-                        <i class="search-icon flaticon-search" style="margin-inline: 40px;"></i>
+                        <i class="search-icon flaticon-search" style="margin-inline: 20px;"></i>
 
                         <div class="wishlist single-btn">
                             <a href="{{ route('wishlist') }}" class="wishlist-btn header-btn">

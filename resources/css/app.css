@@ -71,9 +71,9 @@ h3 {
     @apply bg-primary-red;
 }
 
-.header-area .header-bottom .menu-area .main-menu {
+/* .header-area .header-bottom .menu-area .main-menu {
     @apply gap-10;
-}
+} */
 
 .header-area .header-middle .header-middle-wrap .brand-area .brand-image {
     max-width: 250px;
@@ -421,7 +421,7 @@ h3 {
 
 /* START CART AREA */
 .cart-page-area {
-    @apply grid grid-cols-[3fr_1fr] gap-10 items-center;
+    @apply grid lg:grid-cols-[3fr_1fr] gap-10 items-center;
 }
 
 .cart-page-area th {
@@ -573,6 +573,9 @@ h3 {
 .product-single-left .slick-slider .slick-track,
 .product-single-left .slick-slider .slick-list {
     @apply !h-full;
+}
+.direction-rtl .product-single-area .product-single-left .product-slier-big-image {
+    @apply !w-full;
 }
 
 /* Add some basic styling */
@@ -902,4 +905,49 @@ h3 {
     border: solid white;
     border-width: 0 3px 3px 0;
     transform: rotate(45deg);
+}
+
+
+/* CSS for responsiveness */
+@media (max-width: 768px) {
+    .table-responsive {
+        overflow-x: auto;
+    }
+    .wish-list-table table {
+        width: 100%;
+        display: block;
+    }
+    .wish-list-table thead {
+        display: none;
+    }
+    .wish-list-table tbody, .wish-list-table tr, .wish-list-table td {
+        display: block;
+        width: 100%;
+    }
+    .wish-list-table td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+    }
+    .wish-list-table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 50%;
+        padding-left: 15px;
+        font-weight: bold;
+        text-align: left;
+    }
+}
+
+.direction-rtl .header-area .header-middle .header-middle-wrap .header-right .single-btn {
+    @apply !m-0 !ms-3;
+}
+
+.wish-list-area .wish-list-table .product-price .price {
+    @apply !text-2xl;
+}
+
+.cart-page-area .cart-page-item .product-info .product-name .product-link {
+    @apply !text-2xl;
 }
