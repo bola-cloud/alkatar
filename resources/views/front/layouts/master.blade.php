@@ -4,7 +4,7 @@
 @stack('post_css')
 
 <body
-    class="{{ session()->has('lang_dir') && session()->get('lang_dir') == 'rtl' ? 'direction-rtl' : 'direction-ltr' }} max-w-[1600px] mx-auto">
+    class="{{ session()->has('lang_dir') && session()->get('lang_dir') == 'rtl' ? 'direction-rtl' : 'direction-ltr' }} max-w-[1600px] mx-auto px-10">
     <!-- Preloader Area Start -->
     <div id="preloader">
         <div id="status">

@@ -116,14 +116,10 @@
 
 <!-- product banner area start here  -->
 <div class="product-banner hidden lg:block pb-100">
-    <div class="row">
         @foreach ($promotion as $promo)
-        <div class="col-12">
             <a href="{{$promo->Link_One}}" class="single-banner"><img class="banner-image"
                     src="{{ asset(PromotionImage() . $promo->Image_One) }}" alt="product-banner" /></a>
-        </div>
         @endforeach
-    </div>
 </div>
 <!-- product banner area end here  -->
 
