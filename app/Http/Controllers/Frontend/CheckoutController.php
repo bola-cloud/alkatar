@@ -215,15 +215,19 @@ class CheckoutController extends Controller
                         $checkoutProduct[] = [
                             'name' => $item->name,
                             'quantity' => $item->qty,
-                            'unit_amount' => $item->price * 1000,
+                            'unit_amount' => number_format($item->price,3) * 1000,
                         ];
                     }
 
+
+
+                    if ($shipping_charge) {
                     $checkoutProduct[] = [
                         'name' => 'Shipping Charge',
                         'quantity' => 1,
                         'unit_amount' => $shipping_charge * 1000,
                     ];
+                    }
 
 
                     $response = Http::withHeaders([
@@ -248,7 +252,6 @@ class CheckoutController extends Controller
                         ]
                     ]);
 
-                    // dd($response);
 
                     if ($response->successful()) {
                         $paymentJsonData =  $response->json();

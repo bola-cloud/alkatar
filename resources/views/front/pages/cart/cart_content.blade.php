@@ -23,6 +23,7 @@
                             </tr>
                         </thead>
                         <tbody>
+{{--                        @dd($content)--}}
                             <div id="cart_ajax_load">
                                 @php
                                 $total = 0;
@@ -65,6 +66,16 @@
                                                     {{ $item->options->size }}
                                                 </li>
                                             </ul>
+                                            @endif
+
+                                            @if ($item->options->additions)
+                                                <ul class="size-switch mt-2">
+                                                    @foreach ($item->options->additions as $addition)
+                                                    <li class="single-size active">
+                                                        {{ $addition->name_ar }}
+                                                    </li>
+                                                    @endforeach
+                                                </ul>
                                             @endif
                                         </div>
                                     </td>

@@ -39,6 +39,12 @@ class CartController extends Controller
 
             $color_id = DB::table('color_product')->where('Product_Id', $request->product_id)->where('Color_Id', $request->color_id)->count();
             $size_id = DB::table('size_product')->where('Product_Id', $request->product_id)->where('Size_Id', $request->size_id)->count();
+            if (isset($request->additions)) {
+            $additions =  DB::table('additions')->where('product_id', $request->product_id)->whereIn('id', $request->additions)->get();
+            }
+
+//            dd($request->additions);
+
             if ($color_id == 0) {
                 $color_id = null;
             }
@@ -60,6 +66,7 @@ class CartController extends Controller
                 'options' =>
                 [
                     'name_ar' => $product->fr_Product_Name,
+                    'additions' => $additions ?? [],
                     'size' => $size_id == 0 ? $size_id : $size_name->Size,
                     'color' => $color_id == 0 ? $color_id : $color_name->ColorCode,
                     'image' => $product->Primary_Image,
@@ -82,7 +89,7 @@ class CartController extends Controller
             }
         }
     }
-    
+
     public function cartContent()
     {
         $content = Cart::content();
