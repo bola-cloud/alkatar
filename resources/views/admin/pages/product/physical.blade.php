@@ -138,11 +138,13 @@
                                             <div class="input__group mb-25">
                                                 <label for="price">{{ __('Price') }} *</label>
                                                 <input type="number" class="form-control" id="price"
-                                                    name="price" value="{{ old('price') }}" placeholder="Price">
+                                                    name="price" value="{{ old('price') }}" placeholder="Price" 
+                                                    step="0.001" min="0" required>
                                                 @error('price')
                                                     <span class="text-danger">{{ $message }}</span>
                                                 @enderror
                                             </div>
+                                            
                                             <div class="input__group mb-25">
                                                 <label for="discount">{{ __('Discount (in Percentage)') }}</label>
                                                 <input type="number" class="form-control" id="discount"
@@ -155,7 +157,7 @@
                                             <div class="input__group mb-25">
                                                 <label for="discount_price">{{ __('Discount Price') }}</label>
                                                 <input type="number" class="form-control" id="discount_price"
-                                                    name="discount_price" value="{{ old('discount_price') }}" readonly>
+                                                    name="discount_price" value="{{ old('discount_price') }}" readonly step="0.001" min="0">
                                                 @error('discount_price')
                                                     <span class="text-danger">{{ $message }}</span>
                                                 @enderror
@@ -444,7 +446,7 @@
                         </select>
                     </div>
                     <div class="col-md-5">
-                        <input type="text" class="form-control" name="size_price[]" placeholder="Enter Price" value="${price || ''}">
+                        <input type="text" class="form-control" required name="size_price[]" placeholder="Enter Price" value="${price || ''}">
                     </div>
                     <div class="col-md-1">
                         <button type="button" class="btn btn-danger remove-size-row" data-row-id="size-row-${sizeCounter}">

@@ -38,17 +38,17 @@
                             <div class="single-widget">
                                 <h3 class="widget-title">{{ __('Customer Service') }}</h3>
                                 <ul class="widget-menu">
-                                    <li class="menu-item"><a class="menu-link"
-                                            href="{{ route('faq') }}">{{ __('Help & FAQ') }}</a></li>
+                                    {{-- <li class="menu-item"><a class="menu-link"
+                                            href="{{ route('faq') }}">{{ __('Help & FAQ') }}</a></li> --}}
                                     <li class="menu-item"><a class="menu-link"
                                             href="{{ route('terms.conditions') }}">{{ __('Terms of Conditions') }}</a>
                                     </li>
                                     <li class="menu-item"><a class="menu-link"
                                             href="{{ route('privacy.policy') }}">{{ __('Privacy Policy') }}</a>
                                     </li>
-                                    <li class="menu-item"><a class="menu-link"
+                                    {{-- <li class="menu-item"><a class="menu-link"
                                             href="{{ route('refund.policy') }}">{{ __('Online Returns Policy') }}</a>
-                                    </li>
+                                    </li> --}}
                                     <li class="menu-item"><a class="menu-link"
                                             href="{{ route('shipping.return') }}">{{ __('Shipping & Return') }}</a>
                                     </li>

@@ -38,39 +38,40 @@
                                         </div>
                                     </td>
 
-                                    <td class="max-w-[200px] p-2" data-label="{{__("Product Name")}}">
+                                    <td class="max-w-[200px] p-2" data-label="{{__(" Product Name")}}">
                                         <div class="product-info text-center">
                                             <h3 class="product-name mt-16 lg:mt-0">
                                                 <a class="product-link block w-[30ch] lg:w-[15ch] truncate text-clip whitespace-normal"
-                                                   href="{{ route('single.product', $item->options->slug ?? '') }}"
-                                                   title="{{ langConverter($item->name, $item->options->name_ar) }}">
+                                                    href="{{ route('single.product', $item->options->slug ?? '') }}"
+                                                    title="{{ langConverter($item->name, $item->options->name_ar) }}">
                                                     {{ langConverter($item->name, $item->options->name_ar) }}
                                                 </a>
                                             </h3>
                                             @if ($item->options->color)
-                                                <div class="variable-single-item color-switch mt-2">
-                                                    <div class="product-variable-color">
-                                                        <label>
-                                                            <input name="modal-product-color" class="color-select"
-                                                                   type="radio">
-                                                            <span style="background:{{ $item->options->color }};" class="inline-block w-4 h-4"></span>
-                                                        </label>
-                                                    </div>
+                                            <div class="variable-single-item color-switch mt-2">
+                                                <div class="product-variable-color">
+                                                    <label>
+                                                        <input name="modal-product-color" class="color-select"
+                                                            type="radio">
+                                                        <span style="background:{{ $item->options->color }};"
+                                                            class="inline-block w-4 h-4"></span>
+                                                    </label>
                                                 </div>
+                                            </div>
                                             @endif
                                             @if ($item->options->size)
-                                                <ul class="size-switch mt-2">
-                                                    <li class="single-size active">
-                                                        {{ $item->options->size }}
-                                                    </li>
-                                                </ul>
+                                            <ul class="size-switch mt-2">
+                                                <li class="single-size active">
+                                                    {{ $item->options->size }}
+                                                </li>
+                                            </ul>
                                             @endif
                                         </div>
                                     </td>
-                                    
+
                                     <td data-label="{{ __('Price') }}">
                                         <div class="product-price text-center">
-                                            
+
                                             <h3 class="price ">
                                                 <span class="mainPrice">{{ currencyConverter($item->price) }}</span>
                                             </h3>
