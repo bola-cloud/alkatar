@@ -223,14 +223,14 @@
             </a>
         </li>
         @endcanany
-        @canany(['currency-list'])
-        <li class="{{ isset($menu) && $menu == 'currency' ? 'mm-active' : '' }}">
-            <a href="{{ route('admin.currency_list') }}">
-                <i class="fa fa-dollar-sign"></i>
-                <span>{{ __('Currency') }}</span>
-            </a>
-        </li>
-        @endcanany
+{{--        @canany(['currency-list'])--}}
+{{--        <li class="{{ isset($menu) && $menu == 'currency' ? 'mm-active' : '' }}">--}}
+{{--            <a href="{{ route('admin.currency_list') }}">--}}
+{{--                <i class="fa fa-dollar-sign"></i>--}}
+{{--                <span>{{ __('Currency') }}</span>--}}
+{{--            </a>--}}
+{{--        </li>--}}
+{{--        @endcanany--}}
         @canany(['currency-list'])
         <li class="{{ isset($menu) && $menu == 'coupon' ? 'mm-active' : '' }}">
             <a href="{{ route('admin.coupon') }}">
@@ -381,7 +381,7 @@
                         <i class="fa fa-circle"></i>
                         <span>{{ __('Static Menus') }}</span>
                     </a>
-                </li> 
+                </li>
                 <li class="{{ isset($submenu) && $submenu == 'dynamic_menus' ? 'mm-active' : '' }}">
                     <a href="{{ route('admin.dynamic_menus') }}">
                         <i class="fa fa-circle"></i>
@@ -536,7 +536,7 @@
                         <i class="fa fa-circle"></i>
                         <span>{{ __('Static Menus') }}</span>
                     </a>
-                </li> 
+                </li>
                 <li class="{{ isset($submenu) && $submenu == 'dynamic_menus' ? 'mm-active' : '' }}">
                     <a href="{{ route('admin.dynamic_menus') }}">
                         <i class="fa fa-circle"></i>
