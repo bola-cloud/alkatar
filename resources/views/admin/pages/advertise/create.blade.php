@@ -22,7 +22,7 @@
                             <form enctype="multipart/form-data" method="POST" action="{{route('admin.advertise.store')}}">
                                 @csrf
                                 <div class="form-group">
-                                    <label for="exampleInputEmail1">{{ __('Image One')}}</label>
+                                    <label for="exampleInputEmail1">{{ __('Image One')}} (1600x430)</label>
                                     <input type="file" class="form-control putImage1" name="image_one" id="image_one">
                                     <img  src="" id="target1"/>
                                 </div>
@@ -30,7 +30,7 @@
                                     <label for="exampleInputLink1">{{ __('Link for Image One')}}</label>
                                     <input type="text" class="form-control" name="link_one" id="link_one">
                                 </div>
-                                
+
                                 {{-- <div class="form-group">
                                     <label for="exampleInputEmail1">{{ __('Image Two')}}</label>
                                     <input type="file" class="form-control putImage2"  name="image_two" id="image_two">

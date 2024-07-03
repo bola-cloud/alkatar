@@ -40,7 +40,7 @@
                                                 <input type="text" id="fr_category_name" name="fr_category_name"  value="{{ old('fr_category_name') }}" placeholder="Name (Arabic)">
                                             </div>
                                             <div class="input__group mb-25">
-                                                <label>{{ __('Icon')}} (250x250)</label>
+                                                <label>{{ __('Icon')}} (200x200)</label>
                                                 <input type="file" id="icon" name="icon" accept="image/*">
                                             </div>
                                             <div class="input__group mb-25">

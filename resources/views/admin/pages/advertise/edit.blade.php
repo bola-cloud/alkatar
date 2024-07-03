@@ -33,7 +33,7 @@
                                             @csrf
                                             <input type="hidden" name="id" value="{{$edit->id}}">
                                             <div class="input__group mb-25">
-                                                <label for="exampleInputEmail1">{{ __('Image One')}}</label>
+                                                <label for="exampleInputEmail1">{{ __('Image One')}} (1600x430)</label>
                                                 <input type="file" class="putImage1" name="image_one" id="image_one">
                                                 <img  class="admin_image" src="{{asset(PromotionImage().$edit->Image_One)}}" id="target1"/>
                                             </div>

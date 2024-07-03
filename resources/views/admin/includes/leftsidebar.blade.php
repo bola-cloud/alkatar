@@ -293,12 +293,12 @@
                         <span>{{ __('Contact Us') }}</span>
                     </a>
                 </li>
-                <li class="{{ isset($submenu) && $submenu == 'subscribers' ? 'mm-active' : '' }}">
-                    <a href="{{ route('admin.subscribe.index') }}">
-                        <i class="fa fa-circle"></i>
-                        <span>{{ __('Subscribers') }}</span>
-                    </a>
-                </li>
+{{--                <li class="{{ isset($submenu) && $submenu == 'subscribers' ? 'mm-active' : '' }}">--}}
+{{--                    <a href="{{ route('admin.subscribe.index') }}">--}}
+{{--                        <i class="fa fa-circle"></i>--}}
+{{--                        <span>{{ __('Subscribers') }}</span>--}}
+{{--                    </a>--}}
+{{--                </li>--}}
             </ul>
         </li>
         @endcanany

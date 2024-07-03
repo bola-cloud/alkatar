@@ -41,10 +41,10 @@
                                                 <input type="text" id="fr_category_name" name="fr_category_name" value="{{$edit->fr_Category_Name}}" placeholder="Name (Arabic)">
                                             </div>
                                             <div class="input__group mb-25">
-                                                <label>{{ __('Icon')}}</label>
+                                                <label>{{ __('Icon')}} (200x200)</label>
                                                 <input type="file" id="icon" name="icon" accept="image/*">
                                                 @if($edit->Category_Icon)
-                                                    <img 
+                                                    <img
                                                     src="{{ asset(CategoryImage() . $edit->Category_Icon) }}" alt="Current Image" width="100">
                                                 @endif
                                             </div>

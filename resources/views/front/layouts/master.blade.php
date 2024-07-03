@@ -113,37 +113,42 @@
         </div>
     </div>
 
-    
+
 <!-- Size Selection Modal -->
-<div class="modal fade" id="sizeModal" tabindex="-1" aria-labelledby="sizeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="sizeModalLabel">Select Size and Additions</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <h6>{{ __("Size Options") }}:</h6>
-                    <div id="sizeOptionsContainer" class="d-flex flex-wrap gap-2">
-                        <!-- Size options will be injected here -->
+    <div class="modal fade" id="sizeModal" tabindex="-1" aria-labelledby="sizeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header flex items-center justify-between">
+                    <h5 class="modal-title" id="sizeModalLabel">Select Size and Additions</h5>
+                    <div>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                 </div>
-                <div class="mb-3" id="additionOptionsSection">
-                    <h6>{{ __("Addition Options") }}:</h6>
-                    <div id="additionOptionsContainer" class="d-flex flex-wrap gap-2">
-                        <!-- Addition options will be injected here -->
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <h6>{{ __("Size Options") }}:</h6>
+                        <div id="sizeOptionsContainer" class="d-flex flex-wrap gap-2">
+                            <!-- Size options will be injected here -->
+                        </div>
+                    </div>
+                    <div class="mb-3" id="additionOptionsSection">
+                        <h6>{{ __("Addition Options") }}:</h6>
+                        <div id="additionOptionsContainer" class="d-flex flex-wrap gap-2">
+                            <!-- Addition options will be injected here -->
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="submitSelection">
-                    {{ __('Add To Cart') }}
-                </button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="submitSelection">
+                        {{ __('Add To Cart') }}
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 
 
