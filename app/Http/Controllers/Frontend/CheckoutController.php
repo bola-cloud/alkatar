@@ -49,6 +49,7 @@ class CheckoutController extends Controller
         $check = Cart::count();
         if ($check) {
             $data['content'] = Cart::content();
+
             $data['currencies'] = Currency::all();
             $data['paymentPlatforms'] = PaymentPlatform::where('status', ACTIVE)->get();
             $data['billing'] = Billing::where('User_Id', Auth::id())->first() ?? Auth::user();
@@ -215,18 +216,18 @@ class CheckoutController extends Controller
                         $checkoutProduct[] = [
                             'name' => $item->name,
                             'quantity' => $item->qty,
-                            'unit_amount' => number_format($item->price,3) * 1000,
+                            'unit_amount' => number_format($item->price, 3) * 1000,
                         ];
                     }
 
 
 
                     if ($shipping_charge) {
-                    $checkoutProduct[] = [
-                        'name' => 'Shipping Charge',
-                        'quantity' => 1,
-                        'unit_amount' => $shipping_charge * 1000,
-                    ];
+                        $checkoutProduct[] = [
+                            'name' => 'Shipping Charge',
+                            'quantity' => 1,
+                            'unit_amount' => $shipping_charge * 1000,
+                        ];
                     }
 
 

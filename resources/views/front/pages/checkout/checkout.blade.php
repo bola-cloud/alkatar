@@ -9,135 +9,135 @@
     <h1 class="text-5xl md:text-7xl font-bold text-center text-primary-red mb-8">{{ __("Checkout Page") }}</h1>
     <div class="checkout">
         <div class="container mx-auto px-4">
-                    <div class="grid lg:grid-cols-2 lg:gap-8 checkout-form bg-white p-6 rounded-lg shadow-md lg:h-full">
-                        <form method="post" action="{{ route('checkout.order') }}" id="paymentForm">
-                            @csrf
-                            <div class="space-y-6">
-                                @if (!auth()->check())
-                                <div class="mb-6">
-                                    <div class="flex flex-col sm:flex-row justify-between items-center mb-4">
-                                        <h2 class="text-3xl xl:text-4xl text-black font-bold mb-2 lg:mb-0">{{ __("Returning buyer? Please login:") }}</h2>
-                                        <a class="primary-btn text-center bg-primary-red text-white px-5 py-3 lg:py-4 rounded text-lg xl:text-xl" href="{{ route("login") }}">{{ __("Login") }}</a>
+            <div class="grid lg:grid-cols-2 lg:gap-8 checkout-form bg-white p-6 rounded-lg shadow-md lg:h-full">
+                <form method="post" action="{{ route('checkout.order') }}" id="paymentForm">
+                    @csrf
+                    <div class="space-y-6">
+                        @if (!auth()->check())
+                        <div class="mb-6">
+                            <div class="flex flex-col sm:flex-row justify-between items-center mb-4">
+                                <h2 class="text-3xl xl:text-4xl text-black font-bold mb-2 lg:mb-0">{{ __("Returning buyer? Please login:") }}</h2>
+                                <a class="primary-btn text-center bg-primary-red text-white px-5 py-3 lg:py-4 rounded text-lg xl:text-xl" href="{{ route("login") }}">{{ __("Login") }}</a>
+                            </div>
+                        </div>
+                        @endif
+
+                        <div>
+                            <h2 class="text-3xl lg:text-4xl font-bold mb-4">{{ __('Billing Address') }}</h2>
+                        </div>
+                        <div class="space-y-4">
+                            <input type="text" class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_name" name="billing_name" placeholder="{{ __('Name') }}" value="{{ isset($billing) ? $billing->Name ?? $billing->name : '' }}" required />
+                            <input type="email" class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_email" name="billing_email" placeholder="{{ __('Email Address') }}" value="{{ isset($billing) ? $billing->Email ?? $billing->email : '' }}" required />
+                            <input type="text" class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_street_address" name="billing_street_address" placeholder="{{ __('Street Address') }}" value="{{ isset($billing) ? $billing->Street : '' }}" required />
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <input type="text" class="w-full sm:w-1/2 p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_state" name="billing_state" placeholder="{{ __('State') }}" value="{{ isset($billing) ? $billing->State : '' }}" required />
+                                <input type="text" class="w-full sm:w-1/2 p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_zipcode" name="billing_zipcode" placeholder="{{ __('Zip/Postal Code') }}" value="{{ isset($billing) ? $billing->Zipcode : '' }}" required />
+                            </div>
+                            <div class="relative">
+                                <select class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_country" name="billing_country" required>
+                                    <option>{{ __('Governorate') }}</option>
+                                    @foreach (country() as $code => $name)
+                                    <option value="{{ $code }}" {{ isset($billing) && $billing->Country == $code ? 'selected' : '' }}>
+                                        {{ $name }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mt-8">
+                            <h2 class="text-3xl lg:text-4xl font-bold mb-4">{{ __('Payment Method') }}</h2>
+                            <div class="space-y-4">
+                                @foreach ($paymentPlatforms as $payment)
+                                @if ($payment->slug == 'paypal')
+                                <div class="flex items-center justify-between p-3 lg:p-4 border rounded">
+                                    <div class="flex gap-2 mt-2">
+                                        <input class="form-check-input" type="radio" name="payment" id="paypal" value="paypal" />
+                                        <label class="form-check-label text-lg lg:text-2xl" for="paypal">{{ langConverter('Thawani Payment', 'بوابة ثواني') }}</label>
                                     </div>
+                                    <img src="{{ asset(IMG_PAYMENT_GATEWAY . $payment->image) }}" alt="paypal" class="size-48" />
+                                </div>
+                                @endif
+                                @endforeach
+
+                                @if (env('COD_STATUS') == '1')
+                                <div class="flex items-center justify-between p-3 lg:p-4 border rounded">
+                                    <div class="flex gap-2 mt-2">
+                                        <input class="form-check-input" type="radio" name="payment" id="COD" value="COD" />
+                                        <label class="form-check-label text-lg lg:text-2xl" for="COD">{{ langConverter('Cash on delivery', 'دفع عند التوصيل') }}</label>
+                                    </div>
+                                    <img src="{{ asset(IMG_PAYMENT_GATEWAY . env('COD_IMAGE')) }}" alt="{{ env('COD_NAME') }}" class="size-48" />
                                 </div>
                                 @endif
 
-                                <div>
-                                    <h2 class="text-3xl lg:text-4xl font-bold mb-4">{{ __('Billing Address') }}</h2>
+                                <div class="flex gap-3 space-x-2 mt-4">
+                                    <input type="checkbox" class="form-check-input" id="agree" required />
+                                    <label class="form-check-label text-lg lg:text-xl" for="agree">
+                                        {{ __('By clicking the button you agree to our') }}
+                                        <a href="{{ route('terms.conditions') }}" class="text-primary-red">{{ __('Terms & Conditions') }}</a>
+                                    </label>
                                 </div>
-                                <div class="space-y-4">
-                                    <input type="text" class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_name" name="billing_name" placeholder="{{ __('Name') }}" value="{{ isset($billing) ? $billing->Name ?? $billing->name : '' }}" required />
-                                    <input type="email" class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_email" name="billing_email" placeholder="{{ __('Email Address') }}" value="{{ isset($billing) ? $billing->Email ?? $billing->email : '' }}" required />
-                                    <input type="text" class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_street_address" name="billing_street_address" placeholder="{{ __('Street Address') }}" value="{{ isset($billing) ? $billing->Street : '' }}" required />
-                                    <div class="flex flex-col sm:flex-row gap-4">
-                                      <input type="text" class="w-full sm:w-1/2 p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_state" name="billing_state" placeholder="{{ __('State') }}" value="{{ isset($billing) ? $billing->State : '' }}" required />
-                                      <input type="text" class="w-full sm:w-1/2 p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_zipcode" name="billing_zipcode" placeholder="{{ __('Zip/Postal Code') }}" value="{{ isset($billing) ? $billing->Zipcode : '' }}" required />
-                                    </div>
-                                    <div class="relative">
-                                      <select class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_country" name="billing_country" required>
-                                        <option>{{ __('Governorate') }}</option>
-                                        @foreach (country() as $cnt)
-                                          <option value="{{ $cnt }}" {{ isset($billing) && $billing->Country == $cnt ? 'selected' : '' }}>
-                                            {{ $cnt }}
-                                          </option>
-                                        @endforeach
-                                      </select>
-                                    </div>
-                                  </div>
 
-                            <div class="mt-8">
-                                <h2 class="text-3xl lg:text-4xl font-bold mb-4">{{ __('Payment Method') }}</h2>
-                                <div class="space-y-4">
-                                    @foreach ($paymentPlatforms as $payment)
-                                    @if ($payment->slug == 'paypal')
-                                    <div class="flex items-center justify-between p-3 lg:p-4 border rounded">
-                                        <div class="flex gap-2 mt-2">
-                                        <input class="form-check-input" type="radio" name="payment" id="paypal" value="paypal" />
-                                        <label class="form-check-label text-lg lg:text-2xl" for="paypal">{{ langConverter('Thawani Payment', 'بوابة ثواني') }}</label>
-                                        </div>
-                                        <img src="{{ asset(IMG_PAYMENT_GATEWAY . $payment->image) }}" alt="paypal" class="size-48" />
-                                    </div>
-                                    @endif
-                                    @endforeach
-
-                                    @if (env('COD_STATUS') == '1')
-                                    <div class="flex items-center justify-between p-3 lg:p-4 border rounded">
-                                        <div class="flex gap-2 mt-2">
-                                        <input class="form-check-input" type="radio" name="payment" id="COD" value="COD" />
-                                        <label class="form-check-label text-lg lg:text-2xl" for="COD">{{ langConverter('Cash on delivery', 'دفع عند التوصيل') }}</label>
-                                        </div>
-                                        <img src="{{ asset(IMG_PAYMENT_GATEWAY . env('COD_IMAGE')) }}" alt="{{ env('COD_NAME') }}" class="size-48" />
-                                    </div>
-                                    @endif
-
-                                    <div class="flex gap-3 space-x-2 mt-4">
-                                        <input type="checkbox" class="form-check-input" id="agree" required />
-                                        <label class="form-check-label text-lg lg:text-xl" for="agree">
-                                            {{ __('By clicking the button you agree to our') }}
-                                            <a href="{{ route('terms.conditions') }}" class="text-primary-red">{{ __('Terms & Conditions') }}</a>
-                                        </label>
-                                    </div>
-
-                                    @if (auth()->check())
-                                    <button type="submit" id="payButton" class="w-full bg-primary-red text-white py-3 lg:py-4 px-4 rounded hover:bg-red-600 transition duration-300 text-lg lg:text-xl">{{ __('Place Order') }}</button>
-                                    <button type="button" id="payButtonN" class="w-full bg-primary-red text-white py-3 lg:py-4 px-4 rounded hover:bg-red-600 transition duration-300 d-none buy_now text-lg lg:text-xl">{{ __('Place Order') }}</button>
-                                    @else
-                                    <button type="button" class="w-full bg-primary-red text-white py-3 lg:py-4 px-4 rounded hover:bg-red-600 transition duration-300 text-lg lg:text-xl" data-bs-toggle="modal" data-bs-target="#loginModal">{{ __('Place Order') }}</button>
-                                    @endif
-                                </div>
+                                @if (auth()->check())
+                                <button type="submit" id="payButton" class="w-full bg-primary-red text-white py-3 lg:py-4 px-4 rounded hover:bg-red-600 transition duration-300 text-lg lg:text-xl">{{ __('Place Order') }}</button>
+                                <button type="button" id="payButtonN" class="w-full bg-primary-red text-white py-3 lg:py-4 px-4 rounded hover:bg-red-600 transition duration-300 d-none buy_now text-lg lg:text-xl">{{ __('Place Order') }}</button>
+                                @else
+                                <button type="button" class="w-full bg-primary-red text-white py-3 lg:py-4 px-4 rounded hover:bg-red-600 transition duration-300 text-lg lg:text-xl" data-bs-toggle="modal" data-bs-target="#loginModal">{{ __('Place Order') }}</button>
+                                @endif
                             </div>
-                        </form>
-                    </div>
+                        </div>
+                </form>
+            </div>
 
-                    <div class="cart-summary bg-white p-6 lg:p-8 rounded-lg shadow-md lg:h-full">
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-3xl lg:text-4xl font-bold">{{ __('Cart Summary') }}</h2>
-                            <a class="text-primary-red hover:underline text-lg lg:text-xl" href="{{ route('cart.content') }}">{{ __('Edit') }}</a>
+            <div class="cart-summary bg-white p-6 lg:p-8 rounded-lg shadow-md lg:h-full">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl lg:text-4xl font-bold">{{ __('Cart Summary') }}</h2>
+                    <a class="text-primary-red hover:underline text-lg lg:text-xl" href="{{ route('cart.content') }}">{{ __('Edit') }}</a>
+                </div>
+                <ul class="space-y-4">
+                    @php $total = 0; @endphp
+                    @foreach ($content as $item)
+                    <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4">
+                        <div class="flex items-center space-x-4 mb-2 sm:mb-0">
+                            <img src="{{ asset(ProductImage() . $item->options->image) }}" alt="{{ $item->name }}" class="w-20 h-20 xl:w-32 xl:h-32 object-cover rounded">
+                            <div class="!ms-10">
+                                <h3 class="font-bold text-2xl xl:text-4xl">
+                                    {{langConverter($item->name, $item->options->name_ar)}}
+                                </h3>
+                                <p class="text-2xl xl:text-4xl text-gray-600">{{ __('Size') }}: {{ is_null($item->options->size) ? __('Free Size') : $item->options->size }}</p>
+                                <p class="text-2xl xl:text-4xl text-gray-600">{{ __('Quantity') }}: {{ $item->qty }}</p>
+                            </div>
                         </div>
-                        <ul class="space-y-4">
-                            @php $total = 0; @endphp
-                            @foreach ($content as $item)
-                            <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4">
-                                <div class="flex items-center space-x-4 mb-2 sm:mb-0">
-                                    <img src="{{ asset(ProductImage() . $item->options->image) }}" alt="{{ $item->name }}" class="w-20 h-20 xl:w-32 xl:h-32 object-cover rounded">
-                                    <div class="!ms-10">
-                                        <h3 class="font-bold text-2xl xl:text-4xl">
-                                            {{langConverter($item->name, $item->options->name_ar)}}
-                                        </h3>
-                                        <p class="text-2xl xl:text-4xl text-gray-600">{{ __('Size') }}: {{ is_null($item->options->size) ? __('Free Size') : $item->options->size }}</p>
-                                        <p class="text-2xl xl:text-4xl text-gray-600">{{ __('Quantity') }}: {{ $item->qty }}</p>
-                                    </div>
-                                </div>
-                                <div class="text-right mt-2 sm:mt-0">
-                                    <h3 class="font-bold text-black text-2xl xl:text-4xl">{{ currencyConverter($item->price * $item->qty) }}</h3>
-                                </div>
-                            </li>
-                            @endforeach
-                        </ul>
-                        <div class="mt-6">
-                            <h2 class="text-2xl xl:text-4xl font-bold mb-3">{{ __('Discount Codes') }}</h2>
-                            <form action="{{ route('apply.coupon') }}" method="post" class="flex space-x-2">
-                                @csrf
-                                <input type="text" class="flex-grow p-2 lg:p-3 border rounded h-14 lg:h-16 text-lg xl:text-3xl" name="coupon_code" placeholder="{{ __('Enter your coupon code') }}" required />
-                                <button type="submit" class="bg-primary-red text-white px-4 py-3 lg:py-4 rounded hover:bg-red-600 transition duration-300 text-lg xl:text-2xl">{{ __('Apply Coupon') }}</button>
-                            </form>
+                        <div class="text-right mt-2 sm:mt-0">
+                            <h3 class="font-bold text-black text-2xl xl:text-4xl">{{ currencyConverter($item->price * $item->qty) }}</h3>
                         </div>
-                        <ul class="mt-10 lg:mt-20 space-y-2 text-2xl xl:text-4xl">
-                            <li class="flex justify-between"><span>{{ __('Subtotal') }}</span> <span>{{ currencyConverter(\Cart::subtotal()) }}</span></li>
-                            <li class="flex justify-between"><span>{{ __('Shipping Cost') }}</span> <span id="delivery-charge-curr"></span></li>
-                            <li class="flex justify-between"><span>{{ __('VAT/Tax') }}</span> <span id="tax-show-curr">{{ currencyConverter(tax_amount(\Cart::subtotal())) }}</span></li>
-                            @if (!empty(Session::get('CouponAmount')))
-                            <li class="flex justify-between"><span>{{ __('Coupon Discount (-)') }}</span> <span>{{ currencyConverter(Session::get('CouponAmount')) }}</span></li>
-                            @endif
-                        </ul>
-                        <div class="mt-6 pt-4 border-t">
-                            <h3 class="text-2xl xl:text-3xl font-bold flex justify-between">
-                                <span>{{ __('Total Cost') }}</span>
-                                <span id="total-cost-curr">{{ currencyConverter(\Cart::subtotal() + allsetting()['shipping_charge'] + tax_amount(\Cart::subtotal()) - Session::get('CouponAmount')) }}</span>
-                            </h3>
-                        </div>
-                    </div>
-               
+                    </li>
+                    @endforeach
+                </ul>
+                <div class="mt-6">
+                    <h2 class="text-2xl xl:text-4xl font-bold mb-3">{{ __('Discount Codes') }}</h2>
+                    <form action="{{ route('apply.coupon') }}" method="post" class="flex space-x-2">
+                        @csrf
+                        <input type="text" class="flex-grow p-2 lg:p-3 border rounded h-14 lg:h-16 text-lg xl:text-3xl" name="coupon_code" placeholder="{{ __('Enter your coupon code') }}" required />
+                        <button type="submit" class="bg-primary-red text-white px-4 py-3 lg:py-4 rounded hover:bg-red-600 transition duration-300 text-lg xl:text-2xl">{{ __('Apply Coupon') }}</button>
+                    </form>
+                </div>
+                <ul class="mt-10 lg:mt-20 space-y-2 text-2xl xl:text-4xl">
+                    <li class="flex justify-between"><span>{{ __('Subtotal') }}</span> <span>{{ currencyConverter(\Cart::subtotal()) }}</span></li>
+                    <li class="flex justify-between"><span>{{ __('Shipping Cost') }}</span> <span id="delivery-charge-curr"></span></li>
+                    <li class="flex justify-between"><span>{{ __('VAT/Tax') }}</span> <span id="tax-show-curr">{{ currencyConverter(tax_amount(\Cart::subtotal())) }}</span></li>
+                    @if (!empty(Session::get('CouponAmount')))
+                    <li class="flex justify-between"><span>{{ __('Coupon Discount (-)') }}</span> <span>{{ currencyConverter(Session::get('CouponAmount')) }}</span></li>
+                    @endif
+                </ul>
+                <div class="mt-6 pt-4 border-t">
+                    <h3 class="text-2xl xl:text-3xl font-bold flex justify-between">
+                        <span>{{ __('Total Cost') }}</span>
+                        <span id="total-cost-curr">{{ currencyConverter(\Cart::subtotal() + allsetting()['shipping_charge'] + tax_amount(\Cart::subtotal()) - Session::get('CouponAmount')) }}</span>
+                    </h3>
+                </div>
+            </div>
+
         </div>
     </div>
 </section>

@@ -23,7 +23,7 @@
                             </tr>
                         </thead>
                         <tbody>
-{{--                        @dd($content)--}}
+                            {{-- @dd($content)--}}
                             <div id="cart_ajax_load">
                                 @php
                                 $total = 0;
@@ -32,19 +32,14 @@
                                 <tr class="cart-page-item">
                                     <td data-label="{{ __('Product Image') }}">
                                         <div class="product-top">
-                                            <a href="{{ route('single.product', $item->options->slug ?? '') }}"><img
-                                                    class="product-thumbnal"
-                                                    src="{{ asset(ProductImage() . $item->options->image) }}"
-                                                    alt="cart"></a>
+                                            <a href="{{ route('single.product', $item->options->slug ?? '') }}"><img class="product-thumbnal" src="{{ asset(ProductImage() . $item->options->image) }}" alt="cart"></a>
                                         </div>
                                     </td>
 
                                     <td class="max-w-[200px] p-2" data-label="{{__(" Product Name")}}">
                                         <div class="product-info text-center">
                                             <h3 class="product-name mt-16 lg:mt-0">
-                                                <a class="product-link block w-[30ch] lg:w-[15ch] truncate text-clip whitespace-normal"
-                                                    href="{{ route('single.product', $item->options->slug ?? '') }}"
-                                                    title="{{ langConverter($item->name, $item->options->name_ar) }}">
+                                                <a class="product-link block w-[30ch] lg:w-[15ch] truncate text-clip whitespace-normal" href="{{ route('single.product', $item->options->slug ?? '') }}" title="{{ langConverter($item->name, $item->options->name_ar) }}">
                                                     {{ langConverter($item->name, $item->options->name_ar) }}
                                                 </a>
                                             </h3>
@@ -52,10 +47,8 @@
                                             <div class="variable-single-item color-switch mt-2">
                                                 <div class="product-variable-color">
                                                     <label>
-                                                        <input name="modal-product-color" class="color-select"
-                                                            type="radio">
-                                                        <span style="background:{{ $item->options->color }};"
-                                                            class="inline-block w-4 h-4"></span>
+                                                        <input name="modal-product-color" class="color-select" type="radio">
+                                                        <span style="background:{{ $item->options->color }};" class="inline-block w-4 h-4"></span>
                                                     </label>
                                                 </div>
                                             </div>
@@ -69,13 +62,13 @@
                                             @endif
 
                                             @if ($item->options->additions)
-                                                <ul class="size-switch mt-2">
-                                                    @foreach ($item->options->additions as $addition)
-                                                    <li class="single-size active">
-                                                        {{ $addition->name_ar }}
-                                                    </li>
-                                                    @endforeach
-                                                </ul>
+                                            <ul class="size-switch mt-2">
+                                                @foreach ($item->options->additions as $addition)
+                                                <li class="single-size active">
+                                                    {{ $addition->name_ar }}
+                                                </li>
+                                                @endforeach
+                                            </ul>
                                             @endif
                                         </div>
                                     </td>
@@ -90,12 +83,9 @@
                                     </td>
                                     <td data-label="{{ __('Quantity') }}">
                                         <div class="cart-quantity input-group">
-                                            <div class="increase-btn dec qtybutton btn qty_decrease"
-                                                data-id="{{ $item->rowId }}">-</div>
-                                            <input class="qty-input cart-plus-minus-box qty_value" type="text"
-                                                name="qtybutton" id="qty_value" value="{{ $item->qty }}" readonly />
-                                            <div class="increase-btn inc qtybutton btn qty_increase"
-                                                data-id="{{ $item->rowId }}">+</div>
+                                            <div class="increase-btn dec qtybutton btn qty_decrease" data-id="{{ $item->rowId }}">-</div>
+                                            <input class="qty-input cart-plus-minus-box qty_value" type="text" name="qtybutton" id="qty_value" value="{{ $item->qty }}" readonly />
+                                            <div class="increase-btn inc qtybutton btn qty_increase" data-id="{{ $item->rowId }}">+</div>
                                         </div>
                                     </td>
                                     <td data-label="{{ __('Total') }}">
@@ -104,8 +94,7 @@
                                         </h1>
                                     </td>
                                     <td data-label="{{ __('Remove') }}">
-                                        <button class="delet-btn deleteItemCart" title="{{ __('Delete Item') }}"
-                                            data-id="{{ $item->rowId }}">
+                                        <button class="delet-btn deleteItemCart" title="{{ __('Delete Item') }}" data-id="{{ $item->rowId }}">
                                             <img src="{{ asset('frontend/assets/images/close.svg') }}" alt="close" />
                                         </button>
                                     </td>
@@ -129,8 +118,7 @@
             <form action="{{ route('apply.coupon') }}" method="post">
                 @csrf
                 <div class="form-group">
-                    <input type="text" class="form-control" name="coupon_code"
-                        placeholder="{{ __('Enter your coupon code') }}" />
+                    <input type="text" class="form-control" name="coupon_code" placeholder="{{ __('Enter your coupon code') }}" />
                 </div>
                 <div class="form-button text-center">
                     <button type="submit" class="form-btn">{{ __('Apply Coupon') }}</button>
@@ -145,7 +133,8 @@
             <div class="sub-total-inner-box d-flex justify-content-between align-items-center">
                 <h2 class="bottom-box-title m-0">{{ __('Subtotal:') }}</h2>
                 <h2 class="bottom-box-title totalAmount m-0">
-                    {{ currencyConverter(subtotal()) }}</h2>
+                    {{ currencyConverter(subtotal()) }}
+                </h2>
             </div>
 
             @if (session()->has('CouponAmount'))
@@ -165,7 +154,8 @@
                 $all_total = subtotal() - Session::get('CouponAmount');
                 @endphp
                 <h2 class="bottom-box-title cart-page-final-total totalAmount m-0">
-                    {{ currencyConverter($all_total) }}</h2>
+                    {{ currencyConverter($all_total) }}
+                </h2>
             </div>
 
             <div class="form-button text-center">

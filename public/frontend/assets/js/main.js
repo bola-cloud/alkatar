@@ -210,7 +210,7 @@
         nextArrow: '<i class="slick-next fas fa-angle-right"></i> ',
         responsive: [
             {
-                breakpoint: 1300,
+                breakpoint: 1200,
                 settings: {
                     slidesToShow: 3,
                     slidesToScroll: 1,
