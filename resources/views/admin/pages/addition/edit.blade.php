@@ -45,7 +45,7 @@
 
                                         <div class="input__group mb-25">
                                             <label for="product_id">{{ __('Select Product') }}</label>
-                                            <select name="product_id" id="product_id" class="form-control">
+                                            <select name="product_id" id="product_id" class="form-control select2">
                                                 @foreach($products as $product)
                                                     <option value="{{ $product->id }}" {{ $addition->product_id == $product->id ? 'selected' : '' }}>
                                                         {{ $product->en_Product_Name }}
@@ -60,12 +60,20 @@
                                                 placeholder="Price" step="0.001">
                                         </div>
                                         
-                                        <div class="input__group mb-25">
+                                        {{-- <div class="input__group mb-25">
                                             <label>{{ __('Icon')}} (250x250)</label>
                                             <input type="file" id="icon" name="icon" accept="image/*">
                                             @if($addition->icon)
                                                 <img src="{{ asset(ProductImage().$addition->icon) }}" alt="Current Icon" style="max-width: 100px; margin-top: 10px;">
                                             @endif
+                                        </div> --}}
+
+                                        <div class="input__group">
+                                            <label>{{ __('Active')}}</label>
+                                            <label class="switch" for="status">
+                                                <input type="checkbox" id="status" name="status" value="1" {{ $addition->status == 1 ? 'checked' : '' }}>
+                                                <span class="slider round"></span>
+                                            </label>
                                         </div>
 
                                         <div class="input__button">
@@ -81,4 +89,15 @@
         </div>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.select2').select2({
+            placeholder: "Select a product",
+            allowClear: true
+        });
+    });
+</script>
 @endsection

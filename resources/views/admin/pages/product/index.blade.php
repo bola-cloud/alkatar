@@ -36,7 +36,7 @@
                                 <th>{{ __('Product Name') }}</th>
                                 <th>{{ __('Category') }}</th>
                                 <th>{{ __('Price') }}</th>
-                                <th>{{ __('Type') }}</th>
+                                {{-- <th>{{ __('Type') }}</th> --}}
                                 <th>{{ __('Status') }}</th>
                                 <th>{{ __('Action') }}</th>
                             </tr>

@@ -13,6 +13,10 @@
                     name: 'name'
                 },
                 {
+                    data: 'name_ar',
+                    name: 'name_ar'
+                },
+                {
                     data: 'action',
                     name: 'action',
                     orderable: false

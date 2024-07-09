@@ -58,6 +58,10 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
+
+            @php
+            $taxes = \App\Models\Tax::all();
+            @endphp
             <form enctype="multipart/form-data" method="POST" action="{{ route('admin.country_tax_store') }}">
                 <div class="modal-body">
                     @csrf
@@ -65,9 +69,12 @@
                         <label for="country">{{ __('Country') }}</label>
                         <select name="country" id="country">
                             <option value="">{{ __('---Country---') }}</option>
-                            @foreach (country() as $code => $name)
+                            @if ($taxes->count()=== 0)
+                            <option value="Oman">Oman</option>
+                            @endif
+                            {{-- @foreach (country() as $code => $name)
                             <option value="{{ $code }}">{{ $name }}</option>
-                            @endforeach
+                            @endforeach --}}
                         </select>
                     </div>
                     <div class="input__group mb-25">

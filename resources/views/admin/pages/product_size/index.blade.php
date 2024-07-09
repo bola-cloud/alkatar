@@ -36,6 +36,7 @@
                         <thead>
                         <tr>
                             <th>{{ __('Product Size')}}</th>
+                            <th>{{ __('Arabic Name')}}</th>
                             <th>{{ __('Action')}}</th>
                         </tr>
                         </thead>

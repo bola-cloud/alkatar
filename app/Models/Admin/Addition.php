@@ -9,7 +9,7 @@ class Addition extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'name_ar', 'price', 'product_id', 'icon'];
+    protected $fillable = ['name', 'name_ar', 'price', 'product_id', 'icon', 'status'];
 
 
     public function product()

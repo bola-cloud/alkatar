@@ -23,7 +23,7 @@ class ContactUsController extends Controller
         Contactus::create([
             'FirstName' => $request->firstname,
             'Email' => $request->email,
-            'Message' => $request->message,
+            'Message' => $request->message ?? '',
         ]);
         return redirect()->back()->with('success', __('Successfully Sent Message!'));
     }

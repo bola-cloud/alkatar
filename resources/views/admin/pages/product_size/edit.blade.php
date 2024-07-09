@@ -40,6 +40,12 @@
                                                 <input type="text" id="size" name="size" value="{{ $edit->Size }}"
                                                     placeholder="{{ __('Size') }}">
                                             </div>
+
+                                            <div class="input__group mb-25">
+                                                <label for="Size_ar">{{ __('Size Arabic') }}</label>
+                                                <input type="text" id="Size_ar" name="Size_ar" value="{{ $edit->Size_ar }}"
+                                                    placeholder="{{ __('Size Arabic') }}">
+                                            </div>
                                             <div class="input__button">
                                                 <button type="submit" class="btn btn-blue">{{ __('Update') }}</button>
                                             </div>

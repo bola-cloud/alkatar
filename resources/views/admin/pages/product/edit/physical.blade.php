@@ -167,10 +167,10 @@
                                                 <textarea name="en_description" id="summernote" class="form-control">{!! $product->en_Description !!}</textarea>
                                             </div>
 
-                                            <div class="input__group mb-25">
+                                            {{-- <div class="input__group mb-25">
                                                 <label for="exampleInputEmail1">{{ __('ShippingReturn') }}</label>
                                                 <textarea name="en_shippingreturn" id="summernote2" class="form-control">{!! $product->en_ShippingReturn !!}</textarea>
-                                            </div>
+                                            </div> --}}
                                             <div class="input__group mb-25">
                                                 <label for="exampleInputEmail1">{{ __('AdditionalInformation') }}</label>
                                                 <textarea name="en_additionalinformation" id="summernote3" class="form-control">{!! $product->en_AdditionalInformation !!}</textarea>
@@ -222,7 +222,7 @@
                                                         {{ $product->Status == 1 ? 'checked' : '' }} name="status"
                                                         class="custom-control-input" id="customSwitch1">
                                                     <label class="custom-control-label"
-                                                        for="customSwitch1">{{ __('Status') }}</label>
+                                                        for="customSwitch1">{{ __('Active') }}</label>
                                                 </div>
                                             </div>
                                             <div class="input__group mb-25">
@@ -231,7 +231,7 @@
                                                         {{ $product->Featured_Product == 1 ? 'checked' : '' }}
                                                         name="feature" class="custom-control-input" id="customSwitch2">
                                                     <label class="custom-control-label"
-                                                        for="customSwitch2">{{ __('Featured Product') }}</label>
+                                                        for="customSwitch2">{{ __('Popular') }}</label>
                                                 </div>
                                             </div>
                                             <div class="input__group mb-25">
@@ -291,10 +291,10 @@
                                                 <label for="exampleInputEmail1">{{ __('Description') }}</label>
                                                 <textarea name="fr_description" id="summernote4" class="form-control">{!! $product->fr_Description !!}</textarea>
                                             </div>
-                                            <div class="input__group mb-25">
+                                            {{-- <div class="input__group mb-25">
                                                 <label for="exampleInputEmail1">{{ __('ShippingReturn') }}</label>
                                                 <textarea name="fr_shippingreturn" id="summernote5" class="form-control">{!! $product->fr_ShippingReturn !!}</textarea>
-                                            </div>
+                                            </div> --}}
                                             <div class="input__group mb-25">
                                                 <label for="exampleInputEmail1">{{ __('AdditionalInformation') }}</label>
                                                 <textarea name="fr_additionalinformation" id="summernote6" class="form-control">{!! $product->fr_AdditionalInformation !!}</textarea>

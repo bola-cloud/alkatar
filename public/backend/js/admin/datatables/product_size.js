@@ -11,6 +11,10 @@
                     name: 'Size'
                 },
                 {
+                    data: 'Size_ar',
+                    name: 'Size_ar'
+                },
+                {
                     data: 'action',
                     name: 'action',
                     orderable: false

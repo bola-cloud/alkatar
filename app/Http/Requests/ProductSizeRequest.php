@@ -24,7 +24,8 @@ class ProductSizeRequest extends FormRequest
     public function rules()
     {
         return [
-            'size'=>'required'
+            'size' => 'required',
+            "Size_ar" => "required"
         ];
     }
 }

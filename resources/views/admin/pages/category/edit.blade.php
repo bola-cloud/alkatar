@@ -48,14 +48,14 @@
                                                     src="{{ asset(CategoryImage() . $edit->Category_Icon) }}" alt="Current Image" width="100">
                                                 @endif
                                             </div>
-                                            <div class="input__group mb-25">
+                                            {{-- <div class="input__group mb-25">
                                                 <label>{{__('Description '.langString('en'))}}</label>
                                                 <textarea name="en_description" id="en_description" placeholder="Description (English)">{{$edit->en_Description}}</textarea>
                                             </div>
                                             <div class="input__group mb-25">
                                                 <label>{{__('Description '.langString('fr'))}}</label>
                                                 <textarea name="fr_description" id="fr_description" placeholder="Description (Arabic)">{{$edit->fr_Description}}</textarea>
-                                            </div>
+                                            </div> --}}
                                             <div class="input__button">
                                                 <button type="submit" class="btn btn-blue">{{ __('Update')}}</button>
                                             </div>

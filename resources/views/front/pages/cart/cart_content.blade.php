@@ -53,19 +53,22 @@
                                                 </div>
                                             </div>
                                             @endif
+
                                             @if ($item->options->size)
+                                            <h1 class="font-bold underline">{{__("Size")}}</h1>
                                             <ul class="size-switch mt-2">
                                                 <li class="single-size active">
-                                                    {{ $item->options->size }}
+                                                    {{ langConverter($item->options->size, $item->options->size_ar) }}
                                                 </li>
                                             </ul>
                                             @endif
 
                                             @if ($item->options->additions)
+                                            <h1 class="font-bold underline mt-3">{{__("Additions")}}</h1>
                                             <ul class="size-switch mt-2">
                                                 @foreach ($item->options->additions as $addition)
                                                 <li class="single-size active">
-                                                    {{ $addition->name_ar }}
+                                                    {{ langConverter($addition->name,$addition->name_ar) }}
                                                 </li>
                                                 @endforeach
                                             </ul>

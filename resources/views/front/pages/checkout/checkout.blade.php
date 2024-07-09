@@ -78,12 +78,9 @@
                                     </label>
                                 </div>
 
-                                @if (auth()->check())
                                 <button type="submit" id="payButton" class="w-full bg-primary-red text-white py-3 lg:py-4 px-4 rounded hover:bg-red-600 transition duration-300 text-lg lg:text-xl">{{ __('Place Order') }}</button>
                                 <button type="button" id="payButtonN" class="w-full bg-primary-red text-white py-3 lg:py-4 px-4 rounded hover:bg-red-600 transition duration-300 d-none buy_now text-lg lg:text-xl">{{ __('Place Order') }}</button>
-                                @else
-                                <button type="button" class="w-full bg-primary-red text-white py-3 lg:py-4 px-4 rounded hover:bg-red-600 transition duration-300 text-lg lg:text-xl" data-bs-toggle="modal" data-bs-target="#loginModal">{{ __('Place Order') }}</button>
-                                @endif
+                              
                             </div>
                         </div>
                 </form>
@@ -104,7 +101,15 @@
                                 <h3 class="font-bold text-2xl xl:text-4xl">
                                     {{langConverter($item->name, $item->options->name_ar)}}
                                 </h3>
-                                <p class="text-2xl xl:text-4xl text-gray-600">{{ __('Size') }}: {{ is_null($item->options->size) ? __('Free Size') : $item->options->size }}</p>
+                                <p class="text-2xl xl:text-4xl text-gray-600 my-4"><span class="font-bold underline"> {{__('Size') }}</span>: {{ is_null($item->options->size) ? __('Free Size') : langConverter($item->options->size, $item->options->size_ar) }}</p>
+                                @if ($item->options->additions)
+                                <div class="mb-4">
+                                <p class="text-2xl xl:text-4xl text-gray-600 font-bold underline ">{{ __('Additions') }}:</p>
+                                @foreach ($item->options->additions as $addition)
+                                <p class="text-2xl xl:text-4xl text-gray-600">{{ langConverter($addition->name, $addition->name_ar) }}</p>
+                                </div>
+                                @endforeach
+                                @endif
                                 <p class="text-2xl xl:text-4xl text-gray-600">{{ __('Quantity') }}: {{ $item->qty }}</p>
                             </div>
                         </div>

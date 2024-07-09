@@ -31,7 +31,8 @@
                             <th>{{ __('Name (AR)')}}</th>
                             <th>{{ __('Product')}}</th>
                             <th>{{ __('Price')}}</th>
-                            <th>{{ __('Icon')}}</th>
+                            {{-- <th>{{ __('Icon')}}</th> --}}
+                            <th>{{ __("Status")}}</th>
                             <th>{{ __('Action')}}</th>
                         </tr>
                         </thead>
@@ -56,7 +57,8 @@
                         {data: 'name_ar', name: 'name_ar'},
                         {data: 'product', name: 'product'},
                         {data: 'price', name: 'price'},
-                        {data: 'icon', name: 'icon'},
+                        // {data: 'icon', name: 'icon'},
+                        {data: 'status', name: 'status'},
                         {data: 'action', name: 'action', orderable: false, searchable: false},
                     ]
                 });

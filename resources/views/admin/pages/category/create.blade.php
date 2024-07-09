@@ -43,14 +43,14 @@
                                                 <label>{{ __('Icon')}} (200x200)</label>
                                                 <input type="file" id="icon" name="icon" accept="image/*">
                                             </div>
-                                            <div class="input__group mb-25">
+                                            {{-- <div class="input__group mb-25">
                                                 <label>{{__('Description '.langString('en'))}}</label>
                                                 <textarea name="en_description" id="en_description" placeholder="Description (English)">{{ old('en_description') }}</textarea>
                                             </div>
                                             <div class="input__group mb-25">
                                                 <label>{{__('Description '.langString('fr'))}}</label>
                                                 <textarea name="fr_description" id="fr_description" placeholder="Description (Arabic)">{{ old('fr_description') }}</textarea>
-                                            </div>
+                                            </div> --}}
                                             <div class="input__button">
                                                 <button type="submit" class="btn btn-blue">{{ __('Add')}}</button>
                                             </div>

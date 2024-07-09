@@ -1,6 +1,10 @@
 @extends('admin.master', ['menu' => 'catbad', 'submenu' => 'add_addition'])
 @section('title', isset($title) ? $title : '')
 @section('content')
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+</head>
+
 <div class="row">
     <div class="col-md-12">
         <div class="breadcrumb__content">
@@ -45,7 +49,8 @@
 
                                         <div class="input__group mb-25">
                                             <label for="product_id">{{ __('Select Product') }}</label>
-                                            <select name="product_id" id="product_id" class="form-control">
+                                            <select name="product_id" id="product_id" class="form-control select2">
+                                                <option value="">Select a product</option>
                                                 @foreach($products as $product)
                                                     <option value="{{ $product->id }}">{{ $product->en_Product_Name }}</option>
                                                 @endforeach
@@ -58,9 +63,17 @@
                                                 placeholder="Price" step="0.001">
                                         </div>
                                         
-                                        <div class="input__group mb-25">
+                                        {{-- <div class="input__group mb-25">
                                             <label>{{ __('Icon')}} (250x250)</label>
                                             <input type="file" id="icon" name="icon" accept="image/*">
+                                        </div> --}}
+
+                                        <div class="input__group">
+                                            <label>{{ __('Active')}}</label>
+                                            <label class="switch" for="status">
+                                                <input type="checkbox" id="status" name="status" value="1" checked>
+                                                <span class="slider round"></span>
+                                            </label>
                                         </div>
 
                                         <div class="input__button">
@@ -77,4 +90,16 @@
         </div>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.select2').select2({
+            placeholder: "Select a product",
+            allowClear: true
+        });
+    });
+</script>
 @endsection
+

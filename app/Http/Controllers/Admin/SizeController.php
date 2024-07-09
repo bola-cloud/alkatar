@@ -40,6 +40,7 @@ class SizeController extends Controller
     {
         $size = Size::create([
             'Size' => $request->size,
+            'Size_ar' => $request->Size_ar
         ]);
         if ($size) {
             return redirect()->route('admin.product.size')->with('success', __('Successfully Stored !'));
@@ -57,6 +58,8 @@ class SizeController extends Controller
         $id = $request->id;
         $color = Size::where('id', $id)->update([
             'Size' => $request->size,
+            'Size_ar' => $request->Size_ar
+
         ]);
         if ($color) {
             return redirect()->route('admin.product.size')->with('success', __('Successfully Update !'));

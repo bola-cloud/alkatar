@@ -138,7 +138,7 @@
                                             <input type="radio" name="size" value="{{ $size->pivot->price }}"
                                                 class="size-radio" data-size="{{ $size->id }}" id="size-{{ $size->id }}"
                                                 {{ $loop->first ? 'checked' : '' }}>
-                                            <span class="size-label font-bold">{{ $size->Size }}</span> -
+                                            <span class="size-label font-bold">{{ langConverter($size->Size, $size->Size_ar) }}</span> -
                                             <span class="size-price">{{ currencyConverter($size->pivot->price) }}</span>
                                         </label>
                                     </div>

@@ -76,7 +76,8 @@ class AdditionController extends Controller
             'en_addition_name' => 'required|string',
             'fr_addition_name' => 'required|string',
             'price' => 'required|numeric',
-            'icon' => 'nullable|image'
+            'icon' => 'nullable|image',
+            'status' => 'nullable|string',
         ]);
 
 
@@ -91,6 +92,7 @@ class AdditionController extends Controller
             'price' => $data['price'],
             'product_id' => $data['product_id'],
             'icon' => $icon_name ?? null,
+            'status' => isset($data['status']) ? '1' : '0',
         ]);
 
         return redirect()->route('admin.physical.product.addition.create')->with('success', 'Addition created successfully');
@@ -115,7 +117,8 @@ class AdditionController extends Controller
             'en_addition_name' => 'required|string',
             'fr_addition_name' => 'required|string',
             'price' => 'required|numeric',
-            'icon' => 'nullable|image'
+            'icon' => 'nullable|image',
+            'status' => 'nullable|string',
         ]);
 
         if ($request->hasFile('icon')) {
@@ -126,12 +129,15 @@ class AdditionController extends Controller
             $icon_name = fileUpload($request->file('icon'), ProductImage());
         }
 
+
+
         $addition->update([
             'name' => $data['en_addition_name'],
             'name_ar' => $data['fr_addition_name'],
             'price' => $data['price'],
             'product_id' => $data['product_id'],
             'icon' => $icon_name ?? $addition->icon,
+            'status' => isset($data['status']) ? '1' : '0',
         ]);
 
         return redirect()->route('admin.physical.product.addition.edit', $addition->id)->with('success', 'Addition updated successfully');

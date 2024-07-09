@@ -65,7 +65,8 @@
                             @if (getSocialLink()->Twitter)
                             <li class="social-media-item">
                                 <a target="_blank" class="social-media-link" href="{{ getSocialLink()->Twitter }}">
-                                    <i class="fab fa-twitter"></i></a>
+                                   {{-- whatsapp logo --}}
+                                    <i class="fab fa-whatsapp"></i></a>
                             </li>
                             @endif
                             {{-- @if (getSocialLink()->Linkedin)

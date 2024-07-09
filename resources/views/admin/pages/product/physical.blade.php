@@ -191,13 +191,13 @@
                                                 @enderror
                                             </div>
 
-                                            <div class="input__group mb-25">
+                                            {{-- <div class="input__group mb-25">
                                                 <label for="en_shippingreturn">{{ __('Shipping Return') }}</label>
                                                 <textarea name="en_shippingreturn" id="summernote2" class="form-control" placeholder="Shipping Return">{{ old('en_shippingreturn') }}</textarea>
                                                 @error('en_shippingreturn')
                                                     <span class="text-danger">{{ $message }}</span>
                                                 @enderror
-                                            </div>
+                                            </div> --}}
                                             <div class="input__group mb-25">
                                                 <label
                                                     for="en_additionalinformation">{{ __('Additional Information') }}</label>
@@ -216,7 +216,7 @@
                                                 @enderror
                                             </div>
                                             <div class="input__group mb-25">
-                                                <label for="image_two">{{ __('Image 2') }}</label>
+                                                <label for="image_two">{{ __('Image 2') }} (320x250)</label>
                                                 <input type="file" class="form-control putImage2" name="image_two"
                                                     id="image_two">
                                                 <img src="" id="target2" />
@@ -225,7 +225,7 @@
                                                 @enderror
                                             </div>
                                             <div class="input__group mb-25">
-                                                <label for="image_three">{{ __('Image 3') }}</label>
+                                                <label for="image_three">{{ __('Image 3') }} (320x250)</label>
                                                 <input type="file" class="form-control putImage3" name="image_three"
                                                     id="image_three">
                                                 <img src="" id="target3" />
@@ -234,7 +234,7 @@
                                                 @enderror
                                             </div>
                                             <div class="input__group mb-25">
-                                                <label for="image_four">{{ __('Image 4') }}</label>
+                                                <label for="image_four">{{ __('Image 4') }} (320x250)</label>
                                                 <input type="file" class="form-control putImage4" name="image_four"
                                                     id="image_four">
                                                 <img src="" id="target4" />
@@ -243,7 +243,7 @@
                                                 @enderror
                                             </div>
                                             <div class="input__group mb-25">
-                                                <label for="image_five">{{ __('Image 5') }}</label>
+                                                <label for="image_five">{{ __('Image 5') }} (320x250)</label>
                                                 <input type="file" class="form-control putImage5" name="image_five"
                                                     id="image_five">
                                                 <img src="" id="target5" />
@@ -257,7 +257,7 @@
                                                     <input type="checkbox" value="1" name="status"
                                                         class="custom-control-input" id="customSwitch1">
                                                     <label class="custom-control-label"
-                                                        for="customSwitch1">{{ __('Status') }}</label>
+                                                        for="customSwitch1">{{ __('Active') }}</label>
                                                 </div>
                                                 @error('status')
                                                     <span class="text-danger">{{ $message }}</span>
@@ -268,7 +268,7 @@
                                                     <input type="checkbox" value="1" name="feature"
                                                         class="custom-control-input" id="customSwitch2">
                                                     <label class="custom-control-label"
-                                                        for="customSwitch2">{{ __('Featured Product') }}</label>
+                                                        for="customSwitch2">{{ __('Popular') }}</label>
                                                 </div>
                                                 @error('feature')
                                                     <span class="text-danger">{{ $message }}</span>
@@ -349,14 +349,14 @@
                                                     <span class="text-danger">{{ $message }}</span>
                                                 @enderror
                                             </div>
-
+{{-- 
                                             <div class="input__group mb-25">
                                                 <label for="fr_shippingreturn">{{ __('Shipping Return') }}</label>
                                                 <textarea name="fr_shippingreturn" id="summernote5" class="form-control">{{ old('fr_shippingreturn') }}</textarea>
                                                 @error('fr_shippingreturn')
                                                     <span class="text-danger">{{ $message }}</span>
                                                 @enderror
-                                            </div>
+                                            </div> --}}
                                             <div class="input__group mb-25">
                                                 <label
                                                     for="fr_additionalinformation">{{ __('Additional Information') }}</label>
