@@ -193,7 +193,7 @@
                                     <textarea id="exampleFormControlTextarea1" rows="3" name="feedback"></textarea>
                                 </div>
 
-                                <button type="submit" class="primary-btn">{{ __('Submit') }}</button>
+                                <button type="submit" class="primary-btn !bg-primary-red !text-white">{{ __('Submit') }}</button>
 
                             </form>
                         </div>

@@ -370,7 +370,7 @@
             </ul>
         </li>
         @endcanany
-        <li class="{{ isset($menu) && $menu == 'menus' ? 'mm-active' : '' }}">
+        {{-- <li class="{{ isset($menu) && $menu == 'menus' ? 'mm-active' : '' }}">
             <a class="has-arrow" href="#">
                 <i class="fa fa-bars"></i>
                 <span>{{ __('Manage Menus') }}</span>
@@ -395,7 +395,7 @@
                     </a>
                 </li>
             </ul>
-        </li>
+        </li> --}}
         {{-- <li class="{{ isset($menu) && $menu == 'theme_management' ? 'mm-active' : '' }}">
             <a class="has-arrow" href="#">
                 <i class="fas fa-cog"></i>
