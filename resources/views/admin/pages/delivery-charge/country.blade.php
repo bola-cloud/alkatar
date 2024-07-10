@@ -34,7 +34,7 @@
                     <thead>
                         <tr>
                             <th>{{ __('Country')}}</th>
-                            <th>{{ __('Charge (in USD)')}}</th>
+                            <th>{{ __('Charge')}}</th>
                             <th>{{ __('Status')}}</th>
                             <th>{{ __('Action')}}</th>
                         </tr>
