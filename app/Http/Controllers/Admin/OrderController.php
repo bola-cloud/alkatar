@@ -52,6 +52,15 @@ class OrderController extends Controller
                     }
                     return $html;
                 })
+                ->addColumn('Payment_Method', function ($data) {
+                    $payment_method = $data->Payment_Method;
+
+                    if ($payment_method === 'COD') {
+                        return '<span style="color:green; font-weight: bold;">' . $payment_method . '</span>';
+                    } else {
+                        return '<span style="color:blue; font-weight: bold;">' . $payment_method . '</span>';
+                    }
+                })
                 ->addColumn('types', function ($data) {
                     $html = '';
                     foreach ($data->order_details as $key => $or) {
@@ -102,7 +111,7 @@ class OrderController extends Controller
                     }
                     return $html;
                 })
-                ->rawColumns(['action', 'Products', 'digital_goods', 'Status', 'types'])
+                ->rawColumns(['action', 'Products', 'digital_goods', 'Status', 'types', 'Payment_Method'])
                 ->make(true);
         }
         $data['title'] = __('Order List');

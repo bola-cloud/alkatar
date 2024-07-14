@@ -23,10 +23,10 @@
                     data: 'Products',
                     name: 'Products'
                 },
-                {
-                    data: 'types',
-                    name: 'types'
-                },
+                // {
+                //     data: 'types',
+                //     name: 'types'
+                // },
                 {
                     data: 'GrandTotal',
                     name: 'GrandTotal'

@@ -49,23 +49,23 @@
                 <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
                     <div class="single-widget">
                         <h3 class="widget-title">{{ __('Contact Us') }}</h3>
-                        <ul class="social-media">
+                        <ul class="social-media !mb-10">
                             @if (getSocialLink()->Facebook)
                             <li class="social-media-item">
-                                <a target="_blank" class="social-media-link" href="{{ getSocialLink()->Facebook }}">
+                                <a target="_blank" class="social-media-link !bg-blue-600" href="{{ getSocialLink()->Facebook }}">
                                     <i class="fab fa-facebook-f"></i></a>
                             </li>
                             @endif
                             {{-- @if (getSocialLink()->Skype)
                             <li class="social-media-item">
-                                <a target="_blank" class="social-media-link" href="{{ getSocialLink()->Skype }}">
+                                <a target="_blank" class="social-media-link !bg-blue-500" href="{{ getSocialLink()->Skype }}">
                             <i class="fab fa-skype"></i></a>
                             </li>
                             @endif --}}
                             @if (getSocialLink()->Twitter)
-                            <li class="social-media-item">
-                                <a target="_blank" class="social-media-link" href="{{ getSocialLink()->Twitter }}">
-                                   {{-- whatsapp logo --}}
+                            <li class="social-media-item ">
+                                <a target="_blank" class="social-media-link !bg-green-400" href="{{ getSocialLink()->Twitter }}">
+                                    {{-- whatsapp logo --}}
                                     <i class="fab fa-whatsapp"></i></a>
                             </li>
                             @endif
@@ -78,7 +78,7 @@
                             @endif --}}
                             @if (getSocialLink()->Instagram)
                             <li class="social-media-item">
-                                <a target="_blank" class="social-media-link" href="{{ getSocialLink()->Instagram }}">
+                                <a target="_blank" class="social-media-link !bg-pink-500" href="{{ getSocialLink()->Instagram }}">
                                     <i class="fab fa-instagram"></i></a>
                             </li>
                             @endif

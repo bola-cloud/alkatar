@@ -31,7 +31,7 @@
                             <input type="text" class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_street_address" name="billing_street_address" placeholder="{{ __('Street Address') }}" value="{{ isset($billing) ? $billing->Street : '' }}" required />
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <input type="text" class="w-full sm:w-1/2 p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_state" name="billing_state" placeholder="{{ __('State') }}" value="{{ isset($billing) ? $billing->State : '' }}" required />
-                                <input type="text" class="w-full sm:w-1/2 p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_zipcode" name="billing_zipcode" placeholder="{{ __('Zip/Postal Code') }}" value="{{ isset($billing) ? $billing->Zipcode : '' }}" required />
+                                <input type="hidden" class="w-full sm:w-1/2 p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_zipcode" name="billing_zipcode" placeholder="{{ __('Zip/Postal Code') }}" value="00000" />
                             </div>
                             <div class="relative">
                                 <select class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl" id="billing_country" name="billing_country" required>
@@ -80,7 +80,7 @@
 
                                 <button type="submit" id="payButton" class="w-full bg-primary-red text-white py-3 lg:py-4 px-4 rounded hover:bg-red-600 transition duration-300 text-lg lg:text-xl">{{ __('Place Order') }}</button>
                                 <button type="button" id="payButtonN" class="w-full bg-primary-red text-white py-3 lg:py-4 px-4 rounded hover:bg-red-600 transition duration-300 d-none buy_now text-lg lg:text-xl">{{ __('Place Order') }}</button>
-                              
+
                             </div>
                         </div>
                 </form>
@@ -104,9 +104,9 @@
                                 <p class="text-2xl xl:text-4xl text-gray-600 my-4"><span class="font-bold underline"> {{__('Size') }}</span>: {{ is_null($item->options->size) ? __('Free Size') : langConverter($item->options->size, $item->options->size_ar) }}</p>
                                 @if ($item->options->additions)
                                 <div class="mb-4">
-                                <p class="text-2xl xl:text-4xl text-gray-600 font-bold underline ">{{ __('Additions') }}:</p>
-                                @foreach ($item->options->additions as $addition)
-                                <p class="text-2xl xl:text-4xl text-gray-600">{{ langConverter($addition->name, $addition->name_ar) }}</p>
+                                    <p class="text-2xl xl:text-4xl text-gray-600 font-bold underline ">{{ __('Additions') }}:</p>
+                                    @foreach ($item->options->additions as $addition)
+                                    <p class="text-2xl xl:text-4xl text-gray-600">{{ langConverter($addition->name, $addition->name_ar) }}</p>
                                 </div>
                                 @endforeach
                                 @endif
