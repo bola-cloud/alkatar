@@ -14,14 +14,11 @@
                         <option selected>{{ __('Category') }}</option>
                         @foreach (Category() as $item)
                             <option value="{{ route('category.product', $item->id) }}">
-                                {{ langConverter($item->en_Category_Name, $item->fr_Category_Name) }}</option>
+                                {{ langConverter($item->en_Category_Name, $item->fr_Category_Name) }}
+                            </option>
                         @endforeach
                     </select>
-                    <div class="form-group">
-                        <input type="text" class="form-control" id="mobilesearch" name="search"
-                            placeholder="{{ __('Search Here') }}" />
-                        <button type="button" class="search-btn"><i class="flaticon-search"></i></button>
-                    </div>
+
                 </div>
             </form>
         </div>
@@ -35,8 +32,7 @@
                     @else
                         <li class="menu-item">
                             <span class="menu-expand"></span>
-                            <a class="menu-link"
-                                href="#">{{ langConverter($menu->en_name, $menu->fr_name) }}</a>
+                            <a class="menu-link" href="#">{{ langConverter($menu->en_name, $menu->fr_name) }}</a>
                             <ul class="sub-menu">
                                 @foreach ($menu->submenus as $submenu)
                                     <li class="sub-menu-item"><a class="sub-menu-link"
@@ -56,8 +52,7 @@
                     <a href="#" class="currency">{{ currency() }} <i class="fas fa-angle-down"></i></a>
                     <ul class="currency-list">
                         @foreach (currency_array(currency()) as $crr)
-                            <li class="single-currency"><span class="flag">{{ $crr->symbol }}</span><a
-                                    class="currency-text"
+                            <li class="single-currency"><span class="flag">{{ $crr->symbol }}</span><a class="currency-text"
                                     href="{{ route('currency.switch', $crr->currency) }}">{{ $crr->currency }}</a>
                             </li>
                         @endforeach
@@ -66,23 +61,23 @@
                 <div class="lang-switcher">
                     @if (app()->getLocale() == 'en')
                         @if(getLanguage('en')->status == 1)
-                        <span class="flag"><img src="{{ asset(IMG_LANGUAGE . getLanguage('en')->thumb) }}"
-                                alt="united-states" /></span>
-                        <a href="javascript:void(0)" class="lang">{{ getLanguage('en')->name }}
-                            @if(getLanguage('fr')->status == 1)
-                                <i class="fas fa-angle-down"></i>
-                            @endif
-                        </a>
+                            <span class="flag"><img src="{{ asset(IMG_LANGUAGE . getLanguage('en')->thumb) }}"
+                                    alt="united-states" /></span>
+                            <a href="javascript:void(0)" class="lang">{{ getLanguage('en')->name }}
+                                @if(getLanguage('fr')->status == 1)
+                                    <i class="fas fa-angle-down"></i>
+                                @endif
+                            </a>
                         @endif
                     @elseif(app()->getLocale() == 'fr')
                         @if(getLanguage('fr')->status == 1)
-                        <span class="flag"><img src="{{ asset(IMG_LANGUAGE . getLanguage('fr')->thumb) }}"
-                                alt="india" /></span>
-                        <a href="javascript:void(0)" class="lang">{{ getLanguage('fr')->name }}
-                            @if(getLanguage('en')->status == 1)
-                                <i class="fas fa-angle-down"></i>
-                            @endif
-                        </a>
+                            <span class="flag"><img src="{{ asset(IMG_LANGUAGE . getLanguage('fr')->thumb) }}"
+                                    alt="india" /></span>
+                            <a href="javascript:void(0)" class="lang">{{ getLanguage('fr')->name }}
+                                @if(getLanguage('en')->status == 1)
+                                    <i class="fas fa-angle-down"></i>
+                                @endif
+                            </a>
                         @endif
                     @endif
 
@@ -109,11 +104,11 @@
             </div>
             @if (Auth::user())
                 @if (Auth::user()->is_admin == ACTIVE)
-                    <a class="account-btn mb-3" href="{{ route('admin.dashboard') }}"><i
-                            class="user-icon flaticon-user"></i> {{ __('Dashboard') }}</a>
+                    <a class="account-btn mb-3" href="{{ route('admin.dashboard') }}"><i class="user-icon flaticon-user"></i>
+                        {{ __('Dashboard') }}</a>
                 @else
-                    <a class="account-btn mb-3" href="{{ route('user.profile') }}"><i
-                            class="user-icon flaticon-user"></i> {{ __('Profile') }}</a>
+                    <a class="account-btn mb-3" href="{{ route('user.profile') }}"><i class="user-icon flaticon-user"></i>
+                        {{ __('Profile') }}</a>
                 @endif
                 <a class="account-btn mb-3" href="{{ route('user.logout') }}"><i class="user-icon flaticon-user"></i>
                     {{ __('Logout') }}</a>
