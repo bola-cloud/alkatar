@@ -13,7 +13,7 @@ class Subcategory extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'name_ar', 'category_id'];
+    protected $fillable = ['name', 'name_ar', 'category_id', 'status'];
 
     public function category(): BelongsTo
     {

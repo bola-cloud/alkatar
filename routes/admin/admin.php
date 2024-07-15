@@ -117,10 +117,10 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin', 'en.loca
         Route::get('/create', [SubcategoryController::class, 'subCategoryCreate'])->name('subcategory.create');
         Route::post('/create', [SubcategoryController::class, 'subCategoryStore'])->name('subcategory.store');
         Route::get('/edit/{id}', [SubcategoryController::class, 'subCategoryEdit'])->name('subcategory.edit');
-        Route::post('/update', [CategoryController::class, 'categoryUpdate'])->name('category.update')->middleware(['permission:category-edit', 'isDemo']);
-        Route::get('/active/{id}', [CategoryController::class, 'categoryActive'])->name('category.active')->middleware(['permission:category-edit', 'isDemo']);
-        Route::get('/inactive/{d}', [CategoryController::class, 'categoryInactive'])->name('category.inactive')->middleware(['permission:category-edit', 'isDemo']);
-        Route::get('/delete/{id}', [CategoryController::class, 'categoryDelete'])->name('category.delete')->middleware(['permission:category-delete', 'isDemo']);
+        Route::post('/update', [SubcategoryController::class, 'subCategoryUpdate'])->name('subcategory.update');
+        Route::get('/active/{id}', [SubcategoryController::class, 'subCategoryActive'])->name('subcategory.active');
+        Route::get('/inactive/{id}', [SubcategoryController::class, 'subCategoryInactive'])->name('subcategory.inactive');
+        Route::get('/delete/{id}', [SubcategoryController::class, 'subCategoryDelete'])->name('subcategory.delete');
     });
 
 

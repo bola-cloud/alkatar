@@ -27,9 +27,10 @@
             <div class="customers__table">
                 <form action="{{ route('admin.orders.bulk_status_update') }}" method="POST" id="bulk-action-form">
                     @csrf
-                    <div class="bulk-action-wrapper mb-3">
-                        <select name="bulk_status" id="bulk-status-select"
-                            class="form-control d-inline-block w-auto mr-2">
+                    <div class="bulk-action-wrapper mb-3" style="display: flex; align-items: center; gap: 10px">
+                        <h1 style="font-size: 1rem;">Change Status:</h1>
+                        <select name="bulk_status" id="bulk-status-select" class="form-control d-inline-block mr-2"
+                            style="width: 250px;">
                             <option value="">{{ __('Bulk Action') }}</option>
                             <option value="{{ ORDER_PENDING }}">{{ __('Pending') }}</option>
                             <option value="{{ ORDER_PROCESSING }}">{{ __('Processing') }}</option>
@@ -40,6 +41,8 @@
                         </select>
                         <button type="submit" class="btn btn-primary" id="bulk-apply-btn">{{ __('Apply') }}</button>
                     </div>
+
+
                     <table id="AdvertiseTable" class="row-border data-table-filter table-style">
                         <thead>
                             <tr>

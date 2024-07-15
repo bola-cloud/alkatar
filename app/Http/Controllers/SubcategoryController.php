@@ -19,13 +19,13 @@ class SubcategoryController extends Controller
                     $btn = '<div class="action__buttons">';
                     $btn = $btn . '<a href="' . route('admin.subcategory.edit', $data->id) . '" class="btn-action" title="Edit"><i class="fas fa-pen-to-square"></i></a>';
 
-                    // if ($data->Status == 1) {
-                    //     $btn = $btn . '<a href="' . route('admin.category.inactive', $data->id) . '" class="btn-action" title="Inactive"><i class="fas fa-toggle-on"></i></a>';
-                    // } else {
-                    //     $btn = $btn . '<a href="' . route('admin.category.active', $data->id) . '" class="btn-action" title="Active"><i class="fas fa-toggle-off"></i></a>';
-                    // }
-    
-                    $btn = $btn . '<a href="' . route('admin.category.delete', $data->id) . '" class="btn-action delete" title="Delete"><i class="fas fa-trash-alt"></i></a>';
+                    if ($data->status == 1) {
+                        $btn = $btn . '<a href="' . route('admin.subcategory.inactive', $data->id) . '" class="btn-action" title="Inactive"><i class="fas fa-toggle-on"></i></a>';
+                    } else {
+                        $btn = $btn . '<a href="' . route('admin.subcategory.active', $data->id) . '" class="btn-action" title="Active"><i class="fas fa-toggle-off"></i></a>';
+                    }
+
+                    $btn = $btn . '<a href="' . route('admin.subcategory.delete', $data->id) . '" class="btn-action delete" title="Delete"><i class="fas fa-trash-alt"></i></a>';
                     $btn = $btn . '</div>';
                     return $btn;
                 })
@@ -41,15 +41,15 @@ class SubcategoryController extends Controller
 
                     return $category->en_Category_Name;
                 })
-                // ->editColumn('Status', function ($data) {
-                //     if ($data->Status == 1) {
-                //         $active = "Active";
-                //         return '<span class="status active">' . $active . '</span>';
-                //     } else {
-                //         $active = "Inactive";
-                //         return '<span class="status blocked">' . $active . '</span>';
-                //     }
-                // })
+                ->editColumn('status', function ($data) {
+                    if ($data->status == 1) {
+                        $active = "Active";
+                        return '<span class="status active">' . $active . '</span>';
+                    } else {
+                        $active = "Inactive";
+                        return '<span class="status blocked">' . $active . '</span>';
+                    }
+                })
                 ->rawColumns(['action', 'name', 'name_ar', 'category_id'])
                 ->make(true);
         }
@@ -91,67 +91,48 @@ class SubcategoryController extends Controller
         return view('admin.pages.subcategory.edit', $data);
     }
 
-    public function categoryUpdate(Request $request)
+    public function subCategoryUpdate(Request $request)
     {
         $id = $request->id;
-        $cat = Category::whereid($id)->first();
-
-
-        if ($request->icon) {
-            // delete image
-            if ($cat->Category_Icon) {
-                $oldIcon = $cat->Category_Icon;
-                if ($request->icon && $oldIcon) {
-                    Storage::delete(CategoryImage() . $oldIcon);
-                }
-
-            }
-            // upload image
-            $icon_name = fileUpload($request['icon'], CategoryImage());
-        } else {
-            $icon_name = $cat->Category_Icon;
-        }
+        $cat = Subcategory::whereid($id)->first();
 
 
         $update = $cat->update([
-            'en_Category_Name' => is_null($request->en_category_name) ? $cat->en_Category_Name : $request->en_category_name,
-            'en_Description' => is_null($request->en_description) ? $cat->en_Description : $request->en_description,
-            'en_Category_Slug' => is_null($request->en_category_name) ? $cat->en_Category_Slug : $this->slugify($request->en_category_name),
-            'fr_Category_Name' => is_null($request->fr_category_name) ? $cat->fr_Category_Name : $request->fr_category_name,
-            'fr_Description' => is_null($request->fr_description) ? $cat->fr_Description : $request->fr_description,
-            'fr_Category_Slug' => is_null($request->fr_category_name) ? $cat->fr_Category_Slug : $this->slugify($request->fr_category_name),
-            'Category_Icon' => $icon_name,
+            'name' => is_null($request->name) ? $cat->name : $request->name,
+            'name_ar' => is_null($request->name_ar) ? $cat->name_ar : $request->name_ar,
+            'category_id' => is_null($request->category_id) ? $cat->category_id : $request->category_id
         ]);
+
         if ($update) {
-            return redirect()->route('admin.category')->with('success', __('Successfully Updated!'));
+            return redirect()->route('admin.subcategory')->with('success', __('Successfully Updated!'));
         }
         return redirect()->back()->with('error', __('Does not Update  !'));
     }
-    // public function categoryActive($id)
-    // {
-    //     $inactive = Category::find($id)->update(['Status' => 1]);
-    //     if ($inactive) {
-    //         return redirect()->route('admin.category')->with('success', __('Successfully Active !'));
-    //     }
-    //     return redirect()->route('admin.category')->with('success', __('Does not Updated!'));
-    // }
-    // public function categoryInactive($id)
-    // {
-    //     $inactive = Category::find($id)->update(['Status' => 0]);
-    //     if ($inactive) {
-    //         return redirect()->route('admin.category')->with('success', __('Successfully Inactive !'));
-    //     }
-    //     return redirect()->route('admin.category')->with('success', __('Does not Updated !'));
-    // }
+    public function subCategoryActive($id)
+    {
+        $inactive = Subcategory::find($id)->update(['status' => 1]);
+        if ($inactive) {
+            return redirect()->route('admin.subcategory')->with('success', __('Successfully Active !'));
+        }
+        return redirect()->route('admin.subcategory')->with('success', __('Does not Updated!'));
+    }
+    public function subCategoryInactive($id)
+    {
+        $inactive = Subcategory::find($id)->update(['status' => 0]);
+        if ($inactive) {
+            return redirect()->route('admin.subcategory')->with('success', __('Successfully Inactive !'));
+        }
+        return redirect()->route('admin.subcategory')->with('success', __('Does not Updated !'));
+    }
 
-    // public function categoryDelete($id)
-    // {
-    //     $delete = Category::Where('id', $id)->delete();
-    //     if ($delete) {
-    //         return redirect()->route('admin.category')->with('success', __('Successfully Deleted !'));
-    //     }
-    //     return redirect()->route('admin.category')->with('error', __('Does Not Delete!'));
-    // }
+    public function subCategoryDelete($id)
+    {
+        $delete = Subcategory::Where('id', $id)->delete();
+        if ($delete) {
+            return redirect()->route('admin.subcategory')->with('success', __('Successfully Deleted !'));
+        }
+        return redirect()->route('admin.subcategory')->with('error', __('Does Not Delete!'));
+    }
 
     // public function slugify($text)
     // {

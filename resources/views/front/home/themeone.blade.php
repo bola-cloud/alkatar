@@ -2,15 +2,17 @@
 <div class="hero-section">
     <div class="hero-slider">
         @foreach ($sliders as $slider)
-        @if (isset($slider->slider_link))
-        <a href="{{$slider->slider_link}}">
-            <div class="signle-slide" style="background-image: url('{{ asset(SliderImage() . $slider->Background_Image) }}');">
-            </div>
-        </a>
-        @else
-        <div class="signle-slide" style="background-image: url('{{ asset(SliderImage() . $slider->Background_Image) }}');">
-        </div>
-        @endif
+            @if (isset($slider->slider_link))
+                <a href="{{$slider->slider_link}}">
+                    <div class="signle-slide"
+                        style="background-image: url('{{ asset(SliderImage() . $slider->Background_Image) }}');">
+                    </div>
+                </a>
+            @else
+                <div class="signle-slide"
+                    style="background-image: url('{{ asset(SliderImage() . $slider->Background_Image) }}');">
+                </div>
+            @endif
         @endforeach
     </div>
 </div>
@@ -39,13 +41,14 @@
 
     <div class="category-box-slide">
         @foreach (Category_Des_Icon() as $item)
-        <a href="{{ route('category.product', $item->id)}}" class="category_slider_item relative ">
-            <img src="{{ asset(CategoryImage() . $item->Category_Icon)  }}" alt="{{ langConverter($item->en_Category_Name, $item->fr_Category_Name) }}">
+            <a href="{{ route('category.product', $item->id)}}" class="category_slider_item relative ">
+                <img src="{{ asset(CategoryImage() . $item->Category_Icon)  }}"
+                    alt="{{ langConverter($item->en_Category_Name, $item->fr_Category_Name) }}">
 
-            <p class="!text-7xl">
-                {{ langConverter($item->en_Category_Name, $item->fr_Category_Name) }}
-            </p>
-        </a>
+                <p class="!text-7xl">
+                    {{ langConverter($item->en_Category_Name, $item->fr_Category_Name) }}
+                </p>
+            </a>
         @endforeach
     </div>
 </div>
@@ -74,11 +77,11 @@
 
     <div class="offers-box-slide">
         @forelse ($on_sales as $product)
-        <x-frontend.product-card :product="$product" />
+            <x-frontend.product-card :product="$product" />
         @empty
-        <div class="text-center text-5xl font-bold mt-20">
-            <h3>{{ __('No Products Found') }}</h3>
-        </div>
+            <div class="text-center text-5xl font-bold mt-20">
+                <h3>{{ __('No Products Found') }}</h3>
+            </div>
         @endforelse
     </div>
 </div>
@@ -107,11 +110,11 @@
 
     <div class="offers-box-slide">
         @forelse($best_selling as $product)
-        <x-frontend.product-card :product="$product" />
+            <x-frontend.product-card :product="$product" />
         @empty
-        <div class="text-center text-5xl font-bold mt-20">
-            <h3>{{ __('No Products Found') }}</h3>
-        </div>
+            <div class="text-center text-5xl font-bold mt-20">
+                <h3>{{ __('No Products Found') }}</h3>
+            </div>
         @endforelse
     </div>
 </div>
@@ -120,7 +123,8 @@
 <!-- product banner area start here  -->
 <div class="product-banner hidden lg:block pb-100">
     @foreach ($promotion as $promo)
-    <a href="{{$promo->Link_One}}" class="single-banner"><img class="banner-image" src="{{ asset(PromotionImage() . $promo->Image_One) }}" alt="product-banner" /></a>
+        <a href="{{$promo->Link_One}}" class="single-banner"><img class="banner-image"
+                src="{{ asset(PromotionImage() . $promo->Image_One) }}" alt="product-banner" /></a>
     @endforeach
 </div>
 <!-- product banner area end here  -->
@@ -148,11 +152,11 @@
 
     <div class="offers-box-slide">
         @forelse ($featured_products as $product)
-        <x-frontend.product-card :product="$product" />
+            <x-frontend.product-card :product="$product" />
         @empty
-        <div class="text-center text-5xl font-bold mt-20">
-            <h3>{{ __('No Products Found') }}</h3>
-        </div>
+            <div class="text-center text-5xl font-bold mt-20">
+                <h3>{{ __('No Products Found') }}</h3>
+            </div>
         @endforelse
     </div>
 </div>
@@ -181,11 +185,11 @@
 
     <div class="offers-box-slide">
         @forelse ($new_arrivals as $product)
-        <x-frontend.product-card :product="$product" />
+            <x-frontend.product-card :product="$product" />
         @empty
-        <div class="text-center text-5xl font-bold mt-20">
-            <h3>{{ __('No Products Found') }}</h3>
-        </div>
+            <div class="text-center text-5xl font-bold mt-20">
+                <h3>{{ __('No Products Found') }}</h3>
+            </div>
         @endforelse
     </div>
 </div>

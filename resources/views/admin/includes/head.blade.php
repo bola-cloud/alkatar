@@ -25,5 +25,6 @@
     <link href="{{ asset('backend/css/admin/extra.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/cookie-consent.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/css/toastr.min.css') }}">
+
     @stack('post_styles')
 </head>

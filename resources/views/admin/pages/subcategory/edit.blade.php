@@ -30,7 +30,7 @@
                             <div class="col-md-12">
                                 <div class="form-vertical__item bg-style">
                                     <form enctype="multipart/form-data" method="POST"
-                                        action="{{route('admin.category.update')}}">
+                                        action="{{route('admin.subcategory.update')}}">
                                         @csrf
                                         <input type="hidden" name="id" value="{{$edit->id}}">
                                         <div class="input__group mb-25">

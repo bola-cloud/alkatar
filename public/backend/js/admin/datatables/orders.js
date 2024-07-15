@@ -1,5 +1,10 @@
 (function ($) {
     "use strict";
+    function updateApplyButtonState() {
+        var checkedBoxes = $('input[name="order_ids[]"]:checked').length;
+        $('#bulk-apply-btn').prop('disabled', checkedBoxes === 0);
+    }
+
     $(document).ready(function () {
         var table = $('#AdvertiseTable').DataTable({
             processing: true,
@@ -61,9 +66,12 @@
             ]
         });
 
+       
+
         // Select all checkbox functionality
         $('#select-all-checkbox').on('change', function() {
             $('input[name="order_ids[]"]').prop('checked', this.checked);
+            updateApplyButtonState();
         });
 
         // Deselect "select all" if any checkbox is unchecked
@@ -71,6 +79,8 @@
             if (!this.checked) {
                 $('#select-all-checkbox').prop('checked', false);
             }
+
+            updateApplyButtonState();
         });
 
         // Bulk action form submission
@@ -92,6 +102,8 @@
         w.print();
         w.close();
     });
+
+    updateApplyButtonState();
 })(jQuery);
 
 function orderDetails(id) {
