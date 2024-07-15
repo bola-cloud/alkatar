@@ -15,7 +15,7 @@ class ProductsMakeSubcategoryIdNullable extends Migration
     public function up()
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->foreignIdFor(Subcategory::class)->nullable()->after('Category_Id')->default(null);
+            $table->foreignIdFor(Subcategory::class)->nullable()->after('Category_Id')->default(null)->change();
         });
     }
 
