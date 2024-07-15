@@ -3,6 +3,7 @@
 namespace App\Models\Admin;
 
 use App\Models\ProductReview;
+use App\Models\Subcategory;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     use HasFactory, Sluggable;
-    protected $fillable=[
+    protected $fillable = [
         'Category_Id',
         'en_Product_Name',
         'en_Product_Slug',
@@ -66,11 +67,13 @@ class Product extends Model
             ],
         ];
     }
-    public function category(){
-        return $this->belongsTo(Category::class,'Category_Id');
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'Category_Id');
     }
-    public function brand(){
-        return $this->belongsTo(Brand::class,'Brand_Id');
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class, 'Brand_Id');
     }
 
 
@@ -96,5 +99,10 @@ class Product extends Model
     public function additions()
     {
         return $this->hasMany(Addition::class);
+    }
+
+    public function subcategory()
+    {
+        return $this->belongsTo(Subcategory::class);
     }
 }

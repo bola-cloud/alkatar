@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SubcategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\AdditionController;
@@ -49,7 +50,8 @@ Route::group(['prefix' => 'subscribe'], function () {
     Route::post('/store', [SubscribeController::class, 'subscribeStore'])->name('admin.subscribe.store');
     Route::get('/delete/{id}', [SubscribeController::class, 'subscribeDelete'])->name('admin.subscribe.delete');
     Route::get('/list', [SubscribeController::class, 'index'])->name('admin.subscribe.index');
-    Route::post('promote', [SubscribeController::class, 'promote'])->name('admin.subscribe.promote')->middleware(['isDemo']);;
+    Route::post('promote', [SubscribeController::class, 'promote'])->name('admin.subscribe.promote')->middleware(['isDemo']);
+    ;
 });
 
 Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin', 'en.locale'], 'as' => 'admin.'], function () {
@@ -78,7 +80,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin', 'en.loca
         Route::get('/index', [ContactUsController::class, 'contactUs'])->name('contact.us.index')->middleware(['permission:crm-list|crm-create|crm-edit|crm-delete']);
         Route::get('user/reply/{id}', [ContactUsController::class, 'userReply'])->name('user.reply')->middleware(['permission:crm-create']);
         Route::post('send/reply', [ContactUsController::class, 'sendReply'])->name('send.reply')->middleware(['permission:crm-create', 'isDemo']);
-        Route::get('/delete/{id}', [ContactUsController::class, 'contactUsDelete'])->name('contact.us.delete')->middleware(['permission:crm-delete', 'isDemo']);;
+        Route::get('/delete/{id}', [ContactUsController::class, 'contactUsDelete'])->name('contact.us.delete')->middleware(['permission:crm-delete', 'isDemo']);
+        ;
     });
     Route::group(['prefix' => 'general-settings'], function () {
         Route::get('', [GeneralSettingsController::class, 'GeneralSettings'])->name('general.settings')->middleware(['permission:cms-list|cms-create|cms-edit|cms-delete']);
@@ -108,6 +111,19 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin', 'en.loca
         Route::get('/inactive/{d}', [CategoryController::class, 'categoryInactive'])->name('category.inactive')->middleware(['permission:category-edit', 'isDemo']);
         Route::get('/delete/{id}', [CategoryController::class, 'categoryDelete'])->name('category.delete')->middleware(['permission:category-delete', 'isDemo']);
     });
+
+    Route::group(['prefix' => 'subcategory'], function () {
+        Route::get('', [SubcategoryController::class, 'subcategory'])->name('subcategory');
+        Route::get('/create', [SubcategoryController::class, 'subCategoryCreate'])->name('subcategory.create');
+        Route::post('/create', [SubcategoryController::class, 'subCategoryStore'])->name('subcategory.store');
+        Route::get('/edit/{id}', [SubcategoryController::class, 'subCategoryEdit'])->name('subcategory.edit');
+        Route::post('/update', [CategoryController::class, 'categoryUpdate'])->name('category.update')->middleware(['permission:category-edit', 'isDemo']);
+        Route::get('/active/{id}', [CategoryController::class, 'categoryActive'])->name('category.active')->middleware(['permission:category-edit', 'isDemo']);
+        Route::get('/inactive/{d}', [CategoryController::class, 'categoryInactive'])->name('category.inactive')->middleware(['permission:category-edit', 'isDemo']);
+        Route::get('/delete/{id}', [CategoryController::class, 'categoryDelete'])->name('category.delete')->middleware(['permission:category-delete', 'isDemo']);
+    });
+
+
     Route::group(['prefix' => 'brand'], function () {
         Route::get('', [BrandController::class, 'brand'])->name('brand')->middleware(['permission:brand-list|brand-create|brand-edit|brand-delete']);
         Route::get('/create', [BrandController::class, 'brandCreate'])->name('brand.create')->middleware(['permission:brand-create']);
