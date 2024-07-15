@@ -114,6 +114,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin', 'en.loca
 
     Route::group(['prefix' => 'subcategory'], function () {
         Route::get('', [SubcategoryController::class, 'subcategory'])->name('subcategory');
+        Route::get('/all', [SubcategoryController::class, 'getAllSubcategories'])->name('subcategory.all');
         Route::get('/create', [SubcategoryController::class, 'subCategoryCreate'])->name('subcategory.create');
         Route::post('/create', [SubcategoryController::class, 'subCategoryStore'])->name('subcategory.store');
         Route::get('/edit/{id}', [SubcategoryController::class, 'subCategoryEdit'])->name('subcategory.edit');

@@ -49,7 +49,8 @@ class Product extends Model
         'license_key',
         'affiliate_link',
         'type',
-        'points'
+        'points',
+        'subcategory_id'
     ];
     /**
      * Return the sluggable configuration array for this model.

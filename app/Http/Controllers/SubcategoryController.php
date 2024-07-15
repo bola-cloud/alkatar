@@ -57,6 +57,13 @@ class SubcategoryController extends Controller
         return view('admin.pages.subcategory.index', $data);
     }
 
+    public function getAllSubcategories(Request $request)
+    {
+        $categoryId = $request->category_id;
+        $subcategories = Subcategory::where('category_id', $categoryId)->get();
+        return response()->json($subcategories);
+    }
+
     public function subCategoryCreate()
     {
         $data['title'] = __('Subcategory Create');

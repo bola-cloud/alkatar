@@ -73,6 +73,16 @@
                                                     @endforeach
                                                 </select>
                                             </div>
+
+                                            <div class="input__group mb-25">
+                                            <label for="subcategory_id">{{__("Subcategory Name")}}</label>
+                                            <select class="form-control" id="subcategory_id" name="subcategory_id" data-subcategory-id="{{$product->subcategory_id}}">
+                                                <option value="">{{ __('Select Subcategory') }}</option>
+                                            </select>
+                                            @error('subcategory_id')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
                                             {{-- <div class="input__group mb-25">
                                                 <label for="exampleInputEmail1">{{ __('Item Tag') }}</label>
                                                 <select class="form-control" id="item_teg" name="item_teg">
@@ -96,6 +106,8 @@
                                                     @endforeach
                                                 </select>
                                             </div>
+
+
                                             {{-- <div class="input__group mb-25">
                                                 <label for="select2Multiple">{{ __('Product Color') }}</label>
                                                 <select class="select2-multiple form-control tag_two" name="color[]"
@@ -416,4 +428,29 @@
         });
     });
 </script>
+
+  <script>
+        $(document).ready(function () {
+            $('#en_category_name').change(function () {
+                var categoryId = $(this).val();
+                if (categoryId) {
+                    $.ajax({
+                        url: '{{ route("admin.subcategory.all") }}',
+                        type: 'GET',
+                        data: { category_id: categoryId },
+                        success: function (data) {
+                            $('#subcategory_id').empty();
+                            $('#subcategory_id').append('<option value="">{{ __("Select Subcategory") }}</option>');
+                            $.each(data, function (key, value) {
+                                $('#subcategory_id').append('<option value="' + value.id + '">' + value.name + '</option>');
+                            });
+                        }
+                    });
+                } else {
+                    $('#subcategory_id').empty();
+                    $('#subcategory_id').append('<option value="">{{ __("Select Subcategory") }}</option>');
+                }
+            });
+        });
+    </script>
 @endpush

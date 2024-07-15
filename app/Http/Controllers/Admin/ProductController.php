@@ -12,6 +12,7 @@ use App\Models\Admin\ProductTag;
 use App\Models\Admin\Size;
 use App\Models\ItemTag;
 use App\Models\ProductTagList;
+use App\Models\Subcategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
@@ -97,6 +98,7 @@ class ProductController extends Controller
         $data['title'] = __('Product Create');
         $data['product'] = Product::get();
         $data['category'] = Category::get();
+        $data['subcategories'] = Subcategory::get();
         $data['tags'] = ProductTagList::get();
         $data['item_tags'] = ItemTag::get();
         return view('admin.pages.product.create', $data);
@@ -105,7 +107,7 @@ class ProductController extends Controller
     {
         $data['title'] = __('Physical Product Create');
         $data['product'] = Product::get();
-        $data['category'] = Category::get();
+        $data['category'] = Category::with('subcategories')->get();
         $data['tags'] = ProductTagList::get();
         $data['item_tags'] = ItemTag::get();
         return view('admin.pages.product.physical', $data);
@@ -232,7 +234,7 @@ class ProductController extends Controller
 
     public function physicalProductAdd($data)
     {
-        $result  = ['success' => false];
+        $result = ['success' => false];
         if (Product::where('en_product_slug', $data['en_product_slug'])->count() > 0) {
             $enSlug = $data['en_product_slug'] . '-' . rand(100000, 999999);
         } else {
@@ -276,6 +278,7 @@ class ProductController extends Controller
             'New_Arrival' => $data['on_arrival'],
             'Voucher' => $this->generateRandomString(6),
             'points' => $data['points'] ?? 0,
+            'subcategory_id' => $data['subcategory_id']
         ]);
         if (!empty($product)) {
             if (isset($data['product_tag'])) {
@@ -306,7 +309,7 @@ class ProductController extends Controller
             //     $product->sizes()->sync($sizeid);
             // }
 
-        
+
 
             $result['success'] = true;
         }
@@ -315,7 +318,7 @@ class ProductController extends Controller
 
     public function digitalProductAdd($data)
     {
-        $result  = ['success' => false];
+        $result = ['success' => false];
         if (Product::where('en_product_slug', $data['en_product_slug'])->count() > 0) {
             $enSlug = $data['en_product_slug'] . '-' . rand(100000, 999999);
         } else {
@@ -379,7 +382,7 @@ class ProductController extends Controller
 
     public function licenseProductAdd($data)
     {
-        $result  = ['success' => false];
+        $result = ['success' => false];
         if (Product::where('en_product_slug', $data['en_product_slug'])->count() > 0) {
             $enSlug = $data['en_product_slug'] . '-' . rand(100000, 999999);
         } else {
@@ -444,7 +447,7 @@ class ProductController extends Controller
 
     public function affiliateProductAdd($data)
     {
-        $result  = ['success' => false];
+        $result = ['success' => false];
         if (Product::where('en_product_slug', $data['en_product_slug'])->count() > 0) {
             $enSlug = $data['en_product_slug'] . '-' . rand(100000, 999999);
         } else {
@@ -536,7 +539,7 @@ class ProductController extends Controller
     public function productEdit($product_type, $id)
     {
         $data['title'] = __('Product Edit');
-        $data['product'] = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('id', $id)->first();
+        $data['product'] = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags', 'subcategory')->where('id', $id)->first();
         $data['colors'] = Color::latest()->get();
         $data['sizes'] = Size::latest()->get();
         $data['size_price'] = $data['product']->sizes->pluck('pivot.size_id', 'pivot.price');
@@ -673,6 +676,7 @@ class ProductController extends Controller
     public function physicalProductUpdate($data, $product)
     {
 
+
         $result = ['success' => false];
         if (Product::where('en_Product_Slug', $data['en_product_slug'])->where('id', '!=', $product->id)->count() > 0) {
             $enSlug = $data['en_product_slug'] . '-' . rand(100000, 999999);
@@ -686,23 +690,23 @@ class ProductController extends Controller
         }
         $update = $product->update([
             'en_Product_Name' => $data['en_product_name'],
-            'en_Product_Slug' =>  $enSlug,
-            'Brand_Id' =>  null,
-            'Category_Id' =>  $data['en_category_name'],
+            'en_Product_Slug' => $enSlug,
+            'Brand_Id' => null,
+            'Category_Id' => $data['en_category_name'],
             'Price' => $data['price'],
-            'Discount' =>  $data['discount'],
+            'Discount' => $data['discount'],
             'Discount_Price' => $data['discount_price'],
-            'en_About' =>  $data['en_about'] ?? '',
+            'en_About' => $data['en_about'] ?? '',
             'en_Description' => $data['en_description'],
-            'en_ShippingReturn' =>  $data['en_shippingreturn'] ?? "",
-            'en_AdditionalInformation' =>  $data['en_additionalinformation'] ?? "",
+            'en_ShippingReturn' => $data['en_shippingreturn'] ?? "",
+            'en_AdditionalInformation' => $data['en_additionalinformation'] ?? "",
             'fr_Product_Name' => $data['fr_product_name'],
             'fr_Product_Slug' => $frSlug,
-            'fr_About' =>  $data['fr_about'] ?? '',
+            'fr_About' => $data['fr_about'] ?? '',
             'fr_Description' => $data['fr_description'],
             'fr_ShippingReturn' => $data['fr_shippingreturn'] ?? "",
             'fr_AdditionalInformation' => $data['fr_additionalinformation'] ?? "",
-            'Quantity' =>  $data['qty'],
+            'Quantity' => $data['qty'],
             // 'ItemTag' => $data['item_teg'],
             'Primary_Image' => $data['primary_image'],
             'Image2' => $data['img_two'],
@@ -716,6 +720,7 @@ class ProductController extends Controller
             'On_Sale' => $data['on_sale'],
             'New_Arrival' => $data['on_arrival'],
             'points' => $data['points'] ?? 0,
+            'subcategory_id' => $data['subcategory_id'] ?? null
         ]);
         if (!empty($update)) {
             if (isset($data['product_tag'])) {
@@ -937,7 +942,7 @@ class ProductController extends Controller
         return $text;
     }
 
-    public  function generateRandomString($length = 20)
+    public function generateRandomString($length = 20)
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $charactersLength = strlen($characters);
