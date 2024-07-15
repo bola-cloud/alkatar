@@ -43,12 +43,12 @@ class OrderController extends Controller
                     return $data->user != null ? $data->user->name : __('Guest User');
                 })
                 ->addColumn('GrandTotal', function ($data) {
-                    return  $data->Grand_Total . ' OMR';
+                    return $data->Grand_Total . ' OMR';
                 })
                 ->addColumn('Products', function ($data) {
                     $html = '';
                     foreach ($data->order_details as $or) {
-                        $html .= '<img src="' . asset(IMG_PRODUCT_PATH . $or->product->Primary_Image)  . '" border="0" height="50" class="img-rounded mr-1" align="center" />';
+                        $html .= '<img src="' . asset(IMG_PRODUCT_PATH . $or->product->Primary_Image) . '" border="0" height="50" class="img-rounded mr-1" align="center" />';
                     }
                     return $html;
                 })
@@ -160,6 +160,30 @@ class OrderController extends Controller
             return redirect()->back()->with('error', __('Something went wrong!'));
         }
         return redirect()->back()->with('error', __('Order not found!'));
+    }
+
+    public function bulkStatusUpdate(Request $request)
+    {
+        $orderIds = $request->input('order_ids', []);
+        $newStatus = $request->input('bulk_status');
+
+        if (empty($orderIds) || empty($newStatus)) {
+            return redirect()->back()->with('error', __('Please select orders and a status.'));
+        }
+
+        $updated = Order::whereIn('id', $orderIds)->update(['Order_Status' => $newStatus]);
+
+        if ($updated) {
+            // Send status change emails
+            $orders = Order::whereIn('id', $orderIds)->get();
+            // foreach ($orders as $order) {
+            //     $this->statusChangeEmail($order, $newStatus);
+            // }
+
+            return redirect()->back()->with('success', __('Orders status updated successfully.'));
+        }
+
+        return redirect()->back()->with('error', __('Failed to update orders status.'));
     }
 
     public function statusChangeEmail($order, $order_status)

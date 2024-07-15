@@ -1,15 +1,25 @@
 (function ($) {
     "use strict";
     $(document).ready(function () {
-        $('#AdvertiseTable').DataTable({
+        var table = $('#AdvertiseTable').DataTable({
             processing: true,
             serverSide: true,
             ajax: $('#table-url').data("url"),
             columns: [
                 {
+                    data: 'id',
+                    name: 'id',
+                    orderable: false,
+                    searchable: false,
+                    render: function (data) {
+                        return '<input type="checkbox" name="order_ids[]" value="' + data + '">';
+                    }
+                },
+                {
                     data: 'DT_RowIndex',
                     name: 'DT_RowIndex',
-                    orderable: false, searchable: false
+                    orderable: false,
+                    searchable: false
                 },
                 {
                     data: 'Order_Number',
@@ -23,10 +33,6 @@
                     data: 'Products',
                     name: 'Products'
                 },
-                // {
-                //     data: 'types',
-                //     name: 'types'
-                // },
                 {
                     data: 'GrandTotal',
                     name: 'GrandTotal'
@@ -54,6 +60,30 @@
                 }
             ]
         });
+
+        // Select all checkbox functionality
+        $('#select-all-checkbox').on('change', function() {
+            $('input[name="order_ids[]"]').prop('checked', this.checked);
+        });
+
+        // Deselect "select all" if any checkbox is unchecked
+        $('#AdvertiseTable').on('change', 'input[name="order_ids[]"]', function() {
+            if (!this.checked) {
+                $('#select-all-checkbox').prop('checked', false);
+            }
+        });
+
+        // Bulk action form submission
+        $('#bulk-action-form').on('submit', function(e) {
+            e.preventDefault();
+            if ($('input[name="order_ids[]"]:checked').length > 0) {
+                if (confirm("Are you sure you want to update the status of selected orders?")) {
+                    this.submit();
+                }
+            } else {
+                alert("Please select at least one order.");
+            }
+        });
     });
 
     $('#print-now').on('click', function () {
@@ -62,8 +92,7 @@
         w.print();
         w.close();
     });
-})(jQuery)
-
+})(jQuery);
 
 function orderDetails(id) {
     $.post(
@@ -80,6 +109,7 @@ function orderDetails(id) {
         }
     );
 }
+
 function orderStatusEdit(id) {
     $.post(
         ROUTE_ORDER_STATUS_EDIT,

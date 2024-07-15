@@ -13,8 +13,7 @@
             <div class="breadcrumb__content__right">
                 <nav aria-label="breadcrumb">
                     <ul class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Home') }}</a>
-                        </li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Home') }}</a></li>
                         <li class="breadcrumb-item active" aria-current="page">{{ __('Orders') }}</li>
                     </ul>
                 </nav>
@@ -22,50 +21,65 @@
         </div>
     </div>
 </div>
-
 <div class="row">
     <div class="col-md-12">
         <div class="customers__area bg-style mb-30">
             <div class="customers__table">
-                <table id="AdvertiseTable" class="row-border data-table-filter table-style">
-                    <thead>
-                        <tr>
-                            <th>{{ __('SL') }}</th>
-                            <th>{{ __('Id') }}</th>
-                            <th>{{ __('User') }}</th>
-                            <th>{{ __('Products') }}</th>
-                            <!-- <th>{{ __('Types') }}</th> -->
-                            <th>{{ __('Total Amount') }}</th>
-                            <th>{{ __('Coupon Code') }}</th>
-                            <th>{{ __('Payment Method') }}</th>
-                            <th>{{ __('Digital Goods') }}</th>
-                            <th>{{ __('Status') }}</th>
-                            <th>{{ __('Action') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
+                <form action="{{ route('admin.orders.bulk_status_update') }}" method="POST" id="bulk-action-form">
+                    @csrf
+                    <div class="bulk-action-wrapper mb-3">
+                        <select name="bulk_status" id="bulk-status-select"
+                            class="form-control d-inline-block w-auto mr-2">
+                            <option value="">{{ __('Bulk Action') }}</option>
+                            <option value="{{ ORDER_PENDING }}">{{ __('Pending') }}</option>
+                            <option value="{{ ORDER_PROCESSING }}">{{ __('Processing') }}</option>
+                            <option value="{{ ORDER_SHIPPED }}">{{ __('Shipped') }}</option>
+                            <option value="{{ ORDER_DELIVERED }}">{{ __('Delivered') }}</option>
+                            <option value="{{ ORDER_CANCELLED }}">{{ __('Cancelled') }}</option>
+                            <option value="{{ ORDER_RETURN }}">{{ __('Returned') }}</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary" id="bulk-apply-btn">{{ __('Apply') }}</button>
+                    </div>
+                    <table id="AdvertiseTable" class="row-border data-table-filter table-style">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="select-all-checkbox"></th>
+                                <th>{{ __('SL') }}</th>
+                                <th>{{ __('Id') }}</th>
+                                <th>{{ __('User') }}</th>
+                                <th>{{ __('Products') }}</th>
+                                <th>{{ __('Total Amount') }}</th>
+                                <th>{{ __('Coupon Code') }}</th>
+                                <th>{{ __('Payment Method') }}</th>
+                                <th>{{ __('Digital Goods') }}</th>
+                                <th>{{ __('Status') }}</th>
+                                <th>{{ __('Action') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </form>
             </div>
         </div>
     </div>
 </div>
-
-<!--  modal -->
-<div class="modal fade bd-example-modal-lg" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="invoiceModalTitle" aria-hidden="true">
+<!-- modal -->
+<div class="modal fade bd-example-modal-lg" id="dataModal" tabindex="-1" role="dialog"
+    aria-labelledby="invoiceModalTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
         </div>
     </div>
 </div>
+@endsection
 
 @push('post_scripts')
-<script>
-    const ROUTE_ORDER_DETAILS = "{{ route('admin.order.details') }}";
-    const ROUTE_ORDER_STATUS_EDIT = "{{ route('admin.order_status_edit') }}";
-    const CSRF_TOKEN = "{{ csrf_token() }}";
-</script>
-<script src="{{ asset('backend/js/admin/datatables/orders.js') }}"></script>
-<!-- Page level custom scripts -->
+    <script>
+        const ROUTE_ORDER_DETAILS = "{{ route('admin.order.details') }}";
+        const ROUTE_ORDER_STATUS_EDIT = "{{ route('admin.order_status_edit') }}";
+        const CSRF_TOKEN = "{{ csrf_token() }}";
+    </script>
+    <script src="{{ asset('backend/js/admin/datatables/orders.js') }}"></script>
+
 @endpush
-@endsection

@@ -297,6 +297,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin', 'en.loca
     Route::get('/order-delete/{id}', [OrderController::class, 'orderDelete'])->name('order_delete')->middleware(['permission:order-delete', 'isDemo']);
     Route::get('/order/digital-products/{id}', [OrderController::class, 'digitalProductSend'])->name('digital_product_send')->middleware(['permission:order-edit']);
     Route::post('/order/digital-products-mail', [OrderController::class, 'digitalProductMail'])->name('digital_product_mail')->middleware(['permission:order-edit', 'isDemo']);
+    Route::post('/admin/orders/bulk-status-update', [OrderController::class, 'bulkStatusUpdate'])->name('orders.bulk_status_update');
 
     Route::get('/transactions', [OrderController::class, 'transactionsList'])->name('transactions')->middleware(['permission:transaction-list|transaction-create|transaction-edit|transaction-delete']);
 
