@@ -2,12 +2,12 @@
 <div class="offcanvas offcanvas-start menu-offcanvas" tabindex="-1" id="offcanvasMobileMenu">
     <div class="mobile-menu-area">
         <div class="offcanvas-header">
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             <a class="brand-logo" href="{{ route('front') }}"><img class="brand-image"
                     src="{{ asset(IMG_LOGO_PATH . $allsettings['main_logo']) }}"
                     alt="{{ $allsettings['app_title'] }}" /></a>
-            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-        <div class="menu-search-form">
+        <!-- <div class="menu-search-form">
             <form>
                 <div class="search-wrap">
                     <select class="form-select">
@@ -21,13 +21,25 @@
 
                 </div>
             </form>
-        </div>
+        </div> -->
         <nav class="main-menu">
             <ul class="menu-list">
                 @foreach ($all_menus as $menu)
                     @if ($menu->submenus->count() == 0)
                         <li class="menu-item"><a class="menu-link"
                                 href="{{ $menu->url }}">{{ langConverter($menu->en_name, $menu->fr_name) }}</a>
+                        </li>
+                    @elseif (strtolower($menu->en_name) === "categories")
+                        <li class="menu-item">
+                            <span class="menu-expand"></span>
+                            <a class="menu-link" href="#">{{ langConverter($menu->en_name, $menu->fr_name) }}</a>
+                            <ul class="sub-menu">
+                                @foreach (Category_Des_Icon() as $submenu)
+                                    <li class="sub-menu-item"><a class="sub-menu-link"
+                                            href="{{route('category.product', $item->id)}}">{{ langConverter($submenu->en_Category_Name, $submenu->fr_Category_Name) }}</a>
+                                    </li>
+                                @endforeach
+                            </ul>
                         </li>
                     @else
                         <li class="menu-item">

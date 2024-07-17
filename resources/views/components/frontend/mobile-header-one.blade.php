@@ -8,15 +8,6 @@
                             alt="{{ __('zairito') }}" /></a>
                 </div>
 
-                <div class="search-area">
-                    <form action="{{ route('category.product') }}" method="get">
-                        <div class="search-wrap">
-                            <input type="text" class="form-control" id="search" name="search"
-                                placeholder="{{ __('Search Here') }}" style="border-radius: 0 !important;" />
-                            <button type="submit" class="search-btn"><i class="flaticon-search"></i></button>
-                        </div>
-                    </form>
-                </div>
                 <div class="header-right">
                     {{-- <a href="{{ route('wishlist') }}" class="wishlist-btn header-btn">
                         <div class="btn-left">
@@ -46,6 +37,17 @@
 
 
                 </div>
+            </div>
+
+
+            <div class="search-area mt-3 !w-full !max-w-full mx-auto">
+                <form action="{{ route('category.product') }}" method="get">
+                    <div class="search-wrap">
+                        <input type="text" class="form-control" id="search" name="search"
+                            placeholder="{{ __('Search Here') }}" style="border-radius: 0 !important;" />
+                        <button type="submit" class="search-btn"><i class="flaticon-search"></i></button>
+                    </div>
+                </form>
             </div>
 
         </div>
