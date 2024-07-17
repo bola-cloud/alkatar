@@ -30,20 +30,20 @@
                         </div>
                         <div class="space-y-4">
                             <label for="billing_name"
-                                class="block text-lg font-medium text-gray-700">{{ __('Name') }}</label>
+                                class="block text-lg xl:text-2xl font-medium text-gray-700">{{ __('Name') }}</label>
                             <input type="text" class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl"
                                 id="billing_name" name="billing_name" placeholder="{{ __('Name') }}"
                                 value="{{ isset($billing) ? $billing->Name ?? $billing->name : '' }}" required />
 
                             <label for="billing_email"
-                                class="block text-lg font-medium text-gray-700">{{ __('Email Address (Optional)') }}</label>
+                                class="block text-lg xl:text-2xl font-medium text-gray-700">{{ __('Email Address (Optional)') }}</label>
                             <input type="email" class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl"
                                 id="billing_email" name="billing_email" placeholder="{{ __('Email Address') }}"
                                 value="{{ isset($billing) ? $billing->Email ?? $billing->email : '' }}" required />
 
                             <div class="relative">
                                 <label for="billing_country"
-                                    class="block text-lg font-medium text-gray-700">{{ __('Governorate') }}</label>
+                                    class="block text-lg xl:text-2xl font-medium text-gray-700 mb-2">{{ __('Governorate') }}</label>
                                 <select class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl"
                                     id="billing_country" name="billing_country" required>
                                     <option>{{ __('Governorate') }}</option>
@@ -58,7 +58,7 @@
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <div class="w-full">
                                     <label for="billing_state"
-                                        class="block text-lg font-medium text-gray-700">{{ __('State') }}</label>
+                                        class="block text-lg xl:text-2xl font-medium text-gray-700 mb-2">{{ __('State') }}</label>
                                     <input type="text"
                                         class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl"
                                         id="billing_state" name="billing_state" placeholder="{{ __('State') }}"
@@ -74,8 +74,8 @@
                                 </div>
                             </div>
 
-                            <label for="billing_street_address"
-                                class="block text-lg font-medium text-gray-700">{{ __('Street Address (Optional)') }}</label>
+                            <label for="billing_street_address mb-2"
+                                class="block text-lg xl:text-2xl font-medium text-gray-700">{{ __('Street Address (Optional)') }}</label>
                             <input type="text" class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl"
                                 id="billing_street_address" name="billing_street_address"
                                 placeholder="{{ __('Street Address') }}"
@@ -117,7 +117,7 @@
 
                                 <div class="flex gap-3 space-x-2 mt-4">
                                     <input type="checkbox" class="form-check-input" id="agree" required />
-                                    <label class="form-check-label text-lg lg:text-xl" for="agree">
+                                    <label class="form-check-label text-lg lg:text-2xl" for="agree">
                                         {{ __('By clicking the button you agree to our') }}
                                         <a href="{{ route('terms.conditions') }}"
                                             class="text-primary-red">{{ __('Terms & Conditions') }}</a>
