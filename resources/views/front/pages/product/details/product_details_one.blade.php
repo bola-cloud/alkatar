@@ -18,28 +18,28 @@
                                         alt="{{ __('product') }}" />
                                 </div>
                                 @if ($products->Image4)
-                                <div class="single-slide">
-                                    <img class="slide-image" src="{{ asset(ProductImage() . $products->Image4) }}"
-                                        alt="{{ __('product') }}" />
-                                </div>
+                                    <div class="single-slide">
+                                        <img class="slide-image" src="{{ asset(ProductImage() . $products->Image4) }}"
+                                            alt="{{ __('product') }}" />
+                                    </div>
                                 @endif
                                 @if ($products->Image3)
-                                <div class="single-slide">
-                                    <img class="slide-image" src="{{ asset(ProductImage() . $products->Image3) }}"
-                                        alt="{{ __('product') }}" />
-                                </div>
+                                    <div class="single-slide">
+                                        <img class="slide-image" src="{{ asset(ProductImage() . $products->Image3) }}"
+                                            alt="{{ __('product') }}" />
+                                    </div>
                                 @endif
                                 @if ($products->Image5)
-                                <div class="single-slide">
-                                    <img class="slide-image" src="{{ asset(ProductImage() . $products->Image5) }}"
-                                        alt="{{ __('product') }}" />
-                                </div>
+                                    <div class="single-slide">
+                                        <img class="slide-image" src="{{ asset(ProductImage() . $products->Image5) }}"
+                                            alt="{{ __('product') }}" />
+                                    </div>
                                 @endif
                                 @if ($products->Image2)
-                                <div class="single-slide">
-                                    <img class="slide-image" src="{{ asset(ProductImage() . $products->Image2) }}"
-                                        alt="{{ __('product') }}" />
-                                </div>
+                                    <div class="single-slide">
+                                        <img class="slide-image" src="{{ asset(ProductImage() . $products->Image2) }}"
+                                            alt="{{ __('product') }}" />
+                                    </div>
                                 @endif
 
                             </div>
@@ -52,25 +52,25 @@
                                         src="{{ asset(ProductImage() . $products->Primary_Image) }}"
                                         alt="{{ __('product') }}" /></li>
                                 @if ($products->Image4)
-                                <li class="single-item"><img class="single-item-image"
-                                        src="{{ asset(ProductImage() . $products->Image4) }}"
-                                        alt="{{ __('product') }}" />
-                                </li>
+                                    <li class="single-item"><img class="single-item-image"
+                                            src="{{ asset(ProductImage() . $products->Image4) }}"
+                                            alt="{{ __('product') }}" />
+                                    </li>
                                 @endif
                                 @if ($products->Image3)
-                                <li class="single-item"><img class="single-item-image"
-                                        src="{{ asset(ProductImage() . $products->Image3) }}"
-                                        alt="{{ __('product') }}" /></li>
+                                    <li class="single-item"><img class="single-item-image"
+                                            src="{{ asset(ProductImage() . $products->Image3) }}"
+                                            alt="{{ __('product') }}" /></li>
                                 @endif
                                 @if ($products->Image5)
-                                <li class="single-item"><img class="single-item-image"
-                                        src="{{ asset(ProductImage() . $products->Image5) }}"
-                                        alt="{{ __('product') }}" /></li>
+                                    <li class="single-item"><img class="single-item-image"
+                                            src="{{ asset(ProductImage() . $products->Image5) }}"
+                                            alt="{{ __('product') }}" /></li>
                                 @endif
                                 @if ($products->Image2)
-                                <li class="single-item"><img class="single-item-image"
-                                        src="{{ asset(ProductImage() . $products->Image2) }}"
-                                        alt="{{ __('product') }}" /></li>
+                                    <li class="single-item"><img class="single-item-image"
+                                            src="{{ asset(ProductImage() . $products->Image2) }}"
+                                            alt="{{ __('product') }}" /></li>
                                 @endif
                             </ul>
                         </div>
@@ -83,7 +83,7 @@
                             <div class="product-name flex">
                                 {{ langConverter($products->en_Product_Name, $products->fr_Product_Name) }}
                                 @foreach ($products->product_tags as $ppt)
-                                <h4 class="product-catagory">{{ langConverter($ppt->tag, $ppt->tag_ar) }}</h4>
+                                    <h4 class="product-catagory">{{ langConverter($ppt->tag, $ppt->tag_ar) }}</h4>
                                 @endforeach
                             </div>
                             <!-- This is server side code. User can not modify it. -->
@@ -93,37 +93,42 @@
                             </div>
 
                             <div class="product-price relative">
-                                @if (currencyConverter($products->Price) ==
-                                currencyConverter($products->Discount_Price))
-                                <span class="price">{{ currencyConverter($products->Discount_Price) }}</span>
+                                @if (
+                                        currencyConverter($products->Price) ==
+                                        currencyConverter($products->Discount_Price)
+                                    )
+                                                                    <span class="price">{{ currencyConverter($products->Discount_Price) }}</span>
                                 @else
-                                <span class="price">{{ currencyConverter($products->Discount_Price) }}</span>
-                                <span class="regular-price">{{ currencyConverter($products->Price) }}</span>
-                                <span
-                                    class="absolute start-[25rem] bg-red-100 text-red-400 rounded-full px-4 py-1 text-lg font-bold">
-                                    {{__("Discount (-)")}}{{number_format($products->Discount, 0)}}%</span>
+                                    <span class="price">{{ currencyConverter($products->Discount_Price) }}</span>
+                                    <span class="regular-price">{{ currencyConverter($products->Price) }}</span>
+                                    <span
+                                        class="absolute start-[25rem] bg-red-100 text-red-400 rounded-full px-4 py-1 text-lg font-bold">
+                                        {{__("Discount (-)")}}{{number_format($products->Discount, 0)}}%</span>
                                 @endif
                             </div>
 
                             @if (isset($products->points) && $products->points > 0)
-                            <p class="text-3xl text-primary-red font-bold">{{ __("Win Points", ['points' =>
-                                $products->points]) }}</p>
+                                                        <p class="text-3xl text-primary-red font-bold">{{ __("Win Points", [
+                                    'points' =>
+                                        $products->points
+                                ]) }}</p>
                             @endif
 
 
-                            <p class="note-text">{{ langConverter($products->en_About, $products->fr_About) }}
+                            <p class="note-text">
+                                {!! langConverter($products->en_About, $products->fr_About) !!}
                             </p>
 
                             <div class="product-color-area">
                                 <div class="variable-single-item color-switch">
                                     <div class="product-variable-color">
                                         @foreach ($products->colors as $color)
-                                        <label>
-                                            <input type="hidden" name="colorId" value="{{ $color->id }}">
-                                            <input name="productColor" class="color-select" type="radio"
-                                                value="{{ $color->id }}">
-                                            <span style="background:{{ $color->ColorCode }};"></span>
-                                        </label>
+                                            <label>
+                                                <input type="hidden" name="colorId" value="{{ $color->id }}">
+                                                <input name="productColor" class="color-select" type="radio"
+                                                    value="{{ $color->id }}">
+                                                <span style="background:{{ $color->ColorCode }};"></span>
+                                            </label>
                                         @endforeach
                                     </div>
                                 </div>
@@ -133,35 +138,39 @@
                                 <h4 class="size-title">{{ __('Size') }}:</h4>
                                 <div class="size-switch ">
                                     @foreach ($products->sizes as $size)
-                                    <div>
-                                        <label for="size-{{ $size->id }}" class="size-option">
-                                            <input type="radio" name="size" value="{{ $size->pivot->price }}"
-                                                class="size-radio" data-size="{{ $size->id }}" id="size-{{ $size->id }}"
-                                                {{ $loop->first ? 'checked' : '' }}>
-                                            <span class="size-label font-bold">{{ langConverter($size->Size, $size->Size_ar) }}</span> -
-                                            <span class="size-price">{{ currencyConverter($size->pivot->price) }}</span>
-                                        </label>
-                                    </div>
+                                        <div>
+                                            <label for="size-{{ $size->id }}" class="size-option">
+                                                <input type="radio" name="size" value="{{ $size->pivot->price }}"
+                                                    class="size-radio" data-size="{{ $size->id }}" id="size-{{ $size->id }}"
+                                                    {{ $loop->first ? 'checked' : '' }}>
+                                                <span
+                                                    class="size-label font-bold">{{ langConverter($size->Size, $size->Size_ar) }}</span>
+                                                -
+                                                <span class="size-price">{{ currencyConverter($size->pivot->price) }}</span>
+                                            </label>
+                                        </div>
                                     @endforeach
                                 </div>
                             </div>
 
                             @if ($products->additions->count() > 0)
-                            <div class="product-addition-area border-t pt-16">
-                                <h4 class="addition-title">{{ __('Additions') }}:</h4>
-                                <div class="addition-switch">
-                                    @foreach ($products->additions as $addition)
-                                    <label for="addition-{{ $addition->id }}" class="addition-option">
-                                        <input type="checkbox" name="addition[]" value="{{ $addition->price }}"
-                                            class="addition-checkbox" data-addition="{{ $addition->id }}"
-                                            id="addition-{{ $addition->id }}">
-                                        <span class="addition-label font-bold">{{ langConverter($addition->name,
-                                            $addition->name_ar) }}</span> -
-                                        <span class="addition-price">{{ currencyConverter($addition->price) }}</span>
-                                    </label>
-                                    @endforeach
-                                </div>
-                            </div>
+                                                <div class="product-addition-area border-t pt-16">
+                                                    <h4 class="addition-title">{{ __('Additions') }}:</h4>
+                                                    <div class="addition-switch">
+                                                        @foreach ($products->additions as $addition)
+                                                                                    <label for="addition-{{ $addition->id }}" class="addition-option">
+                                                                                        <input type="checkbox" name="addition[]" value="{{ $addition->price }}"
+                                                                                            class="addition-checkbox" data-addition="{{ $addition->id }}"
+                                                                                            id="addition-{{ $addition->id }}">
+                                                                                        <span class="addition-label font-bold">{{ langConverter(
+                                                                $addition->name,
+                                                                $addition->name_ar
+                                                            ) }}</span> -
+                                                                                        <span class="addition-price">{{ currencyConverter($addition->price) }}</span>
+                                                                                    </label>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
                             @endif
 
 
@@ -179,9 +188,9 @@
                                         alt="icon" /><strong class="feature-title">{{ __('Shipping Charge:')
                                         }}</strong><span class="feature-text">
                                         @if (@allsetting()['shipping_free_text'])
-                                        {{ @allsetting()['shipping_free_text'] }}
+                                            {{ @allsetting()['shipping_free_text'] }}
                                         @else
-                                        {{ currencyConverter(allsetting()['shipping_charge']) }}
+                                            {{ currencyConverter(allsetting()['shipping_charge']) }}
                                         @endif
                                         {{-- {{ __('On all orders over') }}
                                         {{ currencyConverter(allsetting()['shipping_charge']) }} --}}
@@ -271,29 +280,29 @@
 
                         <div class="reviews-list">
                             @forelse($products->product_reviews as $review)
-                            <div class="single-review">
-                                <div class="reviewer">
-                                    <div class="reviewer-wrap">
-                                        <img class="reviewer-image"
-                                            src="{{ isset($review->user->image) ? asset(AdminProfilePicture() . $review->user->image) : Avatar::create($review->user->name)->toBase64() }}"
-                                            alt="reviewer-image" />
-                                        <h4 class="reviewer-name">{{ $review->user->name }}</h4>
-                                    </div>
-                                </div>
-                                <div class="review-middle">
-                                    <!-- This is server side code. User can not modify it. -->
-                                    {!! reviewRating($review->id) !!}
-                                    <span class="remiew-time">{{
-                                        \Carbon\Carbon::parse($review->created_at)->diffForHumans() }}</span>
-                                </div>
-                                <h4 class="review-meta"><span class="time">{{
-                                        \Carbon\Carbon::parse($review->created_at)->format('jS M Y') }}
-                                    </span> by <a class="author" href="javascript:void(0)">{{ $review->user->name }}</a>
-                                </h4>
-                                <p class="review-text">{{ $review->feedback }}</p>
-                            </div>
+                                                    <div class="single-review">
+                                                        <div class="reviewer">
+                                                            <div class="reviewer-wrap">
+                                                                <img class="reviewer-image"
+                                                                    src="{{ isset($review->user->image) ? asset(AdminProfilePicture() . $review->user->image) : Avatar::create($review->user->name)->toBase64() }}"
+                                                                    alt="reviewer-image" />
+                                                                <h4 class="reviewer-name">{{ $review->user->name }}</h4>
+                                                            </div>
+                                                        </div>
+                                                        <div class="review-middle">
+                                                            <!-- This is server side code. User can not modify it. -->
+                                                            {!! reviewRating($review->id) !!}
+                                                            <span class="remiew-time">{{
+                                \Carbon\Carbon::parse($review->created_at)->diffForHumans() }}</span>
+                                                        </div>
+                                                        <h4 class="review-meta"><span class="time">{{
+                                \Carbon\Carbon::parse($review->created_at)->format('jS M Y') }}
+                                                            </span> by <a class="author" href="javascript:void(0)">{{ $review->user->name }}</a>
+                                                        </h4>
+                                                        <p class="review-text">{{ $review->feedback }}</p>
+                                                    </div>
                             @empty
-                            <h1>{{ __('No Review Yet!') }}</h1>
+                                <h1>{{ __('No Review Yet!') }}</h1>
                             @endforelse
 
                         </div>
@@ -331,10 +340,10 @@
 
         <div class="offers-box-slide">
             @forelse($similar_product as $product)
-            <x-frontend.product-card :product="$product" />
+                <x-frontend.product-card :product="$product" />
 
             @empty
-            <h1>{{ __('No related product found!') }}</h1>
+                <h1>{{ __('No related product found!') }}</h1>
             @endforelse
         </div>
     </div>
@@ -342,71 +351,71 @@
 @endsection
 
 @push('post_script')
-<script>
-    // $(document).ready(function() {
-    //     // Get the original price from the page
-    //     var originalPrice = parseFloat($('.single-size input[type="radio"]:checked').val());
-    //     var additionPrice = 0;
+    <script>
+        // $(document).ready(function() {
+        //     // Get the original price from the page
+        //     var originalPrice = parseFloat($('.single-size input[type="radio"]:checked').val());
+        //     var additionPrice = 0;
 
-    //     // Set the initial price based on the first selected size
-    //     $('.product-price .price').text('OMR ' + originalPrice.toFixed(2));
-    //     $('.addCart').attr('data-price', originalPrice);
-    //     $('.addCart').attr('data-size-id', $('.single-size input[type="radio"]:checked').data('size'));
+        //     // Set the initial price based on the first selected size
+        //     $('.product-price .price').text('OMR ' + originalPrice.toFixed(2));
+        //     $('.addCart').attr('data-price', originalPrice);
+        //     $('.addCart').attr('data-size-id', $('.single-size input[type="radio"]:checked').data('size'));
 
-    //     // Update price and data attributes when a size is selected
-    //     $('.single-size').on('click', function() {
-    //         var sizeRadio = $(this).find('.size-radio');
-    //         sizeRadio.prop('checked', true);
-    //         originalPrice = parseFloat(sizeRadio.val());
-    //         $('.product-price .price').text('OMR ' + (originalPrice + additionPrice).toFixed(2));
-    //         $('.addCart').attr('data-price', originalPrice + additionPrice);
-    //         $('.addCart').attr('data-size-id', sizeRadio.data('size'));
-    //     });
+        //     // Update price and data attributes when a size is selected
+        //     $('.single-size').on('click', function() {
+        //         var sizeRadio = $(this).find('.size-radio');
+        //         sizeRadio.prop('checked', true);
+        //         originalPrice = parseFloat(sizeRadio.val());
+        //         $('.product-price .price').text('OMR ' + (originalPrice + additionPrice).toFixed(2));
+        //         $('.addCart').attr('data-price', originalPrice + additionPrice);
+        //         $('.addCart').attr('data-size-id', sizeRadio.data('size'));
+        //     });
 
-    //     // Update price and data attributes when an addition is selected
-    //     $('.single-addition').on('click', function() {
-    //         var additionRadio = $(this).find('.addition-radio');
-    //         additionRadio.prop('checked', true);
-    //         additionPrice = parseFloat(additionRadio.val());
-    //         $('.product-price .price').text('OMR ' + (originalPrice + additionPrice).toFixed(2));
-    //         $('.addCart').attr('data-price', originalPrice + additionPrice);
-    //         $('.addCart').attr('data-addition-id', additionRadio.data('addition'));
-    //     });
-    // });
-    $(document).ready(function() {
-        // Get the initial price from the first selected size
-        var sizePrice = parseFloat($('.size-switch input[type="radio"]:checked').val());
-        var selectedAdditions = [];
+        //     // Update price and data attributes when an addition is selected
+        //     $('.single-addition').on('click', function() {
+        //         var additionRadio = $(this).find('.addition-radio');
+        //         additionRadio.prop('checked', true);
+        //         additionPrice = parseFloat(additionRadio.val());
+        //         $('.product-price .price').text('OMR ' + (originalPrice + additionPrice).toFixed(2));
+        //         $('.addCart').attr('data-price', originalPrice + additionPrice);
+        //         $('.addCart').attr('data-addition-id', additionRadio.data('addition'));
+        //     });
+        // });
+        $(document).ready(function () {
+            // Get the initial price from the first selected size
+            var sizePrice = parseFloat($('.size-switch input[type="radio"]:checked').val());
+            var selectedAdditions = [];
 
-        // Set the initial total price
-        updateTotalPrice();
-
-        // Update price and data attributes when a size is selected
-        $('.size-switch input[type="radio"]').on('change', function() {
-            sizePrice = parseFloat($(this).val());
+            // Set the initial total price
             updateTotalPrice();
-            $('.addCart').attr('data-size-id', $(this).data('size'));
+
+            // Update price and data attributes when a size is selected
+            $('.size-switch input[type="radio"]').on('change', function () {
+                sizePrice = parseFloat($(this).val());
+                updateTotalPrice();
+                $('.addCart').attr('data-size-id', $(this).data('size'));
+            });
+
+            // Handle addition selection
+            $('.addition-switch input[type="checkbox"]').on('change', function () {
+                var additionId = $(this).data('addition');
+                var additionPrice = parseFloat($(this).val());
+
+                if ($(this).is(':checked')) {
+                    selectedAdditions.push({ id: additionId, price: additionPrice });
+                } else {
+                    selectedAdditions = selectedAdditions.filter(addition => addition.id !== additionId);
+                }
+                updateTotalPrice();
+            });
+
+            // Function to update the total price display
+            function updateTotalPrice() {
+                var totalPrice = sizePrice + selectedAdditions.reduce((sum, addition) => sum + addition.price, 0);
+                $('.product-price .price').text('OMR ' + totalPrice.toFixed(2));
+                $('.addCart').attr('data-price', totalPrice);
+            }
         });
-
-        // Handle addition selection
-      $('.addition-switch input[type="checkbox"]').on('change', function() {
-        var additionId = $(this).data('addition');
-        var additionPrice = parseFloat($(this).val());
-        
-        if ($(this).is(':checked')) {
-            selectedAdditions.push({ id: additionId, price: additionPrice });
-        } else {
-            selectedAdditions = selectedAdditions.filter(addition => addition.id !== additionId);
-        }
-        updateTotalPrice();
-    });
-
-        // Function to update the total price display
-        function updateTotalPrice() {
-        var totalPrice = sizePrice + selectedAdditions.reduce((sum, addition) => sum + addition.price, 0);
-        $('.product-price .price').text('OMR ' + totalPrice.toFixed(2));
-        $('.addCart').attr('data-price', totalPrice);
-    }
-    });
-</script>
+    </script>
 @endpush
