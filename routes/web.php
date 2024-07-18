@@ -207,7 +207,7 @@ Route::get('/sync-products', function () {
                     'Primary_Image' => $record['Main Image'],
                     // 'Status' => $record['Status'],
                     'Status' => 1,
-                    'Brand_Id' => $record['Manufacturer ID'],
+                    'Brand_Id' => null,
                 ]
             ];
         }
