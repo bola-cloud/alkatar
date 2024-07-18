@@ -20,7 +20,7 @@ class ProductController extends Controller
         if (!empty($product)) {
             $cat_id = $product->category->id;
 
-            $data['similar_product'] =  Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('status', 1)
+            $data['similar_product'] = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('status', 1)
                 ->where('Category_Id', $cat_id)
                 ->where('id', '!=', $product->id)
                 ->latest()->take(5)->get();
@@ -150,7 +150,7 @@ class ProductController extends Controller
         return 'something wrong';
     }
 
-    public function  productFilteringLeftSide(Request $request)
+    public function productFilteringLeftSide(Request $request)
     {
         if ($request->ajax()) {
             if ($request->checkCat) {
@@ -197,7 +197,7 @@ class ProductController extends Controller
                 ->where('status', 1)
                 ->where('Category_Id', $id)
                 ->latest()
-                ->paginate(9);
+                ->paginate(10); // Changed from 9 to 10
             $data['category'] = $category;
         } else {
             // General search across all categories
@@ -209,10 +209,12 @@ class ProductController extends Controller
                         ->orWhere('fr_Product_Name', 'LIKE', "%{$search}%");
                 })
                 ->latest()
-                ->paginate(9);
+                ->paginate(10); // Changed from 9 to 10
         }
 
         $data['products'] = $products;
+
+        // dd($products->count());
 
         if ($products->count() > 0) {
             return view('front.pages.product.category_wise_product', $data);
