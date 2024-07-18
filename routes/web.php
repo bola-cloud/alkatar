@@ -178,7 +178,7 @@ Route::get("/thawani-success", [CheckoutController::class, "paymentSuccess"])->n
 Route::get('/sync-products', function () {
     ini_set('max_execution_time', 1800); // 10 minutes
 
-    $csv = Reader::createFromPath(storage_path('products.csv'), 'r');
+    $csv = Reader::createFromPath(storage_path('minor-products.csv'), 'r');
     $csv->setHeaderOffset(0);
     $records = $csv->getRecords();
 

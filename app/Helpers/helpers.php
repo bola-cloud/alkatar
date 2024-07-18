@@ -184,7 +184,7 @@ if (!function_exists('Category')) {
 if (!function_exists('Category_Des_Icon')) {
     function Category_Des_Icon()
     {
-        return Category::where('en_Description', '!=', null)->orWhere('Category_Icon', '!=', null)->get();
+        return Category::all();
     }
 }
 if (!function_exists('BrandImage')) {
@@ -269,7 +269,7 @@ if (!function_exists('currency')) {
         if (session()->has('currency')) {
             return session()->get('currency');
         }
-        
+
         return 'USD';
     }
 }
@@ -572,7 +572,7 @@ if (!function_exists('reviewRating')) {
         $review = ProductReview::whereId($review_id)->first();
         $html = '';
         if ($review->rating == 1) {
-            $html =  '<ul class="product-review">
+            $html = '<ul class="product-review">
                     <li class="review-item active"><i class="flaticon-star"></i></li>
                     <li class="review-item"><i class="flaticon-star"></i></li>
                     <li class="review-item"><i class="flaticon-star"></i></li>
@@ -580,7 +580,7 @@ if (!function_exists('reviewRating')) {
                     <li class="review-item"><i class="flaticon-star"></i></li>
                 </ul>';
         } elseif ($review->rating == 2) {
-            $html =  '<ul class="product-review">
+            $html = '<ul class="product-review">
                     <li class="review-item active"><i class="flaticon-star"></i></li>
                     <li class="review-item active"><i class="flaticon-star"></i></li>
                     <li class="review-item"><i class="flaticon-star"></i></li>
@@ -588,7 +588,7 @@ if (!function_exists('reviewRating')) {
                     <li class="review-item"><i class="flaticon-star"></i></li>
                 </ul>';
         } elseif ($review->rating == 3) {
-            $html =  '<ul class="product-review">
+            $html = '<ul class="product-review">
                     <li class="review-item active"><i class="flaticon-star"></i></li>
                     <li class="review-item active"><i class="flaticon-star"></i></li>
                     <li class="review-item active"><i class="flaticon-star"></i></li>
@@ -596,7 +596,7 @@ if (!function_exists('reviewRating')) {
                     <li class="review-item"><i class="flaticon-star"></i></li>
                 </ul>';
         } elseif ($review->rating == 4) {
-            $html =  '<ul class="product-review">
+            $html = '<ul class="product-review">
                     <li class="review-item active"><i class="flaticon-star"></i></li>
                     <li class="review-item active"><i class="flaticon-star"></i></li>
                     <li class="review-item active"><i class="flaticon-star"></i></li>
@@ -604,7 +604,7 @@ if (!function_exists('reviewRating')) {
                     <li class="review-item"><i class="flaticon-star"></i></li>
                 </ul>';
         } elseif ($review->rating == 5) {
-            $html =  '<ul class="product-review">
+            $html = '<ul class="product-review">
                     <li class="review-item active"><i class="flaticon-star"></i></li>
                     <li class="review-item active"><i class="flaticon-star"></i></li>
                     <li class="review-item active"><i class="flaticon-star"></i></li>
@@ -624,7 +624,7 @@ if (!function_exists('productReview')) {
         $review = ProductReview::where('product_id', $product_id)->avg('rating');
         $html = '';
         if (round($review) == 1) {
-            $html =  '<ul class="product-review">
+            $html = '<ul class="product-review">
                     <li class="review-item active"><i class="flaticon-star"></i></li>
                     <li class="review-item"><i class="flaticon-star"></i></li>
                     <li class="review-item"><i class="flaticon-star"></i></li>
@@ -632,7 +632,7 @@ if (!function_exists('productReview')) {
                     <li class="review-item"><i class="flaticon-star"></i></li>
                 </ul>';
         } elseif (round($review) == 2) {
-            $html =  '<ul class="product-review">
+            $html = '<ul class="product-review">
                     <li class="review-item active"><i class="flaticon-star"></i></li>
                     <li class="review-item active"><i class="flaticon-star"></i></li>
                     <li class="review-item"><i class="flaticon-star"></i></li>
@@ -640,7 +640,7 @@ if (!function_exists('productReview')) {
                     <li class="review-item"><i class="flaticon-star"></i></li>
                 </ul>';
         } elseif (round($review) == 3) {
-            $html =  '<ul class="product-review">
+            $html = '<ul class="product-review">
                     <li class="review-item active"><i class="flaticon-star"></i></li>
                     <li class="review-item active"><i class="flaticon-star"></i></li>
                     <li class="review-item active"><i class="flaticon-star"></i></li>
@@ -648,7 +648,7 @@ if (!function_exists('productReview')) {
                     <li class="review-item"><i class="flaticon-star"></i></li>
                 </ul>';
         } elseif (round($review) == 4) {
-            $html =  '<ul class="product-review">
+            $html = '<ul class="product-review">
                     <li class="review-item active"><i class="flaticon-star"></i></li>
                     <li class="review-item active"><i class="flaticon-star"></i></li>
                     <li class="review-item active"><i class="flaticon-star"></i></li>
@@ -656,7 +656,7 @@ if (!function_exists('productReview')) {
                     <li class="review-item"><i class="flaticon-star"></i></li>
                 </ul>';
         } elseif (round($review) == 5) {
-            $html =  '<ul class="product-review">
+            $html = '<ul class="product-review">
                     <li class="review-item active"><i class="flaticon-star"></i></li>
                     <li class="review-item active"><i class="flaticon-star"></i></li>
                     <li class="review-item active"><i class="flaticon-star"></i></li>
@@ -664,7 +664,7 @@ if (!function_exists('productReview')) {
                     <li class="review-item active"><i class="flaticon-star"></i></li>
                 </ul>';
         } else {
-            $html =  '<ul class="product-review">
+            $html = '<ul class="product-review">
                     <li class="review-item"><i class="flaticon-star"></i></li>
                     <li class="review-item"><i class="flaticon-star"></i></li>
                     <li class="review-item"><i class="flaticon-star"></i></li>
