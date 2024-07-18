@@ -22,6 +22,12 @@ use App\Http\Controllers\Frontend\SubscribeSessionController;
 use App\Http\Controllers\Frontend\PaymentController;
 use App\Http\Controllers\Frontend\PageController;
 use App\Http\Controllers\SslCommerzPaymentController;
+use App\Models\Admin\Category;
+use App\Models\Admin\Product;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use League\Csv\Reader;
+
 
 //Route::redirect('/', '');
 Route::post('currency-price', [CartController::class, 'currencyPrice'])->name('currency_price');
@@ -152,8 +158,8 @@ Route::group(['middleware' => ['is_user']], function () {
     Route::post('/order-track', [CheckoutController::class, 'orderTrack'])->name('checkout.order_track');
 });
 
-Route::match(array('GET','POST'),'/payment-notify/{id}', [PaymentApiController::class, 'paymentNotifier'])->name('paymentNotify');
-Route::match(array('GET','POST'),'payment-cancel/{id}', [PaymentApiController::class, 'paymentCancel'])->name('paymentCancel');
+Route::match(array('GET', 'POST'), '/payment-notify/{id}', [PaymentApiController::class, 'paymentNotifier'])->name('paymentNotify');
+Route::match(array('GET', 'POST'), 'payment-cancel/{id}', [PaymentApiController::class, 'paymentCancel'])->name('paymentCancel');
 
 // SSLCOMMERZ Start
 Route::post('/success', [SslCommerzPaymentController::class, 'success']);
@@ -165,3 +171,133 @@ Route::post('/ipn', [SslCommerzPaymentController::class, 'ipn']);
 
 // Thawani pay
 Route::get("/thawani-success", [CheckoutController::class, "paymentSuccess"])->name("thawani.success");
+// In web.php
+
+
+
+Route::get('/sync-products', function () {
+    ini_set('max_execution_time', 600); // 10 minutes
+
+    $csv = Reader::createFromPath(storage_path('minor-products.csv'), 'r');
+    $csv->setHeaderOffset(0);
+    $records = $csv->getRecords();
+
+    $processed = 0;
+    $errors = [];
+    $productData = [];
+    $categoryCache = [];
+
+    foreach ($records as $record) {
+        $productId = $record['Product ID'];
+        $language = strtolower($record['Language']);
+
+        // Map Arabic ('ar') to French ('fr') for internal processing
+        if ($language === 'ar') {
+            $language = 'fr';
+        }
+
+        if (!isset($productData[$productId])) {
+            $productData[$productId] = [
+                'en' => [],
+                'fr' => [],
+                'shared' => [
+                    'Price' => $record['Price'],
+                    'Discount_Price' => $record['Price'],
+                    'Quantity' => $record['Quantity'],
+                    'Primary_Image' => $record['Main Image'],
+                    // 'Status' => $record['Status'],
+                    'Status' => 1,
+                    'Brand_Id' => $record['Manufacturer ID'],
+                ]
+            ];
+        }
+
+        $productData[$productId][$language] = [
+            $language . '_Product_Name' => $record['Name'],
+            $language . '_Product_Slug' => $record['Slug'],
+            $language . '_About' => $record['Description'],
+            $language . '_Description' => $record['Description'],
+            $language . '_ShippingReturn' => '',
+            $language . '_AdditionalInformation' => '',
+            'Voucher' => ''
+        ];
+
+        if ($language === 'en' || $language === 'fr') {
+            $categoryPath = explode(' > ', $record['Categories']);
+            $categoryName = end($categoryPath);
+            $productData[$productId]['shared']['Category_Name'][$language] = trim($categoryName);
+        }
+    }
+
+    // Default French data to English if French is missing
+    foreach ($productData as $productId => $data) {
+        if (empty($data['fr']) && !empty($data['en'])) {
+            foreach ($data['en'] as $key => $value) {
+                $frKey = str_replace('en_', 'fr_', $key);
+                $productData[$productId]['fr'][$frKey] = $value;
+            }
+        }
+    }
+
+    DB::beginTransaction();
+
+    foreach ($productData as $productId => $data) {
+        try {
+            $product = Product::firstOrNew(['id' => $productId]);
+            $productAttributes = array_merge($data['en'], $data['fr'], $data['shared']);
+            unset($productAttributes['Category_Name']);
+
+            foreach ($productAttributes as $key => $value) {
+                $product->{$key} = $value;
+            }
+
+            if (!empty($product->Primary_Image)) {
+                $contents = Http::get($product->Primary_Image)->body();
+                $filename = basename($product->Primary_Image);
+                $path = substr($filename, 0, 10) . '.png';
+                file_put_contents($path, $contents);
+                $product->Primary_Image = $path;
+            }
+
+            $product->save();
+
+            // Create and attach category with names in both languages
+            if (!empty($data['shared']['Category_Name'])) {
+                $enCategoryName = $data['shared']['Category_Name']['en'] ?? null;
+                $frCategoryName = $data['shared']['Category_Name']['fr'] ?? $enCategoryName; // Use English name if French name is missing
+
+                $categoryKey = $enCategoryName . '|' . $frCategoryName;
+                if (!isset($categoryCache[$categoryKey])) {
+                    $category = Category::firstOrCreate([
+                        'en_Category_Name' => $enCategoryName,
+                        'fr_Category_Name' => $frCategoryName,
+                        'en_Category_Slug' => Str::slug($enCategoryName),
+                        'fr_Category_Slug' => Str::slug($frCategoryName),
+                        'Status' => 1
+                    ]);
+                    $categoryCache[$categoryKey] = $category->id;
+                }
+
+                $product->Category_Id = $categoryCache[$categoryKey];
+                $product->save();
+            }
+
+            // Attaching default size
+            $defaultSizeId = 1; // Assuming '1' is the ID of the default size
+            $defaultPrice = $data['shared']['Price']; // Use the product's price for this size
+            $product->sizes()->sync([$defaultSizeId => ['price' => $defaultPrice]], false);
+
+
+            $processed++;
+            DB::commit();
+        } catch (\Exception $e) {
+            $errors[] = "Error processing product ID {$productId}: " . $e->getMessage();
+            DB::rollBack();
+        }
+    }
+
+    return response()->json([
+        'processed' => $processed,
+        'errors' => $errors
+    ]);
+});
