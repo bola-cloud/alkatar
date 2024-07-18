@@ -255,7 +255,7 @@ Route::get('/sync-products', function () {
                 $contents = Http::get($product->Primary_Image)->body();
                 $filename = basename($product->Primary_Image);
                 $path = substr($filename, 0, 10) . '.png';
-                file_put_contents($path, $contents);
+                file_put_contents(public_path('/uploaded_files/product_image/' . $path), $contents);
                 $product->Primary_Image = $path;
             }
 
