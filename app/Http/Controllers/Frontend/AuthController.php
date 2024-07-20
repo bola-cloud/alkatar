@@ -48,7 +48,7 @@ class AuthController extends Controller
 
         if ($user) {
             if ($user->status == INACTIVE) {
-                return  redirect()->route('front')->with('error', __('User is blocked by admin.'));
+                return redirect()->route('front')->with('error', __('User is blocked by admin.'));
             }
             if (Hash::check($request->password, $user->password)) {
                 if (Auth::attempt(['Number' => $request->phone_number, 'password' => $request->password])) {
@@ -86,7 +86,7 @@ class AuthController extends Controller
         if ($user) {
             if (Hash::check($request->password, $user->password)) {
                 if ($user->status == INACTIVE) {
-                    return  redirect()->route('front')->with('error', __('User is blocked by admin.'));
+                    return redirect()->route('front')->with('error', __('User is blocked by admin.'));
                 }
                 if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
                     if (Auth::user()->is_admin == 0) {
@@ -220,7 +220,7 @@ class AuthController extends Controller
 
             if ($finduser) {
                 if ($finduser->status == INACTIVE) {
-                    return  redirect()->route('front')->with('error', __('User is blocked by admin.'));
+                    return redirect()->route('front')->with('error', __('User is blocked by admin.'));
                 }
                 Auth::login($finduser);
                 return redirect()->route('front')->with('success', __('Login Successfully!'));
@@ -254,7 +254,7 @@ class AuthController extends Controller
 
             if ($finduser) {
                 if ($finduser->status == INACTIVE) {
-                    return  redirect()->route('front')->with('error', __('User is blocked by admin.'));
+                    return redirect()->route('front')->with('error', __('User is blocked by admin.'));
                 }
                 Auth::login($finduser);
                 return redirect()->route('front')->with('success', __('Login Successfully!'));
@@ -276,63 +276,101 @@ class AuthController extends Controller
 
     public function otpSignInPost(Request $request)
     {
+
+        //     $request->validate([
+        //         'phone_number' => 'required',
+        //     ]);
+
+        //     // $response = Http::post(
+        //     //     'https://muscatapps.smsoman.com/api/GenOTP',
+        //     //     [
+        //     //         "UserName" => "Mufraji",
+        //     //         "Password" => "Mufraji123",
+        //     //         "Phoneno" => $request->input('phone_number'),
+        //     //         "MsgTemplate" => "{OTP} is your verification code for Sharaa Dates. Do not share this code with anyone."
+        //     //     ]
+        //     // );
+
+        //     // $data = $response->json();
+
+        //     // info($data);
+
+        //     $otp 
+
+
+        //     $response = Http::asForm()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/send_otp', [
+        //         'phone_number' => '201159774052',
+        //         'otp' => '337'
+        //     ]);
+
+        //     if ($response->successful()) {
+        //         // Handle successful response
+        //         echo $response->body();
+        //     } else {
+        //         // Handle error response
+        //         echo $response->body();
+        //     }
+
+
+        //     if ($data['StatusDesc'] == 'Success') {
+        //         return redirect()->route('user.otp.verify.get', [
+        //             'phone_number' => $request->input('phone_number'),
+        //             'RefNo' => $data['RefNo']
+        //         ]);
+        //     } else {
+        //         return redirect()->back()->with('error', 'Something went wrong! SMS not sent');
+        //     }
+
         $request->validate([
             'phone_number' => 'required',
         ]);
 
-        $response = Http::post(
-            'https://muscatapps.smsoman.com/api/GenOTP',
-            [
-                "UserName" => "Mufraji",
-                "Password" => "Mufraji123",
-                "Phoneno" => $request->input('phone_number'),
-                "MsgTemplate" => "{OTP} is your verification code for Sharaa Dates. Do not share this code with anyone."
-            ]
-        );
+        // Generate a random 6-digit OTP
+        $otp = str_pad(random_int(0, 99999), 5, '0', STR_PAD_LEFT);
 
-        $data = $response->json();
+        // Store OTP in session for later verification
+        session(['whatsapp_otp' => $otp]);
 
-        info($data);
+        // Send OTP via WhatsApp
+        $response = Http::asForm()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/send_otp', [
+            // 'phone_number' => $request->input('phone_number'),
+            'phone_number' => '201159774052',
+            'otp' => $otp
+        ]);
 
-
-        if ($data['StatusDesc'] == 'Success') {
+        if ($response->successful()) {
             return redirect()->route('user.otp.verify.get', [
-            'phone_number' => $request->input('phone_number'),
-            'RefNo' => $data['RefNo']
+                'phone_number' => $request->input('phone_number'),
             ]);
         } else {
-            return redirect()->back()->with('error', 'Something went wrong! SMS not sent');
+            return redirect()->back()->with('error', 'Failed to send OTP. Please try again.');
         }
     }
 
     public function otpVerify(Request $request)
     {
         $data['phone_number'] = $request->phone_number;
-        $data['RefNo'] = $request->RefNo;
 
         return view('front.auth.otp_form', $data);
     }
 
     public function otpVerifyPost(Request $request)
     {
+        $request->validate([
+            'phone_number' => 'required',
+            'otp' => 'required|digits:5',
+        ]);
 
         $phone_number = $request->input('phone_number');
+        $entered_otp = $request->input('otp');
+        $stored_otp = session('whatsapp_otp');
 
-        $response = Http::post(
-            'https://muscatapps.smsoman.com/api/VerifyOTP',
-            [
-                "UserName" => "Mufraji",
-                "Password" => "Mufraji123",
-                "RefNo" => $request->input('ref_no'),
-                "OTP" => $request->input('otp'),
-                "Phoneno" => $phone_number,
-            ]
-        );
+        // dd($entered_otp, $stored_otp);
 
-        $data = $response->json();
+        if ($entered_otp === $stored_otp) {
+            // OTP is valid
+            session()->forget('whatsapp_otp'); // Clear the OTP from session
 
-
-        if ($data['StatusDesc'] == 'Success') {
             $user = User::where('Number', $phone_number)->where("is_admin", 0)->first();
 
             if ($user) {
@@ -349,7 +387,7 @@ class AuthController extends Controller
                 if ($user) {
                     Auth::login($user);
                     return redirect()->route('front')->with('success', __('Sign Up Successfully !'));
-                } 
+                }
             }
         } else {
             return redirect()->back()->with('error', 'Invalid OTP');
