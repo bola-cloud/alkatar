@@ -333,8 +333,7 @@ class AuthController extends Controller
 
         // Send OTP via WhatsApp
         $response = Http::asForm()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/send_otp', [
-            // 'phone_number' => $request->input('phone_number'),
-            'phone_number' => '201159774052',
+            'phone_number' => "968" . $request->input('phone_number'),
             'otp' => $otp
         ]);
 
