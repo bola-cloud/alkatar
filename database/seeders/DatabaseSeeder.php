@@ -47,5 +47,6 @@ class DatabaseSeeder extends Seeder
         $this->call(SeoSettingsTableSeeder::class);
         $this->call(SpecialOfferTableSeeder::class);
         $this->call(BannerSeeder::class);
+        $this->call(OmanStatesSeeder::class);
     }
 }
