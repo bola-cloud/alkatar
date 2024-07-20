@@ -18,7 +18,7 @@ class ProductController extends Controller
     {
         $product = Product::where('en_Product_Slug', $slug)->with('category')->where('status', 1)->firstOrFail();
         if (!empty($product)) {
-            $cat_id = $product->category->id;
+            $cat_id = $product->category?->id;
 
             $data['similar_product'] = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('status', 1)
                 ->where('Category_Id', $cat_id)

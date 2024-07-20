@@ -53,7 +53,7 @@ class ProductController extends Controller
                     return $data->en_Product_Name;
                 })
                 ->editColumn('Category', function ($data) {
-                    return $data->category->en_Category_Name;
+                    return $data->category?->en_Category_Name;
                 })
                 ->editColumn('Price', function ($data) {
                     $dp = $data->Discount_Price;

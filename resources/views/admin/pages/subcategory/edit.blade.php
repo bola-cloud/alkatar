@@ -50,7 +50,7 @@
                                             <select id="categorySelect" name="category_id" >
                                                 @foreach(Category() as $category)
                                                     <option value="{{$category->id}}" {{$edit->category_id == $category->id ? 'selected' : ''}}>
-                                                        {{$category->en_Category_Name}}
+                                                        {{$category?->en_Category_Name}}
                                                     </option>
                                                 @endforeach
                                             </select>

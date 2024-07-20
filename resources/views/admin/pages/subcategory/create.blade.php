@@ -50,7 +50,7 @@
                                             <select id="categorySelect" name="category_id">
                                                 @foreach(Category_Des_Icon() as $category)
                                                     <option value="{{$category->id}}">
-                                                        {{$category->en_Category_Name}}
+                                                        {{$category?->en_Category_Name}}
                                                     </option>
                                                 @endforeach
                                             </select>

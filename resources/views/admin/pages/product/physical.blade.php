@@ -59,7 +59,7 @@
                                             <select class="form-control" id="en_category_name" name="en_category_name">
                                                 @foreach ($category as $item)
                                                     <option value="{{ $item->id }}">
-                                                        {{ $item->en_Category_Name }}
+                                                        {{ $item?->en_Category_Name ?? "N/A" }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -456,24 +456,24 @@
             function createSizeRow(sizeId = null, price = null) {
                 sizeCounter++;
                 const sizeRow = `
-                                                        <div class="row mb-3" id="size-row-${sizeCounter}">
-                                                            <div class="col-md-6">
-                                                                <select class="form-control" name="size[]">
-                                                                    @foreach (productSize() as $item)
-                                                                        <option value="{{ $item->id }}" ${sizeId === {{ $item->id }} ? 'selected' : ''}>{{ $item->Size }}</option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
-                                                            <div class="col-md-5">
-                                                                <input type="text" class="form-control" required name="size_price[]" placeholder="Enter Price" value="${price || ''}">
-                                                            </div>
-                                                            <div class="col-md-1">
-                                                                <button type="button" class="btn btn-danger remove-size-row" data-row-id="size-row-${sizeCounter}">
-                                                                    <i class="fa fa-times"></i>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    `;
+                                                                        <div class="row mb-3" id="size-row-${sizeCounter}">
+                                                                            <div class="col-md-6">
+                                                                                <select class="form-control" name="size[]">
+                                                                                    @foreach (productSize() as $item)
+                                                                                        <option value="{{ $item->id }}" ${sizeId === {{ $item->id }} ? 'selected' : ''}>{{ $item->Size }}</option>
+                                                                                    @endforeach
+                                                                                </select>
+                                                                            </div>
+                                                                            <div class="col-md-5">
+                                                                                <input type="text" class="form-control" required name="size_price[]" placeholder="Enter Price" value="${price || ''}">
+                                                                            </div>
+                                                                            <div class="col-md-1">
+                                                                                <button type="button" class="btn btn-danger remove-size-row" data-row-id="size-row-${sizeCounter}">
+                                                                                    <i class="fa fa-times"></i>
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    `;
 
                 $('#size-container').append(sizeRow);
             }
