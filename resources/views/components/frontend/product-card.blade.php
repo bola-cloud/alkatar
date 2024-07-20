@@ -8,10 +8,10 @@
         </a>
         <div class="product-flags">
             @foreach ($product->product_tags as $ppt)
-            <span class="product-flag sale">{{ $ppt->tag }}</span>
+                <span class="product-flag sale">{{ $ppt->tag }}</span>
             @endforeach
             @if ($product->Discount > 0)
-            <span class="product-flag discount">{{ __('-') }}{{ $product->Discount }} %</span>
+                <span class="product-flag discount">{{ __('-') }}{{ $product->Discount }} %</span>
             @endif
         </div>
 
@@ -33,33 +33,32 @@
         <input type="hidden" name="quantity" value="1" id="product_quantity">
         <h3 class="product-name"><a class="product-link"
                 href="{{ route('single.product', $product->en_Product_Slug) }}">{{
-                langConverter($product->en_Product_Name, $product->fr_Product_Name) }}</a></h3>
+    langConverter($product->en_Product_Name, $product->fr_Product_Name) }}</a></h3>
 
         @if($product->points > 0)
-        <p class="product_points">{{ __("Win Points", ['points' => $product->points]) }}</p>
+            <p class="product_points">{{ __("Win Points", ['points' => $product->points]) }}</p>
         @endif
 
         <div class="product-price">
             @if ($product->sizes->count() > 0)
-            @php
-                $firstSize = $product->sizes->first();
-
-                // dd($firstSize);
-            @endphp
-            @if ($firstSize->pivot->price == $product->Discount_Price)
-                <span class="price">{{ currencyConverter($firstSize->pivot->price) }}</span>
-            @else
-            <span class="regular-price">{{ currencyConverter($product->Discount_Price) }}</span>
-            <span class="price">{{ currencyConverter($firstSize->pivot->price) }}</span>
-            @endif
+                        @php
+                            $firstSize = $product->sizes->first();
+                        @endphp
+                        @if ($firstSize->pivot->price == $product->Discount_Price)
+                            <span class="price">{{ currencyConverter($firstSize->pivot->price) }}</span>
+                        @else
+                            <span class="regular-price">{{ currencyConverter($firstSize->pivot->price) }}</span>
+                            <span class="price">{{ currencyConverter($product->Discount_Price) }}</span>
+                        @endif
             @endif
         </div>
 
         {!! productReview($product->id) !!}
 
         <a href="javascript:void(0)" title="{{ __('Add To Cart') }}" class="add-cart addCart"
-            data-id="{{ $product->id }}" data-name="{{ $product->en_Product_Name }}"
-            data-sizes="{{ json_encode($product->sizes) }}" data-additions="{{json_encode($product->additions)}}">
+            data-id="{{ $product->id }}" data-discount="{{$product->Discount_Price}}"
+            data-name="{{ $product->en_Product_Name }}" data-sizes="{{ json_encode($product->sizes) }}"
+            data-additions="{{json_encode($product->additions)}}">
             <svg fill="#000000" class="size-8 hover:fill-white transition-colors" version="1.1" id="Capa_1"
                 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 483.1 483.1"
                 xml:space="preserve">

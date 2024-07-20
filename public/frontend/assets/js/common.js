@@ -259,6 +259,9 @@
                 var productName = $(this).data("name");
                 var sizes = $(this).data("sizes");
                 var additions = $(this).data("additions") || [];
+                var discount = $(this).data("discount") ?? null;
+
+
 
                 $("#sizeModalLabel").text(`${localizedText.selectSize}`);
 
@@ -266,8 +269,9 @@
                 sizeOptionsContainer.empty();
 
                 sizes.forEach(function (size) {
-                    var sizeOption = `<button class="btn btn-outline-primary size-option" data-product-id="${productId}" data-size-id="${size.id}" data-price="${size.pivot.price}">
-                                        ${size.Size} - ${size.pivot.price}
+                    const finalPrice = discount ?? size.pivot.price 
+                    var sizeOption = `<button class="btn btn-outline-primary size-option" data-product-id="${productId}" data-size-id="${size.id}" data-price="${finalPrice}">
+                                        ${size.Size} - ${finalPrice}
                                       </button>`;
                     sizeOptionsContainer.append(sizeOption);
                 });
