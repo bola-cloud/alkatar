@@ -453,27 +453,36 @@
             let sizeCounter = 0;
 
             // Function to create a new size row
-            function createSizeRow(sizeId = null, price = null) {
+            function createSizeRow(sizeId = null, price = null, weight = null) {
                 sizeCounter++;
                 const sizeRow = `
-                                                                        <div class="row mb-3" id="size-row-${sizeCounter}">
-                                                                            <div class="col-md-6">
-                                                                                <select class="form-control" name="size[]">
-                                                                                    @foreach (productSize() as $item)
-                                                                                        <option value="{{ $item->id }}" ${sizeId === {{ $item->id }} ? 'selected' : ''}>{{ $item->Size }}</option>
-                                                                                    @endforeach
-                                                                                </select>
-                                                                            </div>
-                                                                            <div class="col-md-5">
-                                                                                <input type="text" class="form-control" required name="size_price[]" placeholder="Enter Price" value="${price || ''}">
-                                                                            </div>
-                                                                            <div class="col-md-1">
-                                                                                <button type="button" class="btn btn-danger remove-size-row" data-row-id="size-row-${sizeCounter}">
-                                                                                    <i class="fa fa-times"></i>
-                                                                                </button>
-                                                                            </div>
-                                                                        </div>
-                                                                    `;
+                                                                                                            <div class="row mb-3" id="size-row-${sizeCounter}">
+                                                                                                                <div class="col-md-5">
+                                                                                                                     <label for="size-${sizeCounter}">Size:</label>
+                                    <select class="form-control" name="size[]" id="size-${sizeCounter}">
+                                                                                                                        @foreach (productSize() as $item)
+                                                                                                                            <option value="{{ $item->id }}" ${sizeId === {{ $item->id }} ? 'selected' : ''}>{{ $item->Size }}</option>
+                                                                                                                        @endforeach
+                                                                                                                    </select>
+                                                                                                                </div>
+                                                                                                                 <div class="col-md-3">
+                                                                                                                                 <label for="price-${sizeCounter}">Price:</label>
+
+                                                                                                                    <input type="text" class="form-control" required name="size_price[]"  id="price-${sizeCounter}" placeholder="Enter Price" value="${price || ''}">
+                                                                                                                </div>
+
+                                                                                                                 <div class="col-md-3">
+                                                                                                                 <label for="weight-${sizeCounter}">Weight (grams):</label>
+                                                                                                                    <input type="text" id="weight-${sizeCounter}" class="form-control" required name="size_weight[]" placeholder="Enter Weight (grams)" value="${weight || ''}">
+                                                                                                                </div>
+
+                                                                                                                <div class="col-md-1">
+                                                                                                                    <button type="button" class="btn btn-danger remove-size-row" data-row-id="size-row-${sizeCounter}">
+                                                                                                                        <i class="fa fa-times"></i>
+                                                                                                                    </button>
+                                                                                                                </div>
+                                                                                                            </div>
+                                                                                                        `;
 
                 $('#size-container').append(sizeRow);
             }

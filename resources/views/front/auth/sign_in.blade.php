@@ -13,8 +13,7 @@
                     <form class="login-form" method="post" action="{{ route('user.sign.otp') }}">
                         @csrf
                         <div class="mt-32 mb-20">
-                            <label for="phone_number"
-                                class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+                            <label for="phone_number" class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
                                 {{__("Phone Number")}}:</label>
                             <div class="flex items-center">
                                 <button id="dropdown-phone-button" data-dropdown-toggle="dropdown-phone"
@@ -53,7 +52,8 @@
                                 </div>
                             </div>
                             <p id="helper-text-explanation" class="mt-6 text-xl text-gray-500 dark:text-gray-400">
-                                {{__("We will send you an SMS with a verification code.")}}</p>
+                                {{__("We will send you an Whatsapp with a verification code.")}}
+                            </p>
                         </div>
                         {{-- <div class="mb-20">
                             <label for="password"
@@ -62,16 +62,16 @@
                                 <input type="password" id="password" name="password"
                                     aria-describedby="password-helper-text"
                                     class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 !rounded-none border border-gray-300 focus:ring-primary-red focus:border-primary-red dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-primary-red placeholder:!pt-3"
-                                    placeholder="{{__("Password")}}" required />
+                                    placeholder="{{__(" Password")}}" required />
                             </div>
-                             <p id="password-helper-text" class="mt-6 text-xl text-gray-500 dark:text-gray-400">
-                                {{__("Enter your account password")}}</p> 
+                            <p id="password-helper-text" class="mt-6 text-xl text-gray-500 dark:text-gray-400">
+                                {{__("Enter your account password")}}</p>
                         </div> --}}
 
                         <div class="form-group">
                             <button type="submit"
                                 class="form-control btn btn-primary rounded submit px-3 primary-btn auth-btn">{{
-                                __('Login') }}</button>
+    __('Login') }}</button>
                         </div>
                     </form>
 

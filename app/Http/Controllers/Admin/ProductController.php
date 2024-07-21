@@ -297,9 +297,10 @@ class ProductController extends Controller
 
             $sizes = request('size', []);
             $prices = request('size_price', []);
+            $weights = request('size_weight', []);
 
             foreach ($sizes as $key => $size) {
-                $product->sizes()->attach($size, ['price' => $prices[$key]]);
+                $product->sizes()->attach($size, ['price' => $prices[$key], 'weight' => $weights[$key]]);
             }
 
             $product->sizes()->sync($sizes);
@@ -676,6 +677,7 @@ class ProductController extends Controller
     public function physicalProductUpdate($data, $product)
     {
 
+        // dd($data);
 
         $result = ['success' => false];
         if (Product::where('en_Product_Slug', $data['en_product_slug'])->where('id', '!=', $product->id)->count() > 0) {
@@ -743,13 +745,14 @@ class ProductController extends Controller
 
             $sizes = request('size', []);
             $prices = request('size_price', []);
+            $weights = request('size_weight', []);
 
 
             $newPrSizes = [];
 
             foreach ($sizes as $key => $size) {
                 if ($size != null) {
-                    $newPrSizes[$size] = ['price' => $prices[$key]];
+                    $newPrSizes[$size] = ['price' => $prices[$key], 'weight' => $weights[$key]];
                 }
             }
 
