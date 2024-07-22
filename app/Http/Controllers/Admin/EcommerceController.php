@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Country;
 use App\Models\DeliveryCharge;
+use App\Models\State;
 use App\Models\Tax;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -94,6 +96,12 @@ class EcommerceController extends Controller
                     $btn = $btn . '</div>';
                     return $btn;
                 })
+                ->editColumn('state_id', function ($data) {
+                    return $data->state->name_en;
+                })
+                ->editColumn('city_id', function ($data) {
+                    return $data->city->name_en;
+                })
                 ->editColumn('status', function ($data) {
                     if ($data->status == ACTIVE) {
                         return '<span class="status active">Active</span>';
@@ -101,11 +109,15 @@ class EcommerceController extends Controller
                         return '<span class="status blockedr">Inactive</span>';
                     }
                 })
-                ->rawColumns(['action', 'status'])
+                ->rawColumns(['action', 'status', 'state_id', 'city_id'])
                 ->make(true);
         }
         $data['title'] = __('Delivery Charge List');
-        $data['delivery_charges'] = DeliveryCharge::get();
+        $data['delivery_charges'] = DeliveryCharge::with('city', 'state')->get();
+        $oman_country_id = Country::where('name_en', 'Oman')->first()->id;
+        $data['states'] = State::where('country_id', $oman_country_id)->get();
+        // dd($data['delivery_charges']);
+
         return view('admin.pages.delivery-charge.country', $data);
     }
 
@@ -116,6 +128,8 @@ class EcommerceController extends Controller
             $update = $tax->update([
                 'country' => $request->country,
                 'charge' => $request->charge,
+                'city_id' => $request->city_id,
+                'state_id' => $request->state_id,
             ]);
             if (!empty($update)) {
                 return redirect()->back()->with('success', __('Delivery charge already exist. It Updated!'));
@@ -124,6 +138,8 @@ class EcommerceController extends Controller
             $store = DeliveryCharge::create([
                 'country' => $request->country,
                 'charge' => $request->charge,
+                'city_id' => $request->city_id,
+                'state_id' => $request->state_id,
             ]);
             if (!empty($store)) {
                 return redirect()->back()->with('success', __('Delivery charge added!'));
@@ -141,6 +157,8 @@ class EcommerceController extends Controller
                 'country' => $request->country,
                 'charge' => $request->charge,
                 'status' => $request->status,
+                'city_id' => $request->city_id,
+                'state_id' => $request->state_id,
             ]);
             if (!empty($update)) {
                 return redirect()->back()->with('success', __('Country tax Updated!'));

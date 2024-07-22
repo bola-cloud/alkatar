@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\PaymentApiController;
+use App\Http\Controllers\CityController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Frontend\AuthController;
 use App\Http\Controllers\Frontend\AboutUsController;
@@ -172,6 +173,8 @@ Route::post('/ipn', [SslCommerzPaymentController::class, 'ipn']);
 // Thawani pay
 Route::get("/thawani-success", [CheckoutController::class, "paymentSuccess"])->name("thawani.success");
 // In web.php
+
+Route::get("/get-cities-by-state/{state_id}", [CityController::class, "getCitiesByState"]);
 
 
 

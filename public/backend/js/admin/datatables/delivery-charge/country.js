@@ -7,8 +7,12 @@
             ajax: $('#table-url').data("url"),
             columns: [
                 {
-                    data: 'country',
-                    name: 'country'
+                    data: 'state_id',
+                    name: 'state_id'
+                },
+                {
+                    data: 'city_id',
+                    name: 'city_id'
                 },
                 {
                     data: 'charge',
@@ -25,5 +29,7 @@
                 }
             ]
         });
+
+     
     });
 })(jQuery)

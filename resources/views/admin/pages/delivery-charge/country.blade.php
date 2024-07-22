@@ -26,14 +26,16 @@
         <div class="customers__area bg-style mb-30">
             <div class="item-title">
                 <div class="col-xs-6">
-                    <button data-bs-toggle="modal" data-bs-target="#createModal1" class="btn btn-md btn-info">{{ __('Add Delivery Charge')}}</button>
+                    <button data-bs-toggle="modal" data-bs-target="#createModal1"
+                        class="btn btn-md btn-info">{{ __('Add Delivery Charge')}}</button>
                 </div>
             </div>
             <div class="customers__table">
                 <table id="BlogTable" class="row-border data-table-filter table-style">
                     <thead>
                         <tr>
-                            <th>{{ __('Country')}}</th>
+                            <th>{{ __('State')}}</th>
+                            <th>{{ __('City')}}</th>
                             <th>{{ __('Charge')}}</th>
                             <th>{{ __('Status')}}</th>
                             <th>{{ __('Action')}}</th>
@@ -47,11 +49,12 @@
     </div>
 </div>
 
-<div class="modal fade" id="createModal1" tabindex="-1" role="dialog" aria-labelledby="createModalTitle1" aria-hidden="true">
+<div class="modal fade" id="createModal1" tabindex="-1" role="dialog" aria-labelledby="createModalTitle1"
+    aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header bg-success">
-                <h5 class="modal-title text-white" id="editModalLongTitle">{{__('Add')}}</h5>
+                <h5 class="modal-title text-white" id="editModalLongTitle">{{__('Add Delivery Charge')}}</h5>
                 <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -59,18 +62,27 @@
             <form enctype="multipart/form-data" method="POST" action="{{route('admin.country_dc_store')}}">
                 <div class="modal-body">
                     @csrf
+                    <input type="hidden" name="country" value="Oman" />
+
                     <div class="input__group mb-25">
-                        <label for="country">{{__('Country')}}</label>
-                        <select name="country" id="country" required>
-                            <option value="">{{__('---Country---')}}</option>
-                            @foreach (country() as $code => $name)
-                            <option value="{{$code}}">{{$name}}</option>
+                        <label for="state">{{__('State')}}</label>
+                        <select name="state_id" id="state" required>
+                            <option value="">{{__('---Select State---')}}</option>
+                            @foreach ($states as $state)
+                                <option value="{{$state->id}}">{{$state->name_en}}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="input__group mb-25">
-                        <label for="exampleInputEmail1">{{ __('Charge')}}</label>
-                        <input type="number" min="0" step="0.01" name="charge" placeholder="{{__('Delivery Charge')}}" required>
+                        <label for="city">{{__('City')}}</label>
+                        <select name="city_id" id="city" required>
+                            <option value="">{{__('---Select City---')}}</option>
+                        </select>
+                    </div>
+                    <div class="input__group mb-25">
+                        <label for="charge">{{ __('Charge')}}</label>
+                        <input type="number" min="0" step="0.001" name="charge" id="charge"
+                            placeholder="{{__('Delivery Charge')}}" required>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -81,46 +93,113 @@
         </div>
     </div>
 </div>
+
 @foreach ($delivery_charges as $dc)
-<div class="modal fade" id="editModal{{$dc->id}}" tabindex="-1" role="dialog" aria-labelledby="editModalTitle{{$dc->id}}" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-success">
-                <h5 class="modal-title text-white" id="editModalLongTitle">{{__('Edit')}}</h5>
-                <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+    <div class="modal fade" id="editModal{{$dc->id}}" tabindex="-1" role="dialog"
+        aria-labelledby="editModalTitle{{$dc->id}}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-success">
+                    <h5 class="modal-title text-white" id="editModalLongTitle">{{__('Edit')}}</h5>
+                    <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form enctype="multipart/form-data" method="POST"
+                    action="{{route('admin.country_dc_update', encrypt($dc->id))}}">
+                    <div class="modal-body">
+                        @csrf
+                        <input type="hidden" name="country" value="Oman" />
+                        <div class="input__group mb-25">
+                            <label for="state_edit">{{__('State')}}</label>
+                            <select name="state_id" id="state_edit_{{$dc->id}}" required>
+                                <option value="">{{__('---Select State---')}}</option>
+                                @foreach ($states as $state)
+                                    <option value="{{$state->id}}" {{$dc->state_id == $state->id ? 'selected' : ''}}>
+                                        {{$state->name_en}}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="input__group mb-25">
+                            <label for="city_edit">{{__('City')}}</label>
+                            <select name="city_id" id="city_edit_{{$dc->id}}" required>
+                                <option value="{{$dc->city_id}}">{{$dc->city->name_en}}</option>
+                            </select>
+                        </div>
+                        <div class="input__group mb-25">
+                            <label for="charge_edit">{{ __('Charge')}}</label>
+                            <input type="number" min="0" step="0.001" name="charge" id="charge_edit_{{$dc->id}}"
+                                placeholder="{{__('Delivery Charge')}}" value="{{$dc->charge}}" required>
+                        </div>
+                        <div class="input__group mb-25">
+                            <label for="status">{{__('Status')}}</label>
+                            <select name="status" id="status" required>
+                                <option value="{{ACTIVE}}" {{$dc->status == ACTIVE ? 'selected' : ''}}>{{__('Active')}}
+                                </option>
+                                <option value="{{INACTIVE}}" {{$dc->status == INACTIVE ? 'selected' : ''}}>{{__('Inactive')}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger me-2" data-bs-dismiss="modal">{{__('Close')}}</button>
+                        <button type="submit" class="btn btn-primary">{{ __('Update')}}</button>
+                    </div>
+                </form>
             </div>
-            <form enctype="multipart/form-data" method="POST" action="{{route('admin.country_dc_update', encrypt($dc->id))}}">
-                <div class="modal-body">
-                    @csrf
-                    <div class="input__group mb-25">
-                        <label for="country">{{__('Country')}}</label>
-                        <input name="country" id="country" value="{{$dc->country}}" readonly>
-                    </div>
-                    <div class="input__group mb-25">
-                        <label for="exampleInputEmail1">{{ __('Tax Rate (In Percentage)')}}</label>
-                        <input type="number" min="0" step="0.01" name="charge" placeholder="{{__('Delivery Charge')}}" value="{{$dc->charge}}" required>
-                    </div>
-                    <div class="input__group mb-25">
-                        <label for="status">{{__('Status')}}</label>
-                        <select name="status" id="status" required>
-                            <option value="{{ACTIVE}}" {{$dc->status == ACTIVE ? 'selected' : ''}}>{{__('Active')}}</option>
-                            <option value="{{INACTIVE}}" {{$dc->status == INACTIVE ? 'selected' : ''}}>{{__('Inactive')}}</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger me-2" data-bs-dismiss="modal">{{__('Close')}}</button>
-                    <button type="submit" class="btn btn-primary">{{ __('Edit')}}</button>
-                </div>
-            </form>
         </div>
     </div>
-</div>
 @endforeach
+
 @push('post_scripts')
-<script src="{{asset('backend/js/admin/datatables/delivery-charge/country.js')}}"></script>
-<!-- Page level custom scripts -->
+    <script src="{{asset('backend/js/admin/datatables/delivery-charge/country.js')}}"></script>
+    <script>
+        $(document).ready(function () {
+            $('#state').on('change', function () {
+                var stateId = $(this).val();
+                if (stateId) {
+                    $.ajax({
+                        url: '/get-cities-by-state/' + stateId,
+                        type: "GET",
+                        dataType: "json",
+                        success: function (data) {
+                            $('#city').empty();
+                            $('#city').append('<option value="">---Select City---</option>');
+                            $.each(data, function (key, value) {
+                                $('#city').append('<option value="' + value.id + '">' + value.name_en + '</option>');
+                            });
+                        }
+                    });
+                } else {
+                    $('#city').empty();
+                    $('#city').append('<option value="">---Select City---</option>');
+                }
+            });
+
+            @foreach($delivery_charges as $dc)
+                $('#state_edit_{{$dc->id}}').on('change', function () {
+                    var stateId = $(this).val();
+                    if (stateId) {
+                        $.ajax({
+                            url: '/get-cities-by-state/' + stateId,
+                            type: "GET",
+                            dataType: "json",
+                            success: function (data) {
+                                $('#city_edit_{{$dc->id}}').empty();
+                                $('#city_edit_{{$dc->id}}').append('<option value="">---Select City---</option>');
+                                $.each(data, function (key, value) {
+                                    $('#city_edit_{{$dc->id}}').append('<option value="' + value.id + '">' + value.name_en + '</option>');
+                                });
+                            }
+                        });
+                    } else {
+                        $('#city_edit_{{$dc->id}}').empty();
+                        $('#city_edit_{{$dc->id}}').append('<option value="">---Select City---</option>');
+                    }
+                });
+            @endforeach
+        });
+    </script>
 @endpush
 @endsection

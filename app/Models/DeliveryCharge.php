@@ -14,5 +14,17 @@ class DeliveryCharge extends Model
         'charge',
         'type',
         'status',
+        'city_id',
+        'state_id',
     ];
+
+    public function city()
+    {
+        return $this->belongsTo(City::class);
+    }
+
+    public function state()
+    {
+        return $this->belongsTo(State::class);
+    }
 }
