@@ -194,6 +194,8 @@
                     </li>
                     <li class="flex justify-between"><span>{{ __('Shipping Cost') }}</span> <span
                             id="delivery-charge-curr"></span></li>
+                    <li class="flex justify-between"><span>{{ __('Weight Handling Cost') }}</span> <span
+                            id="weight-charge-curr">{{currencyConverter($extraWeightFees)}} </span></li>
                     <li class="flex justify-between"><span>{{ __('VAT/Tax') }}</span> <span
                             id="tax-show-curr">{{ currencyConverter(tax_amount(\Cart::subtotal())) }}</span></li>
                     @if (!empty(Session::get('CouponAmount')))
@@ -205,8 +207,18 @@
                 <div class="mt-6 pt-4 border-t">
                     <h3 class="text-2xl xl:text-3xl font-bold flex justify-between">
                         <span>{{ __('Total Cost') }}</span>
-                        <span
-                            id="total-cost-curr">{{ currencyConverter(\Cart::subtotal() + allsetting()['shipping_charge'] + tax_amount(\Cart::subtotal()) - Session::get('CouponAmount')) }}</span>
+                        <span id="total-cost-curr">
+                            {{ 
+        currencyConverter(
+        \Cart::subtotal()
+        + allsetting()['shipping_charge']
+        + tax_amount(\Cart::subtotal())
+        - Session::get('CouponAmount')
+        + $extraWeightFees
+    )
+    
+    }}
+                        </span>
                     </h3>
                 </div>
             </div>

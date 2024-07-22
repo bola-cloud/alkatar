@@ -44,6 +44,29 @@ class CheckoutController extends Controller
         $this->paymentController = $paymentController;
     }
 
+    public function calculateExtraWeightFees()
+    {
+        $totalWeightGrams = 0;
+        foreach (Cart::content() as $item) {
+            $totalWeightGrams += $item->weight * $item->qty;
+        }
+
+        // Convert grams to kilograms
+        $totalWeightKg = $totalWeightGrams / 1000;
+
+        $shippingFee = 0;
+
+        if ($totalWeightKg > 0 && $totalWeightKg <= 10) {
+            $shippingFee = 2; // 2 OMR for 0-10kg
+        } elseif ($totalWeightKg > 10) {
+            $extraKg = ceil($totalWeightKg - 10);
+            $shippingFee = 2 + ($extraKg * 0.100); // 2 OMR + 0.100 OMR for each extra kg
+        }
+
+        return $shippingFee;
+    }
+
+
     public function checkoutPage()
     {
         $check = Cart::count();
@@ -58,6 +81,8 @@ class CheckoutController extends Controller
             $data['title'] = $seo->title;
             $data['description'] = $seo->description;
             $data['keywords'] = $seo->keywords;
+            $data['extraWeightFees'] = $this->calculateExtraWeightFees();
+
             return view('front.pages.checkout.checkout', $data);
         } else {
             return redirect()->route('front')->with('toast_warning', 'Cart is Empty');
@@ -102,7 +127,9 @@ class CheckoutController extends Controller
                 $cartItems = Cart::content();
                 $tax = tax_amount($subtotal, $request->billing_country);
                 $shipping_charge = delivery_charge($request->billing_country);
-                $this->grand_total = $subtotal + $tax + $shipping_charge;
+                $weight_charge = $this->calculateExtraWeightFees();
+                $shipping_charge += $weight_charge;
+                $this->grand_total = $subtotal + $tax + $shipping_charge + $weight_charge;
 
                 // address
                 if (hasBlillingAddress($user_id) == 1) {
@@ -155,6 +182,8 @@ class CheckoutController extends Controller
                     }
                 }
 
+                // dd($weight_charge);
+
 
 
 
@@ -166,7 +195,7 @@ class CheckoutController extends Controller
                 session()->put('tax', $tax);
                 if ($request->payment == 'creditcard') {
                     session()->put('payment_method_name', STRIPE);
-                    return  $this->pay($this->grand_total * (conversion_rate('USD') ? conversion_rate('USD') : 0), $this->discount, 'USD', 2, $request->payment_method);
+                    return $this->pay($this->grand_total * (conversion_rate('USD') ? conversion_rate('USD') : 0), $this->discount, 'USD', 2, $request->payment_method);
                 } elseif ($request->payment == 'sslcommerz') {
                     $tran_id = uniqid();
                     $post_data = array();
@@ -222,6 +251,8 @@ class CheckoutController extends Controller
 
 
 
+
+
                     if ($shipping_charge) {
                         $checkoutProduct[] = [
                             'name' => 'Shipping Charge',
@@ -236,26 +267,26 @@ class CheckoutController extends Controller
                         'Content-Type' => 'application/json',
                         'thawani-api-key' => env('THAWANI_TEST_SECRET_KEY'),
                     ])->post(env('THAWANI_TEST_CHECKOUT_URL') . '/checkout/session', [
-                        'client_reference_id' => $order_number,
-                        'mode' => 'payment',
-                        'products' => $checkoutProduct,
-                        'success_url' => route('thawani.success', [
-                            'order_number' => $order_number,
-                        ]),
-                        'cancel_url' => 'https://company.com/cancel',
-                        'metadata' => [
-                            'order_number' => $order_number,
-                            'shipping_charge' => $shipping_charge,
-                            'subtotal' => $subtotal,
-                            'discount' => $this->discount,
-                            'grand_total' => $this->grand_total,
-                            'tax' => $tax,
-                        ]
-                    ]);
+                                'client_reference_id' => $order_number,
+                                'mode' => 'payment',
+                                'products' => $checkoutProduct,
+                                'success_url' => route('thawani.success', [
+                                    'order_number' => $order_number,
+                                ]),
+                                'cancel_url' => 'https://company.com/cancel',
+                                'metadata' => [
+                                    'order_number' => $order_number,
+                                    'shipping_charge' => $shipping_charge,
+                                    'subtotal' => $subtotal,
+                                    'discount' => $this->discount,
+                                    'grand_total' => $this->grand_total,
+                                    'tax' => $tax,
+                                ]
+                            ]);
 
 
                     if ($response->successful()) {
-                        $paymentJsonData =  $response->json();
+                        $paymentJsonData = $response->json();
 
                         // create new request body for create payment
                         $payment = [
@@ -459,7 +490,7 @@ class CheckoutController extends Controller
 
         if ($request->payment == 'creditcard') {
             session()->put('payment_method_name', STRIPE);
-            return  $this->pay($this->grand_total, $this->discount, 'USD', 2, $request->payment_method);
+            return $this->pay($this->grand_total, $this->discount, 'USD', 2, $request->payment_method);
         } elseif ($request->payment == 'sslcommerz') {
             $tran_id = uniqid();
             $post_data = array();
@@ -504,7 +535,7 @@ class CheckoutController extends Controller
             }
         } elseif ($request->payment == 'paypal') {
             session()->put('payment_method_name', PAYPAL);
-            return  $this->pay($this->grand_total, $this->discount, 'USD', 1, $request->payment_method);
+            return $this->pay($this->grand_total, $this->discount, 'USD', 1, $request->payment_method);
         } elseif ($request->payment == 'COD') {
             return $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, COD);
         } elseif ($request->payment == 'bank') {
@@ -542,7 +573,7 @@ class CheckoutController extends Controller
             $paymentPlatform = $this->paymentPlatformResolver
                 ->resolveService(session()->get('paymentPlatformId'));
 
-            $payment =  $paymentPlatform->handleApproval();
+            $payment = $paymentPlatform->handleApproval();
 
             if ($payment['success'] == true) {
                 return $this->orderCreateCall(
@@ -674,7 +705,7 @@ class CheckoutController extends Controller
 
     public function createBillingAddress($request, $user_id)
     {
-        return  Billing::create([
+        return Billing::create([
             'User_Id' => $user_id,
             'Name' => $request->billing_name,
             'Email' => $request->billing_email,
@@ -726,7 +757,7 @@ class CheckoutController extends Controller
         return $shipping;
     }
 
-    public  function generateRandomString($length = 20)
+    public function generateRandomString($length = 20)
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $charactersLength = strlen($characters);
@@ -751,11 +782,11 @@ class CheckoutController extends Controller
         ];
         $data['tax_rate'] = tax_rate($request->country);
         $data['tax_amount'] = tax_amount(Cart::subtotal(), $request->country);
-        $data['tax_show'] =   currencyConverter(tax_amount(Cart::subtotal(), $request->country));
+        $data['tax_show'] = currencyConverter(tax_amount(Cart::subtotal(), $request->country));
         $data['delivery_charge'] = delivery_charge($request->country);
-        $data['delivery_charge_curr'] =  currencyConverter(delivery_charge($request->country));
+        $data['delivery_charge_curr'] = currencyConverter(delivery_charge($request->country));
         $data['total_cost'] = Cart::subtotal() + delivery_charge($request->country) + tax_amount(Cart::subtotal(), $request->country) - Session::get('CouponAmount');
-        $data['total_cost_curr'] =  currencyConverter(Cart::subtotal() + delivery_charge($request->country) + tax_amount(Cart::subtotal(), $request->country) - Session::get('CouponAmount'));
+        $data['total_cost_curr'] = currencyConverter(Cart::subtotal() + delivery_charge($request->country) + tax_amount(Cart::subtotal(), $request->country) - Session::get('CouponAmount'));
         $data['success'] = true;
         return $data;
     }

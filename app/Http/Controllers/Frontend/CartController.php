@@ -55,14 +55,18 @@ class CartController extends Controller
             $size_name = Size::where('id', $request->size_id)->first();
             $product_price = $request->price;
 
+            $selected_size = DB::table('size_product')->where('Product_Id', $request->product_id)->where('Size_Id', $request->size_id)->first();
+
+            // dd($selected_size);
+
             $cart = Cart::add([
                 'id' => $request->product_id,
                 'name' => $product->en_Product_Name,
                 'qty' => $request->quantity,
-                'price' => $product_price,
+                'price' => $selected_size->price,
                 'size' => $size_id == 0 ? $size_id : $size_name->Size,
                 'selectedSize' => $request->selectedSize,
-                'weight' => $product->Price,
+                'weight' => $selected_size->weight ?? 0,
                 'options' =>
                     [
                         'name_ar' => $product->fr_Product_Name,
@@ -72,7 +76,7 @@ class CartController extends Controller
                         'color' => $color_id == 0 ? $color_id : $color_name->ColorCode,
                         'image' => $product->Primary_Image,
                         'slug' => $product->en_Product_Slug,
-                        'discount_price' => $product_price,
+                        'discount_price' => $selected_size->price,
                         'item_tag' => $product->ItemTag,
                         'discount_parcent' => $product->Discount,
                         'voucher' => $product->Voucher,
@@ -90,6 +94,9 @@ class CartController extends Controller
             }
         }
     }
+
+
+
 
     public function cartContent()
     {

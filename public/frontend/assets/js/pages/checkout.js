@@ -130,7 +130,7 @@
             success: function (data) {
                 $('#tax-show-curr').text(data.tax_show)
                 $('#delivery-charge-curr').text(data.delivery_charge_curr)
-                $('#total-cost-curr').text(data.total_cost_curr)
+                // $('#total-cost-curr').text(data.total_cost_curr)
             }
         });
     }
