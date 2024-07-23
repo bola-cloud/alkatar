@@ -3,6 +3,10 @@
 @section('description', isset($description) ? $description : '')
 @section('keywords', isset($keywords) ? $keywords : '')
 @section('content')
+<style>
+   
+</style>
+
 <!-- Product Area Start -->
 <div class="product-area section">
     <div class="container">
@@ -36,7 +40,9 @@
                                     <div class="categorie-left">
                                         <input class="form-check-input CheckCategory" type="checkbox"
                                             value="{{ $category->en_Category_Name }}"
-                                            id="product_category_{{$category->id}}">
+                                            id="product_category_{{$category->id}}"
+                                            {{$category->id == $selected_category ? 'checked' : ''}} 
+                                            >
                                         <label class="form-check-label"
                                             for="product_category_{{$category->id}}">{{ langConverter($category->en_Category_Name, $category->fr_Category_Name) }}</label>
                                     </div>
@@ -117,11 +123,11 @@
                                 <p class="grid place-items-center mt-32 font-bold text-3xl">{{__("No Products Found!")}}</p>
                             @endforelse
                         </div>
-                        <div class="pagination-area mt-30">
-                            <ul class="paginations text-center">
-                                {{ $products->links() }}
-                            </ul>
-                        </div>
+                        <div class="pagination-area" style="margin-block: 30px;">
+                                <ul class="paginations text-center">
+                                    {{ $products->links('vendor.pagination.custom') }}
+                                </ul>
+                            </div>
                     </div>
                 </div>
             </div>

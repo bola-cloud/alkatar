@@ -475,7 +475,7 @@ h3 {
 
 .product-single-area .product-single-details .product-info .cart-plus-minus {
     @apply bg-white border-2 border-gray-300 rounded-xl px-5 py-2;
-}
+}   
 
 .product-single-area
     .product-single-left
@@ -954,4 +954,12 @@ h3 {
 
 .cart-page-area .bottom-box-title {
     @apply !text-3xl;
+}
+
+.pagination-area .paginations .pagination-page.active .pagination-link {
+@apply bg-primary-red;
+}
+
+.pagination-area .paginations .pagination-page .pagination-link:hover {
+@apply bg-primary-red;
 }

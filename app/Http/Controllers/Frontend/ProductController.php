@@ -213,6 +213,7 @@ class ProductController extends Controller
         }
 
         $data['products'] = $products;
+        $data['selected_category'] = $id;
 
         // dd($products->count());
 
