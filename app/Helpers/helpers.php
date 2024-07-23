@@ -539,11 +539,11 @@ if (!function_exists('tax_rate')) {
 }
 
 if (!function_exists('delivery_charge')) {
-    function delivery_charge($country = null)
+    function delivery_charge($city = null)
     {
         $dc = 0;
-        if ($country != null) {
-            $delivery_charge = DeliveryCharge::where('country', $country)->where('status', ACTIVE)->first();
+        if ($city != null) {
+            $delivery_charge = DeliveryCharge::where('city_id', $city)->where('status', ACTIVE)->first();
             if (!is_null($delivery_charge)) {
                 $dc = $delivery_charge->charge;
             }

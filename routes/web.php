@@ -175,132 +175,133 @@ Route::get("/thawani-success", [CheckoutController::class, "paymentSuccess"])->n
 // In web.php
 
 Route::get("/get-cities-by-state/{state_id}", [CityController::class, "getCitiesByState"]);
+Route::get("/get-city-charge/{city_id}", [CityController::class, "getCityCharge"]);
 
 
 
-Route::get('/sync-products', function () {
-    ini_set('max_execution_time', 1800); // 10 minutes
+// Route::get('/sync-products', function () {
+//     ini_set('max_execution_time', 1800); // 10 minutes
 
-    $csv = Reader::createFromPath(storage_path('products.csv'), 'r');
-    $csv->setHeaderOffset(0);
-    $records = $csv->getRecords();
+//     $csv = Reader::createFromPath(storage_path('minor-products.csv'), 'r');
+//     $csv->setHeaderOffset(0);
+//     $records = $csv->getRecords();
 
-    $processed = 0;
-    $errors = [];
-    $productData = [];
-    $categoryCache = [];
+//     $processed = 0;
+//     $errors = [];
+//     $productData = [];
+//     $categoryCache = [];
 
-    foreach ($records as $record) {
-        $productId = $record['Product ID'];
-        $language = strtolower($record['Language']);
+//     foreach ($records as $record) {
+//         $productId = $record['Product ID'];
+//         $language = strtolower($record['Language']);
 
-        // Map Arabic ('ar') to French ('fr') for internal processing
-        if ($language === 'ar') {
-            $language = 'fr';
-        }
+//         // Map Arabic ('ar') to French ('fr') for internal processing
+//         if ($language === 'ar') {
+//             $language = 'fr';
+//         }
 
-        if (!isset($productData[$productId])) {
-            $productData[$productId] = [
-                'en' => [],
-                'fr' => [],
-                'shared' => [
-                    'Price' => $record['Price'],
-                    'Discount_Price' => $record['Price'],
-                    'Quantity' => $record['Quantity'],
-                    'Primary_Image' => $record['Main Image'],
-                    // 'Status' => $record['Status'],
-                    'Status' => 1,
-                    'Brand_Id' => null,
-                ]
-            ];
-        }
+//         if (!isset($productData[$productId])) {
+//             $productData[$productId] = [
+//                 'en' => [],
+//                 'fr' => [],
+//                 'shared' => [
+//                     'Price' => $record['Price'],
+//                     'Discount_Price' => $record['Price'],
+//                     'Quantity' => $record['Quantity'],
+//                     'Primary_Image' => $record['Main Image'],
+//                     // 'Status' => $record['Status'],
+//                     'Status' => 1,
+//                     'Brand_Id' => null,
+//                 ]
+//             ];
+//         }
 
-        $productData[$productId][$language] = [
-            $language . '_Product_Name' => $record['Name'],
-            $language . '_Product_Slug' => $record['Slug'],
-            $language . '_About' => $record['Description'],
-            $language . '_Description' => $record['Description'],
-            $language . '_ShippingReturn' => '',
-            $language . '_AdditionalInformation' => '',
-            'Voucher' => ''
-        ];
+//         $productData[$productId][$language] = [
+//             $language . '_Product_Name' => $record['Name'],
+//             $language . '_Product_Slug' => $record['Slug'],
+//             $language . '_About' => $record['Description'],
+//             $language . '_Description' => $record['Description'],
+//             $language . '_ShippingReturn' => '',
+//             $language . '_AdditionalInformation' => '',
+//             'Voucher' => ''
+//         ];
 
-        if ($language === 'en' || $language === 'fr') {
-            $categoryPath = explode(' > ', $record['Categories']);
-            $categoryName = end($categoryPath);
-            $productData[$productId]['shared']['Category_Name'][$language] = trim($categoryName);
-        }
-    }
+//         if ($language === 'en' || $language === 'fr') {
+//             $categoryPath = explode(' > ', $record['Categories']);
+//             $categoryName = end($categoryPath);
+//             $productData[$productId]['shared']['Category_Name'][$language] = trim($categoryName);
+//         }
+//     }
 
-    // Default French data to English if French is missing
-    foreach ($productData as $productId => $data) {
-        if (empty($data['fr']) && !empty($data['en'])) {
-            foreach ($data['en'] as $key => $value) {
-                $frKey = str_replace('en_', 'fr_', $key);
-                $productData[$productId]['fr'][$frKey] = $value;
-            }
-        }
-    }
+//     // Default French data to English if French is missing
+//     foreach ($productData as $productId => $data) {
+//         if (empty($data['fr']) && !empty($data['en'])) {
+//             foreach ($data['en'] as $key => $value) {
+//                 $frKey = str_replace('en_', 'fr_', $key);
+//                 $productData[$productId]['fr'][$frKey] = $value;
+//             }
+//         }
+//     }
 
-    DB::beginTransaction();
+//     DB::beginTransaction();
 
-    foreach ($productData as $productId => $data) {
-        try {
-            $product = Product::firstOrNew(['id' => $productId]);
-            $productAttributes = array_merge($data['en'], $data['fr'], $data['shared']);
-            unset($productAttributes['Category_Name']);
+//     foreach ($productData as $productId => $data) {
+//         try {
+//             $product = Product::firstOrNew(['id' => $productId]);
+//             $productAttributes = array_merge($data['en'], $data['fr'], $data['shared']);
+//             unset($productAttributes['Category_Name']);
 
-            foreach ($productAttributes as $key => $value) {
-                $product->{$key} = $value;
-            }
+//             foreach ($productAttributes as $key => $value) {
+//                 $product->{$key} = $value;
+//             }
 
-            if (!empty($product->Primary_Image)) {
-                $contents = Http::get($product->Primary_Image)->body();
-                $filename = basename($product->Primary_Image);
-                $path = substr($filename, 0, 10) . '.png';
-                file_put_contents(public_path('/uploaded_files/product_image/' . $path), $contents);
-                $product->Primary_Image = $path;
-            }
+//             if (!empty($product->Primary_Image)) {
+//                 $contents = Http::get($product->Primary_Image)->body();
+//                 $filename = basename($product->Primary_Image);
+//                 $path = substr($filename, 0, 10) . '.png';
+//                 file_put_contents(public_path('/uploaded_files/product_image/' . $path), $contents);
+//                 $product->Primary_Image = $path;
+//             }
 
-            $product->save();
+//             $product->save();
 
-            // Create and attach category with names in both languages
-            if (!empty($data['shared']['Category_Name'])) {
-                $enCategoryName = $data['shared']['Category_Name']['en'] ?? null;
-                $frCategoryName = $data['shared']['Category_Name']['fr'] ?? $enCategoryName; // Use English name if French name is missing
+//             // Create and attach category with names in both languages
+//             if (!empty($data['shared']['Category_Name'])) {
+//                 $enCategoryName = $data['shared']['Category_Name']['en'] ?? null;
+//                 $frCategoryName = $data['shared']['Category_Name']['fr'] ?? $enCategoryName; // Use English name if French name is missing
 
-                $categoryKey = $enCategoryName . '|' . $frCategoryName;
-                if (!isset($categoryCache[$categoryKey])) {
-                    $category = Category::firstOrCreate([
-                        'en_Category_Name' => $enCategoryName,
-                        'fr_Category_Name' => $frCategoryName,
-                        'en_Category_Slug' => Str::slug($enCategoryName),
-                        'fr_Category_Slug' => Str::slug($frCategoryName),
-                        'Status' => 1
-                    ]);
-                    $categoryCache[$categoryKey] = $category->id;
-                }
+//                 $categoryKey = $enCategoryName . '|' . $frCategoryName;
+//                 if (!isset($categoryCache[$categoryKey])) {
+//                     $category = Category::firstOrCreate([
+//                         'en_Category_Name' => $enCategoryName,
+//                         'fr_Category_Name' => $frCategoryName,
+//                         'en_Category_Slug' => Str::slug($enCategoryName),
+//                         'fr_Category_Slug' => Str::slug($frCategoryName),
+//                         'Status' => 1
+//                     ]);
+//                     $categoryCache[$categoryKey] = $category->id;
+//                 }
 
-                $product->Category_Id = $categoryCache[$categoryKey];
-                $product->save();
-            }
+//                 $product->Category_Id = $categoryCache[$categoryKey];
+//                 $product->save();
+//             }
 
-            // Attaching default size
-            $defaultSizeId = 1; // Assuming '1' is the ID of the default size
-            $defaultPrice = $data['shared']['Price']; // Use the product's price for this size
-            $product->sizes()->sync([$defaultSizeId => ['price' => $defaultPrice]], false);
+//             // Attaching default size
+//             $defaultSizeId = 1; // Assuming '1' is the ID of the default size
+//             $defaultPrice = $data['shared']['Price']; // Use the product's price for this size
+//             $product->sizes()->sync([$defaultSizeId => ['price' => $defaultPrice]], false);
 
 
-            $processed++;
-            DB::commit();
-        } catch (\Exception $e) {
-            $errors[] = "Error processing product ID {$productId}: " . $e->getMessage();
-            DB::rollBack();
-        }
-    }
+//             $processed++;
+//             DB::commit();
+//         } catch (\Exception $e) {
+//             $errors[] = "Error processing product ID {$productId}: " . $e->getMessage();
+//             DB::rollBack();
+//         }
+//     }
 
-    return response()->json([
-        'processed' => $processed,
-        'errors' => $errors
-    ]);
-});
+//     return response()->json([
+//         'processed' => $processed,
+//         'errors' => $errors
+//     ]);
+// });

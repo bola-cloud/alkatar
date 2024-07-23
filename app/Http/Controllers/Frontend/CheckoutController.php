@@ -16,9 +16,11 @@ use App\Models\Admin\Order;
 use App\Models\Admin\OrderDetails;
 use App\Models\Admin\Product;
 use App\Models\Admin\Shipping;
+use App\Models\Country;
 use App\Models\Currency;
 use App\Models\PaymentPlatform;
 use App\Models\SeoSetting;
+use App\Models\State;
 use App\Resolvers\PaymentPlatformResolver;
 use Illuminate\Http\Request;
 use Gloudemans\Shoppingcart\Facades\Cart;
@@ -82,6 +84,8 @@ class CheckoutController extends Controller
             $data['description'] = $seo->description;
             $data['keywords'] = $seo->keywords;
             $data['extraWeightFees'] = $this->calculateExtraWeightFees();
+            $oman_country_id = Country::where('name_en', 'Oman')->first()->id;
+            $data['states'] = State::where('country_id', $oman_country_id)->get();
 
             return view('front.pages.checkout.checkout', $data);
         } else {
@@ -98,6 +102,7 @@ class CheckoutController extends Controller
     }
     public function checkoutOrder(Request $request)
     {
+        // dd($request->all());
         if (Auth::check()) {
             $request->validate([
                 'billing_name' => 'required',
@@ -126,7 +131,7 @@ class CheckoutController extends Controller
                 $subtotal = Cart::subtotal();
                 $cartItems = Cart::content();
                 $tax = tax_amount($subtotal, $request->billing_country);
-                $shipping_charge = delivery_charge($request->billing_country);
+                $shipping_charge = delivery_charge($request->city_id);
                 $weight_charge = $this->calculateExtraWeightFees();
                 $shipping_charge += $weight_charge;
                 $this->grand_total = $subtotal + $tax + $shipping_charge + $weight_charge;
@@ -395,6 +400,7 @@ class CheckoutController extends Controller
                     return redirect()->back()->with('error', 'Payment method is required');
                 }
             } catch (\Exception $e) {
+                dd($e);
                 return redirect()->back()->with('error', 'Something went wrong');
             }
         } else {

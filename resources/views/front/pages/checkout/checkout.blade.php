@@ -43,26 +43,30 @@
 
                             <div class="relative">
                                 <label for="billing_country"
-                                    class="block text-lg xl:text-2xl font-medium text-gray-700 mb-2">{{ __('Governorate') }}</label>
+                                    class="block text-lg xl:text-2xl font-medium text-gray-700 mb-2">{{ __('State') }}</label>
                                 <select class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl"
-                                    id="billing_country" name="billing_country" required>
-                                    <option>{{ __('Governorate') }}</option>
-                                    @foreach (country() as $code => $name)
-                                        <option value="{{ $code }}" {{ isset($billing) && $billing->Country == $code ? 'selected' : '' }}>
-                                            {{ $name }}
+                                    id="billing_country" name="billing_state" required>
+                                    <option>{{ __('State') }}</option>
+                                    @foreach ($states as $state)
+                                        <option value="{{ $state->id }}">
+                                            {{ langConverter($state->name_en, $state->name_ar) }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
 
+                            <input type="hidden" name="billing_country" value="1" />
+
                             <div class="flex flex-col sm:flex-row gap-4">
-                                <div class="w-full">
-                                    <label for="billing_state"
-                                        class="block text-lg xl:text-2xl font-medium text-gray-700 mb-2">{{ __('State') }}</label>
-                                    <input type="text"
-                                        class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl"
-                                        id="billing_state" name="billing_state" placeholder="{{ __('State') }}"
-                                        value="{{ isset($billing) ? $billing->State : '' }}" required />
+
+                                <div class="relative w-full">
+                                    <label for="city"
+                                        class="block text-lg xl:text-2xl font-medium text-gray-700 mb-2">{{ __('City') }}</label>
+                                    <select class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl"
+                                        id="city" name="city_id" required>
+                                        <option value="">{{__('---Select City---')}}</option>
+
+                                    </select>
                                 </div>
                                 <div class="w-0">
                                     <!-- <label for="billing_zipcode"
@@ -236,5 +240,48 @@
 
 @push('post_script')
     <script src="{{ asset('frontend/assets/js/pages/checkout.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+            $('#billing_country').on('change', function () {
+                var stateId = $(this).val();
+                if (stateId) {
+                    $.ajax({
+                        url: '/get-cities-by-state/' + stateId,
+                        type: "GET",
+                        dataType: "json",
+                        success: function (data) {
+                            $('#city').empty();
+                            $('#city').append('<option value="">---Select City---</option>');
+                            $.each(data, function (key, value) {
+                                $('#city').append('<option value="' + value.id + '" > ' + value.name_en + '</option > ');
+                            });
+                        }
+                    });
+                } else {
+                    $('#city').empty();
+                    $('#city').append('<option value="">---Select City---</option>');
+                }
+            });
+        });
+
+        // add the shipping charge depending on selected city
+        $('#city').on('change', function () {
+            var cityId = $(this).val();
+            if (cityId) {
+                $.ajax({
+                    url: '/get-city-charge/' + cityId,
+                    type: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        console.log("city change data", data);
+                        $('#delivery-charge-curr').text(data.formatted_charge);
+                        // $('#weight-charge-curr').text(data.weight_charge);
+                        // $('#tax-show-curr').text(data.tax_amount);
+                        $('#total-cost-curr').text(data.total_cost);
+                    }
+                });
+            }
+        });
+    </script>
 @endpush
 @endsection
