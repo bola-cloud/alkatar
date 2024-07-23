@@ -23,7 +23,7 @@ services:
 
     mysql:
         container_name: SharaaDates_DB
-        image: mysql:8.0
+        image: mysql:8.0.39
         command: --default-authentication-plugin=mysql_native_password
         environment:
             MYSQL_ROOT_PASSWORD: default
@@ -45,7 +45,7 @@ services:
             - mysql
 
     nginx:
-        image: nginx:1.21-alpine
+        image: nginx:1.27.0-alpine
         container_name: SharaaDates-nginx
         volumes:
             - .:/var/www/html

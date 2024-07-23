@@ -180,7 +180,7 @@ h3 {
 }
 
 .single-grid-product {
-    @apply border-2 border-gray-200 rounded-lg overflow-hidden shadow-md hover:scale-105 transition-all duration-500 hover:border-primary-red hover:cursor-pointer md:max-w-[350px] pb-7;
+    @apply border-2 border-gray-200 rounded-lg overflow-hidden shadow-md hover:scale-105 transition-all duration-500 hover:border-primary-red hover:cursor-pointer md:max-w-[320px] pb-7;
 }
 
 .single-grid-product .product-info {
@@ -208,7 +208,7 @@ h3 {
 }
 
 .single-grid-product .product-top .product-thumbnal {
-    @apply relative w-full !h-[350px] object-fill hover:scale-100;
+    @apply relative w-full h-[250px] object-fill hover:scale-100;
 }
 
 .product-banner .single-banner .banner-image {
