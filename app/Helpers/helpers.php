@@ -279,7 +279,7 @@ if (!function_exists('currencyConverter')) {
     {
         $convert_price = $price;
         if (session()->has('currency')) {
-            $currency = Currency::where('currency', session()->get('currency'))->first();
+            $currency = Currency::where('iso', 'omr')->first();
             if (!empty($currency)) {
                 $convert_price = $price * $currency->convert_from_usd;
                 return format_price($convert_price);
