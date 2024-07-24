@@ -123,28 +123,17 @@ class EcommerceController extends Controller
 
     public function countryDCStore(Request $request)
     {
-        $tax = DeliveryCharge::where('country', $request->country)->first();
-        if (!is_null($tax)) {
-            $update = $tax->update([
-                'country' => $request->country,
-                'charge' => $request->charge,
-                'city_id' => $request->city_id,
-                'state_id' => $request->state_id,
-            ]);
-            if (!empty($update)) {
-                return redirect()->back()->with('success', __('Delivery charge already exist. It Updated!'));
-            }
-        } else {
             $store = DeliveryCharge::create([
                 'country' => $request->country,
                 'charge' => $request->charge,
                 'city_id' => $request->city_id,
                 'state_id' => $request->state_id,
             ]);
+
             if (!empty($store)) {
                 return redirect()->back()->with('success', __('Delivery charge added!'));
             }
-        }
+        
         return redirect()->back()->with('error', __('Something went wrong'));
     }
 
