@@ -170,6 +170,16 @@
     });
 
     $(document).ready(function () {
+        function __(key, replace = {}) {
+            let translation = window.translations[key] || key;
+            
+            Object.keys(replace).forEach(placeholder => {
+                translation = translation.replace(`:${placeholder}`, replace[placeholder]);
+            });
+            
+            return translation;
+        }
+        
         var isProductDetailsPage = $(".product-single-area").length > 0;
         let selectedProductId = null;
         let selectedSizeId = null;
@@ -278,6 +288,7 @@
                 selectedProductId = productId;
                 var productName = $(this).data("name");
                 var sizes = $(this).data("sizes");
+                var weights = $(this).data("weights") || [];
                 var additions = $(this).data("additions") || [];
                 var discount = $(this).data("discount") ?? null;
 
@@ -291,10 +302,28 @@
                 sizes.forEach(function (size) {
                     const finalPrice = discount ?? size.pivot.price 
                     var sizeOption = `<button class="btn btn-outline-primary size-option" data-product-id="${productId}" data-size-id="${size.id}" data-price="${finalPrice}">
-                                        ${size.Size} - ${finalPrice}
+                                        ${size.Size} - ${finalPrice} OMR
                                       </button>`;
                     sizeOptionsContainer.append(sizeOption);
                 });
+
+                var weightOptionsContainer = $("#weightOptionsContainer");
+                weightOptionsContainer.empty();
+
+                if (weights.length > 0) {
+                    weights.forEach(function (weight) {
+                        var weightOption = `
+                            <button class="btn btn-outline-primary weight-option" 
+                                    data-product-id="${productId}" 
+                                    data-weight-id="${weight.id}" 
+                                    data-price="${weight.price}">
+                                ${weight.weight} ${localizedText.grams} - ${weight.price} OMR
+                            </button>`;
+                        weightOptionsContainer.append(weightOption);
+                    });
+                }
+
+
 
                 var additionOptionsContainer = $("#additionOptionsContainer");
                 var additionOptionsSection = $("#additionOptionsSection");
@@ -305,7 +334,7 @@
                         var additionOption = `<label class="addition-option">
                                                 <input type="checkbox" data-addition-id="${addition.id}" data-price="${addition.price}">
                                                 <span class="checkmark"></span>
-                                                ${addition.name_ar} - ${addition.price}
+                                                ${addition.name_ar} - ${addition.price} + OMR
                                               </label>`;
                         additionOptionsContainer.append(additionOption);
                     });
@@ -329,6 +358,15 @@
             selectedSizeId = $(this).data("size-id");
             selectedSizePrice = parseFloat($(this).data("price"));
         });
+
+        $(document).on("click", ".weight-option", function () {
+            $(".weight-option").removeClass("selected");
+            $(this).addClass("selected");
+            selectedWeightId = $(this).data("weight-id");
+            selectedWeightPrice = parseFloat($(this).data("price"));
+        });
+
+
 
         $(document).on("change", ".addition-option input", function () {
             var additionId = $(this).data("addition-id");
@@ -354,7 +392,7 @@
         $("#submitSelection").on("click", function () {
             const productId = selectedProductId
 
-            var totalPrice = selectedSizePrice;
+            var totalPrice = selectedSizePrice + selectedWeightPrice;
             selectedAdditions.forEach(function (addition) {
                 totalPrice += addition.price;
             });
@@ -381,6 +419,7 @@
                     quantity: quantity,
                     color_id: color,
                     size_id: selectedSizeId,
+                    weight_id: selectedWeightId,
                     additions: selectedAdditions.map(function (addition) {
                         return addition.id;
                     }),

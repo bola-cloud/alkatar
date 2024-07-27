@@ -134,6 +134,14 @@
                             <!-- Size options will be injected here -->
                         </div>
                     </div>
+
+                    <div class="mb-3" id="additionOptionsSection">
+                        <h6>{{ __("Weight Options") }}:</h6>
+                        <div id="weightOptionsContainer" class="d-flex flex-wrap gap-2">
+                            <!-- Weight options will be injected here -->
+                        </div>
+                    </div>
+
                     <div class="mb-3" id="additionOptionsSection">
                         <h6>{{ __("Addition Options") }}:</h6>
                         <div id="additionOptionsContainer" class="d-flex flex-wrap gap-2">
@@ -159,7 +167,8 @@
     <script>
         var localizedText = {
           productAddedToCart: @json(__('Product Added to Cart Successfully')),
-          selectSize: @json(__('Select Size for Product'))
+          selectSize: @json(__('Select Size for Product')),
+          grams: @json(__('Grams')),
       };
     </script>
     @include('front.layouts.include.script')
