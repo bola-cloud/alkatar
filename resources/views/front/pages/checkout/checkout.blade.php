@@ -156,10 +156,12 @@
                             {{ is_null($item->options->size) ? __('Free Size') : langConverter($item->options->size, $item->options->size_ar) }}
                         </p>
 
+                        @if(isset($item->options->weight))
                         <p class="text-2xl xl:text-4xl text-gray-600 my-4">
                             <span class="font-bold underline">{{__('Size') }}</span>:
                             {{ is_null($item->options->weight) ? __('Free Size') : $item->options->weight->weight . " " . __("Grams") }}
                         </p>
+                        @endif
                         @if ($item->options->additions)
                             <div class="mb-4">
                                 <p class="text-2xl xl:text-4xl text-gray-600 font-bold underline">{{ __('Additions') }}:</p>
