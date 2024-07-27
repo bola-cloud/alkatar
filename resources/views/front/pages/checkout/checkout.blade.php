@@ -64,7 +64,7 @@
                                         class="block text-lg xl:text-2xl font-medium text-gray-700 mb-2">{{ __('City') }}</label>
                                     <select class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl"
                                         id="city" name="city_id" required>
-                                        <option value="">{{__('---Select City---')}}</option>
+                                        <option value="">{{__('City')}}</option>
 
                                     </select>
                                 </div>

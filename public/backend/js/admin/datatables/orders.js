@@ -50,10 +50,10 @@
                     data: 'Payment_Method',
                     name: 'Payment_Method'
                 },
-                {
-                    data: 'digital_goods',
-                    name: 'digital_goods'
-                },
+                // {
+                //     data: 'digital_goods',
+                //     name: 'digital_goods'
+                // },
                 {
                     data: 'Status',
                     name: 'Status'

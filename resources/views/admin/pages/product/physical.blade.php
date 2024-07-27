@@ -119,7 +119,7 @@
                                         </div>
 
                                         <div class="input__group mb-25">
-                                            <label for="select2Multiple">{{ __('Product Size') }}</label>
+                                            <label for="select2Multiple">{{ __('Product Options') }}</label>
                                             <select class="select2-multiple form-control tag_one" name="size[]"
                                                 multiple="multiple">
                                                 @foreach (productSize() as $item)
@@ -132,7 +132,7 @@
                                         </div> --}}
 
                                         <div class="input__group mb-25">
-                                            <label>{{ __('Product Size') }}</label>
+                                            <label>{{ __('Product Option') }}</label>
                                             <div id="size-container">
                                                 <!-- Size rows will be added here dynamically -->
                                             </div>
@@ -458,7 +458,7 @@
                 const sizeRow = `
                                                                                                             <div class="row mb-3" id="size-row-${sizeCounter}">
                                                                                                                 <div class="col-md-5">
-                                                                                                                     <label for="size-${sizeCounter}">Size:</label>
+                                                                                                                     <label for="size-${sizeCounter}">Option:</label>
                                     <select class="form-control" name="size[]" id="size-${sizeCounter}">
                                                                                                                         @foreach (productSize() as $item)
                                                                                                                             <option value="{{ $item->id }}" ${sizeId === {{ $item->id }} ? 'selected' : ''}>{{ $item->Size }}</option>

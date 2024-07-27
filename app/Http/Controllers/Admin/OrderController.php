@@ -83,13 +83,13 @@ class OrderController extends Controller
                 ->addColumn('Coupon', function ($data) {
                     return is_null($data->Coupon_Id) ? 'N/A' : $data->coupon->CouponCode;
                 })
-                ->addColumn('digital_goods', function ($data) {
-                    if (validDigitalSend($data->id)) {
-                        return '<a href="' . route('admin.digital_product_send', encrypt($data->id)) . '" class="btn btn-outline-primary small rounded" title="' . __('Send') . '">' . __('Send') . '</a>';
-                    } else {
-                        return 'N/A';
-                    }
-                })
+                // ->addColumn('digital_goods', function ($data) {
+                //     if (validDigitalSend($data->id)) {
+                //         return '<a href="' . route('admin.digital_product_send', encrypt($data->id)) . '" class="btn btn-outline-primary small rounded" title="' . __('Send') . '">' . __('Send') . '</a>';
+                //     } else {
+                //         return 'N/A';
+                //     }
+                // })
                 ->addColumn('Status', function ($data) {
                     $html = '';
                     if ($data->Order_Status == ORDER_PENDING) {
@@ -111,7 +111,7 @@ class OrderController extends Controller
                     }
                     return $html;
                 })
-                ->rawColumns(['action', 'Products', 'digital_goods', 'Status', 'types', 'Payment_Method'])
+                ->rawColumns(['action', 'Products', 'Status', 'types', 'Payment_Method'])
                 ->make(true);
         }
         $data['title'] = __('Order List');

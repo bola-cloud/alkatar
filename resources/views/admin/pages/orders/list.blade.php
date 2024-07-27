@@ -54,7 +54,7 @@
                                 <th>{{ __('Total Amount') }}</th>
                                 <th>{{ __('Coupon Code') }}</th>
                                 <th>{{ __('Payment Method') }}</th>
-                                <th>{{ __('Digital Goods') }}</th>
+                                <!-- <th>{{ __('Digital Goods') }}</th> -->
                                 <th>{{ __('Status') }}</th>
                                 <th>{{ __('Action') }}</th>
                             </tr>
