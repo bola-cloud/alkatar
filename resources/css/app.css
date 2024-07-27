@@ -491,7 +491,8 @@ h3 {
 }
 
 .product-single-area .product-single-details .product-info .size-switch,
-.product-single-area .product-single-details .product-info .addition-switch {
+.product-single-area .product-single-details .product-info .addition-switch,
+.product-single-area .product-single-details .product-info .weight-switch {
     @apply flex flex-col gap-5 w-max;
 }
 
@@ -504,7 +505,12 @@ h3 {
     .product-single-details
     .product-info
     .addition-switch
-    .single-addition
+    .single-addition,
+    .product-single-area
+    .product-single-details
+    .product-info
+    .weight-switch
+    .single-weight
      {
     @apply bg-white border-2 border-gray-300 rounded-xl px-5 py-4 h-20 flex items-center justify-center gap-5;
 }
@@ -707,13 +713,13 @@ h3 {
     margin-bottom: 1rem;
 }
 
-#sizeOptionsContainer, #additionOptionsContainer {
+#sizeOptionsContainer, #additionOptionsContainer, #weightOptionsContainer {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
 }
 
-.size-option, .addition-option {
+.size-option, .addition-option, .weight-option {
     padding: 1rem 2rem;
     font-size: 1.25rem;
     border: 1px solid #dee2e6;
@@ -724,12 +730,12 @@ h3 {
     transition: background-color 0.3s, color 0.3s;
 }
 
-.size-option:hover, .addition-option:hover {
+.size-option:hover, .addition-option:hover, .weight-option:hover {
     background-color: var(--bs-primary);
     color: #ffffff;
 }
 
-.modal-body .size-option.selected, .modal-body .addition-option.selected {
+.modal-body .size-option.selected, .modal-body .addition-option.selected, .modal-body .weight-option.selected {
     background-color: var(--bs-primary);
     color: #ffffff;
 }
@@ -791,7 +797,7 @@ h3 {
 }
 
 /* Base styles for options */
-.size-option, .addition-option {
+.size-option, .addition-option, .weight-option {
     display: flex;
     align-items: center;
     cursor: pointer;
@@ -803,14 +809,14 @@ h3 {
 
 
 /* Hide the default input */
-.size-radio, .addition-checkbox {
+.size-radio, .addition-checkbox, .weight-radio {
     appearance: none;
     position: absolute;
     opacity: 0;
 }
 
 /* Custom radio button */
-.size-radio + .size-label:before {
+.size-radio + .size-label:before, .weight-radio + .weight-label:before {
     content: '';
     display: inline-block;
     margin-inline-end: 10px;
@@ -822,9 +828,11 @@ h3 {
     transition: background-color 0.3s ease;
 }
 
-.size-radio:checked + .size-label:before {
+.size-radio:checked + .size-label:before, .weight-radio:checked + .weight-label:before {
     background-color:  var(--bs-primary-dark)
 }
+
+
 
 /* Custom checkbox */
 .addition-checkbox + .addition-label:before {
@@ -906,6 +914,9 @@ h3 {
     border-width: 0 3px 3px 0;
     transform: rotate(45deg);
 }
+
+
+
 
 
 /* CSS for responsiveness */

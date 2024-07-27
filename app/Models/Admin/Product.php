@@ -4,6 +4,7 @@ namespace App\Models\Admin;
 
 use App\Models\ProductReview;
 use App\Models\Subcategory;
+use App\Models\WeightProduct;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -87,6 +88,7 @@ class Product extends Model
         return $this->belongsToMany(Size::class, 'size_product', 'Product_Id', 'Size_Id')->withPivot('price', 'weight');
     }
 
+
     public function product_tags()
     {
         return $this->hasMany(ProductTag::class, 'product_id');
@@ -105,5 +107,10 @@ class Product extends Model
     public function subcategory()
     {
         return $this->belongsTo(Subcategory::class);
+    }
+
+    public function weights()
+    {
+        return $this->hasMany(WeightProduct::class, 'Product_Id');
     }
 }

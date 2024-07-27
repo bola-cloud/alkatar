@@ -173,18 +173,30 @@
         var isProductDetailsPage = $(".product-single-area").length > 0;
         let selectedProductId = null;
         let selectedSizeId = null;
+        let selectedWeightId = null;
         let selectedSizePrice = 0;
+        let selectedWeightPrice = 0;
         let selectedAdditions = [];
     
         if (isProductDetailsPage) {
             // Set initial values
             selectedSizeId = $('.size-switch input[type="radio"]:checked').data('size');
             selectedSizePrice = parseFloat($('.size-switch input[type="radio"]:checked').val());
+            selectedWeightId = $('.weight-switch input[type="radio"]:checked').data('weight');
+            selectedWeightPrice = parseFloat($('.weight-switch input[type="radio"]:checked').val());
+
     
             // Handle size selection
             $('.size-switch input[type="radio"]').on('change', function() {
                 selectedSizeId = $(this).data('size');
                 selectedSizePrice = parseFloat($(this).val());
+                updateTotalPrice();
+            });
+
+             // Handle size selection
+             $('.weight-switch input[type="radio"]').on('change', function() {
+                selectedWeightId = $(this).data('weight');
+                selectedWeightPrice = parseFloat($(this).val());
                 updateTotalPrice();
             });
     
@@ -194,16 +206,23 @@
                 var additionPrice = parseFloat($(this).val());
                 
                 if ($(this).is(':checked')) {
-                    selectedAdditions.push({ id: additionId, price: additionPrice });
+                    if (additionId && additionPrice) {
+                        selectedAdditions.push({ id: additionId, price: additionPrice });
+                    }
+                  
                 } else {
                     selectedAdditions = selectedAdditions.filter(addition => addition.id !== additionId);
                 }
+                
                 updateTotalPrice();
+
+                $('.addCart').attr("data-price", selectedSizePrice + selectedWeightPrice + selectedAdditions.reduce((sum, addition) => sum + addition.price, 0));
             });
     
             // Update total price
             function updateTotalPrice() {
-                var totalPrice = selectedSizePrice + selectedAdditions.reduce((sum, addition) => sum + addition.price, 0);
+                const additionTotalPrice = selectedAdditions.length ? selectedAdditions.reduce((sum, addition) => sum + addition.price, 0) : 0;
+                var totalPrice = selectedSizePrice + selectedWeightPrice +  additionTotalPrice;
                 $('.product-single-right .product-price .price').text(currencyPrice(totalPrice));
             }
     
@@ -223,6 +242,7 @@
                         quantity: quantity,
                         color_id: colorId,
                         size_id: selectedSizeId,
+                        weight_id: selectedWeightId,
                         additions: selectedAdditions.map(addition => addition.id),
                         price,
                         _token: $('meta[name="csrf-token"]').attr("content"),
@@ -314,17 +334,20 @@
             var additionId = $(this).data("addition-id");
             var additionPrice = parseFloat($(this).data("price"));
 
-            if ($(this).is(":checked")) {
-                selectedAdditions.push({
-                    id: additionId,
-                    price: additionPrice,
-                });
-            } else {
-                selectedAdditions = selectedAdditions.filter(function (
-                    addition
-                ) {
-                    return addition.id !== additionId;
-                });
+            if (!isProductDetailsPage) {
+
+                if ($(this).is(":checked")) {
+                    selectedAdditions.push({
+                        id: additionId,
+                        price: additionPrice,
+                    });
+                } else {
+                    selectedAdditions = selectedAdditions.filter(function (
+                        addition
+                    ) {
+                        return addition.id !== additionId;
+                    });
+                }
             }
         });
 

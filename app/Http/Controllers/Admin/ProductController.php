@@ -758,6 +758,37 @@ class ProductController extends Controller
 
             $pr->sizes()->sync($newPrSizes);
 
+           // Handle weights
+           $weights = request('weight_amount', []);
+           $weightPrices = request('weight_price', []);
+           
+           // Collect all weights from the request
+           $newWeights = [];
+           foreach ($weights as $key => $weight) {
+               if ($weight != null) {
+                   $newWeights[$key] = [
+                       'weight' => $weight,
+                       'price' => $weightPrices[$key]
+                   ];
+               }
+           }
+   
+           // Update existing weights or create new ones
+           foreach ($product->weights as $existingWeight) {
+               $weightId = $existingWeight->id;
+               if (isset($newWeights[$weightId])) {
+                   $existingWeight->update($newWeights[$weightId]);
+                   unset($newWeights[$weightId]);
+               } else {
+                   $existingWeight->delete();
+               }
+           }
+   
+           // Create new weights
+           foreach ($newWeights as $weight) {
+               $product->weights()->create($weight);
+           }
+
 
             // if (isset($data['size'])) {
             //     DB::table('size_product')->where('Product_Id', $product->id)->delete();

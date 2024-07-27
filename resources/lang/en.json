@@ -135,7 +135,8 @@
     "$ Min": "$ Min",
     "$ Max": "$ Max",
     "Colors": "Colors",
-    "Size": "Options",
+    "Option": "Option",
+    "Size": "Size",
     "All Products": "All Products",
     "No result found!": "No result found!",
     "Category Product": "Category Product",
@@ -246,5 +247,6 @@
     "*All the amount is in USD currency.": "*All the amount is in OMR currency.",
     "Size Options": "Size Options",
     "Addition Options": "Addition Options",
-    "Credit Card Payment": "Credit Card Payment"
+    "Credit Card Payment": "Credit Card Payment",
+    "Grams": "Grams"
 }

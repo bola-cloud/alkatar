@@ -39,7 +39,7 @@
                                     <td class="max-w-[200px] p-2" data-label="{{__(" Product Name")}}">
                                         <div class="product-info text-center">
                                             <h3 class="product-name mt-16 lg:mt-0">
-                                                <a class="product-link block w-[30ch] lg:w-[15ch] truncate text-clip whitespace-normal" href="{{ route('single.product', $item->options->slug ?? '') }}" title="{{ langConverter($item->name, $item->options->name_ar) }}">
+                                                <a class="product-link block w-[30ch] lg:w-[25ch] truncate text-clip whitespace-normal" href="{{ route('single.product', $item->options->slug ?? '') }}" title="{{ langConverter($item->name, $item->options->name_ar) }}">
                                                     {{ langConverter($item->name, $item->options->name_ar) }}
                                                 </a>
                                             </h3>
@@ -55,13 +55,23 @@
                                             @endif
 
                                             @if ($item->options->size)
-                                            <h1 class="font-bold underline">{{__("Size")}}</h1>
+                                            <h1 class="font-bold underline">{{__("Option")}}</h1>
                                             <ul class="size-switch mt-2">
                                                 <li class="single-size active">
                                                     {{ langConverter($item->options->size, $item->options->size_ar) }}
                                                 </li>
                                             </ul>
                                             @endif
+
+                                            @if ($item->options->weight)
+                                            <h1 class="font-bold underline mt-3">{{__("Size")}}</h1>
+                                            <ul class="size-switch mt-2">
+                                                <li class="single-size active">
+                                                    {{$item->options->weight->weight }} {{ __('Grams') }}
+                                                </li>
+                                            </ul>
+                                            @endif
+
 
                                             @if ($item->options->additions)
                                             <h1 class="font-bold underline mt-3">{{__("Additions")}}</h1>

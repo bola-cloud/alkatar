@@ -140,6 +140,14 @@
                                                 <button type="button" class="btn btn-primary" id="add-size-btn">Add Size</button>
                                             </div>
 
+                                            <div class="input__group mb-25">
+                                            <label>{{ __('Product Weight') }}</label>
+                                            <div id="weight-container">
+                                                <!-- Size rows will be added here dynamically -->
+                                            </div>
+                                            <button type="button" class="btn btn-primary" id="add-weight-btn">Add
+                                            Weight</button>
+                                        </div>
                                             
                                             
 
@@ -434,6 +442,58 @@
         });
     });
 </script>
+
+<script>
+   $(document).ready(function () {
+    let weightCounter = 0;
+
+    // Function to create a new weight row
+    function createWeightRow(weightId = null, price = null, weight = null) {
+        weightCounter++;
+        const weightRow = `
+            <div class="row mb-3" id="weight-row-${weightCounter}">
+                <div class="col-md-3">
+                    <label for="weight-${weightCounter}">Weight (grams):</label>
+                    <input type="text" id="weight-${weightCounter}" class="form-control" required name="weight_amount[]" placeholder="Enter Weight (grams)" value="${weight || ''}">
+                </div>
+                <div class="col-md-3">
+                    <label for="price-${weightCounter}">Price:</label>
+                    <input type="text" class="form-control" required name="weight_price[]" id="price-${weightCounter}" placeholder="Enter Price" value="${price || ''}">
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-danger remove-weight-row" data-row-id="weight-row-${weightCounter}">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        $('#weight-container').append(weightRow);
+    }
+
+
+         // Pre-populate existing sizes
+         @foreach ($product->weights as $weight)
+         createWeightRow({{ $weight->id }}, '{{ $weight->price }}', '{{ $weight->weight }}');
+        @endforeach
+
+         // Add initial size row if no existing sizes
+         if (!{{ $product->weights->count() }}) {
+            createWeightRow();
+        }
+
+    // Add event listener for the "Add Weight" button
+    $('#add-weight-btn').click(function () {
+        createWeightRow();
+    });
+
+    // Add event listener for removing weight rows
+    $(document).on('click', '.remove-weight-row', function () {
+        const rowId = $(this).data('row-id');
+        $(`#${rowId}`).remove();
+    });
+});
+    </script>
+
 
   <script>
         $(document).ready(function () {

@@ -134,8 +134,27 @@
                                 </div>
                             </div>
 
+                            <div class="product-weight-area border-t pt-16">
+                                <h4 class="weight-title font-bold text-black mb-8">{{ __('Size') }}:</h4>
+                                <div class="weight-switch ">
+                                    @foreach ($products->weights as $weight)
+                                        <div>
+                                            <label for="weight-{{ $weight->id }}" class="weight-option">
+                                                <input type="radio" name="weight" value="{{ $weight->price }}"
+                                                    class="weight-radio" data-weight="{{ $weight->id }}" id="weight-{{ $weight->id }}"
+                                                    {{ $loop->first ? 'checked' : '' }}>
+                                                <span
+                                                    class="weight-label font-bold">{{ $weight->weight }} {{langConverter("grams", "جرام")}}</span>
+                                                &nbsp;-&nbsp;
+                                                <span class="weight-price">{{ currencyConverter($weight->price) }}</span>
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
                             <div class="product-size-area border-t pt-16">
-                                <h4 class="size-title">{{ __('Size') }}:</h4>
+                                <h4 class="size-title">{{ __('Option') }}:</h4>
                                 <div class="size-switch ">
                                     @foreach ($products->sizes as $size)
                                         <div>
@@ -152,6 +171,7 @@
                                     @endforeach
                                 </div>
                             </div>
+
 
                             @if ($products->additions->count() > 0)
                                                 <div class="product-addition-area border-t pt-16">
@@ -385,34 +405,35 @@
         $(document).ready(function () {
             // Get the initial price from the first selected size
             var sizePrice = parseFloat($('.size-switch input[type="radio"]:checked').val());
+            var weightPrice = parseFloat($('.weight-switch input[type="radio"]:checked').val());
             var selectedAdditions = [];
 
             // Set the initial total price
             updateTotalPrice();
 
             // Update price and data attributes when a size is selected
-            $('.size-switch input[type="radio"]').on('change', function () {
-                sizePrice = parseFloat($(this).val());
-                updateTotalPrice();
-                $('.addCart').attr('data-size-id', $(this).data('size'));
-            });
+            // $('.size-switch input[type="radio"]').on('change', function () {
+            //     sizePrice = parseFloat($(this).val());
+            //     updateTotalPrice();
+            //     $('.addCart').attr('data-size-id', $(this).data('size'));
+            // });
 
             // Handle addition selection
-            $('.addition-switch input[type="checkbox"]').on('change', function () {
-                var additionId = $(this).data('addition');
-                var additionPrice = parseFloat($(this).val());
+            // $('.addition-switch input[type="checkbox"]').on('change', function () {
+            //     var additionId = $(this).data('addition');
+            //     var additionPrice = parseFloat($(this).val());
 
-                if ($(this).is(':checked')) {
-                    selectedAdditions.push({ id: additionId, price: additionPrice });
-                } else {
-                    selectedAdditions = selectedAdditions.filter(addition => addition.id !== additionId);
-                }
-                updateTotalPrice();
-            });
+            //     if ($(this).is(':checked')) {
+            //         selectedAdditions.push({ id: additionId, price: additionPrice });
+            //     } else {
+            //         selectedAdditions = selectedAdditions.filter(addition => addition.id !== additionId);
+            //     }
+            //     updateTotalPrice();
+            // });
 
             // Function to update the total price display
             function updateTotalPrice() {
-                var totalPrice = sizePrice + selectedAdditions.reduce((sum, addition) => sum + addition.price, 0);
+                var totalPrice = sizePrice + weightPrice + selectedAdditions.reduce((sum, addition) => sum + addition.price, 0);
                 $('.product-single-right .product-price .price').text('OMR ' + totalPrice.toFixed(2));
                 $('.addCart').attr('data-price', totalPrice);
             }

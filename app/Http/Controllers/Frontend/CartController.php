@@ -7,6 +7,7 @@ use App\Models\Admin\Color;
 use App\Models\Admin\Product;
 use App\Models\Admin\Size;
 use App\Models\SeoSetting;
+use App\Models\WeightProduct;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 // use Cart;
@@ -17,6 +18,7 @@ class CartController extends Controller
 {
     public function addToCart(Request $request)
     {
+        // dd($request->all()); 
         // dd("request size", $request->selectedSize);
         if ($request->ajax()) {
             $product = Product::with('colors', 'sizes', )
@@ -56,16 +58,18 @@ class CartController extends Controller
             $product_price = $request->price;
 
             $selected_size = DB::table('size_product')->where('Product_Id', $request->product_id)->where('Size_Id', $request->size_id)->first();
+            $selected_weight = WeightProduct::where('product_id', $request->product_id)->where('id', $request->weight_id)->first();
 
-            // dd($selected_size);
+            // dd($selected_weight);
 
             $cart = Cart::add([
                 'id' => $request->product_id,
                 'name' => $product->en_Product_Name,
                 'qty' => $request->quantity,
-                'price' => $selected_size->price,
+                'price' => $request->price,
                 'size' => $size_id == 0 ? $size_id : $size_name->Size,
                 'selectedSize' => $request->selectedSize,
+                'selectedWeight' => $selected_weight,
                 'weight' => $selected_size->weight ?? 0,
                 'options' =>
                     [
@@ -75,6 +79,7 @@ class CartController extends Controller
                         'size_ar' => $size_id == 0 ? $size_id : $size_name->Size_ar,
                         'color' => $color_id == 0 ? $color_id : $color_name->ColorCode,
                         'image' => $product->Primary_Image,
+                        'weight' => $selected_weight ?? null,
                         'slug' => $product->en_Product_Slug,
                         'discount_price' => $selected_size->price,
                         'item_tag' => $product->ItemTag,

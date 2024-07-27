@@ -139,94 +139,89 @@
             </div>
 
             <div class="cart-summary bg-white p-6 lg:p-8 rounded-lg shadow-md lg:h-full">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-3xl lg:text-4xl font-bold">{{ __('Cart Summary') }}</h2>
-                    <a class="text-primary-red hover:underline text-lg lg:text-xl"
-                        href="{{ route('cart.content') }}">{{ __('Edit') }}</a>
-                </div>
-                <ul class="space-y-4">
-                    @php $total = 0; @endphp
-                    @foreach ($content as $item)
-                        <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4">
-                            <div class="flex items-center space-x-4 mb-2 sm:mb-0">
-                                <img src="{{ asset(ProductImage() . $item->options->image) }}" alt="{{ $item->name }}"
-                                    class="w-20 h-20 xl:w-32 xl:h-32 object-cover rounded">
-                                <div class="!ms-10">
-                                    <h3 class="font-bold text-2xl xl:text-4xl">
-                                        {{langConverter($item->name, $item->options->name_ar)}}
-                                    </h3>
-                                    <p class="text-2xl xl:text-4xl text-gray-600 my-4"><span class="font-bold underline">
-                                            {{__('Size') }}</span>:
-                                        {{ is_null($item->options->size) ? __('Free Size') : langConverter($item->options->size, $item->options->size_ar) }}
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-3xl lg:text-4xl font-bold">{{ __('Cart Summary') }}</h2>
+        <a class="text-primary-red hover:underline text-lg lg:text-xl" href="{{ route('cart.content') }}">{{ __('Edit') }}</a>
+    </div>
+    <ul class="space-y-4">
+        @php $total = 0; @endphp
+        @foreach ($content as $item)
+            <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4">
+                <div class="flex items-center space-x-4 mb-2 sm:mb-0">
+                    <img src="{{ asset(ProductImage() . $item->options->image) }}" alt="{{ $item->name }}" class="w-20 h-20 xl:w-32 xl:h-32 object-cover rounded">
+                    <div class="!ms-10">
+                        <h3 class="font-bold text-2xl xl:text-4xl">{{langConverter($item->name, $item->options->name_ar)}}</h3>
+                        <p class="text-2xl xl:text-4xl text-gray-600 my-4">
+                            <span class="font-bold underline">{{__('Option') }}</span>:
+                            {{ is_null($item->options->size) ? __('Free Size') : langConverter($item->options->size, $item->options->size_ar) }}
+                        </p>
+
+                        <p class="text-2xl xl:text-4xl text-gray-600 my-4">
+                            <span class="font-bold underline">{{__('Size') }}</span>:
+                            {{ is_null($item->options->weight) ? __('Free Size') : $item->options->weight->weight . " " . __("Grams") }}
+                        </p>
+                        @if ($item->options->additions)
+                            <div class="mb-4">
+                                <p class="text-2xl xl:text-4xl text-gray-600 font-bold underline">{{ __('Additions') }}:</p>
+                                @foreach ($item->options->additions as $addition)
+                                    <p class="text-2xl xl:text-4xl text-gray-600">
+                                        {{ langConverter($addition->name, $addition->name_ar) }}
                                     </p>
-                                    @if ($item->options->additions)
-                                        <div class="mb-4">
-                                            <p class="text-2xl xl:text-4xl text-gray-600 font-bold underline ">
-                                                {{ __('Additions') }}:
-                                            </p>
-                                            @foreach ($item->options->additions as $addition)
-                                                    <p class="text-2xl xl:text-4xl text-gray-600">
-                                                        {{ langConverter($addition->name, $addition->name_ar) }}
-                                                    </p>
-                                                </div>
-                                            @endforeach
-                                    @endif
-                                    <p class="text-2xl xl:text-4xl text-gray-600">{{ __('Quantity') }}: {{ $item->qty }}</p>
-                                </div>
+                                @endforeach
                             </div>
-                            <div class="text-right mt-2 sm:mt-0">
-                                <h3 class="font-bold text-black text-2xl xl:text-4xl">
-                                    {{ currencyConverter($item->price * $item->qty) }}
-                                </h3>
-                            </div>
-                        </li>
-                    @endforeach
-                </ul>
-                <div class="mt-6">
-                    <h2 class="text-2xl xl:text-4xl font-bold mb-3">{{ __('Discount Codes') }}</h2>
-                    <form action="{{ route('apply.coupon') }}" method="post" class="flex space-x-2">
-                        @csrf
-                        <input type="text" class="flex-grow p-2 lg:p-3 border rounded h-14 lg:h-16 text-lg xl:text-3xl"
-                            name="coupon_code" placeholder="{{ __('Enter your coupon code') }}" required />
-                        <button type="submit"
-                            class="bg-primary-red text-white px-4 py-3 lg:py-4 rounded hover:bg-red-600 transition duration-300 text-lg xl:text-2xl">{{ __('Apply Coupon') }}</button>
-                    </form>
+                        @endif
+                        <p class="text-2xl xl:text-4xl text-gray-600">{{ __('Quantity') }}: {{ $item->qty }}</p>
+                    </div>
                 </div>
-                <ul class="mt-10 lg:mt-20 space-y-2 text-2xl xl:text-4xl">
-                    <li class="flex justify-between"><span>{{ __('Subtotal') }}</span>
-                        <span>{{ currencyConverter(\Cart::subtotal()) }}</span>
-                    </li>
-                    <li class="flex justify-between"><span>{{ __('Shipping Cost') }}</span> <span
-                            id="delivery-charge-curr"></span></li>
-                    <li class="flex justify-between"><span>{{ __('Weight Handling Cost') }}</span> <span
-                            id="weight-charge-curr">{{currencyConverter($extraWeightFees)}} </span></li>
-                    <li class="flex justify-between"><span>{{ __('VAT/Tax') }}</span> <span
-                            id="tax-show-curr">{{ currencyConverter(tax_amount(\Cart::subtotal())) }}</span></li>
-                    @if (!empty(Session::get('CouponAmount')))
-                        <li class="flex justify-between"><span>{{ __('Coupon Discount (-)') }}</span>
-                            <span>{{ currencyConverter(Session::get('CouponAmount')) }}</span>
-                        </li>
-                    @endif
-                </ul>
-                <div class="mt-6 pt-4 border-t">
-                    <h3 class="text-2xl xl:text-3xl font-bold flex justify-between">
-                        <span>{{ __('Total Cost') }}</span>
-                        <span id="total-cost-curr">
-                            {{ 
-        currencyConverter(
-        \Cart::subtotal()
-        + allsetting()['shipping_charge']
-        + tax_amount(\Cart::subtotal())
-        - Session::get('CouponAmount')
-        + $extraWeightFees
-    )
-    
-    }}
-                        </span>
+                <div class="text-right mt-2 sm:mt-0">
+                    <h3 class="font-bold text-black text-2xl xl:text-4xl">
+                        {{ currencyConverter($item->price * $item->qty) }}
                     </h3>
                 </div>
-            </div>
-
+            </li>
+        @endforeach
+    </ul>
+    <div class="mt-6">
+        <h2 class="text-2xl xl:text-4xl font-bold mb-3">{{ __('Discount Codes') }}</h2>
+        <form action="{{ route('apply.coupon') }}" method="post" class="flex space-x-2">
+            @csrf
+            <input type="text" class="flex-grow p-2 lg:p-3 border rounded h-14 lg:h-16 text-lg xl:text-3xl" name="coupon_code" placeholder="{{ __('Enter your coupon code') }}" required />
+            <button type="submit" class="bg-primary-red text-white px-4 py-3 lg:py-4 rounded hover:bg-red-600 transition duration-300 text-lg xl:text-2xl">{{ __('Apply Coupon') }}</button>
+        </form>
+    </div>
+    <ul class="mt-10 lg:mt-20 space-y-2 text-2xl xl:text-4xl">
+        <li class="flex justify-between">
+            <span>{{ __('Subtotal') }}</span>
+            <span>{{ currencyConverter(\Cart::subtotal()) }}</span>
+        </li>
+        <li class="flex justify-between">
+            <span>{{ __('Shipping Cost') }}</span>
+            <span id="delivery-charge-curr"></span>
+        </li>
+        <li class="flex justify-between">
+            <span>{{ __('Weight Handling Cost') }}</span>
+            <span id="weight-charge-curr">{{currencyConverter($extraWeightFees)}}</span>
+        </li>
+        <li class="flex justify-between">
+            <span>{{ __('VAT/Tax') }}</span>
+            <span id="tax-show-curr">{{ currencyConverter(tax_amount(\Cart::subtotal())) }}</span>
+        </li>
+        @if (!empty(Session::get('CouponAmount')))
+            <li class="flex justify-between">
+                <span>{{ __('Coupon Discount (-)') }}</span>
+                <span>{{ currencyConverter(Session::get('CouponAmount')) }}</span>
+            </li>
+        @endif
+    </ul>
+    <div class="mt-6 pt-4 border-t">
+        <h3 class="text-2xl xl:text-3xl font-bold flex justify-between">
+            <span>{{ __('Total Cost') }}</span>
+            <span id="total-cost-curr">
+                {{ currencyConverter(\Cart::subtotal() + allsetting()['shipping_charge'] + tax_amount(\Cart::subtotal()) - Session::get('CouponAmount') + $extraWeightFees) }}
+            </span>
+        </h3>
+    </div>
+</div>
         </div>
     </div>
 </section>
