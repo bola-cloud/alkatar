@@ -134,6 +134,7 @@
                                 </div>
                             </div>
 
+                            @if (count($products->weights) > 0)
                             <div class="product-weight-area border-t pt-16">
                                 <h4 class="weight-title font-bold text-black mb-8">{{ __('Size') }}:</h4>
                                 <div class="weight-switch ">
@@ -152,6 +153,7 @@
                                     @endforeach
                                 </div>
                             </div>
+                            @endif
 
                             <div class="product-size-area border-t pt-16">
                                 <h4 class="size-title">{{ __('Option') }}:</h4>
@@ -405,7 +407,8 @@
         $(document).ready(function () {
             // Get the initial price from the first selected size
             var sizePrice = parseFloat($('.size-switch input[type="radio"]:checked').val());
-            var weightPrice = parseFloat($('.weight-switch input[type="radio"]:checked').val());
+            var weightValue = $('.weight-switch input[type="radio"]:checked').val();
+            var weightPrice = weightValue ? parseFloat(weightValue) : 0;
             var selectedAdditions = [];
 
             // Set the initial total price

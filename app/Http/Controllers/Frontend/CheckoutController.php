@@ -50,7 +50,8 @@ class CheckoutController extends Controller
     {
         $totalWeightGrams = 0;
         foreach (Cart::content() as $item) {
-            $totalWeightGrams += $item->options->weight->weight * $item->qty;
+            $itemWeight = $item->options->weight->weight ?? 0;
+            $totalWeightGrams += $itemWeight * $item->qty;
         }
 
         // Convert grams to kilograms

@@ -196,7 +196,7 @@
              // Handle size selection
              $('.weight-switch input[type="radio"]').on('change', function() {
                 selectedWeightId = $(this).data('weight');
-                selectedWeightPrice = parseFloat($(this).val());
+                selectedWeightPrice = $(this).val() ? parseFloat($(this).val()) : 0;
                 updateTotalPrice();
             });
     

@@ -69,7 +69,7 @@ class CartController extends Controller
                 'price' => $request->price,
                 'size' => $size_id == 0 ? $size_id : $size_name->Size,
                 'selectedSize' => $request->selectedSize,
-                'selectedWeight' => $selected_weight,
+                'selectedWeight' => $selected_weight ?? null,
                 'weight' => $selected_size->weight ?? 0,
                 'options' =>
                     [
@@ -81,7 +81,7 @@ class CartController extends Controller
                         'image' => $product->Primary_Image,
                         'weight' => $selected_weight ?? null,
                         'slug' => $product->en_Product_Slug,
-                        'discount_price' => $selected_size->price,
+                        'discount_price' => $selected_size->price ? $selected_size->price : 0,
                         'item_tag' => $product->ItemTag,
                         'discount_parcent' => $product->Discount,
                         'voucher' => $product->Voucher,
