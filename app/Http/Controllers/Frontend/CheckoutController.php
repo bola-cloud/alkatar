@@ -279,7 +279,7 @@ class CheckoutController extends Controller
                                 'success_url' => route('thawani.success', [
                                     'order_number' => $order_number,
                                 ]),
-                                'cancel_url' => 'https://company.com/cancel',
+                                'cancel_url' => env('APP_URL'),
                                 'metadata' => [
                                     'order_number' => $order_number,
                                     'shipping_charge' => $shipping_charge,
