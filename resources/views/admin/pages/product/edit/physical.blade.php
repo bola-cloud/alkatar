@@ -133,7 +133,7 @@
                                             </div> --}}
 
                                             <div class="input__group mb-25">
-                                                <label>{{ __('Product Size') }}</label>
+                                                <label>{{ __('Product Option') }}</label>
                                                 <div id="size-container">
                                                     <!-- Size rows will be added here dynamically -->
                                                 </div>
