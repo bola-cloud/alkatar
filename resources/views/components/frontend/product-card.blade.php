@@ -1,4 +1,5 @@
-@props(['product'])
+@props(['product', 'isInDetailsPage' => false])
+
 
 <div class="single-grid-product ms-4" data-product-id="{{ $product->id }}">
     <div class="product-top">
@@ -55,6 +56,7 @@
 
         {!! productReview($product->id) !!}
 
+        @if(!$isInDetailsPage)
         <a href="javascript:void(0)" title="{{ __('Add To Cart') }}" class="add-cart addCart"
             data-id="{{ $product->id }}" data-discount="{{$product->Discount_Price}}"
             data-name="{{ $product->en_Product_Name }}" data-sizes="{{ json_encode($product->sizes) }}"
@@ -70,5 +72,6 @@
             </svg>
             <span class="mt-1">{{ __('Add To Cart') }}</span>
         </a>
+        @endif
     </div>
 </div>

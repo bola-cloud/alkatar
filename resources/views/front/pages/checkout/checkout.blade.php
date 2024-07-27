@@ -96,9 +96,9 @@
                                     @if ($payment->slug == 'paypal')
                                         <div class="flex items-center justify-between p-3 lg:p-4 border rounded">
                                             <div class="flex gap-2 mt-2">
-                                                <input class="" type="radio" name="payment" id="paypal" value="paypal" />
+                                                <input class="" type="radio" name="payment" id="paypal" value="paypal" selected />
                                                 <label class="form-check-label text-lg lg:text-2xl"
-                                                    for="paypal">{{ langConverter('Thawani Payment', 'بوابة ثواني') }}</label>
+                                                    for="paypal">{{ __('Credit Card Payment') }}</label>
                                             </div>
                                             <img src="{{ asset(IMG_PAYMENT_GATEWAY . $payment->image) }}" alt="paypal"
                                                 class="size-48" />

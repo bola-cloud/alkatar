@@ -153,7 +153,7 @@
                 <div class="item__left">
                     <h2>{{__('Total Earning')}}</h2>
                     <div class="status__box__data">
-                        <h2>{{__('$').$totalEarning}}</h2>
+                        <h2>{{__('OMR ').$totalEarning}}</h2>
                     </div>
                 </div>
                 <div class="item__right">
@@ -168,7 +168,7 @@
                 <div class="item__left">
                     <h2>{{__('Today Earning')}}</h2>
                     <div class="status__box__data">
-                        <h2>{{ __('$').$todayEarning }}</h2>
+                        <h2>{{__('OMR ').$todayEarning }}</h2>
                     </div>
                 </div>
                 <div class="item__right">
@@ -183,7 +183,7 @@
                 <div class="item__left">
                     <h2>{{\Carbon\Carbon::now()->format('F').__(' Earning')}}</h2>
                     <div class="status__box__data">
-                        <h2>{{ __('$').$monthEarning }}</h2>
+                        <h2>{{__('OMR ').$monthEarning }}</h2>
                     </div>
                 </div>
                 <div class="item__right">
@@ -198,7 +198,7 @@
                 <div class="item__left">
                     <h2>{{ __('Yearly Earning') }}</h2>
                     <div class="status__box__data">
-                        <h2>{{__('$').$yearEarning}}</h2>
+                        <h2>{{__('OMR ').$yearEarning}}</h2>
                     </div>
                 </div>
                 <div class="item__right">
@@ -279,7 +279,7 @@
                 <div class="item__left">
                     <h2>{{__('Online Transactions')}}</h2>
                     <div class="status__box__data">
-                        <h2>{{ __('$').$totalOnlineTransaction }}</h2>
+                        <h2>{{__('OMR ').$totalOnlineTransaction }}</h2>
                     </div>
                 </div>
                 <div class="item__right">
@@ -294,7 +294,7 @@
                 <div class="item__left">
                     <h2>{{__('Paypal Transactions')}}</h2>
                     <div class="status__box__data">
-                        <h2>{{  __('$').$totalPaypalTransaction }}</h2>
+                        <h2>{{ __('OMR ').$totalPaypalTransaction }}</h2>
                     </div>
                 </div>
                 <div class="item__right">
@@ -309,7 +309,7 @@
                 <div class="item__left">
                     <h2>{{__('Stripe Transactions')}}</h2>
                     <div class="status__box__data">
-                        <h2>{{ __('$').$totalStripeTransaction }}</h2>
+                        <h2>{{__('OMR ').$totalStripeTransaction }}</h2>
                     </div>
                 </div>
                 <div class="item__right">
@@ -324,7 +324,7 @@
                 <div class="item__left">
                     <h2>{{ __('Razorpay Transactions') }}</h2>
                     <div class="status__box__data">
-                        <h2>{{ __('$').$totalRazorpayTransaction }}</h2>
+                        <h2>{{__('OMR ').$totalRazorpayTransaction }}</h2>
                     </div>
                 </div>
                 <div class="item__right">
@@ -341,7 +341,7 @@
                 <div class="item__left">
                     <h2>{{__('Bank Transactions')}}</h2>
                     <div class="status__box__data">
-                        <h2>{{ __('$').$totalOnlineTransaction }}</h2>
+                        <h2>{{__('OMR ').$totalOnlineTransaction }}</h2>
                     </div>
                 </div>
                 <div class="item__right">

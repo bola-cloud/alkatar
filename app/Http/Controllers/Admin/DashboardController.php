@@ -65,6 +65,7 @@ class DashboardController extends Controller
             $data['getTotalReviews'] = $this->repository->getTotalReviews();
             $data['getTotalBlogs'] = $this->repository->getTotalBlogs();
             $data['getTotalSubscribers'] = $this->repository->getTotalSubscribers();
+
             return view('admin.pages.dashboard', $data);
         }
         return redirect()->route('login')->with('error', __('Wrong Credential'));

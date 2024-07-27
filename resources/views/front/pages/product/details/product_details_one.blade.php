@@ -339,8 +339,8 @@
         </div>
 
         <div class="offers-box-slide">
-            @forelse($similar_product as $product)
-                <x-frontend.product-card :product="$product" />
+            @forelse($similar_product as $relatedProduct)
+                <x-frontend.product-card :product="$relatedProduct" :isInDetailsPage="true" />
 
             @empty
                 <h1>{{ __('No related product found!') }}</h1>
@@ -413,7 +413,7 @@
             // Function to update the total price display
             function updateTotalPrice() {
                 var totalPrice = sizePrice + selectedAdditions.reduce((sum, addition) => sum + addition.price, 0);
-                $('.product-price .price').text('OMR ' + totalPrice.toFixed(2));
+                $('.product-single-right .product-price .price').text('OMR ' + totalPrice.toFixed(2));
                 $('.addCart').attr('data-price', totalPrice);
             }
         });

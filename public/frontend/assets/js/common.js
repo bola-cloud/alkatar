@@ -204,7 +204,7 @@
             // Update total price
             function updateTotalPrice() {
                 var totalPrice = selectedSizePrice + selectedAdditions.reduce((sum, addition) => sum + addition.price, 0);
-                $('.product-price .price').text(currencyPrice(totalPrice));
+                $('.product-single-right .product-price .price').text(currencyPrice(totalPrice));
             }
     
             // Handle "Add to Cart" button click
