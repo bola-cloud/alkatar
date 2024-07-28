@@ -34,9 +34,9 @@
                             <span class="menu-expand"></span>
                             <a class="menu-link" href="#">{{ langConverter($menu->en_name, $menu->fr_name) }}</a>
                             <ul class="sub-menu">
-                                @foreach (Category_Des_Icon() as $submenu)
+                                @foreach (Category_Des_Icon()->take(8) as $submenu)
                                     <li class="sub-menu-item"><a class="sub-menu-link"
-                                            href="{{route('category.product', $item->id)}}">{{ langConverter($submenu->en_Category_Name, $submenu->fr_Category_Name) }}</a>
+                                            href="{{route('category.product', $submenu->id)}}">{{ langConverter($submenu->en_Category_Name, $submenu->fr_Category_Name) }}</a>
                                     </li>
                                 @endforeach
                             </ul>
