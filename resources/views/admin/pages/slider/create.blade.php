@@ -70,7 +70,7 @@
                                         </div> --}}
                                         <div class="input__group mb-25">
                                             <label for="background_image">{{ __('BackGround Image') }} (1600px x
-                                                400px)</label>
+                                                620px)</label>
                                             <input type="file" class="form-control putImage2" name="background_image"
                                                 id="background_image">
                                             <img src="" id="target2" />

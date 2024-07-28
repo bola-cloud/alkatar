@@ -172,6 +172,7 @@ Route::post('/ipn', [SslCommerzPaymentController::class, 'ipn']);
 
 // Thawani pay
 Route::get("/thawani-success", [CheckoutController::class, "paymentSuccess"])->name("thawani.success");
+Route::get("/thawani-cancel", [CheckoutController::class, "paymentCancel"])->name("thawani.cancel");
 // In web.php
 
 Route::get("/get-cities-by-state/{state_id}", [CityController::class, "getCitiesByState"]);

@@ -255,7 +255,9 @@ class CheckoutController extends Controller
                                 'success_url' => route('thawani.success', [
                                     'order_number' => $order_number,
                                 ]),
-                                'cancel_url' => env('APP_URL'),
+                                'cancel_url' => route('thawani.cancel', [
+                                    'order_number' => $order_number,
+                                ]),
                                 'metadata' => [
                                     'order_number' => $order_number,
                                     'shipping_charge' => $shipping_charge,
@@ -1039,5 +1041,19 @@ class CheckoutController extends Controller
         $order->save();
 
         return redirect()->route('checkout.thankyou_page')->with('success', 'Order successfully created!');
+    }
+
+    public function paymentCancel(Request $request)
+    {
+        $data = $request->all();
+        $order = Order::where('Order_Number', $data['order_number'])->first();
+
+        $order->Is_Order_Successful = false;
+        $order->Is_Order_Completed = false;
+        $order->Order_Status = ORDER_CANCELLED; 
+
+        $order->save();
+
+        return redirect()->route('front')->with('error', 'Order Cancelled!');
     }
 }

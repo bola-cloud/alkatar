@@ -184,7 +184,7 @@ if (!function_exists('Category')) {
 if (!function_exists('Category_Des_Icon')) {
     function Category_Des_Icon()
     {
-        return Category::where('Status', ACTIVE)->get();
+        return Category::where('Status', ACTIVE)->orderBy('order', 'asc')->get();
     }
 }
 if (!function_exists('BrandImage')) {

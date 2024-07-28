@@ -40,6 +40,10 @@
                                                 <input type="text" id="fr_category_name" name="fr_category_name"  value="{{ old('fr_category_name') }}" placeholder="Name (Arabic)">
                                             </div>
                                             <div class="input__group mb-25">
+                                                <label>{{ __("Order In Homepage")}}</label>
+                                                <input type="text" id="order" name="order"  value="{{ old('order') }}" placeholder="Order">
+                                            </div>
+                                            <div class="input__group mb-25">
                                                 <label>{{ __('Icon')}} (200x200)</label>
                                                 <input type="file" id="icon" name="icon" accept="image/*">
                                             </div>

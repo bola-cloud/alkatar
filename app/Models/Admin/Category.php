@@ -18,7 +18,8 @@ class Category extends Model
     'Category_Icon',
     'fr_Category_Name',
     'fr_Category_Slug',
-    'fr_Description'
+    'fr_Description',
+    "order"
   ];
   public function products()
   {
