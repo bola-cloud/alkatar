@@ -39,7 +39,7 @@
                                 class="block text-lg xl:text-2xl font-medium text-gray-700">{{ __('Email Address (Optional)') }}</label>
                             <input type="email" class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl"
                                 id="billing_email" name="billing_email" placeholder="{{ __('Email Address') }}"
-                                value="{{ isset($billing) ? $billing->Email ?? $billing->email : '' }}" required />
+                                value="{{ isset($billing) ? $billing->Email ?? $billing->email : '' }}" />
 
                             <div class="relative">
                                 <label for="billing_country"
@@ -83,7 +83,7 @@
                             <input type="text" class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl"
                                 id="billing_street_address" name="billing_street_address"
                                 placeholder="{{ __('Street Address') }}"
-                                value="{{ isset($billing) ? $billing->Street : '' }}" required />
+                                value="{{ isset($billing) ? $billing->Street : '' }}" />
 
 
 

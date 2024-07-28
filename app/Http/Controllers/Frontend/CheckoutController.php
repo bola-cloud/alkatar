@@ -103,149 +103,125 @@ class CheckoutController extends Controller
     }
     public function checkoutOrder(Request $request)
     {
-        // dd($request->all());
-        if (Auth::check()) {
-            $request->validate([
-                'billing_name' => 'required',
-                'billing_email' => 'required|email',
-                'billing_street_address' => 'required',
-                'billing_zipcode' => 'required',
-                'billing_country' => 'required',
+        $isLoggedIn = Auth::check();
+    $user_id = $isLoggedIn ? Auth::id() : null;
 
-                // 'shipping_name' => 'required',
-                // 'shipping_email' => 'required|email',
-                // 'shipping_street_address' => 'required',
-                // 'shipping_state' => 'required',
-                // 'shipping_zipcode' => 'required',
-                // 'shipping_country' => 'required',
-            ], [
-                // 'shipping_name.required' => 'The name field is required.',
-                // 'shipping_email.required' => 'The email field is required.',
-                // 'shipping_street_address.required' => 'The address field is required.',
-                // 'shipping_state.required' => 'The state field is required.',
-                // 'shipping_zipcode.required' => 'The zip code field is required.',
-                // 'shipping_country.required' => 'The country field is required.',
-            ]);
+    // Validation
+    $validationRules = [
+        'billing_name' => 'required',
+        'billing_email' => 'nullable|email',
+        'billing_street_address' => 'nullable',
+        'billing_zipcode' => 'required',
+        'billing_country' => 'required',
+    ];
 
-            $user_id = Auth::id();
-            try {
-                $subtotal = Cart::subtotal();
-                $cartItems = Cart::content();
-                $tax = tax_amount($subtotal, $request->billing_country);
-                $shipping_charge = delivery_charge($request->city_id);
-                $weight_charge = $this->calculateExtraWeightFees();
-                $shipping_charge += $weight_charge;
-                $this->grand_total = $subtotal + $tax + $shipping_charge + $weight_charge;
+    $validationMessages = [];
+    // dd($request->all());
 
-                // address
-                if (hasBlillingAddress($user_id) == 1) {
-                    $billing_create = $this->updateBillingAddress($request, $user_id);
-                } else {
-                    $billing_create = $this->createBillingAddress($request, $user_id);
+    if (!$isLoggedIn) {
+        $validationRules += [
+            'billing_name' => 'required',
+            'billing_state' => 'required',
+            'billing_country' => 'required',
+            'billing_zipcode' => 'required',
+        ];
+
+        $validationMessages += [
+            'billing_name.required' => 'The name field is required.',
+            'billing_state.required' => 'The state field is required.',
+            'billing_zipcode.required' => 'The zip code field is required.',
+            'billing_country.required' => 'The country field is required.',
+        ];
+    }
+
+    $request->validate($validationRules, $validationMessages);
+
+    try {
+        $subtotal = Cart::subtotal();
+        $cartItems = Cart::content();
+        $tax = tax_amount($subtotal, $request->billing_country);
+        $shipping_charge = delivery_charge($request->city_id ?? $request->billing_country);
+        $weight_charge = $this->calculateExtraWeightFees();
+        $shipping_charge += $weight_charge;
+        $this->grand_total = $subtotal  + $shipping_charge;
+
+        // Address handling
+        if ($isLoggedIn) {
+            if (hasBlillingAddress($user_id) == 1) {
+                $billing_create = $this->updateBillingAddress($request, $user_id);
+            } else {
+                $billing_create = $this->createBillingAddress($request, $user_id);
+            }
+
+            $billing_address = [
+                'name' => $billing_create->Name,
+                'email' => $billing_create->Email,
+                'street' => $billing_create->Street,
+                'state' => $billing_create->State,
+                'zipcode' => $billing_create->Zipcode,
+                'country' => $billing_create->Country,
+            ];
+
+            $shipping_address = $billing_address;
+        } else {
+            $billing_address = [
+                'name' => $request->billing_name,
+                'email' => $request->billing_email,
+                'street' => $request->billing_street_address,
+                'state' => $request->billing_state,
+                'zipcode' => $request->billing_zipcode,
+                'country' => $request->billing_country,
+            ];
+
+            $shipping_address = [
+                'name' => $request->shipping_name,
+                'email' => $request->shipping_email,
+                'street' => $request->shipping_street_address,
+                'state' => $request->shipping_state,
+                'zipcode' => $request->shipping_zipcode,
+                'country' => $request->shipping_country
+            ];
+        }
+
+        Session::put('billing_address', $billing_address);
+        Session::put('shipping_address', $shipping_address);
+        Session::put('checkout_email', $billing_address['email']);
+
+        // Generate unique order number
+        do {
+            $order_number = $this->generateRandomString(6);
+            $exists_order_number = Order::where('Order_Number', $order_number)->exists();
+        } while ($exists_order_number);
+
+        // Coupon handling
+        if ($isLoggedIn && Session::has('Coupon_Id')) {
+            $coupon = Coupon::whereId(Session::get('Coupon_Id'))->first();
+            if ($coupon) {
+                $orderCoupon = Order::where('Coupon_Id', $coupon->id)->where('User_Id', $user_id)->count();
+                if ($orderCoupon != 0) {
+                    session()->put('couponCode', null);
+                    return redirect()->back()->with('error', 'Already used coupon Code');
                 }
+                $this->discount = $coupon->Amount;
+            }
+        }
 
-                // if (hasShippingAddress($user_id) == 1) {
-                //     $shipping_create = $this->updateShippingAddress($request, $user_id);
-                // } else {
-                //     $shipping_create = $this->createShippingAddress($request, $user_id);
-                // }
+        // Set session variables
+        session()->put('order_number', $order_number);
+        session()->put('shipping_charge', $shipping_charge);
+        session()->put('subtotal', $subtotal);
+        session()->put('discount', $this->discount);
+        session()->put('grand_total', $this->grand_total);
+        session()->put('tax', $tax);
 
-                $billing_address = [
-                    'name' => $billing_create->Name,
-                    'email' => $billing_create->Email,
-                    'street' => $billing_create->Street,
-                    'state' => $billing_create->State,
-                    'zipcode' => $billing_create->Zipcode,
-                    'country' => $billing_create->Country,
-                ];
+        // Payment processing
+        switch ($request->payment) {
+            case 'creditcard':
+                session()->put('payment_method_name', STRIPE);
+                return $this->pay($this->grand_total * (conversion_rate('USD') ? conversion_rate('USD') : 0), $this->discount, 'USD', 2, $request->payment_method);
 
-                $shipping_addresss = [
-                    'name' => $billing_create->Name,
-                    'email' => $billing_create->Email,
-                    'street' => $billing_create->Street,
-                    'state' => $billing_create->State,
-                    'zipcode' => $billing_create->Zipcode,
-                    'country' => $billing_create->Country,
-                ];
-
-                Session::put('billing_address', $billing_address);
-                Session::put('shipping_address', $shipping_addresss);
-                Session::put('checkout_email', $billing_create->Email);
-
-                do {
-                    $order_number = $this->generateRandomString(6);
-                    $exists_order_number = Order::where('Order_Number', $order_number)->exists();
-                } while ($exists_order_number);
-                if (Session::has('Coupon_Id')) {
-                    $coupon = Coupon::whereId(Session::get('Coupon_Id'))->first();
-                    if ($coupon) {
-                        $orderCoupon = Order::where('Coupon_Id', $coupon->id)->where('User_Id', $user_id)->count();
-                        if ($orderCoupon != 0) {
-                            session()->put('couponCode', null);
-                            return redirect()->back()->with('error', 'Already used coupon Code');
-                        }
-                        $this->discount = $coupon->Amount;
-                    }
-                }
-
-                // dd($weight_charge);
-
-
-
-
-                session()->put('order_number', $order_number);
-                session()->put('shipping_charge', $shipping_charge);
-                session()->put('subtotal', $subtotal);
-                session()->put('discount', $this->discount);
-                session()->put('grand_total', $this->grand_total);
-                session()->put('tax', $tax);
-                if ($request->payment == 'creditcard') {
-                    session()->put('payment_method_name', STRIPE);
-                    return $this->pay($this->grand_total * (conversion_rate('USD') ? conversion_rate('USD') : 0), $this->discount, 'USD', 2, $request->payment_method);
-                } elseif ($request->payment == 'sslcommerz') {
-                    $tran_id = uniqid();
-                    $post_data = array();
-                    $post_data['total_amount'] = $this->grand_total * (conversion_rate('BDT') ? conversion_rate('BDT') : 0); # You cant not pay less than 10
-                    $post_data['currency'] = "BDT";
-                    $post_data['tran_id'] = $tran_id; // tran_id must be unique
-
-                    # CUSTOMER INFORMATION
-                    $post_data['cus_name'] = $request->billing_name;
-                    $post_data['cus_email'] = $request->billing_email;
-                    $post_data['cus_add1'] = $request->billing_street_address;
-                    $post_data['cus_add2'] = "";
-                    $post_data['cus_city'] = $request->billing_state;
-                    $post_data['cus_state'] = $request->billing_state;
-                    $post_data['cus_postcode'] = $request->billing_zipcode;
-                    $post_data['cus_country'] = $request->billing_country;
-                    $post_data['cus_phone'] = '8801XXXXXXXXX';
-                    $post_data['cus_fax'] = "";
-
-                    # SHIPMENT INFORMATION
-                    $post_data['ship_name'] = $request->billing_name;
-                    $post_data['ship_add1'] = $request->billing_street_address;
-                    $post_data['ship_add2'] = "";
-                    $post_data['ship_city'] = $request->billing_state;
-                    $post_data['ship_state'] = $request->billing_state;
-                    $post_data['ship_postcode'] = $request->billing_zipcode;
-                    $post_data['ship_phone'] = "";
-                    $post_data['ship_country'] = $request->billing_country;
-
-                    $post_data['shipping_method'] = "sslcommerz";
-                    $post_data['product_name'] = "Computer";
-                    $post_data['product_category'] = "Goods";
-                    $post_data['product_profile'] = "physical-goods";
-
-                    $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, SSLCOMMERZ, $post_data['tran_id']);
-
-                    $sslc = new SslCommerzNotification();
-                    $payment_options = $sslc->makePayment($post_data, 'hosted');
-                    if (!is_array($payment_options)) {
-                        print_r($payment_options);
-                        $payment_options = array();
-                    }
-                } elseif ($request->payment == 'paypal') {
-                    $checkoutProduct = [];
+            case 'paypal':
+                $checkoutProduct = [];
 
                     foreach ($cartItems as $item) {
                         $checkoutProduct[] = [
@@ -320,94 +296,334 @@ class CheckoutController extends Controller
                         // Handle the error case
                         return response()->json(['error' => 'Failed to create session'], 500);
                     }
-                } elseif ($request->payment == MOLLIE) {
-                    $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, MOLLIE);
-                    $object = [
-                        'id' => $order_number,
-                        'payment_method' => MOLLIE,
-                        'currency' => 'USD'
-                    ];
-                    $total = $this->grand_total * (conversion_rate('USD') ? conversion_rate('USD') : 0);
-                    $total = number_format($total, 2, '.', '');
-                    $getWay = new BasePaymentService($object);
-                    $responseData = $getWay->makePayment($total);
 
-                    if ($responseData['success']) {
-                        $order = Order::where('Order_Number', $order_number)->first();
-                        $order->txn = $responseData['payment_id'];
-                        $order->save();
-                        return Redirect::away($responseData['redirect_url']);
-                    } else {
-                        return redirect()->back()->with('error', 'Something went wrong!');
-                    }
-                } elseif ($request->payment == PAYSTACK) {
-                    $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, PAYSTACK);
-                    $object = [
-                        'id' => $order_number,
-                        'payment_method' => PAYSTACK,
-                        'currency' => 'NGN'
-                    ];
-                    $total = $this->grand_total * (conversion_rate('NGN') ? conversion_rate('NGN') : 0);
-                    $total = number_format($total, 2, '.', '');
-                    $getWay = new BasePaymentService($object);
-                    $responseData = $getWay->makePayment($total);
+            case 'COD':
+                return $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, COD);
 
-                    if ($responseData['success']) {
-                        $order = Order::where('Order_Number', $order_number)->first();
-                        $order->txn = $responseData['payment_id'];
-                        $order->save();
-                        return Redirect::away($responseData['redirect_url']);
-                    } else {
-                        return redirect()->back()->with('error', 'Something went wrong!');
-                    }
-                } elseif ($request->payment == INSTAMOJO) {
-                    $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, INSTAMOJO);
-                    $object = [
-                        'id' => $order_number,
-                        'payment_method' => INSTAMOJO,
-                        'currency' => 'INR'
-                    ];
-                    $total = $this->grand_total * (conversion_rate('INR') ? conversion_rate('INR') : 0);
-                    $total = number_format($total, 2, '.', '');
-                    $getWay = new InstamojoService($object);
-                    $responseData = $getWay->makePayment($total);
-
-                    if ($responseData['success']) {
-                        $order = Order::where('Order_Number', $order_number)->first();
-                        $order->txn = $responseData['payment_id'];
-                        $order->save();
-                        return Redirect::away($responseData['redirect_url']);
-                    } else {
-                        return redirect()->back()->with('error', 'Something went wrong!');
-                    }
-                } elseif ($request->payment == 'COD') {
-                    return $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, COD);
-                } elseif ($request->payment == 'bank') {
-                    if ($request->bank_transaction_number != null) {
-                        return $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, BANK_TRANSFER, $request->bank_transaction_number);
-                    } else {
-                        return redirect()->back()->with('error', 'Bank Transaction Number is Required.');
-                    }
-                } elseif ($request->payment == 'razorpay') {
-                    $api = new Api(env('RAZORPAY_KEY'), env('RAZORPAY_SECRET'));
-                    $payment = $api->payment->fetch($request->razorpay_payment_id);
-                    try {
-                        $response = $api->payment->fetch($request->razorpay_payment_id)->capture(array('amount' => $payment['amount']));
-                        return $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, RAZORPAY, $request->razorpay_payment_id);
-                    } catch (\Exception $e) {
-                        return redirect()->back()->with('error', 'something went wrong in razorpay.');
-                    }
+            case 'bank':
+                if ($request->bank_transaction_number != null) {
+                    return $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, BANK_TRANSFER, $request->bank_transaction_number);
                 } else {
-                    return redirect()->back()->with('error', 'Payment method is required');
+                    return redirect()->back()->with('error', 'Bank Transaction Number is Required.');
                 }
-            } catch (\Exception $e) {
-                dd($e);
-                return redirect()->back()->with('error', 'Something went wrong');
-            }
-        } else {
-            return redirect()->back()->with('error', 'Please sign in');
+
+            default:
+                return redirect()->back()->with('error', 'Payment method is required');
         }
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Something went wrong');
     }
+
+    }
+
+    // public function checkoutOrder(Request $request)
+    // {
+    //     // dd($request->all());
+    //     if (Auth::check()) {
+    //         $request->validate([
+    //             'billing_name' => 'required',
+    //             'billing_email' => 'required|email',
+    //             'billing_street_address' => 'required',
+    //             'billing_zipcode' => 'required',
+    //             'billing_country' => 'required',
+
+    //             // 'shipping_name' => 'required',
+    //             // 'shipping_email' => 'required|email',
+    //             // 'shipping_street_address' => 'required',
+    //             // 'shipping_state' => 'required',
+    //             // 'shipping_zipcode' => 'required',
+    //             // 'shipping_country' => 'required',
+    //         ], [
+    //             // 'shipping_name.required' => 'The name field is required.',
+    //             // 'shipping_email.required' => 'The email field is required.',
+    //             // 'shipping_street_address.required' => 'The address field is required.',
+    //             // 'shipping_state.required' => 'The state field is required.',
+    //             // 'shipping_zipcode.required' => 'The zip code field is required.',
+    //             // 'shipping_country.required' => 'The country field is required.',
+    //         ]);
+
+    //         $user_id = Auth::id();
+    //         try {
+    //             $subtotal = Cart::subtotal();
+    //             $cartItems = Cart::content();
+    //             $tax = tax_amount($subtotal, $request->billing_country);
+    //             $shipping_charge = delivery_charge($request->city_id);
+    //             $weight_charge = $this->calculateExtraWeightFees();
+    //             $shipping_charge += $weight_charge;
+    //             $this->grand_total = $subtotal + $tax + $shipping_charge + $weight_charge;
+
+    //             // address
+    //             if (hasBlillingAddress($user_id) == 1) {
+    //                 $billing_create = $this->updateBillingAddress($request, $user_id);
+    //             } else {
+    //                 $billing_create = $this->createBillingAddress($request, $user_id);
+    //             }
+
+    //             // if (hasShippingAddress($user_id) == 1) {
+    //             //     $shipping_create = $this->updateShippingAddress($request, $user_id);
+    //             // } else {
+    //             //     $shipping_create = $this->createShippingAddress($request, $user_id);
+    //             // }
+
+    //             $billing_address = [
+    //                 'name' => $billing_create->Name,
+    //                 'email' => $billing_create->Email,
+    //                 'street' => $billing_create->Street,
+    //                 'state' => $billing_create->State,
+    //                 'zipcode' => $billing_create->Zipcode,
+    //                 'country' => $billing_create->Country,
+    //             ];
+
+    //             $shipping_addresss = [
+    //                 'name' => $billing_create->Name,
+    //                 'email' => $billing_create->Email,
+    //                 'street' => $billing_create->Street,
+    //                 'state' => $billing_create->State,
+    //                 'zipcode' => $billing_create->Zipcode,
+    //                 'country' => $billing_create->Country,
+    //             ];
+
+    //             Session::put('billing_address', $billing_address);
+    //             Session::put('shipping_address', $shipping_addresss);
+    //             Session::put('checkout_email', $billing_create->Email);
+
+    //             do {
+    //                 $order_number = $this->generateRandomString(6);
+    //                 $exists_order_number = Order::where('Order_Number', $order_number)->exists();
+    //             } while ($exists_order_number);
+    //             if (Session::has('Coupon_Id')) {
+    //                 $coupon = Coupon::whereId(Session::get('Coupon_Id'))->first();
+    //                 if ($coupon) {
+    //                     $orderCoupon = Order::where('Coupon_Id', $coupon->id)->where('User_Id', $user_id)->count();
+    //                     if ($orderCoupon != 0) {
+    //                         session()->put('couponCode', null);
+    //                         return redirect()->back()->with('error', 'Already used coupon Code');
+    //                     }
+    //                     $this->discount = $coupon->Amount;
+    //                 }
+    //             }
+
+    //             // dd($weight_charge);
+
+
+
+
+    //             session()->put('order_number', $order_number);
+    //             session()->put('shipping_charge', $shipping_charge);
+    //             session()->put('subtotal', $subtotal);
+    //             session()->put('discount', $this->discount);
+    //             session()->put('grand_total', $this->grand_total);
+    //             session()->put('tax', $tax);
+    //             if ($request->payment == 'creditcard') {
+    //                 session()->put('payment_method_name', STRIPE);
+    //                 return $this->pay($this->grand_total * (conversion_rate('USD') ? conversion_rate('USD') : 0), $this->discount, 'USD', 2, $request->payment_method);
+    //             } elseif ($request->payment == 'sslcommerz') {
+    //                 $tran_id = uniqid();
+    //                 $post_data = array();
+    //                 $post_data['total_amount'] = $this->grand_total * (conversion_rate('BDT') ? conversion_rate('BDT') : 0); # You cant not pay less than 10
+    //                 $post_data['currency'] = "BDT";
+    //                 $post_data['tran_id'] = $tran_id; // tran_id must be unique
+
+    //                 # CUSTOMER INFORMATION
+    //                 $post_data['cus_name'] = $request->billing_name;
+    //                 $post_data['cus_email'] = $request->billing_email;
+    //                 $post_data['cus_add1'] = $request->billing_street_address;
+    //                 $post_data['cus_add2'] = "";
+    //                 $post_data['cus_city'] = $request->billing_state;
+    //                 $post_data['cus_state'] = $request->billing_state;
+    //                 $post_data['cus_postcode'] = $request->billing_zipcode;
+    //                 $post_data['cus_country'] = $request->billing_country;
+    //                 $post_data['cus_phone'] = '8801XXXXXXXXX';
+    //                 $post_data['cus_fax'] = "";
+
+    //                 # SHIPMENT INFORMATION
+    //                 $post_data['ship_name'] = $request->billing_name;
+    //                 $post_data['ship_add1'] = $request->billing_street_address;
+    //                 $post_data['ship_add2'] = "";
+    //                 $post_data['ship_city'] = $request->billing_state;
+    //                 $post_data['ship_state'] = $request->billing_state;
+    //                 $post_data['ship_postcode'] = $request->billing_zipcode;
+    //                 $post_data['ship_phone'] = "";
+    //                 $post_data['ship_country'] = $request->billing_country;
+
+    //                 $post_data['shipping_method'] = "sslcommerz";
+    //                 $post_data['product_name'] = "Computer";
+    //                 $post_data['product_category'] = "Goods";
+    //                 $post_data['product_profile'] = "physical-goods";
+
+    //                 $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, SSLCOMMERZ, $post_data['tran_id']);
+
+    //                 $sslc = new SslCommerzNotification();
+    //                 $payment_options = $sslc->makePayment($post_data, 'hosted');
+    //                 if (!is_array($payment_options)) {
+    //                     print_r($payment_options);
+    //                     $payment_options = array();
+    //                 }
+    //             } elseif ($request->payment == 'paypal') {
+    //                 $checkoutProduct = [];
+
+    //                 foreach ($cartItems as $item) {
+    //                     $checkoutProduct[] = [
+    //                         'name' => $item->name,
+    //                         'quantity' => $item->qty,
+    //                         'unit_amount' => number_format($item->price, 3) * 1000,
+    //                     ];
+    //                 }
+
+
+
+
+
+    //                 if ($shipping_charge) {
+    //                     $checkoutProduct[] = [
+    //                         'name' => 'Shipping Charge',
+    //                         'quantity' => 1,
+    //                         'unit_amount' => $shipping_charge * 1000,
+    //                     ];
+    //                 }
+
+
+    //                 $response = Http::withHeaders([
+    //                     'Accept' => 'application/json',
+    //                     'Content-Type' => 'application/json',
+    //                     'thawani-api-key' => env('THAWANI_TEST_SECRET_KEY'),
+    //                 ])->post(env('THAWANI_TEST_CHECKOUT_URL') . '/checkout/session', [
+    //                             'client_reference_id' => $order_number,
+    //                             'mode' => 'payment',
+    //                             'products' => $checkoutProduct,
+    //                             'success_url' => route('thawani.success', [
+    //                                 'order_number' => $order_number,
+    //                             ]),
+    //                             'cancel_url' => env('APP_URL'),
+    //                             'metadata' => [
+    //                                 'order_number' => $order_number,
+    //                                 'shipping_charge' => $shipping_charge,
+    //                                 'subtotal' => $subtotal,
+    //                                 'discount' => $this->discount,
+    //                                 'grand_total' => $this->grand_total,
+    //                                 'tax' => $tax,
+    //                             ]
+    //                         ]);
+
+
+    //                 if ($response->successful()) {
+    //                     $paymentJsonData = $response->json();
+
+    //                     // create new request body for create payment
+    //                     $payment = [
+    //                         'session_id' => $paymentJsonData['data']['session_id'],
+    //                         'user_id' => $user_id,
+    //                         'order_number' => $order_number,
+    //                         'amount' => $this->grand_total,
+    //                         'status' => 'CREATED',
+    //                     ];
+
+
+    //                     $paymentRequest = new Request($payment);
+
+    //                     // dd($paymentRequest);
+
+    //                     // create payment
+    //                     $this->paymentController->createPayment($paymentRequest);
+
+
+    //                     $paymentUrl = env('THAWANI_TEST_PAY_URL') . $paymentJsonData['data']['session_id'] . '?key=' . env("THAWANI_TEST_PUBLIC_KEY");
+    //                     $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, THAWANI);
+
+    //                     return redirect()->away($paymentUrl);
+    //                 } else {
+    //                     // Handle the error case
+    //                     return response()->json(['error' => 'Failed to create session'], 500);
+    //                 }
+    //             } elseif ($request->payment == MOLLIE) {
+    //                 $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, MOLLIE);
+    //                 $object = [
+    //                     'id' => $order_number,
+    //                     'payment_method' => MOLLIE,
+    //                     'currency' => 'USD'
+    //                 ];
+    //                 $total = $this->grand_total * (conversion_rate('USD') ? conversion_rate('USD') : 0);
+    //                 $total = number_format($total, 2, '.', '');
+    //                 $getWay = new BasePaymentService($object);
+    //                 $responseData = $getWay->makePayment($total);
+
+    //                 if ($responseData['success']) {
+    //                     $order = Order::where('Order_Number', $order_number)->first();
+    //                     $order->txn = $responseData['payment_id'];
+    //                     $order->save();
+    //                     return Redirect::away($responseData['redirect_url']);
+    //                 } else {
+    //                     return redirect()->back()->with('error', 'Something went wrong!');
+    //                 }
+    //             } elseif ($request->payment == PAYSTACK) {
+    //                 $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, PAYSTACK);
+    //                 $object = [
+    //                     'id' => $order_number,
+    //                     'payment_method' => PAYSTACK,
+    //                     'currency' => 'NGN'
+    //                 ];
+    //                 $total = $this->grand_total * (conversion_rate('NGN') ? conversion_rate('NGN') : 0);
+    //                 $total = number_format($total, 2, '.', '');
+    //                 $getWay = new BasePaymentService($object);
+    //                 $responseData = $getWay->makePayment($total);
+
+    //                 if ($responseData['success']) {
+    //                     $order = Order::where('Order_Number', $order_number)->first();
+    //                     $order->txn = $responseData['payment_id'];
+    //                     $order->save();
+    //                     return Redirect::away($responseData['redirect_url']);
+    //                 } else {
+    //                     return redirect()->back()->with('error', 'Something went wrong!');
+    //                 }
+    //             } elseif ($request->payment == INSTAMOJO) {
+    //                 $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, INSTAMOJO);
+    //                 $object = [
+    //                     'id' => $order_number,
+    //                     'payment_method' => INSTAMOJO,
+    //                     'currency' => 'INR'
+    //                 ];
+    //                 $total = $this->grand_total * (conversion_rate('INR') ? conversion_rate('INR') : 0);
+    //                 $total = number_format($total, 2, '.', '');
+    //                 $getWay = new InstamojoService($object);
+    //                 $responseData = $getWay->makePayment($total);
+
+    //                 if ($responseData['success']) {
+    //                     $order = Order::where('Order_Number', $order_number)->first();
+    //                     $order->txn = $responseData['payment_id'];
+    //                     $order->save();
+    //                     return Redirect::away($responseData['redirect_url']);
+    //                 } else {
+    //                     return redirect()->back()->with('error', 'Something went wrong!');
+    //                 }
+    //             } elseif ($request->payment == 'COD') {
+    //                 return $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, COD);
+    //             } elseif ($request->payment == 'bank') {
+    //                 if ($request->bank_transaction_number != null) {
+    //                     return $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, BANK_TRANSFER, $request->bank_transaction_number);
+    //                 } else {
+    //                     return redirect()->back()->with('error', 'Bank Transaction Number is Required.');
+    //                 }
+    //             } elseif ($request->payment == 'razorpay') {
+    //                 $api = new Api(env('RAZORPAY_KEY'), env('RAZORPAY_SECRET'));
+    //                 $payment = $api->payment->fetch($request->razorpay_payment_id);
+    //                 try {
+    //                     $response = $api->payment->fetch($request->razorpay_payment_id)->capture(array('amount' => $payment['amount']));
+    //                     return $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, RAZORPAY, $request->razorpay_payment_id);
+    //                 } catch (\Exception $e) {
+    //                     return redirect()->back()->with('error', 'something went wrong in razorpay.');
+    //                 }
+    //             } else {
+    //                 return redirect()->back()->with('error', 'Payment method is required');
+    //             }
+    //         } catch (\Exception $e) {
+    //             dd($e);
+    //             return redirect()->back()->with('error', 'Something went wrong');
+    //         }
+    //     } else {
+    //         return redirect()->back()->with('error', 'Please sign in');
+    //     }
+    // }
+
 
     public function guestCheckoutOrder(Request $request)
     {
