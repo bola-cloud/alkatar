@@ -168,7 +168,7 @@ h3 {
 }
 
 .category-box-slide .category_slider_item img {
-    @apply w-[250px] max-w-[250px];
+    @apply w-[350px] lg:w-[250px] lg:max-w-[250px];
 }
 
 .category-box-slide .category_slider_item p {
