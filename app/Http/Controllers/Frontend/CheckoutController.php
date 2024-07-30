@@ -16,6 +16,7 @@ use App\Models\Admin\Order;
 use App\Models\Admin\OrderDetails;
 use App\Models\Admin\Product;
 use App\Models\Admin\Shipping;
+use App\Models\City;
 use App\Models\Country;
 use App\Models\Currency;
 use App\Models\PaymentPlatform;
@@ -104,135 +105,148 @@ class CheckoutController extends Controller
     public function checkoutOrder(Request $request)
     {
         $isLoggedIn = Auth::check();
-    $user_id = $isLoggedIn ? Auth::id() : null;
+        $user_id = $isLoggedIn ? Auth::id() : null;
 
-    // dd($request->all());
+        // dd($request->all());
 
-    // Validation
-    $validationRules = [
-        'billing_name' => 'required',
-        'billing_email' => 'nullable|email',
-        'billing_street_address' => 'nullable',
-        'billing_zipcode' => 'required',
-        'billing_country' => 'required',
-    ];
-
-    $validationMessages = [];
-    // dd($request->all());
-
-    if (!$isLoggedIn) {
-        $validationRules += [
+        // Validation
+        $validationRules = [
             'billing_name' => 'required',
-            'billing_state' => 'required',
-            'billing_country' => 'required',
+            'billing_email' => 'nullable|email',
+            'billing_street_address' => 'nullable',
             'billing_zipcode' => 'required',
+            'billing_country' => 'required',
         ];
 
-        $validationMessages += [
-            'billing_name.required' => 'The name field is required.',
-            'billing_state.required' => 'The state field is required.',
-            'billing_zipcode.required' => 'The zip code field is required.',
-            'billing_country.required' => 'The country field is required.',
-        ];
-    }
+        $validationMessages = [];
+        // dd($request->all());
 
-    $request->validate($validationRules, $validationMessages);
-
-    try {
-        $subtotal = Cart::subtotal();
-        $cartItems = Cart::content();
-        $tax = tax_amount($subtotal, $request->billing_country);
-        $shipping_charge = delivery_charge($request->billing_city ?? $request->billing_country);
-        $weight_charge = $this->calculateExtraWeightFees();
-        $shipping_charge += $weight_charge;
-        $this->grand_total = $subtotal  + $shipping_charge;
-
-        // Address handling
-        if ($isLoggedIn) {
-            if (hasBlillingAddress($user_id) == 1) {
-                $billing_create = $this->updateBillingAddress($request, $user_id);
-            } else {
-                $billing_create = $this->createBillingAddress($request, $user_id);
-            }
-
-            $billing_address = [
-                'name' => $billing_create->Name,
-                'email' => $billing_create->Email,
-                'street' => $billing_create->Street,
-                'state' => $billing_create->State,
-                'city'=> $billing_create->City,
-                'zipcode' => $billing_create->Zipcode,
-                'country' => $billing_create->Country,
+        if (!$isLoggedIn) {
+            $validationRules += [
+                'billing_name' => 'required',
+                'billing_state' => 'required',
+                'billing_country' => 'required',
+                'billing_zipcode' => 'required',
             ];
 
-            $shipping_address = $billing_address;
-        } else {
-            $billing_address = [
-                'name' => $request->billing_name,
-                'email' => $request->billing_email,
-                'street' => $request->billing_street_address,
-                'state' => $request->billing_state,
-                'city'=> $request->billing_city,
-                'zipcode' => $request->billing_zipcode,
-                'country' => $request->billing_country,
-            ];
-
-            $shipping_address = [
-                'name' => $request->shipping_name,
-                'email' => $request->shipping_email,
-                'street' => $request->shipping_street_address,
-                'state' => $request->shipping_state,
-                'city'=> $request->shipping_city,
-                'zipcode' => $request->shipping_zipcode,
-                'country' => $request->shipping_country
+            $validationMessages += [
+                'billing_name.required' => 'The name field is required.',
+                'billing_state.required' => 'The state field is required.',
+                'billing_zipcode.required' => 'The zip code field is required.',
+                'billing_country.required' => 'The country field is required.',
             ];
         }
 
+        $request->validate($validationRules, $validationMessages);
 
-        Session::put('billing_address', $billing_address);
-        Session::put('shipping_address', $shipping_address);
-        Session::put('checkout_email', $billing_address['email']);
+        try {
+            $subtotal = Cart::subtotal();
+            $cartItems = Cart::content();
+            $tax = tax_amount($subtotal, $request->billing_country);
+            $shipping_charge = delivery_charge($request->billing_city ?? $request->billing_country);
+            $weight_charge = $this->calculateExtraWeightFees();
+            $shipping_charge += $weight_charge;
+            $this->grand_total = $subtotal + $shipping_charge;
+            $shipping_city = City::find($request->billing_city);
+            $shipping_state = State::find($request->billing_state);
 
-        if ($isLoggedIn) {
-            Session::put('billing_id', $billing_create->id);
-            Session::put('shipping_id', $billing_create->id);
-        }
 
-        // Generate unique order number
-        do {
-            $order_number = $this->generateRandomString(6);
-            $exists_order_number = Order::where('Order_Number', $order_number)->exists();
-        } while ($exists_order_number);
-
-        // Coupon handling
-        if ($isLoggedIn && Session::has('Coupon_Id')) {
-            $coupon = Coupon::whereId(Session::get('Coupon_Id'))->first();
-            if ($coupon) {
-                $orderCoupon = Order::where('Coupon_Id', $coupon->id)->where('User_Id', $user_id)->count();
-                if ($orderCoupon != 0) {
-                    session()->put('couponCode', null);
-                    return redirect()->back()->with('error', 'Already used coupon Code');
+            // Address handling
+            if ($isLoggedIn) {
+                if (hasBlillingAddress($user_id) == 1) {
+                    $billing_create = $this->updateBillingAddress($request, $user_id);
+                } else {
+                    $billing_create = $this->createBillingAddress($request, $user_id);
                 }
-                $this->discount = $coupon->Amount;
+
+                $billing_address = [
+                    'name' => $billing_create->Name,
+                    'email' => $billing_create->Email,
+                    'street' => $billing_create->Street,
+                    'state' => $billing_create->State,
+                    'city' => $billing_create->City,
+                    'zipcode' => $billing_create->Zipcode,
+                    'country' => $billing_create->Country,
+                ];
+
+                $shipping_address = $billing_address;
+            } else {
+                $billing_address = [
+                    'name' => $request->billing_name,
+                    'email' => $request->billing_email,
+                    'street' => $request->billing_street_address,
+                    'state' => $request->billing_state,
+                    'city' => $request->billing_city,
+                    'zipcode' => $request->billing_zipcode,
+                    'country' => $request->billing_country,
+                ];
+
+                $shipping_address = [
+                    'name' => $request->shipping_name,
+                    'email' => $request->shipping_email,
+                    'street' => $request->shipping_street_address,
+                    'state' => $request->shipping_state,
+                    'city' => $request->shipping_city,
+                    'zipcode' => $request->shipping_zipcode,
+                    'country' => $request->shipping_country
+                ];
             }
-        }
 
-        // Set session variables
-        session()->put('order_number', $order_number);
-        session()->put('shipping_charge', $shipping_charge);
-        session()->put('subtotal', $subtotal);
-        session()->put('discount', $this->discount);
-        session()->put('grand_total', $this->grand_total);
-        session()->put('tax', $tax);
+            $billing_address['state_en'] = $shipping_state->name_en;
+            $billing_address['state_ar'] = $shipping_state->name_ar;
+            $billing_address['city_en'] = $shipping_city->name_en;
+            $billing_address['city_ar'] = $shipping_city->name_ar;
 
-        // Payment processing
-        switch ($request->payment) {
-            case 'creditcard':
-                session()->put('payment_method_name', STRIPE);
-                return $this->pay($this->grand_total * (conversion_rate('USD') ? conversion_rate('USD') : 0), $this->discount, 'USD', 2, $request->payment_method);
+            $shipping_address['state_en'] = $shipping_state->name_en;
+            $shipping_address['state_ar'] = $shipping_state->name_ar;
+            $shipping_address['city_en'] = $shipping_city->name_en;
+            $shipping_address['city_ar'] = $shipping_city->name_ar;
 
-            case 'paypal':
-                $checkoutProduct = [];
+
+            Session::put('billing_address', $billing_address);
+            Session::put('shipping_address', $shipping_address);
+            Session::put('checkout_email', $billing_address['email']);
+
+            if ($isLoggedIn) {
+                Session::put('billing_id', $billing_create->id);
+                Session::put('shipping_id', $billing_create->id);
+            }
+
+            // Generate unique order number
+            do {
+                $order_number = $this->generateRandomString(6);
+                $exists_order_number = Order::where('Order_Number', $order_number)->exists();
+            } while ($exists_order_number);
+
+            // Coupon handling
+            if ($isLoggedIn && Session::has('Coupon_Id')) {
+                $coupon = Coupon::whereId(Session::get('Coupon_Id'))->first();
+                if ($coupon) {
+                    $orderCoupon = Order::where('Coupon_Id', $coupon->id)->where('User_Id', $user_id)->count();
+                    if ($orderCoupon != 0) {
+                        session()->put('couponCode', null);
+                        return redirect()->back()->with('error', 'Already used coupon Code');
+                    }
+                    $this->discount = $coupon->Amount;
+                }
+            }
+
+            // Set session variables
+            session()->put('order_number', $order_number);
+            session()->put('shipping_charge', $shipping_charge);
+            session()->put('subtotal', $subtotal);
+            session()->put('discount', $this->discount);
+            session()->put('grand_total', $this->grand_total);
+            session()->put('tax', $tax);
+
+            // Payment processing
+            switch ($request->payment) {
+                case 'creditcard':
+                    session()->put('payment_method_name', STRIPE);
+                    return $this->pay($this->grand_total * (conversion_rate('USD') ? conversion_rate('USD') : 0), $this->discount, 'USD', 2, $request->payment_method);
+
+                case 'paypal':
+                    $checkoutProduct = [];
 
                     foreach ($cartItems as $item) {
                         $checkoutProduct[] = [
@@ -298,7 +312,7 @@ class CheckoutController extends Controller
 
                         // create payment
                         $this->paymentController->createPayment($paymentRequest);
-                        
+
                         $paymentUrl = env('THAWANI_TEST_PAY_URL') . $paymentJsonData['data']['session_id'] . '?key=' . env("THAWANI_TEST_PUBLIC_KEY");
                         $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, THAWANI);
 
@@ -308,23 +322,23 @@ class CheckoutController extends Controller
                         return response()->json(['error' => 'Failed to create session'], 500);
                     }
 
-            case 'COD':
-                return $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, COD);
+                case 'COD':
+                    return $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, COD);
 
-            case 'bank':
-                if ($request->bank_transaction_number != null) {
-                    return $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, BANK_TRANSFER, $request->bank_transaction_number);
-                } else {
-                    return redirect()->back()->with('error', 'Bank Transaction Number is Required.');
-                }
+                case 'bank':
+                    if ($request->bank_transaction_number != null) {
+                        return $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, BANK_TRANSFER, $request->bank_transaction_number);
+                    } else {
+                        return redirect()->back()->with('error', 'Bank Transaction Number is Required.');
+                    }
 
-            default:
-                return redirect()->back()->with('error', 'Payment method is required');
+                default:
+                    return redirect()->back()->with('error', 'Payment method is required');
+            }
+        } catch (\Exception $e) {
+            info($e);
+            return redirect()->back()->with('error', 'Something went wrong');
         }
-    } catch (\Exception $e) {
-        info($e);
-        return redirect()->back()->with('error', 'Something went wrong');
-    }
 
     }
 
@@ -867,62 +881,62 @@ class CheckoutController extends Controller
     public function orederCreate($order_number, $shipping_charge, $tax, $subtotal, $discount, $grand_total, $payment_method, $payment_status, $txn = null)
     {
         try {
-        $data = ['success' => false, 'data' => []];
-      
-        $order = Order::create([
-            'Order_Number' => $order_number,
-            'User_Id' => Auth::check() ? Auth::id() : null,
-            'Billing_Id' => session('billing_id'),
-            // 'Shipping_Id' => session('billing_id'),
-            'billing_address' => json_encode(Session::get('billing_address'), true),
-            'shipping_address' => json_encode(Session::get('shipping_address'), true),
-            'Delivery_Charge' => $shipping_charge,
-            'Tax' => $tax,
-            'Sub_Total' => $subtotal,
-            'Coupon_Id' => Session::get('Coupon_Id'),
-            'Coupon_Amount' => $discount,
-            'Grand_Total' => $grand_total - $discount,
-            'Is_Free_Delivery' => false,
-            'Is_Order_Successful' => false,
-            'Is_Order_Completed' => false,
-            'Payment_Method' => $payment_method,
-            'Payment_Status' => $payment_status,
-            'Order_Status' => ORDER_PENDING,
-            'txn' => $txn != null ? $txn : randomString(8),
-        ]);
+            $data = ['success' => false, 'data' => []];
 
-     
-        if ($order) {
-            session()->put('Coupon_Id', null);
-            session()->put('couponCode', null);
-            session()->put('CouponAmount', 0);
-            session()->put('order_id', $order->id);
-            session()->put('checkout_number', $order->Order_Number);
-            $content = Cart::content();
-            foreach ($content as $item) {
-                $this->subQtyProduct($item->id, $item->qty);
-                OrderDetails::create([
-                    'Order_Id' => $order->id,
-                    'Product_Id' => $item->id,
-                    'Product_Name' => $item->name,
-                    'Image' => $item->options->image,
-                    'Price' => $item->price,
-                    'Color' => $item->options->color,
-                    'Size' => $item->options->size,
-                    'Quantity' => $item->qty,
-                    'Total_Price' => $item->price * $item->qty,
-                ]);
+            $order = Order::create([
+                'Order_Number' => $order_number,
+                'User_Id' => Auth::check() ? Auth::id() : null,
+                'Billing_Id' => session('billing_id'),
+                // 'Shipping_Id' => session('billing_id'),
+                'billing_address' => json_encode(Session::get('billing_address'), true),
+                'shipping_address' => json_encode(Session::get('shipping_address'), true),
+                'Delivery_Charge' => $shipping_charge,
+                'Tax' => $tax,
+                'Sub_Total' => $subtotal,
+                'Coupon_Id' => Session::get('Coupon_Id'),
+                'Coupon_Amount' => $discount,
+                'Grand_Total' => $grand_total - $discount,
+                'Is_Free_Delivery' => false,
+                'Is_Order_Successful' => false,
+                'Is_Order_Completed' => false,
+                'Payment_Method' => $payment_method,
+                'Payment_Status' => $payment_status,
+                'Order_Status' => ORDER_PENDING,
+                'txn' => $txn != null ? $txn : randomString(8),
+            ]);
+
+
+            if ($order) {
+                session()->put('Coupon_Id', null);
+                session()->put('couponCode', null);
+                session()->put('CouponAmount', 0);
+                session()->put('order_id', $order->id);
+                session()->put('checkout_number', $order->Order_Number);
+                $content = Cart::content();
+                foreach ($content as $item) {
+                    $this->subQtyProduct($item->id, $item->qty);
+                    OrderDetails::create([
+                        'Order_Id' => $order->id,
+                        'Product_Id' => $item->id,
+                        'Product_Name' => $item->name,
+                        'Image' => $item->options->image,
+                        'Price' => $item->price,
+                        'Color' => $item->options->color,
+                        'Size' => $item->options->size,
+                        'Quantity' => $item->qty,
+                        'Total_Price' => $item->price * $item->qty,
+                    ]);
+                }
+                $data['success'] = true;
             }
-            $data['success'] = true;
+            // mail
+            $this->orderConfirmMail($order);
+            return $data;
+        } catch (\Exception $e) {
+            info('dasd' . $e->getMessage());
+            $this->error($e->getMessage());
+            return $this->error($e->getMessage());
         }
-        // mail
-        $this->orderConfirmMail($order);
-        return $data;
-    } catch (\Exception $e) {
-        info('dasd'. $e->getMessage());
-        $this->error($e->getMessage());
-        return $this->error($e->getMessage());
-    }
     }
 
     public function subQtyProduct($product_id, $qty)
@@ -1071,7 +1085,7 @@ class CheckoutController extends Controller
 
         $order->Is_Order_Successful = false;
         $order->Is_Order_Completed = false;
-        $order->Order_Status = ORDER_CANCELLED; 
+        $order->Order_Status = ORDER_CANCELLED;
 
         $order->save();
 

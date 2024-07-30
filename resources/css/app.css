@@ -987,3 +987,7 @@ h3 {
 .pagination-area .paginations .pagination-page .pagination-link:hover {
     @apply bg-primary-red;
 }
+
+.mobile-menu-area img {
+    @apply size-40;
+}
