@@ -178,6 +178,10 @@ Route::get("/thawani-cancel", [CheckoutController::class, "paymentCancel"])->nam
 Route::get("/get-cities-by-state/{state_id}", [CityController::class, "getCitiesByState"]);
 Route::get("/get-city-charge/{city_id}", [CityController::class, "getCityCharge"]);
 
+Route::get('/search/suggest', [ProductController::class, 'autoSuggest'])->name('search.suggest');
+
+
+
 
 
 // Route::get('/sync-products', function () {

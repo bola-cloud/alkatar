@@ -305,4 +305,17 @@ class ProductController extends Controller
         }
         return view('front.pages.product.empty-product');
     }
+
+    public function autoSuggest(Request $request)
+    {
+        $query = $request->get('query');
+        $suggestions = Product::where('en_Product_Name', 'LIKE', "%{$query}%")
+            ->orWhere('fr_Product_Name', 'LIKE', "%{$query}%")
+            ->where('Status', 1)
+            ->select('id', 'fr_Product_Name', 'en_Product_Name', 'en_Product_Slug')
+            ->limit(5)
+            ->get();
+
+        return response()->json($suggestions);
+    }
 }
