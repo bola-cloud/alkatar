@@ -1057,6 +1057,7 @@ class CheckoutController extends Controller
 
         $order->Is_Order_Successful = true;
         $order->Is_Order_Completed = true;
+        $order->Order_Status = ORDER_PROCESSING;
 
         $order->save();
 

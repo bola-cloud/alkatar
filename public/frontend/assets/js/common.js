@@ -172,14 +172,17 @@
     $(document).ready(function () {
         function __(key, replace = {}) {
             let translation = window.translations[key] || key;
-            
-            Object.keys(replace).forEach(placeholder => {
-                translation = translation.replace(`:${placeholder}`, replace[placeholder]);
+
+            Object.keys(replace).forEach((placeholder) => {
+                translation = translation.replace(
+                    `:${placeholder}`,
+                    replace[placeholder]
+                );
             });
-            
+
             return translation;
         }
-        
+
         var isProductDetailsPage = $(".product-single-area").length > 0;
         let selectedProductId = null;
         let selectedSizeId = null;
@@ -187,55 +190,101 @@
         let selectedSizePrice = 0;
         let selectedWeightPrice = 0;
         let selectedAdditions = [];
-    
+
         if (isProductDetailsPage) {
             // Set initial values
-            selectedSizeId = $('.size-switch input[type="radio"]:checked').data('size');
-            selectedSizePrice = parseFloat($('.size-switch input[type="radio"]:checked').val());
-            selectedWeightId = $('.weight-switch input[type="radio"]:checked').data('weight');
-            selectedWeightPrice = parseFloat($('.weight-switch input[type="radio"]:checked').val());
+            selectedSizeId = $('.size-switch input[type="radio"]:checked').data(
+                "size"
+            );
 
-    
+            selectedSizePrice = $(
+                '.size-switch input[type="radio"]:checked'
+            ).val()
+                ? parseFloat(
+                      $('.size-switch input[type="radio"]:checked').val()
+                  )
+                : 0;
+
+            selectedWeightId = $(
+                '.weight-switch input[type="radio"]:checked'
+            ).data("weight");
+            selectedWeightPrice = parseFloat(
+                $('.weight-switch input[type="radio"]:checked').val()
+            );
+
             // Handle size selection
-            $('.size-switch input[type="radio"]').on('change', function() {
-                selectedSizeId = $(this).data('size');
-                selectedSizePrice = parseFloat($(this).val());
+            $('.size-switch input[type="radio"]').on("change", function () {
+                selectedSizeId = $(this).data("size");
+                selectedSizePrice = $(this).val()
+                    ? parseFloat($(this).val())
+                    : 0;
                 updateTotalPrice();
             });
 
-             // Handle size selection
-             $('.weight-switch input[type="radio"]').on('change', function() {
-                selectedWeightId = $(this).data('weight');
-                selectedWeightPrice = $(this).val() ? parseFloat($(this).val()) : 0;
+            // Handle size selection
+            $('.weight-switch input[type="radio"]').on("change", function () {
+                selectedWeightId = $(this).data("weight");
+                selectedWeightPrice = $(this).val()
+                    ? parseFloat($(this).val())
+                    : 0;
                 updateTotalPrice();
             });
-    
+
             // Handle addition selection
-            $('.addition-switch input[type="checkbox"]').on('change', function() {
-                var additionId = $(this).data('addition');
-                var additionPrice = parseFloat($(this).val());
-                
-                if ($(this).is(':checked')) {
-                    if (additionId && additionPrice) {
-                        selectedAdditions.push({ id: additionId, price: additionPrice });
-                    }
-                  
-                } else {
-                    selectedAdditions = selectedAdditions.filter(addition => addition.id !== additionId);
-                }
-                
-                updateTotalPrice();
+            $('.addition-switch input[type="checkbox"]').on(
+                "change",
+                function () {
+                    var additionId = $(this).data("addition");
+                    var additionPrice = parseFloat($(this).val());
 
-                $('.addCart').attr("data-price", selectedSizePrice + selectedWeightPrice + selectedAdditions.reduce((sum, addition) => sum + addition.price, 0));
-            });
-    
+                    if ($(this).is(":checked")) {
+                        if (additionId && additionPrice) {
+                            selectedAdditions.push({
+                                id: additionId,
+                                price: additionPrice,
+                            });
+                        }
+                    } else {
+                        selectedAdditions = selectedAdditions.filter(
+                            (addition) => addition.id !== additionId
+                        );
+                    }
+
+                    updateTotalPrice();
+
+                    $(".addCart").attr(
+                        "data-price",
+                        selectedSizePrice +
+                            selectedWeightPrice +
+                            selectedAdditions.reduce(
+                                (sum, addition) => sum + addition.price,
+                                0
+                            )
+                    );
+                }
+            );
+
             // Update total price
             function updateTotalPrice() {
-                const additionTotalPrice = selectedAdditions.length ? selectedAdditions.reduce((sum, addition) => sum + addition.price, 0) : 0;
-                var totalPrice = selectedSizePrice + selectedWeightPrice +  additionTotalPrice;
-                $('.product-single-right .product-price .price').text(currencyPrice(totalPrice));
+                const additionTotalPrice = selectedAdditions.length
+                    ? selectedAdditions.reduce(
+                          (sum, addition) => sum + addition.price,
+                          0
+                      )
+                    : 0;
+
+                var totalPrice =
+                    selectedSizePrice +
+                    selectedWeightPrice +
+                    additionTotalPrice;
+
+                $(".product-single-right .product-price .price").text(
+                    currencyPrice(totalPrice)
+                );
+
+                $(".addCart").attr("data-price", totalPrice);
             }
-    
+
             // Handle "Add to Cart" button click
             $(".addCart").on("click", function () {
                 var productId = $(this).data("product-id");
@@ -243,7 +292,6 @@
                 var colorId = $('input[name="productColor"]:checked').val();
                 var price = $(this).attr("data-price");
 
-    
                 $.ajax({
                     url: $("#AddToCartIntoSession").data("url"),
                     method: "POST",
@@ -253,7 +301,9 @@
                         color_id: colorId,
                         size_id: selectedSizeId,
                         weight_id: selectedWeightId,
-                        additions: selectedAdditions.map(addition => addition.id),
+                        additions: selectedAdditions.map(
+                            (addition) => addition.id
+                        ),
                         price,
                         _token: $('meta[name="csrf-token"]').attr("content"),
                     },
@@ -261,7 +311,7 @@
                         // Handle success (same as before)
                         $(".totalCountItem").html(data[0]);
                         $(".totalAmount").html(currencyPrice(data[1]));
-    
+
                         const Toast = Swal.mixin({
                             toast: true,
                             position: "bottom-end",
@@ -269,8 +319,14 @@
                             timer: 3000,
                             timerProgressBar: true,
                             didOpen: (toast) => {
-                                toast.addEventListener("mouseenter", Swal.stopTimer);
-                                toast.addEventListener("mouseleave", Swal.resumeTimer);
+                                toast.addEventListener(
+                                    "mouseenter",
+                                    Swal.stopTimer
+                                );
+                                toast.addEventListener(
+                                    "mouseleave",
+                                    Swal.resumeTimer
+                                );
                             },
                         });
                         Toast.fire({
@@ -282,7 +338,6 @@
                 });
             });
         } else {
-
             $(".addCart").on("click", function () {
                 var productId = $(this).data("id");
                 selectedProductId = productId;
@@ -291,59 +346,63 @@
                 var weights = $(this).data("weights") || [];
                 var additions = $(this).data("additions") || [];
                 var discount = $(this).data("discount") ?? null;
-
-
-
+                
                 $("#sizeModalLabel").text(`${localizedText.selectSize}`);
-
+                
+                // Clear all option containers before populating
                 var sizeOptionsContainer = $("#sizeOptionsContainer");
-                sizeOptionsContainer.empty();
-
-                sizes.forEach(function (size) {
-                    const finalPrice = discount ?? size.pivot.price 
-                    var sizeOption = `<button class="btn btn-outline-primary size-option" data-product-id="${productId}" data-size-id="${size.id}" data-price="${finalPrice}">
-                                        ${size.Size} - ${finalPrice} OMR
-                                      </button>`;
-                    sizeOptionsContainer.append(sizeOption);
-                });
-
                 var weightOptionsContainer = $("#weightOptionsContainer");
+                var additionOptionsContainer = $("#additionOptionsContainer");
+                
+                sizeOptionsContainer.empty();
                 weightOptionsContainer.empty();
-
+                additionOptionsContainer.empty();
+                
+                // Reset visibility of all sections
+                $("#sizeOptionsSection").hide();
+                $("#weightOptionsSection").hide();
+                $("#additionOptionsSection").hide();
+                
+                // Populate sizes
+                if (sizes.length > 0) {
+                    sizes.forEach(function (size) {
+                        const finalPrice = size.pivot.price ?? discount;
+                        var sizeOption = `<button class="btn btn-outline-primary size-option" data-product-id="${productId}" data-size-id="${size.id}" data-price="${finalPrice}">
+                            ${size.Size} - ${finalPrice} OMR
+                        </button>`;
+                        sizeOptionsContainer.append(sizeOption);
+                    });
+                    $("#sizeOptionsSection").show();
+                }
+                
+                // Populate weights
                 if (weights.length > 0) {
                     weights.forEach(function (weight) {
                         var weightOption = `
-                            <button class="btn btn-outline-primary weight-option" 
-                                    data-product-id="${productId}" 
-                                    data-weight-id="${weight.id}" 
-                                    data-price="${weight.price}">
+                            <button class="btn btn-outline-primary weight-option"
+                                data-product-id="${productId}"
+                                data-weight-id="${weight.id}"
+                                data-price="${weight.price}">
                                 ${weight.weight} ${localizedText.grams} - ${weight.price} OMR
                             </button>`;
                         weightOptionsContainer.append(weightOption);
                     });
+                    $("#weightOptionsSection").show();
                 }
-
-
-
-                var additionOptionsContainer = $("#additionOptionsContainer");
-                var additionOptionsSection = $("#additionOptionsSection");
-                additionOptionsContainer.empty();
-
+                
+                // Populate additions
                 if (additions.length > 0) {
                     additions.forEach(function (addition) {
                         var additionOption = `<label class="addition-option">
-                                                <input type="checkbox" data-addition-id="${addition.id}" data-price="${addition.price}">
-                                                <span class="checkmark"></span>
-                                                ${addition.name_ar} - ${addition.price} + OMR
-                                              </label>`;
+                            <input type="checkbox" data-addition-id="${addition.id}" data-price="${addition.price}">
+                            <span class="checkmark"></span>
+                            ${addition.name_ar} - ${addition.price} + OMR
+                        </label>`;
                         additionOptionsContainer.append(additionOption);
                     });
-
-                    additionOptionsSection.show();
-                } else {
-                    additionOptionsSection.hide();
+                    $("#additionOptionsSection").show();
                 }
-
+                
                 $("#sizeModal").modal("show");
             });
         }
@@ -366,14 +425,11 @@
             selectedWeightPrice = parseFloat($(this).data("price"));
         });
 
-
-
         $(document).on("change", ".addition-option input", function () {
             var additionId = $(this).data("addition-id");
             var additionPrice = parseFloat($(this).data("price"));
 
             if (!isProductDetailsPage) {
-
                 if ($(this).is(":checked")) {
                     selectedAdditions.push({
                         id: additionId,
@@ -390,7 +446,7 @@
         });
 
         $("#submitSelection").on("click", function () {
-            const productId = selectedProductId
+            const productId = selectedProductId;
 
             var totalPrice = selectedSizePrice + selectedWeightPrice;
             selectedAdditions.forEach(function (addition) {

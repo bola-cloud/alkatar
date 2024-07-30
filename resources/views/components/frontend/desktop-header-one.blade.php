@@ -212,8 +212,8 @@
         header.classList.toggle('sticky', window.scrollY > 0);
     });
 
-    document.querySelector('.search-icon').addEventListener('click', function () {
-        var searchArea = document.querySelector('.search-area');
-        searchArea.classList.toggle('show');
-    });
+    // document.querySelector('.search-icon').addEventListener('click', function () {
+    //     var searchArea = document.querySelector('.search-area');
+    //     searchArea.classList.toggle('show');
+    // });
 </script>

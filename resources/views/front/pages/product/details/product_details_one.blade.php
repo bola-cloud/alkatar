@@ -155,6 +155,7 @@
                             </div>
                             @endif
 
+                            @if (count($products->sizes) > 0)
                             <div class="product-size-area border-t pt-16">
                                 <h4 class="size-title">{{ __('Option') }}:</h4>
                                 <div class="size-switch ">
@@ -173,6 +174,7 @@
                                     @endforeach
                                 </div>
                             </div>
+                            @endif
 
 
                             @if ($products->additions->count() > 0)
@@ -406,7 +408,8 @@
         // });
         $(document).ready(function () {
             // Get the initial price from the first selected size
-            var sizePrice = parseFloat($('.size-switch input[type="radio"]:checked').val());
+            var sizeValue = $('.size-switch input[type="radio"]:checked').val()
+            var sizePrice = sizeValue ? parseFloat(sizeValue) : 0;
             var weightValue = $('.weight-switch input[type="radio"]:checked').val();
             var weightPrice = weightValue ? parseFloat(weightValue) : 0;
             var selectedAdditions = [];
@@ -438,6 +441,7 @@
             function updateTotalPrice() {
                 var totalPrice = sizePrice + weightPrice + selectedAdditions.reduce((sum, addition) => sum + addition.price, 0);
                 $('.product-single-right .product-price .price').text('OMR ' + totalPrice.toFixed(2));
+                console.log("totalPrice", totalPrice);
                 $('.addCart').attr('data-price', totalPrice);
             }
         });

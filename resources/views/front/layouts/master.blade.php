@@ -128,14 +128,14 @@
                     </div>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <h6>{{ __("Size Options") }}:</h6>
+                    <div class="mb-3" id="sizeOptionsSection">
+                        <h6>{{ __("Product Options") }}:</h6>
                         <div id="sizeOptionsContainer" class="d-flex flex-wrap gap-2">
                             <!-- Size options will be injected here -->
                         </div>
                     </div>
 
-                    <div class="mb-3" id="additionOptionsSection">
+                    <div class="mb-3" id="weightOptionsSection">
                         <h6>{{ __("Weight Options") }}:</h6>
                         <div id="weightOptionsContainer" class="d-flex flex-wrap gap-2">
                             <!-- Weight options will be injected here -->

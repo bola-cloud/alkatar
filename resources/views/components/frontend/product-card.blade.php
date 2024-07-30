@@ -27,6 +27,7 @@
             </li>
         </ul>
     </div>
+   
     <div class="product-info text-center">
         {{-- @foreach ($product->product_tags as $ppt)
         <h4 class="product-catagory">{{ $ppt->tag }}</h4>
@@ -41,17 +42,22 @@
         @endif
 
         <div class="product-price">
-            @if ($product->sizes->count() > 0)
-                        @php
-                            $firstSize = $product->sizes->first();
-                        @endphp
-                        @if ($firstSize->pivot->price == $product->Discount_Price)
-                            <span class="price">{{ currencyConverter($firstSize->pivot->price) }}</span>
-                        @else
-                            <span class="regular-price">{{ currencyConverter($firstSize->pivot->price) }}</span>
-                            <span class="price">{{ currencyConverter($product->Discount_Price) }}</span>
-                        @endif
-            @endif
+    @php
+        $finalPrice = 0;
+        $firstWeight = $product->weights->first();
+
+            
+        
+        if ($firstWeight) {
+            $finalPrice = $firstWeight->price;
+        } else {
+            $firstSize = $product->sizes->first();
+            $finalPrice = $firstSize?->pivot->price;
+        }
+    @endphp
+    
+        <span class="price">{{ currencyConverter($finalPrice) }}</span>
+
         </div>
 
         {!! productReview($product->id) !!}

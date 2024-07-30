@@ -426,9 +426,9 @@
         @endforeach
 
          // Add initial size row if no existing sizes
-         if (!{{ $product->sizes->count() }}) {
-            createSizeRow();
-        }
+        //  if (!{{ $product->sizes->count() }}) {
+        //     createSizeRow();
+        // }
 
         // Add event listener for the "Add Size" button
         $('#add-size-btn').click(function() {
