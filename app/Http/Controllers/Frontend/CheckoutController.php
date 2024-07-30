@@ -106,6 +106,8 @@ class CheckoutController extends Controller
         $isLoggedIn = Auth::check();
     $user_id = $isLoggedIn ? Auth::id() : null;
 
+    // dd($request->all());
+
     // Validation
     $validationRules = [
         'billing_name' => 'required',
@@ -140,7 +142,7 @@ class CheckoutController extends Controller
         $subtotal = Cart::subtotal();
         $cartItems = Cart::content();
         $tax = tax_amount($subtotal, $request->billing_country);
-        $shipping_charge = delivery_charge($request->city_id ?? $request->billing_country);
+        $shipping_charge = delivery_charge($request->billing_city ?? $request->billing_country);
         $weight_charge = $this->calculateExtraWeightFees();
         $shipping_charge += $weight_charge;
         $this->grand_total = $subtotal  + $shipping_charge;
@@ -158,6 +160,7 @@ class CheckoutController extends Controller
                 'email' => $billing_create->Email,
                 'street' => $billing_create->Street,
                 'state' => $billing_create->State,
+                'city'=> $billing_create->City,
                 'zipcode' => $billing_create->Zipcode,
                 'country' => $billing_create->Country,
             ];
@@ -169,6 +172,7 @@ class CheckoutController extends Controller
                 'email' => $request->billing_email,
                 'street' => $request->billing_street_address,
                 'state' => $request->billing_state,
+                'city'=> $request->billing_city,
                 'zipcode' => $request->billing_zipcode,
                 'country' => $request->billing_country,
             ];
@@ -178,14 +182,21 @@ class CheckoutController extends Controller
                 'email' => $request->shipping_email,
                 'street' => $request->shipping_street_address,
                 'state' => $request->shipping_state,
+                'city'=> $request->shipping_city,
                 'zipcode' => $request->shipping_zipcode,
                 'country' => $request->shipping_country
             ];
         }
 
+
         Session::put('billing_address', $billing_address);
         Session::put('shipping_address', $shipping_address);
         Session::put('checkout_email', $billing_address['email']);
+
+        if ($isLoggedIn) {
+            Session::put('billing_id', $billing_create->id);
+            Session::put('shipping_id', $billing_create->id);
+        }
 
         // Generate unique order number
         do {
@@ -284,12 +295,10 @@ class CheckoutController extends Controller
 
                         $paymentRequest = new Request($payment);
 
-                        // dd($paymentRequest);
 
                         // create payment
                         $this->paymentController->createPayment($paymentRequest);
-
-
+                        
                         $paymentUrl = env('THAWANI_TEST_PAY_URL') . $paymentJsonData['data']['session_id'] . '?key=' . env("THAWANI_TEST_PUBLIC_KEY");
                         $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, THAWANI);
 
@@ -313,6 +322,7 @@ class CheckoutController extends Controller
                 return redirect()->back()->with('error', 'Payment method is required');
         }
     } catch (\Exception $e) {
+        info($e);
         return redirect()->back()->with('error', 'Something went wrong');
     }
 
@@ -823,7 +833,6 @@ class CheckoutController extends Controller
 
     public function orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $discount, $grand_total, $payment_method, $txn = null)
     {
-
         $payment_status = $this->paymentStatus($payment_method);
         $order = $this->orederCreate($order_number, $shipping_charge, $tax, $subtotal, $discount, $grand_total, $payment_method, $payment_status, $txn);
         if ($order['success'] == true) {
@@ -857,12 +866,14 @@ class CheckoutController extends Controller
 
     public function orederCreate($order_number, $shipping_charge, $tax, $subtotal, $discount, $grand_total, $payment_method, $payment_status, $txn = null)
     {
+        try {
         $data = ['success' => false, 'data' => []];
+      
         $order = Order::create([
             'Order_Number' => $order_number,
             'User_Id' => Auth::check() ? Auth::id() : null,
             'Billing_Id' => session('billing_id'),
-            'Shipping_Id' => session('shipping_id'),
+            // 'Shipping_Id' => session('billing_id'),
             'billing_address' => json_encode(Session::get('billing_address'), true),
             'shipping_address' => json_encode(Session::get('shipping_address'), true),
             'Delivery_Charge' => $shipping_charge,
@@ -879,6 +890,8 @@ class CheckoutController extends Controller
             'Order_Status' => ORDER_PENDING,
             'txn' => $txn != null ? $txn : randomString(8),
         ]);
+
+     
         if ($order) {
             session()->put('Coupon_Id', null);
             session()->put('couponCode', null);
@@ -905,6 +918,11 @@ class CheckoutController extends Controller
         // mail
         $this->orderConfirmMail($order);
         return $data;
+    } catch (\Exception $e) {
+        info('dasd'. $e->getMessage());
+        $this->error($e->getMessage());
+        return $this->error($e->getMessage());
+    }
     }
 
     public function subQtyProduct($product_id, $qty)
@@ -936,6 +954,7 @@ class CheckoutController extends Controller
             'Email' => $request->billing_email,
             'Street' => $request->billing_street_address,
             'State' => $request->billing_state,
+            'City' => $request->billing_city,
             'Zipcode' => $request->billing_zipcode,
             'Country' => $request->billing_country,
         ]);
@@ -949,6 +968,7 @@ class CheckoutController extends Controller
             'Email' => $request->billing_email,
             'Street' => $request->billing_street_address,
             'State' => $request->billing_state,
+            'City' => $request->billing_city,
             'Zipcode' => $request->billing_zipcode,
             'Country' => $request->billing_country,
         ]);

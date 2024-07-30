@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Jobs\OrderConfirmMail;
 use App\Models\Admin\Order;
 use App\Models\Admin\OrderDetails;
+use App\Models\City;
+use App\Models\State;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -41,6 +43,22 @@ class OrderController extends Controller
                 })
                 ->addColumn('User', function ($data) {
                     return $data->user != null ? $data->user->name : __('Guest User');
+                })
+                ->addColumn("State", function ($data) {
+                    if (is_null($data->billing)) {
+                        return 'N/A';
+                    }
+
+                    $order_state = State::where("id", $data->billing->State)->first();
+                    return $order_state['name_en'];
+                })
+                ->addColumn("City", function ($data) {
+                    if (is_null($data->billing)) {
+                        return 'N/A';
+                    }
+
+                    $order_city = City::where('id', $data->billing->City)->first();
+                    return $order_city['name_en'];
                 })
                 ->addColumn('GrandTotal', function ($data) {
                     return $data->Grand_Total . ' OMR';

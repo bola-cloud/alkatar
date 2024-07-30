@@ -14,6 +14,7 @@ class Billing extends Model
         'Email',
         'Street',
         'State',
+        'City',
         'Zipcode',
         'Country'
     ];

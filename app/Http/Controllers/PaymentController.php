@@ -11,7 +11,7 @@ class PaymentController extends Controller
     {
         $request->validate([
             "session_id" => "required|string",
-            "user_id" => "required|integer",
+            "user_id" => "nullable|integer",
             "order_number" => "required|string",
             "amount" => "required|numeric",
             "status" => "required|string|in:CREATED,PAYED,REJECTED",

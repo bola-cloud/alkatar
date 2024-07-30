@@ -59,7 +59,7 @@
         </nav>
         <div class="menu-bottom">
             <div class="switcher-lang-currency">
-                <div class="currency-switcher">
+                <!-- <div class="currency-switcher">
                     <span class="flag">{{ currencySymbol()[currency()] }}</span>
                     <a href="#" class="currency">{{ currency() }} <i class="fas fa-angle-down"></i></a>
                     <ul class="currency-list">
@@ -69,7 +69,7 @@
                             </li>
                         @endforeach
                     </ul>
-                </div>
+                </div> -->
                 <div class="lang-switcher">
                     @if (app()->getLocale() == 'en')
                         @if(getLanguage('en')->status == 1)

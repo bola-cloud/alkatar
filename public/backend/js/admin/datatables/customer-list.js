@@ -20,6 +20,10 @@
                     orderable: false
                 },
                 {
+                    data: 'registered_at',
+                    name: 'registered_at'
+                },
+                {
                     data: 'action',
                     name: 'action',
                     orderable: false

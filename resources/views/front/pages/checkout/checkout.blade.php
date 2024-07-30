@@ -63,7 +63,7 @@
                                     <label for="city"
                                         class="block text-lg xl:text-2xl font-medium text-gray-700 mb-2">{{ __('City') }}</label>
                                     <select class="w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl"
-                                        id="city" name="city_id" required>
+                                        id="city" name="billing_city" required>
                                         <option value="">{{__('City')}}</option>
 
                                     </select>

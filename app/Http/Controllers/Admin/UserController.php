@@ -110,6 +110,9 @@ class UserController extends Controller
                 ->addColumn('orders', function ($data) {
                     return orderCountuser($data->id);
                 })
+                ->addColumn("registered_at", function ($data) {
+                    return $data->created_at->format('d M Y');
+                })
                 ->addColumn('action', function ($data) {
                     $btn = '<div class="action__buttons">';
                     if ($data->status == ACTIVE) {

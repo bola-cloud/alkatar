@@ -32,6 +32,7 @@
                             <th>{{ __('Name')}}</th>
                             <th>{{ __('Email')}}</th>
                             <th>{{ __('Orders')}}</th>
+                            <th>{{__("Registered At")}}</th>
                             <th>{{ __('Action')}}</th>
                         </tr>
                         </thead>

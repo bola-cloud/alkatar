@@ -35,6 +35,14 @@
                     name: 'User'
                 },
                 {
+                    data: "State",
+                    name: "State"
+                },
+                {
+                    data: 'City',
+                    name: 'City'
+                },
+                {
                     data: 'Products',
                     name: 'Products'
                 },
