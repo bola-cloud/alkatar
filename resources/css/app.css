@@ -483,7 +483,7 @@ h3 {
     .product-priview-slide
     .single-slide
     .slide-image {
-    @apply rounded-2xl size-[400px] md:size-[650px];
+    @apply rounded-2xl size-[300px] md:size-[450px];
 }
 
 .product-single-area .product-single-left {

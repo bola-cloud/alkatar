@@ -309,8 +309,10 @@ class ProductController extends Controller
     public function autoSuggest(Request $request)
     {
         $query = $request->get('query');
-        $suggestions = Product::where('en_Product_Name', 'LIKE', "%{$query}%")
-            ->orWhere('fr_Product_Name', 'LIKE', "%{$query}%")
+        $suggestions = Product::where(function ($q) use ($query) {
+            $q->where('en_Product_Name', 'LIKE', "%{$query}%")
+                ->orWhere('fr_Product_Name', 'LIKE', "%{$query}%");
+        })
             ->where('Status', 1)
             ->select('id', 'fr_Product_Name', 'en_Product_Name', 'en_Product_Slug')
             ->limit(5)
