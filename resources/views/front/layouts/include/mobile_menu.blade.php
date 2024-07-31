@@ -1,11 +1,11 @@
 <!-- mobile-menu-area area start here  -->
-<div class="offcanvas offcanvas-start menu-offcanvas" tabindex="-1" id="offcanvasMobileMenu">
+<div class="offcanvas offcanvas-start menu-offcanvas !w-[250px]" tabindex="-1" id="offcanvasMobileMenu">
     <div class="mobile-menu-area">
-        <div class="offcanvas-header">
-            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        <div class="offcanvas-header flex justify-between">
             <a class="brand-logo" href="{{ route('front') }}"><img class="brand-image"
-                    src="{{ asset(IMG_LOGO_PATH . $allsettings['main_logo']) }}"
-                    alt="{{ $allsettings['app_title'] }}" /></a>
+            src="{{ asset(IMG_LOGO_PATH . $allsettings['main_logo']) }}"
+            alt="{{ $allsettings['app_title'] }}" /></a>
+            <button type="button" class="btn-close !text-black !text-5xl" data-bs-dismiss="offcanvas" aria-label="Close">x</button>
         </div>
         <!-- <div class="menu-search-form">
             <form>
@@ -57,7 +57,7 @@
                 @endforeach
             </ul>
         </nav>
-        <div class="menu-bottom">
+        <div class="menu-bottom mt-10 flex flex-col gap-3">
             <div class="switcher-lang-currency">
                 <!-- <div class="currency-switcher">
                     <span class="flag">{{ currencySymbol()[currency()] }}</span>
@@ -73,8 +73,9 @@
                 <div class="lang-switcher">
                     @if (app()->getLocale() == 'en')
                         @if(getLanguage('en')->status == 1)
-                            <span class="flag"><img src="{{ asset(IMG_LANGUAGE . getLanguage('en')->thumb) }}"
-                                    alt="united-states" /></span>
+                            <span class="flag">
+                            <img src="{{ asset(IMG_LANGUAGE . 'en.png') }}" alt="united-states" />
+                            </span>
                             <a href="javascript:void(0)" class="lang">{{ getLanguage('en')->name }}
                                 @if(getLanguage('fr')->status == 1)
                                     <i class="fas fa-angle-down"></i>
@@ -83,8 +84,9 @@
                         @endif
                     @elseif(app()->getLocale() == 'fr')
                         @if(getLanguage('fr')->status == 1)
-                            <span class="flag"><img src="{{ asset(IMG_LANGUAGE . getLanguage('fr')->thumb) }}"
-                                    alt="india" /></span>
+                            <span class="flag">
+                            <img src="{{ asset(IMG_LANGUAGE . 'fr.png') }}" alt="oman" />
+                            </span>
                             <a href="javascript:void(0)" class="lang">{{ getLanguage('fr')->name }}
                                 @if(getLanguage('en')->status == 1)
                                     <i class="fas fa-angle-down"></i>
@@ -96,17 +98,20 @@
                     <ul class="{{ activeLanguage() > 1 ? 'lang-list' : '' }}">
                         @if (app()->getLocale() == 'en')
                             @if(getLanguage('fr')->status == 1)
-                                <li class="single-lang"><span class="flag"><img
-                                            src="{{ asset(IMG_LANGUAGE . getLanguage('fr')->thumb) }}"
-                                            alt="united-states" /></span><a class="lang-text"
+                                <li class="single-lang"><span class="flag">
+                                <img src="{{ asset(IMG_LANGUAGE . 'fr.png') }}" alt="oman">
+                                </span><a class="lang-text"
                                         href="{{ route('locale.switch', 'fr') }}">{{ getLanguage('fr')->name }}</a>
                                 </li>
                             @endif
                         @elseif(app()->getLocale() == 'fr')
                             @if(getLanguage('en')->status == 1)
-                                <li class="single-lang"><span class="flag"><img
-                                            src="{{ asset(IMG_LANGUAGE . getLanguage('en')->thumb) }}"
-                                            alt="united-states" /></span><a class="lang-text"
+                                <li class="single-lang">
+                                    <span class="flag">
+                                        
+                                <img src="{{ asset(IMG_LANGUAGE . 'en.png') }}" alt="united-states" />
+                                </span>
+                                <a class="lang-text"
                                         href="{{ route('locale.switch', 'en') }}">{{ getLanguage('en')->name }}</a>
                                 </li>
                             @endif

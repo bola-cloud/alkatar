@@ -991,3 +991,15 @@ h3 {
 .mobile-menu-area img {
     @apply size-40;
 }
+
+.mobile-menu-area .lang-switcher img {
+    @apply size-10;
+}
+
+.mobile-menu-area .menu-list {
+    @apply flex flex-col gap-10;
+}
+
+.related_products_section .product-thumbnal{
+    @apply !size-[200px];
+}

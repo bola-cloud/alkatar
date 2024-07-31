@@ -348,7 +348,7 @@
 <!-- product-single-area end here  -->
 
 <!-- Featured Products area start here  -->
-<div class="featured-productss-area section-top pb-100">
+<div class="featured-productss-area section-top pb-100 related_products_section">
     <div class="container">
         <div class="section-header-area">
             <div class="row">

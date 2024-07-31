@@ -124,9 +124,9 @@
                                     class="{{ getLanguage('en')->status != 1 || getLanguage('fr')->status != 1 ? null : 'lang-list' }}">
                                     @if (app()->getLocale() == 'en')
                                         @if (getLanguage('fr')->status == 1)
-                                            <li class="single-lang">
+                                            <li class="single-lang">.
                                                 <a class="lang-text" href="{{ route('locale.switch', 'fr') }}">
-                                                    <img src="{{ asset(IMG_LANGUAGE . 'fr.png') }}" alt="india">
+                                                    <img src="{{ asset(IMG_LANGUAGE . 'fr.png') }}" alt="oman">
                                                 </a>
                                             </li>
                                         @endif

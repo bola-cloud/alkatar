@@ -1,157 +1,205 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Invoice</title>
-    <link rel="stylesheet" href="{{ asset('admin/css/bootstrap.min.css') }}">
+    <style>
+        
+        .invoice-modal {
+            direction: rtl;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .invoice-modal * {
+            box-sizing: border-box;
+        }
+        .invoice-container {
+        
+            margin: 0 auto;
+            padding: 20px;
+        }
+   
+        .invoice-title {
+            margin: 0;
+            font-size: 24px;
+        }
+        .invoice-logo-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .invoice-logo {
+            max-width: 100px;
+        }
+        .invoice-logo-text {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .order-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border-top: 2px solid #ddd;
+            padding-top: 20px;
+        }
+
+        .order-details p {
+            color: #000;
+        }
+
+        .company-details, .order-info {
+            width: 48%;
+        }
+        .address-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .billing-address, .shipping-address {
+            width: 50%;
+        }
+        .address-box {
+            border: 1px solid #ddd;
+            padding: 10px;
+            height: 100%;
+        }
+        .address-title {
+            padding: 15px 5px;
+            border-bottom: 1px solid #ddd;
+            margin: -10px -10px 10px -10px;
+            font-weight: bold;
+        }
+        .invoice-modal table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .invoice-modal th, .invoice-modal td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: right;
+        }
+        .invoice-modal th {
+            background-color: #f2f2f2;
+        }
+        .total-row {
+            font-weight: bold;
+        }
+        .invoice-footer {
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+         .invoice-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+            gap: 10px;
+         }
+        @media print {
+            body {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+                zoom: 80%;
+            }
+            .invoice-header {
+                background-color: #28a745 !important;
+                color: white !important;
+            }
+        }
+    </style>
 </head>
+<body >
+    <div class="invoice-modal">
+        <div class="invoice-container">
+          
+            <div class="invoice-logo-container">
+                <img src="{{ asset(IMG_LOGO_PATH . allsetting()['main_logo']) }}" alt="Logo" class="invoice-logo">
+                <span class="invoice-logo-text">الفاتورة</span>
+            </div>
 
-<body>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-12 mb-4">
-                <p><img src="{{ asset(IMG_LOGO_PATH . allsetting()['main_logo']) }}" alt="{{ __('Logo') }}" />
-                </p>
-                @php
-                    $bill = json_decode($order->billing_address, true);
-                @endphp
-                <p>
-                    <b>{{ __('Order Number:') }}</b> <a href="javascript:void(0)">{{ $order->Order_Number }}</a><br>
-                    <b>{{ __('Name:') }}</b> {{ $bill['name'] }}<br>
-                    <b>{{ __('Email:') }}</b> {{ $bill['email'] }}<br>
-                    <b>{{ __('Payment Method: ') }}</b> {{ $order->Payment_Method }}<br>
-                    <b>{{ __('TXN: ') }}</b> {{ $order->txn }}
-                </p>
+            <div class="order-details">
+                <div class="company-details">
+                    <p>شركة مطاحن و تمور الشرع</p>
+                    <p>الهاتف: +96893904070</p>
+                    <p>alsaraamills@gmail.com</p>
+                    <p>https://alsharashopping.com</p>
+                </div>
+                <div class="order-info">
+                    <p>تاريخ الإضافة: {{ date('d/m/Y', strtotime($order->created_at)) }}</p>
+                    <p>وقت الإضافة: {{ date('h:i A', strtotime($order->created_at)) }}</p>
+                    <p>رقم الطلب: {{ $order->Order_Number }}</p>
+                    <p>طريقة الدفع: {{ $order->Payment_Method }}</p>
+                    <p>طريقة الشحن: مصاريف الشحن</p>
+                </div>
             </div>
-        </div>
-        <div class="row billing-address-wrap" style="margin-bottom: 20px">
-            <div class="col-md-6 billing-address-item billing-address-box" style="float: left; width:50%">
-                <p>
-                    <b>{{ __('Billing Address:') }}</b><br>
-                    <small>
-                        {{ $bill['name'] }} <br>
-                        {{ $bill['email'] }} <br>
-                        {{ $bill['street'] }} <br>
-                        {{ $bill['state'] }} <br>
-                        {{ $bill['country'] . __(',') }} {{ $bill['zipcode'] }}
-                    </small>
-                </p>
 
-            </div>
-            <div class="col-md-6 billing-address-item shipping-address-box" style="float: right; width:50%; text-align:right">
-                @php
-                    $ship = json_decode($order->shipping_address, true);
-                @endphp
-                <p>
-                    <b>{{ __('Shipping Address:') }}</b><br>
-                    <small>
-                        {{ $ship['name'] }} <br>
-                        {{ $ship['email'] }} <br>
-                        {{ $ship['street'] }} <br>
-                        {{ $ship['state'] }} <br>
-                        {{ $ship['country'] . __(',') }} {{ $ship['zipcode'] }}
-                    </small>
-                </p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-12 mb-4">
-                <!-- Simple Tables -->
-                <div class="card">
-                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                        <h6 class="m-0 font-weight-bold text-primary">{{ __('Products') }}</h6>
+            <div class="address-container">
+                <div class="billing-address">
+                    <div class="address-box">
+                        <div class="address-title">الفاتورة الى</div>
+                        <p>اسم العميل: {{ $bill['name'] ?? 'N/A' }}</p>
+                        <p>البريد الاكتروني: {{ $bill['email'] ?? 'N/A' }}</p>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table align-items-center table-flush">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>{{ __('Name') }}</th>
-                                    <th>{{ __('Image') }}</th>
-                                    <th>{{ __('Quantity') }}</th>
-                                    <th>{{ __('Size') }}</th>
-                                    <th>{{ __('Color') }}</th>
-                                    <th>{{ __('Price') }}</th>
-                                    <th>{{ __('Total') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($order->order_details as $od)
-                                    <tr>
-                                        <td>{{ $od->product->en_Product_Name }}</td>
-                                        <td><img src="{{ asset(IMG_PRODUCT_PATH . $od->product->Primary_Image) }}"
-                                                height="50" class="img-rounded mr-1" /></td>
-                                        <td>{{ $od->Quantity }}</td>
-                                        <td>{{ is_null($od->Size) ? __('N/A') : $od->Size }}</td>
-                                        <td>{{ is_null($od->Color) ? __('N/A') : $od->Color }}</td>
-                                        <td>{{ $od->Price }}</td>
-                                        <td>{{ $od->Total_Price }}</td>
-                                    </tr>
-                                @endforeach
-                                <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td>{{ __('Subtotal') }}</td>
-                                    <td>{{ $order->Sub_Total }}</td>
-                                </tr>
-                                <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td>{{ __('Shipping Charge') }}</td>
-                                    <td>{{ $order->Delivery_Charge }}</td>
-                                </tr>
-                                <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td>{{ __('Tax') }}</td>
-                                    <td>{{ $order->Tax }}</td>
-                                </tr>
-                                @if (!is_null($order->Coupon_Id))
-                                    <tr>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td>{{ __('Discount (-)') }}</td>
-                                        <td>{{ $order->Coupon_Amount }}</td>
-                                    </tr>
-                                @endif
-                                <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td>{{ __('Grand Total') }}</td>
-                                    <td>{{ $order->Grand_Total }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="card-footer">
-                        <small class="text-danger">{{ __('*All the amount is in USD currency.') }}</small>
+                </div>
+                <div class="shipping-address">
+                    <div class="address-box">
+                        <div class="address-title">الشحن الى</div>
+                        <p>العنوان: {{ $ship['street'] ?? 'N/A' }}</p>
+                        <p>المحافظة: {{ $ship['state_ar'] ?? 'N/A' }}</p>
+                        <p>المدينة: {{ $ship['city_ar'] ?? 'N/A' }}</p>
+                        <p>الدولة: سلطنة عمان</p>
                     </div>
                 </div>
             </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>الاسم</th>
+                        <th>الكمية</th>
+                        <th>الحجم</th>
+                        <th>السعر</th>
+                        <th>الإجمالي</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($order->order_details as $od)
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ $od->product->fr_Product_Name }}</td>
+                        <td>{{ $od->Quantity }}</td>
+                        <td>{{ is_null($od->Size) ? 'N/A' : $od->Size }}</td>
+                        <td>{{ $od->Price }}</td>
+                        <td>{{ $od->Total_Price }} OMR</td>
+                    </tr>
+                    @endforeach
+                    <tr class="total-row">
+                        <td colspan="5">الإجمالي قبل النهائي</td>
+                        <td>{{ $order->Sub_Total }} OMR</td>
+                    </tr>
+                    <tr>
+                        <td colspan="5">مصاريف الشحن</td>
+                        <td>{{ $order->Delivery_Charge }} OMR</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td colspan="5">المجموع النهائي:</td>
+                        <td>{{ $order->Grand_Total }} OMR</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="invoice-footer">
+                <p><strong>الملاحظات:</strong></p>
+            </div>
         </div>
     </div>
-    <script src="{{ asset('admin/js/bootstrap.min.js') }}"></script>
-    <script>
-        print()
-    </script>
-
 </body>
 
+<script>
+        print()
+    </script>
 </html>

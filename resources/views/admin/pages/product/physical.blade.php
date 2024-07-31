@@ -30,7 +30,7 @@
                         <form enctype="multipart/form-data" method="POST" action="{{ route('admin.product.store') }}">
                             @csrf
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-xxl-6">
                                     <div class="form-vertical__item bg-style">
                                         <div class="item-top mb-30">
                                             <h2>{{ langString('en', false) . ':' }}</h2>
@@ -331,12 +331,10 @@
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>
-                                        <div class="input__button">
-                                            <button type="submit" class="btn btn-blue">{{ __('Add') }}</button>
-                                        </div>
+                                        
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-xxl-6">
                                     <div class="form-vertical__item bg-style">
                                         <div class="item-top mb-30">
                                             <h2>{{ langString('fr', false) . ':' }}</h2>
@@ -396,6 +394,9 @@
 
                                     </div>
                                 </div>
+                                <div class="input__button">
+                                            <button type="submit" class="btn btn-blue">{{ __('Add') }}</button>
+                                        </div>
                             </div>
                         </form>
                     </div>
