@@ -325,21 +325,27 @@ class AuthController extends Controller
             'phone_number' => 'required',
         ]);
 
+        // dd($request->all());
+
+
         // Generate a random 6-digit OTP
         $otp = str_pad(random_int(0, 99999), 5, '0', STR_PAD_LEFT);
 
         // Store OTP in session for later verification
         session(['whatsapp_otp' => $otp]);
 
+        $phone_without_plus = ltrim($request->input('full_phone'), '+');
+
+
         // Send OTP via WhatsApp
         $response = Http::asForm()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/send_otp', [
-            'phone_number' => "968" . $request->input('phone_number'),
+            'phone_number' => $phone_without_plus,
             'otp' => $otp
         ]);
 
         if ($response->successful()) {
             return redirect()->route('user.otp.verify.get', [
-                'phone_number' => $request->input('phone_number'),
+                'phone_number' => $request->input('full_phone'),
             ]);
         } else {
             return redirect()->back()->with('error', 'Failed to send OTP. Please try again.');

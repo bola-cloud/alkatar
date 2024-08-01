@@ -2,8 +2,16 @@
 @section('title', isset($title) ? $title : 'Home')
 @section('description', isset($description) ? $description : '')
 @section('keywords', isset($keywords) ? $keywords : '')
-@section('content')
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
+
+    <style>
+        .iti {
+            width: 100%;
+        }
+        </style>;
+
+@section('content')
 <div class="sign-in-page section">
     <div class="container">
         <div class="row align-items-center justify-content-center">
@@ -14,74 +22,66 @@
                         @csrf
                         <div class="mt-32 mb-20">
                             <label for="phone_number" class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
-                                {{__("Phone Number")}}:</label>
-                            <div class="flex items-center">
-                                <button id="dropdown-phone-button" data-dropdown-toggle="dropdown-phone"
-                                    class="flex-shrink-0 z-10 flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600 h-20 placeholder:mt-2"
-                                    type="button">
-                                    <span class="text-2xl mt-2">968+</span>
-                                    <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"
-                                        xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img"
-                                        class="h-10 w-10 me-3" preserveAspectRatio="xMidYMid meet" fill="#000000">
-                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
-                                        </g>
-                                        <g id="SVGRepo_iconCarrier">
-                                            <path fill="green" d="M8 31h24a4 4 0 0 0 4-4v-4H8v8z"> </path>
-                                            <path fill="#EEE" d="M32 5H8v8h28V9a4 4 0 0 0-4-4z"> </path>
-                                            <path fill="#DB161B"
-                                                d="M36 13H9V5H4a4 4 0 0 0-4 4v18a4 4 0 0 0 4 4h5v-8h27V13z"> </path>
-                                            <g fill="#EEE">
-                                                <path
-                                                    d="M3.625 8.453c.313.567.313.789.222.839c-.09.05-.238-.09-.55-.657c-.313-.567-.672-1.345-.582-1.395c.091-.051.597.647.91 1.213zm1.891-.349c-.313.567-.493 1.067-.402 1.117c.09.05.417-.369.73-.935c.312-.567.493-1.067.402-1.117c-.091-.05-.418.369-.73.935zm-.563.912l-.297-1.422l-.028-.006c.103-.049.184-.126.184-.237c0-.16-.147-.289-.328-.289s-.328.13-.328.29c0 .108.075.193.175.243l-.284 1.436l.906-.015z">
-                                                </path>
-                                                <path
-                                                    d="M6.703 11.766c-.271-.226-1.349-1.159-1.861-1.716c.046-.16.073-.332.062-.516h.017v.008h.891v.172h1.094v-.531H5.812v.172h-.89v.008h-.031v-.269h-.813v.269H3.75v.016h-.641v-.22H2.078v.578h1.031v-.218h.641v.016h.276l-.036.374s-1.039.046-1.318.091c-.688.109-.469.312.094.5c.259.086.517.12.761.133c-.397.424-1.207 1.053-1.402 1.164c-.219.125-.219.281.203.188c.409-.091 1.355-.926 1.684-1.348l.285-.012c.15-.006.269-.1.369-.224c.427.505 1.264 1.254 1.6 1.458c.359.219.527.214.654.193c.127-.021.064-.052-.217-.286z">
-                                                </path>
-                                            </g>
-                                        </g>
-                                    </svg>
-                                </button>
-                                <div class="relative w-full">
-                                    <input type="text" id="phone-input" name="phone_number"
-                                        aria-describedby="helper-text-explanation"
-                                        class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 !rounded-none border border-gray-300 focus:ring-primary-red focus:border-primary-red dark:bg-gray-700 dark:border-s-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-primary-red placeholder:!pt-3"
-                                        pattern="[1-9]\d{7}"
-                                        title="Please enter a valid Omani Phone Number with 8 digits (excluding +968)."
-                                        placeholder="{{__("Phone Number")}}" required />
-                                </div>
+                                {{__("Phone Number")}}:
+                            </label>
+                            <div class="relative w-full">
+                                <input type="tel" id="phone_number" name="phone_number" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-red focus:border-primary-red dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-primary-red" required>
                             </div>
-                            <p id="helper-text-explanation" class="mt-6 text-xl text-gray-500 dark:text-gray-400">
-                                {{__("We will send you an Whatsapp with a verification code.")}}
+                            <input type="hidden" name="full_phone" id="full_phone">
+                            <p id="helper-text-explanation" class="mt-6 text-xl text-green-500 flex items-center gap-3 ms-3">
+                                <svg fill="#33d17a" height="20px" width="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 308 308" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="XMLID_468_"> <path id="XMLID_469_" d="M227.904,176.981c-0.6-0.288-23.054-11.345-27.044-12.781c-1.629-0.585-3.374-1.156-5.23-1.156 c-3.032,0-5.579,1.511-7.563,4.479c-2.243,3.334-9.033,11.271-11.131,13.642c-0.274,0.313-0.648,0.687-0.872,0.687 c-0.201,0-3.676-1.431-4.728-1.888c-24.087-10.463-42.37-35.624-44.877-39.867c-0.358-0.61-0.373-0.887-0.376-0.887 c0.088-0.323,0.898-1.135,1.316-1.554c1.223-1.21,2.548-2.805,3.83-4.348c0.607-0.731,1.215-1.463,1.812-2.153 c1.86-2.164,2.688-3.844,3.648-5.79l0.503-1.011c2.344-4.657,0.342-8.587-0.305-9.856c-0.531-1.062-10.012-23.944-11.02-26.348 c-2.424-5.801-5.627-8.502-10.078-8.502c-0.413,0,0,0-1.732,0.073c-2.109,0.089-13.594,1.601-18.672,4.802 c-5.385,3.395-14.495,14.217-14.495,33.249c0,17.129,10.87,33.302,15.537,39.453c0.116,0.155,0.329,0.47,0.638,0.922 c17.873,26.102,40.154,45.446,62.741,54.469c21.745,8.686,32.042,9.69,37.896,9.69c0.001,0,0.001,0,0.001,0 c2.46,0,4.429-0.193,6.166-0.364l1.102-0.105c7.512-0.666,24.02-9.22,27.775-19.655c2.958-8.219,3.738-17.199,1.77-20.458 C233.168,179.508,230.845,178.393,227.904,176.981z"></path> <path id="XMLID_470_" d="M156.734,0C73.318,0,5.454,67.354,5.454,150.143c0,26.777,7.166,52.988,20.741,75.928L0.212,302.716 c-0.484,1.429-0.124,3.009,0.933,4.085C1.908,307.58,2.943,308,4,308c0.405,0,0.813-0.061,1.211-0.188l79.92-25.396 c21.87,11.685,46.588,17.853,71.604,17.853C240.143,300.27,308,232.923,308,150.143C308,67.354,240.143,0,156.734,0z M156.734,268.994c-23.539,0-46.338-6.797-65.936-19.657c-0.659-0.433-1.424-0.655-2.194-0.655c-0.407,0-0.815,0.062-1.212,0.188 l-40.035,12.726l12.924-38.129c0.418-1.234,0.209-2.595-0.561-3.647c-14.924-20.392-22.813-44.485-22.813-69.677 c0-65.543,53.754-118.867,119.826-118.867c66.064,0,119.812,53.324,119.812,118.867 C276.546,215.678,222.799,268.994,156.734,268.994z"></path> </g> </g></svg>
+                                {{__("We will send you a Whatsapp with a verification code.")}}
                             </p>
                         </div>
-                        {{-- <div class="mb-20">
-                            <label for="password"
-                                class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">{{__("Password")}}:</label>
-                            <div class="relative w-full">
-                                <input type="password" id="password" name="password"
-                                    aria-describedby="password-helper-text"
-                                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 !rounded-none border border-gray-300 focus:ring-primary-red focus:border-primary-red dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-primary-red placeholder:!pt-3"
-                                    placeholder="{{__(" Password")}}" required />
-                            </div>
-                            <p id="password-helper-text" class="mt-6 text-xl text-gray-500 dark:text-gray-400">
-                                {{__("Enter your account password")}}</p>
-                        </div> --}}
 
                         <div class="form-group">
-                            <button type="submit"
-                                class="form-control btn btn-primary rounded submit px-3 primary-btn auth-btn">{{
-    __('Login') }}</button>
+                            <button type="submit" class="form-control btn btn-primary rounded submit px-3 primary-btn auth-btn">
+                                {{ __('Login') }}
+                            </button>
                         </div>
                     </form>
-
-                    {{-- <p class="text-center my-5">
-                        <span>{{__("Dont have an account?")}}</span>
-                        <a href={{route("user.sign.up")}} class="text-primary-red text-3xl"> {{__("Register")}}</a>
-                    </p> --}}
                 </div>
             </div>
         </div>
     </div>
 </div>
 @endsection
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+    <script>
+   document.addEventListener('DOMContentLoaded', function() {
+    var input = document.querySelector("#phone_number");
+    var iti = window.intlTelInput(input, {
+        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+        initialCountry: "om",
+        separateDialCode: true,
+        preferredCountries: ["om", "ae", "sa", "kw", "bh", "qa"]
+    });
+
+    var form = document.querySelector("form");
+    var fullPhoneInput = document.querySelector("#full_phone");
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Check if the phone number is valid
+        if (iti.isValidNumber()) {
+            var fullNumber = iti.getNumber();
+            console.log("Full number:", fullNumber);
+            fullPhoneInput.value = fullNumber;
+            form.submit();
+        } else {
+            console.error("Invalid phone number");
+            // You can add user feedback here, e.g., display an error message
+            alert("Please enter a valid phone number.");
+        }
+    });
+
+    // Update the hidden input whenever the phone number changes
+    input.addEventListener('input', function() {
+        var fullNumber = iti.getNumber();
+        fullPhoneInput.value = fullNumber;
+    });
+});
+    </script>

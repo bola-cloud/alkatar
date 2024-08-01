@@ -238,7 +238,7 @@
                     var additionPrice = parseFloat($(this).val());
 
                     if ($(this).is(":checked")) {
-                        if (additionId && additionPrice) {
+                        if (additionId) {
                             selectedAdditions.push({
                                 id: additionId,
                                 price: additionPrice,
@@ -346,23 +346,23 @@
                 var weights = $(this).data("weights") || [];
                 var additions = $(this).data("additions") || [];
                 var discount = $(this).data("discount") ?? null;
-                
+
                 $("#sizeModalLabel").text(`${localizedText.selectSize}`);
-                
+
                 // Clear all option containers before populating
                 var sizeOptionsContainer = $("#sizeOptionsContainer");
                 var weightOptionsContainer = $("#weightOptionsContainer");
                 var additionOptionsContainer = $("#additionOptionsContainer");
-                
+
                 sizeOptionsContainer.empty();
                 weightOptionsContainer.empty();
                 additionOptionsContainer.empty();
-                
+
                 // Reset visibility of all sections
                 $("#sizeOptionsSection").hide();
                 $("#weightOptionsSection").hide();
                 $("#additionOptionsSection").hide();
-                
+
                 // Populate sizes
                 if (sizes.length > 0) {
                     sizes.forEach(function (size) {
@@ -374,7 +374,7 @@
                     });
                     $("#sizeOptionsSection").show();
                 }
-                
+
                 // Populate weights
                 if (weights.length > 0) {
                     weights.forEach(function (weight) {
@@ -389,7 +389,7 @@
                     });
                     $("#weightOptionsSection").show();
                 }
-                
+
                 // Populate additions
                 if (additions.length > 0) {
                     additions.forEach(function (addition) {
@@ -402,7 +402,7 @@
                     });
                     $("#additionOptionsSection").show();
                 }
-                
+
                 $("#sizeModal").modal("show");
             });
         }

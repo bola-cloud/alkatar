@@ -353,11 +353,11 @@
         <div class="section-header-area">
             <div class="row">
                 <div class="col-md-6">
-                    <h3 class="sub-title">{{ __('Similar Products') }}</h3>
+                    <!-- <h3 class="sub-title">{{ __('Similar Products') }}</h3> -->
                     <h2 class="section-title">{{ __('Related Products') }}</h2>
                 </div>
                 <div class="col-md-6 align-self-end text-md-end">
-                    <a href="{{ route('all.product') }}" class="see-btn">{{ __('See All') }}</a>
+                    <a href="{{route('category.product', $products->Category_Id)}}" class="see-btn">{{ __('See All') }}</a>
                 </div>
             </div>
         </div>

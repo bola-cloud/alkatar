@@ -23,12 +23,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {{-- @dd($content)--}}
                             <div id="cart_ajax_load">
                                 @php
                                     $total = 0;
                                 @endphp
                                 @foreach ($content as $item)
+
                                     <tr class="cart-page-item">
                                         <td data-label="{{ __('Product Image') }}">
                                             <div class="product-top">
@@ -80,6 +80,7 @@
                                                         </ul>
                                                     </div>
                                                 @endif
+
 
 
                                                 @if ($item->options->additions)
