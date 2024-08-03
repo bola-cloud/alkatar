@@ -7,10 +7,17 @@ use Illuminate\Support\Facades\Log;
 
 trait MuscatAppsService
 {
-    protected function sendSms($mobile, $message, $sender = 'ZakatAlmawl',$source = 'ZakatAlmawl')
+    protected function sendSms($mobile, $message, $sender = 'ZakatAlmawl', $source = 'ZakatAlmawl')
     {
         $mobile = '00968' . $mobile;
-        $url = config('muscatapps.sms_api_url') ."/user/smspush.aspx?username=ZakatAlmawl&password=AbdulNaser24&phoneno=" . $mobile . "&message=" . $message . "&sender=".$sender."&source=".$source;
+//        $url = config('muscatapps.sms_api_url') ."/user/smspush.aspx?username=ZakatAlmawl&password=AbdulNaser24&phoneno=" . $mobile . "&message=" . $message . "&sender=".$sender."&source=".$source;
+        $url = config('muscatapps.sms_api_url') .
+            "/user/smspush.aspx?username=" . config('muscatapps.sms_username') .
+            "&password=" . config('muscatapps.sms_password') .
+            "&phoneno=" . $mobile .
+            "&message=" . $message .
+            "&sender=" . $sender .
+            "&source=" . $source;
         $response = Http::get($url);
         Log::info('SMS sent', [
             'mobile' => $mobile,
@@ -18,11 +25,12 @@ trait MuscatAppsService
             'response' => $response->body()
         ]);
     }
+
     protected function generateOtp($phoneNumber)
     {
         $phoneNumber = '00968' . $phoneNumber;
 
-        $url = config('muscatapps.sms_api_url') ."/api/GenOTP";
+        $url = config('muscatapps.sms_api_url') . "/api/GenOTP";
         $username = 'ZakatAlmawl';
         $password = 'AbdulNaser24';
         $companyName = 'ZakatAlmawl';
@@ -42,7 +50,8 @@ trait MuscatAppsService
             return null;
         }
     }
-    protected function verifyOTP($refNumber, $otp , $phoneNumber )
+
+    protected function verifyOTP($refNumber, $otp, $phoneNumber)
     {
         $phoneNumber = '00968' . $phoneNumber;
 
@@ -57,7 +66,7 @@ trait MuscatAppsService
             "OTP" => $otp,
         ];
         $response = Http::post($url, $payload);
-        return  $response->json();
+        return $response->json();
 
     }
 
