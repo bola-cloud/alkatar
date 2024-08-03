@@ -9,7 +9,7 @@
         .iti {
             width: 100%;
         }
-        </style>;
+        </style>
 
 @section('content')
 <div class="sign-in-page section">
@@ -55,6 +55,7 @@
     var iti = window.intlTelInput(input, {
         utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
         initialCountry: "om",
+        excludeCountries: ["il"],
         separateDialCode: true,
         preferredCountries: ["om", "ae", "sa", "kw", "bh", "qa"]
     });
