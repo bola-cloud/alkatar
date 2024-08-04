@@ -1006,6 +1006,10 @@ h3 {
     @apply flex flex-col gap-10;
 }
 
-.related_products_section .product-thumbnal {
-    @apply !size-[200px];
+.single-grid-product .product-info .product-name .product-link {
+    @apply text-2xl md:text-4xl;
 }
+
+/* .related_products_section .product-thumbnal {
+    @apply !size-[200px];
+} */

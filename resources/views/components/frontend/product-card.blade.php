@@ -1,7 +1,7 @@
 @props(['product', 'isInDetailsPage' => false])
 
 
-<div class="single-grid-product ms-4" data-product-id="{{ $product->id }}">
+<div class="single-grid-product ms-1 md:ms-4" data-product-id="{{ $product->id }}">
     <div class="product-top">
         <a href="{{ route('single.product', $product->en_Product_Slug) }}">
             <img class="product-thumbnal" src="{{ asset(ProductImage() . $product->Primary_Image) }}"
