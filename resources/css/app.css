@@ -211,6 +211,12 @@ h3 {
     @apply relative w-full h-[300px] object-fill hover:scale-100;
 }
 
+@media (max-width: 768px) {
+    .single-grid-product .product-top .product-thumbnal {
+        @apply !h-[180px];
+    }
+}
+
 .product-banner .single-banner .banner-image {
     @apply hover:scale-100;
 }
@@ -1000,6 +1006,10 @@ h3 {
     @apply flex flex-col gap-10;
 }
 
-.related_products_section .product-thumbnal{
-    @apply !size-[200px];
+.single-grid-product .product-info .product-name .product-link {
+    @apply text-2xl md:text-4xl;
 }
+
+/* .related_products_section .product-thumbnal {
+    @apply !size-[200px];
+} */

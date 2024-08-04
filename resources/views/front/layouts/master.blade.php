@@ -3,8 +3,29 @@
 @include('front.layouts.include.head')
 @stack('post_css')
 
+<style>
+    .whats-float {
+        position: fixed;
+        width: 60px;
+        height: 60px;
+        bottom: 80px;
+        right: 20px;
+        background-color: #25d366;
+        color: #FFF;
+        border-radius: 50px;
+        text-align: center;
+        font-size: 30px;
+        box-shadow: 2px 2px 3px #999;
+        z-index: 100;
+    }
+
+    .whats-my-float {
+        margin-top: 16px;
+    }
+</style>
+
 <body
-    class="{{ session()->has('lang_dir') && session()->get('lang_dir') == 'rtl' ? 'direction-rtl' : 'direction-ltr' }} max-w-[1600px] mx-auto px-10">
+    class="{{ session()->has('lang_dir') && session()->get('lang_dir') == 'rtl' ? 'direction-rtl' : 'direction-ltr' }} max-w-[1600px] mx-auto px-3 md:px-10">
     <!-- Preloader Area Start -->
     <div id="preloader">
         <div id="status">
@@ -114,17 +135,17 @@
     </div>
 
 
-<!-- Size Selection Modal -->
+    <!-- Size Selection Modal -->
     <div class="modal fade" id="sizeModal" tabindex="-1" aria-labelledby="sizeModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header flex items-center justify-between">
                     <h5 class="modal-title" id="sizeModalLabel">Select Size and Additions</h5>
                     <div>
-                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                 </div>
                 <div class="modal-body">
@@ -156,7 +177,14 @@
                 </div>
             </div>
         </div>
+
+
     </div>
+
+    <a href="https://api.whatsapp.com/send?phone=96896187346" class="whats-float" target="_blank">
+        <i class="fa fa-whatsapp whats-my-float"></i>
+    </a>
+
 
 
 
@@ -166,13 +194,17 @@
     {{-- include file --}}
     <script>
         var localizedText = {
-          productAddedToCart: @json(__('Product Added to Cart Successfully')),
-          selectSize: @json(__('Select Size for Product')),
-          grams: @json(__('Grams')),
-      };
+            productAddedToCart: @json(__('Product Added to Cart Successfully')),
+            selectSize: @json(__('Select Size for Product')),
+            grams: @json(__('Grams')),
+        };
     </script>
     @include('front.layouts.include.script')
     @stack('post_script')
+
+    <script>
+        var locale = '{{ config('app.locale') }}';
+    </script>
 
     {{-- @include('sweetalert::alert') --}}
 

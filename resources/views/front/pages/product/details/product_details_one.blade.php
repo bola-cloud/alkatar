@@ -245,6 +245,20 @@
                                     </div>
                                 </div>
 
+                                <div class="social-sharing mt-4">
+    <h4 class="text-2xl font-bold mb-5">{{ __('Share this product') }}</h4>
+    <div class="flex gap-10">
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(request()->fullUrl()) }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800">
+            <i class="fab fa-facebook-f text-5xl"></i>
+        </a>
+        <a href="https://wa.me/?text={{ urlencode($products->en_Product_Name . ' - ' . request()->fullUrl()) }}" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-800">
+            <i class="fab fa-whatsapp text-5xl"></i>
+        </a>
+        <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="text-pink-600 hover:text-pink-800">
+            <i class="fab fa-instagram text-5xl"></i>
+        </a>
+    </div>
+</div>
                             </div>
                         </div>
                     </div>
@@ -348,8 +362,8 @@
 <!-- product-single-area end here  -->
 
 <!-- Featured Products area start here  -->
-<div class="featured-productss-area section-top pb-100 related_products_section">
-    <div class="container">
+<div class="featured-productss-area section-top pb-100 related_products_section !px-0">
+    <div>
         <div class="section-header-area">
             <div class="row">
                 <div class="col-md-6">

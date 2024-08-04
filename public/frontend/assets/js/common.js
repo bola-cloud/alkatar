@@ -170,19 +170,6 @@
     });
 
     $(document).ready(function () {
-        function __(key, replace = {}) {
-            let translation = window.translations[key] || key;
-
-            Object.keys(replace).forEach((placeholder) => {
-                translation = translation.replace(
-                    `:${placeholder}`,
-                    replace[placeholder]
-                );
-            });
-
-            return translation;
-        }
-
         var isProductDetailsPage = $(".product-single-area").length > 0;
         let selectedProductId = null;
         let selectedSizeId = null;
@@ -367,8 +354,12 @@
                 if (sizes.length > 0) {
                     sizes.forEach(function (size) {
                         const finalPrice = size.pivot.price ?? discount;
-                        var sizeOption = `<button class="btn btn-outline-primary size-option" data-product-id="${productId}" data-size-id="${size.id}" data-price="${finalPrice}">
-                            ${size.Size} - ${finalPrice} OMR
+                        var sizeOption = `<button class="btn btn-outline-primary size-option" data-product-id="${productId}" data-size-id="${
+                            size.id
+                        }" data-price="${finalPrice}">
+                            ${
+                                locale === "en" ? size.Size : size.Size_ar
+                            } - ${finalPrice} OMR
                         </button>`;
                         sizeOptionsContainer.append(sizeOption);
                     });
@@ -394,9 +385,15 @@
                 if (additions.length > 0) {
                     additions.forEach(function (addition) {
                         var additionOption = `<label class="addition-option">
-                            <input type="checkbox" data-addition-id="${addition.id}" data-price="${addition.price}">
+                            <input type="checkbox" data-addition-id="${
+                                addition.id
+                            }" data-price="${addition.price}">
                             <span class="checkmark"></span>
-                            ${addition.name_ar} - ${addition.price} + OMR
+                            ${
+                                locale === "en"
+                                    ? addition.name
+                                    : addition.name_ar
+                            } - ${addition.price} + OMR
                         </label>`;
                         additionOptionsContainer.append(additionOption);
                     });

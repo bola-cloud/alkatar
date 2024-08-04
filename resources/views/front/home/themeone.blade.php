@@ -65,7 +65,7 @@
 <!--  Categories area end here  -->
 
 <!-- On Sale area start here  -->
-<div class="featured-productss-area pb-100">
+<div class="featured-productss-area pb-100 !px-0 md:!px-8">
     <div class="section-header-area relative">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-center">
@@ -98,7 +98,7 @@
 <!-- On Sale Products area end here  -->
 
 <!-- Best seller start here  -->
-<div class="featured-productss-area pb-100">
+<div class="featured-productss-area pb-100 !px-0 md:!px-8">
     <div class="section-header-area">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-center">
@@ -140,7 +140,7 @@
 <!-- product banner area end here  -->
 
 <!-- Featured start here  -->
-<div class="featured-productss-area pb-100">
+<div class="featured-productss-area pb-100 !px-0 md:!px-8">
     <div class="section-header-area">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-center">
@@ -173,7 +173,7 @@
 <!-- Featured end here  -->
 
 <!-- New Arrival start here  -->
-<div class="featured-productss-area pb-100">
+<div class="featured-productss-area pb-100 !px-0 md:!px-8">
     <div class="section-header-area">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-center">

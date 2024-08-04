@@ -28,10 +28,11 @@
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/cookie-consent.css') }}">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
 
     <!-- Favicon -->
     <link rel="shortcut icon" href="{{ asset(IMG_FAVICON_PATH . $allsettings['favicon']) }}" type="image/x-icon">
     {{-- toastr --}}
-<link rel="stylesheet" href="{{ asset('admin/css/toastr.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin/css/toastr.min.css') }}">
 
 </head>
