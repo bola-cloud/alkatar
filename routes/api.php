@@ -4,7 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use  \App\Http\Controllers\Api\{
     ProductController,
-    CategoryController
+    CategoryController,
+    Auth\AuthController
 };
 
 /*
@@ -17,6 +18,8 @@ use  \App\Http\Controllers\Api\{
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Route::post('otp-signin', [AuthController::class, 'otpSignInPost']);
+Route::post('otp-verify', [AuthController::class, 'otpVerifyPost']);
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/categories', [CategoryController::class, 'index']);
 

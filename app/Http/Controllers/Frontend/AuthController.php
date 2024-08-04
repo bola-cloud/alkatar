@@ -295,7 +295,7 @@ class AuthController extends Controller
 
         //     // info($data);
 
-        //     $otp 
+        //     $otp
 
 
         //     $response = Http::asForm()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/send_otp', [

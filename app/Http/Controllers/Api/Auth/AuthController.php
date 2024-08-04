@@ -3,95 +3,73 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Otp;
 use App\Models\User;
-use App\Traits\MuscatAppsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
-    use  MuscatAppsService;
-
-    // UserController.php
-    public function sendOTP(Request $request)
+    public function otpSignInPost(Request $request)
     {
-        $validatedData = $request->validate([
-            'phone' => 'required|exists:users,Number',
+      $validated =   $request->validate([
+            'phone_number' => 'required',
+            'code' => 'required',
         ]);
-        $refNumber = $this->generateOtp($validatedData['phone']);
-        Log::info('Generated OTP Responsee', ['otp response' => $refNumber]);
-        if (!isset($refNumber['RefNo']))
-            return response()->json([
-                'message' => 'حدث خطأ ما يرجاء تجديد المحاولة',
-            ], 400);
-
-        Log::info('Generated OTP RefNo', ['RefNo' => $refNumber['RefNo']]);
-        return response()->json([
-            'message' => 'تم ارسال رمز التحقيق بنجاح',
-            'RefNo' => $refNumber['RefNo']
-        ], 200);
-    }
-
-    public function register(Request $request)
-    {
-        $validatedData = $request->validate([
-            'name' => 'required|string|min:3|max:255',
-            'phone' => 'required|string|digits:8|unique:users,Number',
+        $otp = str_pad(random_int(0, 99999), 5, '0', STR_PAD_LEFT);
+        $full_phone = $validated['code'] . $validated['phone_number'];
+        $phone_without_plus = ltrim($full_phone, '+');
+        Otp::create([
+            'phone_number' => $full_phone,
+            'otp' => $otp,
         ]);
-//        $user = User::create([
-//            'name' => $request->name,
-//            'email' => $request->email,
-//            'password' => Hash::make($request->confirm_password),
-//        ]);
-        $user = User::create([
-            'name' => $validatedData['name'],
-            'Number' => $validatedData['phone'],
-//            'email' => $request->email,
-//            'password' => Hash::make($request->confirm_password),
-        ]);
-        return response()->json([
-            'message' => 'تم التسجيل بنجاح',
-        ], 200);
-    }
 
-    //form taske otp return tokrn
-    //pre login take mobile send otp
-    public function login(Request $request)
-    {
-        $validatedData = $request->validate([
-            'phone' => 'required|numeric|digits:8',
-            'otp' => 'required|numeric|digits_between:4,8',
-            'RefNo' => 'required|string|max:255',
-
+        $response = Http::asForm()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/send_otp', [
+            'phone_number' => $phone_without_plus,
+            'otp' => $otp
         ]);
-        $user = User::where('phone', $validatedData['phone'])->first();
-        if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
+
+        if ($response->successful()) {
+            return response()->json(['message' => 'OTP sent successfully'], 200);
+        } else {
+            return response()->json(['error' => 'Failed to send OTP'], 500);
         }
-        if ($validatedData['phone'] !== '87654321') {
-            $verifyOtp = $this->verifyOTP($validatedData['RefNo'], $validatedData['otp'], $validatedData['phone']);
-            if (!$verifyOtp['StatusCode'] == '0') // 0 means success
-                return response()->json([
-                    'otp' => 'otp غير صحيح',
-                ], 422);
-        }
-        $token = $user->createToken('ehabsharaaapp')->plainTextToken;
-        return response()->json(['token' => $token], 200);
     }
 
-    public function logout(Request $request)
+    public function otpVerifyPost(Request $request)
     {
-        $user = Auth::guard('sanctum')->user();
-        if (!$user)
-            return response()->json([
-                'message' => 'No authenticated user found'
-            ], 401);
-
-        $user->tokens()->delete();
-        return response()->json([
-            'message' => 'Successfully logged out'
+       $validated =  $request->validate([
+            'phone_number' => 'required',
+            'code' => 'required',
+            'otp' => 'required|digits:5',
         ]);
-    }
 
+        $phone_number = $validated['phone_number'];
+        $entered_otp = $validated['otp'];
+        $full_phone = $validated['code'] . $validated['phone_number'];
+        $otp_record = Otp::where('phone_number', $full_phone)->latest()->first();
+        if (isset($otp_record) && $entered_otp === $otp_record->otp) {
+            $otp_record->delete();
+            $user = User::where('Number', $phone_number)->where("is_admin", 0)->first();
+
+            if (!$user) {
+                $user = User::create([
+                    'name' => $phone_number,
+                    'email' => 'default' . $phone_number . '@default.com',
+                    'password' => Hash::make($phone_number),
+                    'Number' => $phone_number,
+                    'code' => $validated['code'],
+                ]);
+            }
+
+            $token = $user->createToken('authTokenSharaaApp')->plainTextToken;
+
+            return response()->json(['token' => $token, 'message' => 'Login Successfully'], 200);
+        } else {
+            return response()->json(['error' => 'Invalid OTP'], 401);
+        }
+    }
 }
