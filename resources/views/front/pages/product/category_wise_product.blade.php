@@ -116,7 +116,7 @@
 
                 <div id="filterProduct">
                     <div class="product-list">
-                        <div class="row">
+                        <div class="grid grid-cols-2 xl:grid-cols-3">
                             @forelse($products as $product)
                                 <x-frontend.product-card :product="$product" />
                             @empty
