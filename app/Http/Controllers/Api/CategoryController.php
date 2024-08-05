@@ -11,7 +11,7 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::latest()->get();
+        $categories = Category::has('products')->latest()->get();
         return CategoryResource::collection($categories);
     }
 }
