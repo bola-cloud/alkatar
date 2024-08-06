@@ -3,6 +3,7 @@
 @section('description', isset($description) ? $description : '')
 @section('keywords', isset($keywords) ? $keywords : '')
 @section('content')
+
 <!-- product-single-area start here  -->
 <div class="product-single-area section-top">
     <div class="container">
@@ -99,8 +100,8 @@
                                     )
                                                                     <span class="price">{{ currencyConverter($products->Discount_Price) }}</span>
                                 @else
-                                    <span class="price">{{ currencyConverter($products->Discount_Price) }}</span>
-                                    <span class="regular-price">{{ currencyConverter($products->Price) }}</span>
+                                <span class="regular-price">{{ currencyConverter($products->Price) }}</span>
+                                <span class="price">{{ currencyConverter($products->Discount_Price) }}</span>
                                     <span
                                         class="absolute start-[25rem] bg-red-100 text-red-400 rounded-full px-4 py-1 text-lg font-bold">
                                         {{__("Discount (-)")}}{{number_format($products->Discount, 0)}}%</span>
