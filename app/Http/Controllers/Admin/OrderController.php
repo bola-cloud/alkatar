@@ -159,6 +159,9 @@ class OrderController extends Controller
         $order = Order::query()
             ->with('order_details', 'user', 'coupon', 'order_details.product', 'billing', 'shipping')
             ->find($request->id);
+
+        $order['billing_address'] = json_decode($order->billing_address, true);
+
         return view('admin.pages.orders.invoice', compact('order'));
     }
 

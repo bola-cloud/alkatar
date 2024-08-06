@@ -1,173 +1,166 @@
 <!DOCTYPE html>
 <html lang="en" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice</title>
     <style>
-        
-        .invoice-modal {
-            direction: rtl;
+        @page {
+            size: A4 landscape;
+            margin: 0;
+        }
+
+        body {
             font-family: Arial, sans-serif;
-            line-height: 1.6;
+            line-height: 1.3;
             color: #333;
+            margin: 0;
+            padding: 0;
+            font-size: 10px;
+            /* Reduced base font size */
         }
-        .invoice-modal * {
-            box-sizing: border-box;
-        }
+
         .invoice-container {
-        
+            max-width: 1100px;
+            /* Increased for landscape */
             margin: 0 auto;
             padding: 20px;
+            box-sizing: border-box;
         }
-   
-        .invoice-title {
-            margin: 0;
-            font-size: 24px;
-        }
-        .invoice-logo-container {
+
+        .invoice-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
+
         .invoice-logo {
-            max-width: 100px;
+            max-width: 80px;
         }
-        .invoice-logo-text {
-            font-size: 20px;
+
+        .invoice-title {
+            font-size: 16px;
             font-weight: bold;
         }
-        .order-details {
+
+        .invoice-details {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 20px;
-            border-top: 2px solid #ddd;
-            padding-top: 20px;
+            margin-bottom: 15px;
         }
 
-        .order-details p {
-            color: #000;
-        }
-
-        .company-details, .order-info {
+        .invoice-details>div {
             width: 48%;
         }
+
         .address-container {
             display: flex;
-            margin-bottom: 20px;
+            justify-content: space-between;
+            margin-bottom: 15px;
         }
-        .billing-address, .shipping-address {
-            width: 50%;
-        }
+
         .address-box {
-            border: 1px solid #ddd;
-            padding: 10px;
-            height: 100%;
-        }
-        .address-title {
-            padding: 15px 5px;
-            border-bottom: 1px solid #ddd;
-            margin: -10px -10px 10px -10px;
-            font-weight: bold;
-        }
-        .invoice-modal table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        .invoice-modal th, .invoice-modal td {
+            width: 48%;
             border: 1px solid #ddd;
             padding: 8px;
+        }
+
+        .address-title {
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 4px;
+            margin-bottom: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 6px;
             text-align: right;
         }
-        .invoice-modal th {
+
+        th {
             background-color: #f2f2f2;
         }
+
         .total-row {
             font-weight: bold;
         }
+
         .invoice-footer {
-            margin-top: 20px;
             border-top: 1px solid #ddd;
-            padding-top: 10px;
+            padding-top: 8px;
+            font-size: 9px;
         }
-         .invoice-modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 20px;
-            gap: 10px;
-         }
+
         @media print {
             body {
                 print-color-adjust: exact;
                 -webkit-print-color-adjust: exact;
-                zoom: 80%;
-            }
-            .invoice-header {
-                background-color: #28a745 !important;
-                color: white !important;
             }
         }
     </style>
 </head>
-<body >
-    <div class="invoice-modal">
-        <div class="invoice-container">
-          
-            <div class="invoice-logo-container">
-                <img src="{{ asset(IMG_LOGO_PATH . allsetting()['main_logo']) }}" alt="Logo" class="invoice-logo">
-                <span class="invoice-logo-text">الفاتورة</span>
-            </div>
 
-            <div class="order-details">
-                <div class="company-details">
-                    <p>شركة مطاحن و تمور الشرع</p>
-                    <p>الهاتف: +96893904070</p>
-                    <p>alsaraamills@gmail.com</p>
-                    <p>https://alsharashopping.com</p>
-                </div>
-                <div class="order-info">
-                    <p>تاريخ الإضافة: {{ date('d/m/Y', strtotime($order->created_at)) }}</p>
-                    <p>وقت الإضافة: {{ date('h:i A', strtotime($order->created_at)) }}</p>
-                    <p>رقم الطلب: {{ $order->Order_Number }}</p>
-                    <p>طريقة الدفع: {{ $order->Payment_Method }}</p>
-                    <p>طريقة الشحن: مصاريف الشحن</p>
-                </div>
-            </div>
+<body>
+    <div class="invoice-container">
+        <div class="invoice-header">
+            <img src="{{ asset(IMG_LOGO_PATH . allsetting()['main_logo']) }}" alt="Logo" class="invoice-logo">
+            <span class="invoice-title">الفاتورة</span>
+        </div>
 
-            <div class="address-container">
-                <div class="billing-address">
-                    <div class="address-box">
-                        <div class="address-title">الفاتورة الى</div>
-                        <p>اسم العميل: {{ $bill['name'] ?? 'N/A' }}</p>
-                        <p>البريد الاكتروني: {{ $bill['email'] ?? 'N/A' }}</p>
-                    </div>
-                </div>
-                <div class="shipping-address">
-                    <div class="address-box">
-                        <div class="address-title">الشحن الى</div>
-                        <p>العنوان: {{ $ship['street'] ?? 'N/A' }}</p>
-                        <p>المحافظة: {{ $ship['state_ar'] ?? 'N/A' }}</p>
-                        <p>المدينة: {{ $ship['city_ar'] ?? 'N/A' }}</p>
-                        <p>الدولة: سلطنة عمان</p>
-                    </div>
-                </div>
+        <div class="invoice-details">
+            <div>
+                <p><strong>شركة مطاحن و تمور الشرع</strong></p>
+                <p>الهاتف: +96893904070</p>
+                <p>alsaraamills@gmail.com</p>
+                <p>https://alsharashopping.com</p>
             </div>
+            <div>
+                <p>تاريخ الإضافة: {{ date('d/m/Y', strtotime($order->created_at)) }}</p>
+                <p>وقت الإضافة: {{ date('h:i A', strtotime($order->created_at)) }}</p>
+                <p>رقم الطلب: {{ $order->Order_Number }}</p>
+                <p>طريقة الدفع: {{ $order->Payment_Method }}</p>
+                <p>طريقة الشحن: مصاريف الشحن</p>
+            </div>
+        </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>الاسم</th>
-                        <th>الكمية</th>
-                        <th>الحجم</th>
-                        <th>السعر</th>
-                        <th>الإجمالي</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($order->order_details as $od)
+        <div class="address-container">
+            <div class="address-box">
+                <div class="address-title">الفاتورة الى</div>
+                <p>اسم العميل: {{ $order->billing_address['name'] ?? 'N/A' }}</p>
+                <p>البريد الاكتروني: {{ $order->billing_address['email'] ?? 'N/A' }}</p>
+            </div>
+            <div class="address-box">
+                <div class="address-title">الشحن الى</div>
+                <p>العنوان: {{ $order->billing_address['street'] ?? 'N/A' }}</p>
+                <p>المحافظة: {{ $order->billing_address['state_ar'] ?? 'N/A' }}</p>
+                <p>المدينة: {{ $order->billing_address['city_ar'] ?? 'N/A' }}</p>
+                <p>الدولة: سلطنة عمان</p>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>الاسم</th>
+                    <th>الكمية</th>
+                    <th>الحجم</th>
+                    <th>السعر</th>
+                    <th>الإجمالي</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($order->order_details as $od)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $od->product->fr_Product_Name }}</td>
@@ -176,30 +169,33 @@
                         <td>{{ $od->Price }}</td>
                         <td>{{ $od->Total_Price }} OMR</td>
                     </tr>
-                    @endforeach
-                    <tr class="total-row">
-                        <td colspan="5">الإجمالي قبل النهائي</td>
-                        <td>{{ $order->Sub_Total }} OMR</td>
-                    </tr>
-                    <tr>
-                        <td colspan="5">مصاريف الشحن</td>
-                        <td>{{ $order->Delivery_Charge }} OMR</td>
-                    </tr>
-                    <tr class="total-row">
-                        <td colspan="5">المجموع النهائي:</td>
-                        <td>{{ $order->Grand_Total }} OMR</td>
-                    </tr>
-                </tbody>
-            </table>
+                @endforeach
+                <tr class="total-row">
+                    <td colspan="5">الإجمالي قبل النهائي</td>
+                    <td>{{ $order->Sub_Total }} OMR</td>
+                </tr>
+                <tr>
+                    <td colspan="5">مصاريف الشحن</td>
+                    <td>{{ $order->Delivery_Charge }} OMR</td>
+                </tr>
+                <tr class="total-row">
+                    <td colspan="5">المجموع النهائي:</td>
+                    <td>{{ $order->Grand_Total }} OMR</td>
+                </tr>
+            </tbody>
+        </table>
 
-            <div class="invoice-footer">
-                <p><strong>الملاحظات:</strong></p>
-            </div>
+        <div class="invoice-footer">
+            <p><strong>الملاحظات:</strong></p>
+            <p>نشكركم على أعمالكم. يرجى الدفع خلال 30 يومًا من تاريخ الفاتورة.</p>
         </div>
     </div>
 </body>
 
 <script>
-        print()
-    </script>
+    window.onload = function () {
+        window.print();
+    }
+</script>
+
 </html>
