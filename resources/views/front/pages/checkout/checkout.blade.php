@@ -160,6 +160,7 @@
                 <ul class="space-y-4">
                     @php $total = 0; @endphp
                     @foreach ($content as $item)
+
                         <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4">
                             <div class="flex items-center space-x-4 mb-2 sm:mb-0">
                                 <img src="{{ asset(ProductImage() . $item->options->image) }}" alt="{{ $item->name }}"
@@ -169,12 +170,12 @@
                                         {{langConverter($item->name, $item->options->name_ar)}}
                                     </h3>
 
-                                    @if(isset($item->options->size)) {
+
+                                    @if($item->options->size)
                                         <p class="text-2xl lg:text-3xl text-gray-600 my-4">
                                             <span class="font-bold underline">{{__('Option') }}</span>:
                                             {{ is_null($item->options->size) ? __('Free Size') : langConverter($item->options->size, $item->options->size_ar) }}
                                         </p>
-                                        }
                                     @endif
 
 

@@ -138,6 +138,9 @@
                 <div class="address-title">الفاتورة الى</div>
                 <p>اسم العميل: {{ $order->billing_address['name'] ?? 'N/A' }}</p>
                 <p>البريد الاكتروني: {{ $order->billing_address['email'] ?? 'N/A' }}</p>
+                @if ($order->user)
+                    <p>رقم الهاتف: {{$order->user->code . $order->user->Number ?? 'N/A' }}</p>
+                @endif
             </div>
             <div class="address-box">
                 <div class="address-title">الشحن الى</div>
@@ -187,7 +190,7 @@
 
         <div class="invoice-footer">
             <p><strong>الملاحظات:</strong></p>
-            <p>نشكركم على أعمالكم. يرجى الدفع خلال 30 يومًا من تاريخ الفاتورة.</p>
+
         </div>
     </div>
 </body>
