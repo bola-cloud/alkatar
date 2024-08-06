@@ -8,6 +8,7 @@ use App\Models\WeightProduct;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Intervention\Image\Facades\Image;
 
 class Product extends Model
 {
@@ -113,4 +114,33 @@ class Product extends Model
     {
         return $this->hasMany(WeightProduct::class, 'Product_Id');
     }
+
+
+    public function resizeImage()
+    {
+        $originalPath = public_path(ProductImage() . $this->Primary_Image);
+
+        if (!file_exists($originalPath)) {
+            // Handle the case where the file doesn't exist
+            return ''; // Provide a default image path if needed
+        }
+        $image = Image::make($originalPath);
+
+        $image->resize(900, 900, function ($constraint) {
+            $constraint->aspectRatio();
+            $constraint->upsize();
+        });
+
+        // Ensure the resized_images directory exists
+        $resizedImageDir = public_path(ProductImage() . 'resized_images/');
+        if (!file_exists($resizedImageDir)) {
+            mkdir($resizedImageDir, 0775, true);
+        }
+        $resizedImagePath = $resizedImageDir . basename($originalPath);
+        $image->save($resizedImagePath);
+
+        return asset(ProductImage() . 'resized_images/' . basename($originalPath));
+    }
+
+
 }
