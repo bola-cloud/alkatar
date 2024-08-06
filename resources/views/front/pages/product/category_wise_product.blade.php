@@ -9,7 +9,7 @@
 
 <!-- Product Area Start -->
 <div class="product-area section">
-    <div class="container">
+    <div >
         <div class="row">
             <div class="col-xl-3 col-lg-4">
                 <div class="sidebar-widget-area mobile-sidebar">
@@ -37,7 +37,7 @@
                         <div class="categories-list">
                             @foreach (Category_Des_Icon() as $category)
                                 <div class="single-categorie">
-                                    <div class="categorie-left">
+                                    <div class="categorie-left flex items-center gap-2">
                                         <input class="form-check-input CheckCategory" type="checkbox"
                                             value="{{ $category->en_Category_Name }}"
                                             id="product_category_{{$category->id}}"
@@ -116,7 +116,7 @@
 
                 <div id="filterProduct">
                     <div class="product-list">
-                        <div class="grid grid-cols-2 xl:grid-cols-3">
+                        <div class="grid grid-cols-2 lg:grid-cols-3">
                             @forelse($products as $product)
                                 <x-frontend.product-card :product="$product" />
                             @empty
