@@ -323,9 +323,9 @@ class AuthController extends Controller
 
         $request->validate([
             'phone_number' => 'required',
+            'country_code' => 'required',
         ]);
 
-        // dd($request->all());
 
 
         // Generate a random 6-digit OTP
@@ -346,6 +346,7 @@ class AuthController extends Controller
         if ($response->successful()) {
             return redirect()->route('user.otp.verify.get', [
                 'phone_number' => $request->input('full_phone'),
+                'country_code' => $request->input('country_code')
             ]);
         } else {
             return redirect()->back()->with('error', 'Failed to send OTP. Please try again.');
@@ -355,6 +356,7 @@ class AuthController extends Controller
     public function otpVerify(Request $request)
     {
         $data['phone_number'] = $request->phone_number;
+        $data['country_code'] = $request->country_code;
 
         return view('front.auth.otp_form', $data);
     }
@@ -367,6 +369,8 @@ class AuthController extends Controller
         ]);
 
         $phone_number = $request->input('phone_number');
+        $country_code = $request->input('country_code');
+        $phone_without_country_code = ltrim($phone_number, '+' . $country_code);
         $entered_otp = $request->input('otp');
         $stored_otp = session('whatsapp_otp');
 
@@ -386,7 +390,8 @@ class AuthController extends Controller
                     'name' => $phone_number,
                     'email' => 'default' . $phone_number . '@default.com',
                     'password' => Hash::make($phone_number),
-                    'Number' => $phone_number,
+                    'code' => $country_code,
+                    'Number' => $phone_without_country_code,
                 ]);
 
                 if ($user) {

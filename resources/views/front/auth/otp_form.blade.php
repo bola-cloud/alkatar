@@ -32,6 +32,7 @@
                         </div>
 
                         <input type="hidden" name="phone_number" value="{{ $phone_number }}">
+                        <input type="hidden" name="country_code" value="{{ $country_code }}">
                         <input type="hidden" name="otp" id="otp" value="">
                         <div class="form-group mt-24">
                             <button type="submit"
