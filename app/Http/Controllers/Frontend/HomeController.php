@@ -31,25 +31,25 @@ class HomeController extends Controller
             }
             $data['sliders'] = Slider::latest()->get();
             $data['promotion'] = Advertise::latest()->get();
-    
+
             $all_products = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->latest();
-    
+
             $data['featured_products'] = $all_products->clone()->where('Featured_Product', ACTIVE)->paginate(10);
-            $data['on_sales'] = $all_products->clone()->where('On_Sale', ACTIVE)->paginate(10);
+            $data['on_sales'] = $all_products->clone()->where('Discount', "!=", '0')->paginate(10);
             $data['best_selling'] = $all_products->clone()->where('Best_Selling', ACTIVE)->paginate(10);
             $data['new_arrivals'] = $all_products->clone()->where('New_Arrival', ACTIVE)->paginate(10);
-    
+
             $seo = SeoSetting::where('slug', 'home')->first();
             $data['title'] = $seo->title;
             $data['description'] = $seo->description;
             $data['keywords'] = $seo->keywords;
-    
+
             return view('front.index', $data);
         } else {
             return redirect()->to('/install');
         }
     }
-    
+
     public function theme_set(Request $request)
     {
         if (env('APP_DEMO') == true) {

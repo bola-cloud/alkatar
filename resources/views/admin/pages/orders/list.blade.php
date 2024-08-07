@@ -49,10 +49,12 @@
                                 <th><input type="checkbox" id="select-all-checkbox"></th>
                                 <th>{{ __('SL') }}</th>
                                 <th>{{ __('Id') }}</th>
+                                <th>{{ __('Date') }}</th>
+                                <th>{{ __('Time') }}</th>
                                 <th>{{ __('User') }}</th>
-                                <th>{{__("State")}}</th>
+                                <!-- <th>{{__("State")}}</th> -->
                                 <th>{{__("City")}}</th>
-                                <th>{{ __('Products') }}</th>
+                                <!-- <th>{{ __('Products') }}</th> -->
                                 <th>{{ __('Total Amount') }}</th>
                                 <th>{{ __('Coupon Code') }}</th>
                                 <th>{{ __('Payment Method') }}</th>

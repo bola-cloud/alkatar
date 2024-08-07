@@ -107,7 +107,7 @@ class CheckoutController extends Controller
         $isLoggedIn = Auth::check();
         $user_id = $isLoggedIn ? Auth::id() : null;
 
-        // dd($request->all());
+        dd($request->all());
 
         // Validation
         $validationRules = [
@@ -147,6 +147,7 @@ class CheckoutController extends Controller
             $weight_charge = $this->calculateExtraWeightFees();
             $shipping_charge += $weight_charge;
             $this->grand_total = $subtotal + $shipping_charge;
+
             $shipping_city = City::find($request->billing_city);
             $shipping_state = State::find($request->billing_state);
 
