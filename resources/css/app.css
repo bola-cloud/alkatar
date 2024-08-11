@@ -152,7 +152,7 @@ h3 {
 }
 
 .hero-section .hero-slider .signle-slide {
-    @apply h-[250px] md:h-[350px] lg:h-[450px] bg-contain lg:bg-cover;
+    @apply h-[250px] md:h-[350px] lg:h-[620px] bg-contain;
 }
 
 .section-header-area .section-title {

@@ -27,11 +27,11 @@
 <body
     class="{{ session()->has('lang_dir') && session()->get('lang_dir') == 'rtl' ? 'direction-rtl' : 'direction-ltr' }} max-w-[1600px] mx-auto px-3 md:px-10">
     <!-- Preloader Area Start -->
-    <div id="preloader">
+    <!-- <div id="preloader">
         <div id="status">
             <img src="{{ asset(IMG_PRELOADER_PATH . $allsettings['preloader']) }}" alt="img" />
         </div>
-    </div>
+    </div> -->
     <!-- Preloader Area End -->
 
     @include('front.layouts.include.desktop_header')

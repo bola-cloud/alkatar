@@ -2,9 +2,9 @@
 <html lang="en">
 @include('admin.includes.head')
 
-<body>
+<body  class="{{ session()->has('lang_dir') && session()->get('lang_dir') == 'rtl' ? 'direction-rtl' : 'direction-ltr' }}" >
     @include('admin.includes.leftsidebar')
-    <div class="main-content">
+    <div class="main-content" >
         @include('admin.includes.header')
         <div class="page-content-wrap">
             <!-- Container Fluid-->

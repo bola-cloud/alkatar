@@ -107,7 +107,6 @@ class CheckoutController extends Controller
         $isLoggedIn = Auth::check();
         $user_id = $isLoggedIn ? Auth::id() : null;
 
-        dd($request->all());
 
         // Validation
         $validationRules = [
