@@ -54,7 +54,7 @@ Route::group(['prefix' => 'subscribe'], function () {
     ;
 });
 
-Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin', 'en.locale'], 'as' => 'admin.'], function () {
+Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin'], 'as' => 'admin.'], function () {
 
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');

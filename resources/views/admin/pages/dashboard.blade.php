@@ -118,7 +118,7 @@
         <div class="col-lg-3 col-md-6 col-sm-6">
             <div class="status__box-3 bg-style">
                 <div class="item__left">
-                    <h2>{{__(' Delivered Orders')}}</h2>
+                    <h2>{{__('Delivered Orders')}}</h2>
                     <div class="status__box__data">
                         <h2>{{$deliveredOrders}}</h2>
                     </div>
