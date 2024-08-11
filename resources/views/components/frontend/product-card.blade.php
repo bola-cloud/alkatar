@@ -1,6 +1,9 @@
 @props(['product', 'isInDetailsPage' => false])
 
 
+
+
+
 <div class="single-grid-product ms-1 md:ms-4" data-product-id="{{ $product->id }}">
     <div class="product-top">
         <a href="{{ route('single.product', $product->en_Product_Slug) }}">
@@ -56,8 +59,14 @@
                 }
             @endphp
 
-            <span class="price">{{ currencyConverter($finalPrice) }}</span>
-
+            @if ($product->Discount > 0)
+                <span class="price line-through !text-gray-400">{{ currencyConverter($finalPrice) }}</span>
+                <span class="price">
+                    {{currencyConverter($product->Discount_Price)}}
+                </span>
+            @else
+                <span class="price">{{ currencyConverter($finalPrice) }}</span>
+            @endif
         </div>
 
         {!! productReview($product->id) !!}

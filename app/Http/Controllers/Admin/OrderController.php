@@ -63,12 +63,18 @@ class OrderController extends Controller
                 ->addColumn('GrandTotal', function ($data) {
                     return $data->Grand_Total . ' OMR';
                 })
-                ->addColumn('Products', function ($data) {
-                    $html = '';
-                    foreach ($data->order_details as $or) {
-                        $html .= '<img src="' . asset(IMG_PRODUCT_PATH . $or->product->Primary_Image) . '" border="0" height="50" class="img-rounded mr-1" align="center" />';
-                    }
-                    return $html;
+                // ->addColumn('Products', function ($data) {
+                //     $html = '';
+                //     foreach ($data->order_details as $or) {
+                //         $html .= '<img src="' . asset(IMG_PRODUCT_PATH . $or->product->Primary_Image) . '" border="0" height="50" class="img-rounded mr-1" align="center" />';
+                //     }
+                //     return $html;
+                // })
+                ->addColumn("order_date", function ($data) {
+                    return date('d-m-Y', strtotime($data->created_at));
+                })
+                ->addColumn('order_time', function ($data) {
+                    return date('h:i A', strtotime($data->created_at));
                 })
                 ->addColumn('Payment_Method', function ($data) {
                     $payment_method = $data->Payment_Method;
@@ -129,7 +135,7 @@ class OrderController extends Controller
                     }
                     return $html;
                 })
-                ->rawColumns(['action', 'Products', 'Status', 'types', 'Payment_Method'])
+                ->rawColumns(['action', 'Status', 'types', 'Payment_Method'])
                 ->make(true);
         }
         $data['title'] = __('Order List');
@@ -153,6 +159,9 @@ class OrderController extends Controller
         $order = Order::query()
             ->with('order_details', 'user', 'coupon', 'order_details.product', 'billing', 'shipping')
             ->find($request->id);
+
+        $order['billing_address'] = json_decode($order->billing_address, true);
+
         return view('admin.pages.orders.invoice', compact('order'));
     }
 
