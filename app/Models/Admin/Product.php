@@ -128,7 +128,7 @@ class Product extends Model
 
         if (!in_array($mimeType, $allowedMimeTypes)) {
             // Handle unsupported image types
-            return 'Unsupported image type. Only JPEG, PNG, and GIF are supported.';
+            return '';
         }
 
         $image = Image::make($originalPath);
