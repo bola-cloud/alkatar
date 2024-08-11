@@ -119,11 +119,18 @@ class Product extends Model
     public function resizeImage()
     {
         $originalPath = public_path(ProductImage() . $this->Primary_Image);
-
         if (!file_exists($originalPath)) {
-            // Handle the case where the file doesn't exist
-            return ''; // Provide a default image path if needed
+            return '';
         }
+        $mimeType = mime_content_type($originalPath);
+
+        $allowedMimeTypes = ['image/jpeg', 'image/jpg','image/png', 'image/gif'];
+
+        if (!in_array($mimeType, $allowedMimeTypes)) {
+            // Handle unsupported image types
+            return 'Unsupported image type. Only JPEG, PNG, and GIF are supported.';
+        }
+
         $image = Image::make($originalPath);
 
         $image->resize(900, 900, function ($constraint) {
@@ -136,6 +143,7 @@ class Product extends Model
         if (!file_exists($resizedImageDir)) {
             mkdir($resizedImageDir, 0775, true);
         }
+
         $resizedImagePath = $resizedImageDir . basename($originalPath);
         $image->save($resizedImagePath);
 
