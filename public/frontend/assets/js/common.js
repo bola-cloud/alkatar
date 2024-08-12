@@ -195,9 +195,14 @@
             selectedWeightId = $(
                 '.weight-switch input[type="radio"]:checked'
             ).data("weight");
-            selectedWeightPrice = parseFloat(
-                $('.weight-switch input[type="radio"]:checked').val()
-            );
+
+            const selectedWeightValue = $(
+                '.weight-switch input[type="radio"]:checked'
+            ).val();
+
+            selectedWeightPrice = !isNaN(parseFloat(selectedWeightValue))
+                ? parseFloat(selectedWeightValue)
+                : 0;
 
             // Handle size selection
             $('.size-switch input[type="radio"]').on("change", function () {
@@ -259,6 +264,12 @@
                           0
                       )
                     : 0;
+
+                console.log(
+                    selectedSizePrice,
+                    selectedWeightPrice,
+                    additionTotalPrice
+                );
 
                 var totalPrice =
                     selectedSizePrice +
