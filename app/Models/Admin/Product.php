@@ -123,27 +123,26 @@ class Product extends Model
             return '';
         }
         $mimeType = mime_content_type($originalPath);
-
-        $allowedMimeTypes = ['image/jpeg', 'image/jpg','image/png', 'image/gif'];
+        $allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
 
         if (!in_array($mimeType, $allowedMimeTypes)) {
-            // Handle unsupported image types
             return '';
+        }
+
+        $resizedImageDir = public_path(ProductImage() . 'resized_images/');
+        $resizedImagePath = $resizedImageDir . basename($originalPath);
+        if (file_exists($resizedImagePath)) {
+            return asset(ProductImage() . 'resized_images/' . basename($originalPath));
         }
         $image = Image::make($originalPath);
         $image->resize(900, 900, function ($constraint) {
             $constraint->aspectRatio();
             $constraint->upsize();
         });
-        // Ensure the resized_images directory exists
-        $resizedImageDir = public_path(ProductImage() . 'resized_images/');
         if (!file_exists($resizedImageDir)) {
             mkdir($resizedImageDir, 0775, true);
         }
-
-        $resizedImagePath = $resizedImageDir . basename($originalPath);
         $image->save($resizedImagePath);
-
         return asset(ProductImage() . 'resized_images/' . basename($originalPath));
     }
 
