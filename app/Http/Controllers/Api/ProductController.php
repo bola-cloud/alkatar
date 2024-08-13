@@ -16,9 +16,14 @@ class ProductController extends Controller
             $categoryId = $request->get('category');
             $query->where('Category_Id', $categoryId);
         }
-
         $all_products = $query->latest()->paginate($request->get('per_page', 10));
-
         return ProductResource::collection($all_products);
     }
+    public function show($id)
+    {
+        $product = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->findOrFail($id);
+        return ProductResource::make($product);
+    }
+
+
 }

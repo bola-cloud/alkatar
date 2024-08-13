@@ -130,14 +130,11 @@ class Product extends Model
             // Handle unsupported image types
             return '';
         }
-
         $image = Image::make($originalPath);
-
         $image->resize(900, 900, function ($constraint) {
             $constraint->aspectRatio();
             $constraint->upsize();
         });
-
         // Ensure the resized_images directory exists
         $resizedImageDir = public_path(ProductImage() . 'resized_images/');
         if (!file_exists($resizedImageDir)) {
