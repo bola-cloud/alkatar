@@ -4,6 +4,27 @@
 @section('keywords', isset($keywords) ? $keywords : '')
 @section('content')
 
+<title>{{$products->fr_Product_Name}}</title>
+<meta name="description" content="{{$products->fr_Description}}" />
+
+<!-- Facebook meta tags -->
+<meta property="og:title" content="{{ $products->fr_Product_Name }}" />
+<meta property="og:description" content="{{ $products->fr_Description }}" />
+<meta property="og:image" content="{{ asset(ProductImage() . $products->Primary_Image) }}" />
+<meta property="og:image:width" content="300" />
+<meta property="og:image:height" content="300" />
+<meta property="og:url" content="{{ route('single.product', $products->fr_Product_Slug) }}" />
+<meta property="og:type" content="website" />
+<meta property="og:image:type" content="image/jpeg">
+
+<!-- Twitter meta tags -->
+<meta name="twitter:card" content="summary_large_image">
+<meta property="twitter:domain" content="{{ route('single.product', $products->fr_Product_Slug) }}">
+<meta property="twitter:url" content="{{ route('single.product', $products->fr_Product_Slug) }}">
+<meta name="twitter:title" content="{{ $products->fr_Product_Name }}">
+<meta name="twitter:description" content="{{ $products->fr_Description }}">
+<meta name="twitter:image" content="{{ asset(ProductImage() . $products->Primary_Image) }}">
+
 <!-- product-single-area start here  -->
 <div class="product-single-area section-top">
     <div class="container">
