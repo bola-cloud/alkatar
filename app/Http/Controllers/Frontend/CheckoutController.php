@@ -76,7 +76,6 @@ class CheckoutController extends Controller
         $check = Cart::count();
         if ($check) {
             $data['content'] = Cart::content();
-
             $data['currencies'] = Currency::all();
             $data['paymentPlatforms'] = PaymentPlatform::where('status', ACTIVE)->get();
             $data['billing'] = Billing::where('User_Id', Auth::id())->first() ?? Auth::user();
