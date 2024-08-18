@@ -16,10 +16,16 @@ class TaxController extends Controller
             'subtotal' => 'required|numeric|min:0',
             'country' => 'nullable|string|max:255',
         ]);
-        $tax = tax_amount($validated['subtotal'], $validated['country'] ?? null);
+        $taxAmount = 0;
+        if ($validated['country'] != null) {
+            $tax = Tax::where('country', $validated['country'])->where('status', ACTIVE)->first();
+            if (!is_null($tax)) {
+                $taxAmount = ($validated['subtotal'] * $tax->percentage) / 100;
+            }
+        }
         return response()->json([
             'success' => true,
-            'tax' => $tax,
+            'tax_amount' => $taxAmount,
             'tax_details' =>  TaxResource::make($tax),
         ], 200);
     }

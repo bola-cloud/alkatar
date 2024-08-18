@@ -15,7 +15,9 @@ class DeliveryController extends Controller
         $validated = $request->validate([
             'city_id' => 'required|integer|exists:cities,id',
         ]);
-        $deliveryCharge = delivery_charge($validated['city_id']);
+        if ($validated['city_id'] != null) {
+            $deliveryCharge = DeliveryCharge::where('city_id', $validated['city_id'])->where('status', ACTIVE)->first();
+        }
         return  DeliveryChargeResource::make($deliveryCharge);
 
     }
