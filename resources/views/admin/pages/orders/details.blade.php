@@ -121,7 +121,7 @@
                 </div>
                 <div>
                     <p>تاريخ الشراء: {{ date('d/m/Y', strtotime($order->created_at)) }}</p>
-                    <p>وقت الشراء: {{ date('h:i A', strtotime($order->created_at)) }}</p>
+                    <p>وقت الشراء: {{ $order->created_at->timezone('Asia/Muscat')->format('h:i A') }}</p>
                     <p>رقم الطلب: {{ $order->Order_Number }}</p>
                     <p>طريقة الدفع: {{ $order->Payment_Method }}</p>
                     <p>طريقة الشحن: مصاريف الشحن</p>
@@ -134,7 +134,7 @@
                     <p>اسم العميل: {{ $order->billing_address['name'] ?? 'N/A' }}</p>
                     <p>البريد الاكتروني: {{ $order->billing_address['email'] ?? 'N/A' }}</p>
                     @if ($order->user)
-                        <p>رقم الهاتف: {{ $order->billing_address['phone_number'] ?? 'N/A' }}</p>
+                        <p>رقم الهاتف: {{ $order->user->code . $order->user->Number ?? 'N/A' }}</p>
                     @endif
 
                 </div>
@@ -144,6 +144,8 @@
                     <p>المحافظة: {{ $order->billing_address['state_ar'] ?? 'N/A' }}</p>
                     <p>المدينة: {{ $order->billing_address['city_ar'] ?? 'N/A' }}</p>
                     <p>الدولة: سلطنة عمان</p>
+                    <p>رقم الهاتف: {{ $order->billing_address['phone_number'] ?? 'N/A' }}</p>
+
                 </div>
             </div>
 
