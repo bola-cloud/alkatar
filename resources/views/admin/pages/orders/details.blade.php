@@ -120,8 +120,8 @@
                     <p>https://alsharashopping.com</p>
                 </div>
                 <div>
-                    <p>تاريخ الإضافة: {{ date('d/m/Y', strtotime($order->created_at)) }}</p>
-                    <p>وقت الإضافة: {{ date('h:i A', strtotime($order->created_at)) }}</p>
+                    <p>تاريخ الشراء: {{ date('d/m/Y', strtotime($order->created_at)) }}</p>
+                    <p>وقت الشراء: {{ date('h:i A', strtotime($order->created_at)) }}</p>
                     <p>رقم الطلب: {{ $order->Order_Number }}</p>
                     <p>طريقة الدفع: {{ $order->Payment_Method }}</p>
                     <p>طريقة الشحن: مصاريف الشحن</p>
@@ -134,7 +134,7 @@
                     <p>اسم العميل: {{ $order->billing_address['name'] ?? 'N/A' }}</p>
                     <p>البريد الاكتروني: {{ $order->billing_address['email'] ?? 'N/A' }}</p>
                     @if ($order->user)
-                        <p>رقم الهاتف: {{$order->user->code . $order->user->Number ?? 'N/A' }}</p>
+                        <p>رقم الهاتف: {{ $order->billing_address['phone_number'] ?? 'N/A' }}</p>
                     @endif
 
                 </div>
