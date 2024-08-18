@@ -45,8 +45,6 @@ Route::post('/calculate-delivery-charge', [DeliveryController::class, 'calculate
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/coupon-apply', [CouponController::class, 'couponApply']);
-
-
 });
 
 
