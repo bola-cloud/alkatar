@@ -78,6 +78,7 @@ class CheckoutController extends Controller
             $data['content'] = Cart::content();
             $data['currencies'] = Currency::all();
             $data['paymentPlatforms'] = PaymentPlatform::where('status', ACTIVE)->get();
+            $data['user'] = Auth::user();
             $data['billing'] = Billing::where('User_Id', Auth::id())->first() ?? Auth::user();
             $data['shipping'] = Shipping::where('User_Id', Auth::id())->first();
             $seo = SeoSetting::where('slug', 'checkout')->first();
@@ -87,6 +88,7 @@ class CheckoutController extends Controller
             $data['extraWeightFees'] = $this->calculateExtraWeightFees();
             $oman_country_id = Country::where('name_en', 'Oman')->first()->id;
             $data['states'] = State::where('country_id', $oman_country_id)->get();
+            // dd($data);
 
             return view('front.pages.checkout.checkout', $data);
         } else {
@@ -195,11 +197,13 @@ class CheckoutController extends Controller
             $billing_address['state_ar'] = $shipping_state->name_ar;
             $billing_address['city_en'] = $shipping_city->name_en;
             $billing_address['city_ar'] = $shipping_city->name_ar;
+            $billing_address['phone_number'] = $request->billing_phone;
 
             $shipping_address['state_en'] = $shipping_state->name_en;
             $shipping_address['state_ar'] = $shipping_state->name_ar;
             $shipping_address['city_en'] = $shipping_city->name_en;
             $shipping_address['city_ar'] = $shipping_city->name_ar;
+            $shipping_address['phone_number'] = $request->billing_phone;
 
 
             Session::put('billing_address', $billing_address);
@@ -1064,7 +1068,8 @@ class CheckoutController extends Controller
 
         $order->Is_Order_Successful = true;
         $order->Is_Order_Completed = true;
-        $order->Payment_Status = THAWANI;
+        $order->Payment_Method = THAWANI;
+        $order->Payment_Status = PAYMENT_SUCCESS;
         $order->Order_Status = ORDER_PROCESSING;
 
         $order->save();
