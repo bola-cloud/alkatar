@@ -60,11 +60,12 @@ class CheckoutController extends Controller
 
         $shippingFee = 0;
 
-        if ($totalWeightKg >= 1 && $totalWeightKg <= 10) {
-            $shippingFee = 2; // 2 OMR for 1-10kg
-        } elseif ($totalWeightKg > 10) {
+        // if ($totalWeightKg >= 1 && $totalWeightKg <= 10) {
+        //     $shippingFee = 0; // 2 OMR for 1-10kg
+        // } else
+        if ($totalWeightKg > 10) {
             $extraKg = ceil($totalWeightKg - 10);
-            $shippingFee = 2 + ($extraKg * 0.100); // 2 OMR + 0.100 OMR for each extra kg
+            $shippingFee = ($extraKg * 0.100); //  0.100 OMR for each extra kg
         }
 
         return $shippingFee;
