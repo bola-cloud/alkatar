@@ -9,6 +9,9 @@ use  \App\Http\Controllers\Api\{
     CountryController,
     StateController,
     CityController,
+    CouponController,
+    TaxController,
+    DeliveryController
 };
 
 /*
@@ -23,6 +26,7 @@ use  \App\Http\Controllers\Api\{
 */
 Route::post('otp-signin', [AuthController::class, 'otpSignInPost']);
 Route::post('otp-verify', [AuthController::class, 'otpVerifyPost']);
+
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
 
@@ -32,6 +36,18 @@ Route::apiResource('countries', CountryController::class);
 Route::apiResource('countries.states', StateController::class)->shallow();
 Route::apiResource('countries.states.cities', CityController::class)->shallow();
 
+//Route::post('checkout', [ThawaniPayController::class, 'checkout'])->name('checkout');
+//Route::get('success', [ThawaniPayController::class, 'success'])->name('success');
+//Route::get('fail', [ThawaniPayController::class, 'fail'])->name('fail');
+
+Route::post('/calculate-tax', [TaxController::class, 'calculate']);
+Route::post('/calculate-delivery-charge', [DeliveryController::class, 'calculateDeliveryCharge']);
+
+Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::post('/coupon-apply', [CouponController::class, 'couponApply']);
+
+
+});
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

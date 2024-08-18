@@ -17,6 +17,7 @@ class SizeResource extends JsonResource
         return [
             'Size' => $this->Size,
             'Size_ar' => $this->Size_ar,
+            'Size_Id' => $this->pivot->Size_Id,
             'price' => $this->pivot->price,
             'weight' => $this->pivot->weight,
         ];
