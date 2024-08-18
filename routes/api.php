@@ -11,7 +11,8 @@ use  \App\Http\Controllers\Api\{
     CityController,
     CouponController,
     TaxController,
-    DeliveryController
+    DeliveryController,
+    CheckoutController
 };
 
 /*
@@ -45,6 +46,7 @@ Route::post('/calculate-delivery-charge', [DeliveryController::class, 'calculate
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/coupon-apply', [CouponController::class, 'couponApply']);
+    Route::post('/checkout', [CheckoutController::class, 'checkoutOrder']);
 });
 
 
