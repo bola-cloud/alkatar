@@ -49,16 +49,27 @@ class OrderController extends Controller
                         return 'N/A';
                     }
 
-                    $order_state = State::where("id", $data->billing->State)->first();
-                    return $order_state['name_en'];
+                    return $data->billing->state_en;
+
+
+                    // $order_state = State::where("id", $data->billing->State)->first();
+                    // return $order_state['name_en'];
                 })
                 ->addColumn("City", function ($data) {
-                    if (is_null($data->billing)) {
+                    if (is_null($data->billing_address)) {
                         return 'N/A';
                     }
 
-                    $order_city = City::where('id', $data->billing->City)->first();
-                    return $order_city['name_en'];
+
+                    $serialized_billing = json_decode($data->billing_address);
+
+                    if (isset($serialized_billing->city_en)) {
+                        return $serialized_billing->city_en;
+                    } else {
+                        return 'N/A';
+                    }
+                    // $order_city = City::where('id', $data->billing->City)->first();
+                    // return $order_city['name_en'];
                 })
                 ->addColumn('GrandTotal', function ($data) {
                     return $data->Grand_Total . ' OMR';
@@ -74,7 +85,8 @@ class OrderController extends Controller
                     return date('d-m-Y', strtotime($data->created_at));
                 })
                 ->addColumn('order_time', function ($data) {
-                    return date('h:i A', strtotime($data->created_at));
+                    return $data->created_at->timezone('Asia/Muscat')->format('h:i A');
+                    // return date('h:i A', strtotime($data->created_at));
                 })
                 ->addColumn('Payment_Method', function ($data) {
                     $payment_method = $data->Payment_Method;
