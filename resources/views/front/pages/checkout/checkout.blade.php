@@ -274,7 +274,7 @@
                         dataType: "json",
                         success: function (data) {
                             $('#city').empty();
-                            $('#city').append('<option value="">---Select City---</option>');
+                            $('#city').append('<option value="">---اختيار المدينة ---</option>');
                             $.each(data, function (key, value) {
                                 $('#city').append('<option value="' + value.id + '" > ' + value.name_en + '</option > ');
                             });
@@ -282,7 +282,7 @@
                     });
                 } else {
                     $('#city').empty();
-                    $('#city').append('<option value="">---Select City---</option>');
+                    $('#city').append('<option value="">---اختيار المدينة ---</option>');
                 }
             });
         });

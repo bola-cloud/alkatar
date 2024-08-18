@@ -123,7 +123,7 @@
                                 @else
                                 <span class="regular-price">{{ currencyConverter($products->Price) }}</span>
                                 <span class="price">{{ currencyConverter($products->Discount_Price) }}</span>
-                                    <span
+                                <span   id="discout_price" data-discount-price="{{ number_format($products->Discount, 0) }}"
                                         class="absolute start-[25rem] bg-red-100 text-red-400 rounded-full px-4 py-1 text-lg font-bold">
                                         {{__("Discount (-)")}}{{number_format($products->Discount, 0)}}%</span>
                                 @endif
@@ -412,70 +412,26 @@
 
 @push('post_script')
     <script>
-        // $(document).ready(function() {
-        //     // Get the original price from the page
-        //     var originalPrice = parseFloat($('.single-size input[type="radio"]:checked').val());
-        //     var additionPrice = 0;
-
-        //     // Set the initial price based on the first selected size
-        //     $('.product-price .price').text('OMR ' + originalPrice.toFixed(2));
-        //     $('.addCart').attr('data-price', originalPrice);
-        //     $('.addCart').attr('data-size-id', $('.single-size input[type="radio"]:checked').data('size'));
-
-        //     // Update price and data attributes when a size is selected
-        //     $('.single-size').on('click', function() {
-        //         var sizeRadio = $(this).find('.size-radio');
-        //         sizeRadio.prop('checked', true);
-        //         originalPrice = parseFloat(sizeRadio.val());
-        //         $('.product-price .price').text('OMR ' + (originalPrice + additionPrice).toFixed(2));
-        //         $('.addCart').attr('data-price', originalPrice + additionPrice);
-        //         $('.addCart').attr('data-size-id', sizeRadio.data('size'));
-        //     });
-
-        //     // Update price and data attributes when an addition is selected
-        //     $('.single-addition').on('click', function() {
-        //         var additionRadio = $(this).find('.addition-radio');
-        //         additionRadio.prop('checked', true);
-        //         additionPrice = parseFloat(additionRadio.val());
-        //         $('.product-price .price').text('OMR ' + (originalPrice + additionPrice).toFixed(2));
-        //         $('.addCart').attr('data-price', originalPrice + additionPrice);
-        //         $('.addCart').attr('data-addition-id', additionRadio.data('addition'));
-        //     });
-        // });
         $(document).ready(function () {
             // Get the initial price from the first selected size
             var sizeValue = $('.size-switch input[type="radio"]:checked').val()
             var sizePrice = sizeValue ? parseFloat(sizeValue) : 0;
             var weightValue = $('.weight-switch input[type="radio"]:checked').val();
             var weightPrice = weightValue ? parseFloat(weightValue) : 0;
+
+            var discout_price = $('#discout_price').data('discount-price');
+            var discout_price = discout_price ? parseFloat(discout_price) : 0;
+
             var selectedAdditions = [];
 
             // Set the initial total price
             updateTotalPrice();
 
-            // Update price and data attributes when a size is selected
-            // $('.size-switch input[type="radio"]').on('change', function () {
-            //     sizePrice = parseFloat($(this).val());
-            //     updateTotalPrice();
-            //     $('.addCart').attr('data-size-id', $(this).data('size'));
-            // });
-
-            // Handle addition selection
-            // $('.addition-switch input[type="checkbox"]').on('change', function () {
-            //     var additionId = $(this).data('addition');
-            //     var additionPrice = parseFloat($(this).val());
-
-            //     if ($(this).is(':checked')) {
-            //         selectedAdditions.push({ id: additionId, price: additionPrice });
-            //     } else {
-            //         selectedAdditions = selectedAdditions.filter(addition => addition.id !== additionId);
-            //     }
-            //     updateTotalPrice();
-            // });
-
             // Function to update the total price display
             function updateTotalPrice() {
                 var totalPrice = sizePrice + weightPrice + selectedAdditions.reduce((sum, addition) => sum + addition.price, 0);
+                var discountAmount = (discout_price / 100) * totalPrice;
+                totalPrice = totalPrice - discountAmount;
                 $('.product-single-right .product-price .price').text('OMR ' + totalPrice.toFixed(2));
                 console.log("totalPrice", totalPrice);
                 $('.addCart').attr('data-price', totalPrice);

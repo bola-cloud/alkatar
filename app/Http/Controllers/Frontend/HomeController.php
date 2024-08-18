@@ -32,7 +32,7 @@ class HomeController extends Controller
             $data['sliders'] = Slider::latest()->get();
             $data['promotion'] = Advertise::latest()->get();
 
-            $all_products = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->latest();
+            $all_products = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('Status', ACTIVE)->latest();
 
             $data['featured_products'] = $all_products->clone()->where('Featured_Product', ACTIVE)->paginate(10);
             $data['on_sales'] = $all_products->clone()->where('Discount', "!=", '0')->paginate(10);

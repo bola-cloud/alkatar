@@ -91,6 +91,11 @@ class CityController extends Controller
     public function getCitiesByState($state_id)
     {
         $cities = City::where('state_id', $state_id)->get();
+        if(app()->getLocale() == 'fr') {
+            foreach ($cities as $city) {
+                $city->name_en = $city->name_ar;
+            }
+        }
         return response()->json($cities);
     }
 

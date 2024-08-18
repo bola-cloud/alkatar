@@ -255,11 +255,6 @@ class CheckoutController extends Controller
                             'unit_amount' => number_format($item->price, 3) * 1000,
                         ];
                     }
-
-
-
-
-
                     if ($shipping_charge) {
                         $checkoutProduct[] = [
                             'name' => 'Shipping Charge',
@@ -267,7 +262,6 @@ class CheckoutController extends Controller
                             'unit_amount' => $shipping_charge * 1000,
                         ];
                     }
-
 
                     $response = Http::withHeaders([
                         'Accept' => 'application/json',
@@ -314,7 +308,7 @@ class CheckoutController extends Controller
                         $this->paymentController->createPayment($paymentRequest);
 
                         $paymentUrl = env('THAWANI_TEST_PAY_URL') . $paymentJsonData['data']['session_id'] . '?key=' . env("THAWANI_TEST_PUBLIC_KEY");
-                        $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, THAWANI);
+                        $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, " ");
 
                         return redirect()->away($paymentUrl);
                     } else {
@@ -1071,6 +1065,7 @@ class CheckoutController extends Controller
 
         $order->Is_Order_Successful = true;
         $order->Is_Order_Completed = true;
+        $order->Payment_Status = THAWANI;
         $order->Order_Status = ORDER_PROCESSING;
 
         $order->save();
