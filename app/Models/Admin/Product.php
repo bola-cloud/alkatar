@@ -145,6 +145,9 @@ class Product extends Model
         $image->save($resizedImagePath);
         return asset(ProductImage() . 'resized_images/' . basename($originalPath));
     }
-
+    public function scopeWithDiscount($query)
+    {
+        return $query->where('Discount', '>', 0);
+    }
 
 }
