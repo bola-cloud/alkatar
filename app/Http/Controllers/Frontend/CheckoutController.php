@@ -117,9 +117,13 @@ class CheckoutController extends Controller
             'billing_street_address' => 'nullable',
             'billing_zipcode' => 'required',
             'billing_country' => 'required',
+            "billing_phone" => 'required|digits_between:8,11',
         ];
 
-        $validationMessages = [];
+        $validationMessages = [
+            'billing_phone.required' => __('The phone number field is required.'),
+            'billing_phone.digits_between' => __('The phone number must be correct number.'),
+        ];
         // dd($request->all());
 
         if (!$isLoggedIn) {
@@ -131,10 +135,10 @@ class CheckoutController extends Controller
             ];
 
             $validationMessages += [
-                'billing_name.required' => 'The name field is required.',
-                'billing_state.required' => 'The state field is required.',
-                'billing_zipcode.required' => 'The zip code field is required.',
-                'billing_country.required' => 'The country field is required.',
+                'billing_name.required' => __('The name field is required.'),
+                'billing_state.required' => __('The state field is required.'),
+                'billing_zipcode.required' => __('The zipcode field is required.'),
+                'billing_country.required' => __('The country field is required.'),
             ];
         }
 

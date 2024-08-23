@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ExcelUpdateController;
 use App\Http\Controllers\SubcategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
@@ -55,6 +56,7 @@ Route::group(['prefix' => 'subscribe'], function () {
 });
 
 Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin'], 'as' => 'admin.'], function () {
+    Route::get('/update-subcategory', [ExcelUpdateController::class, 'updateSubcategory'])->name('update-subcategory');
 
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');

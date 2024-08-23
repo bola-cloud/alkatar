@@ -176,6 +176,7 @@
         let selectedWeightId = null;
         let selectedSizePrice = 0;
         let selectedWeightPrice = 0;
+        let discountPercenteng = 0;
         let selectedAdditions = [];
 
         if (isProductDetailsPage) {
@@ -344,6 +345,8 @@
                 var weights = $(this).data("weights") || [];
                 var additions = $(this).data("additions") || [];
                 var discount = $(this).data("discount") ?? null;
+                var discountPercenteng = $(this).data("percenteng");
+
 
                 $("#sizeModalLabel").text(`${localizedText.selectSize}`);
 
@@ -384,8 +387,9 @@
                             <button class="btn btn-outline-primary weight-option"
                                 data-product-id="${productId}"
                                 data-weight-id="${weight.id}"
-                                data-price="${weight.price}">
-                                ${weight.weight} ${localizedText.grams} - ${weight.price} OMR
+                                data-price="${weight.price}" 
+                                data-percenteng="${discountPercenteng}">
+                                ${weight.weight} ${localizedText.grams} - ${weight.price - (discountPercenteng/100 * weight.price)} OMR
                             </button>`;
                         weightOptionsContainer.append(weightOption);
                     });
@@ -431,6 +435,7 @@
             $(this).addClass("selected");
             selectedWeightId = $(this).data("weight-id");
             selectedWeightPrice = parseFloat($(this).data("price"));
+            discountPercenteng = $(this).data("percenteng");
         });
 
         $(document).on("change", ".addition-option input", function () {
@@ -457,6 +462,12 @@
             const productId = selectedProductId;
 
             var totalPrice = selectedSizePrice + selectedWeightPrice;
+
+            var discountAmount = (discountPercenteng / 100) * totalPrice;
+            totalPrice = totalPrice - discountAmount;
+
+            console.log(discountPercenteng);
+
             selectedAdditions.forEach(function (addition) {
                 totalPrice += addition.price;
             });

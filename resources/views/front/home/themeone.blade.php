@@ -28,9 +28,9 @@
                 </div>
                 <h2 class="section-title px-4 text-center w-1/2">
                     {{ langConverter(
-        siteContentHomePage('categories')->en_Description_One,
-        siteContentHomePage('categories')->fr_Description_One
-    ) }}
+    siteContentHomePage('categories')->en_Description_One,
+    siteContentHomePage('categories')->fr_Description_One
+) }}
                 </h2>
                 <div class="hidden md:block w-1/4 overflow-hidden">
                     <img src="{{asset("assets/images/dash-line.png")}}" alt="dash line" class="w-full" />
@@ -74,9 +74,9 @@
                 </div>
                 <h2 class="section-title px-4 text-center w-1/2">
                     {{ langConverter(
-        siteContentHomePage('on_sale')->en_Description_One,
-        siteContentHomePage('on_sale')->fr_Description_One
-    ) }}
+    siteContentHomePage('on_sale')->en_Description_One,
+    siteContentHomePage('on_sale')->fr_Description_One
+) }}
                 </h2>
                 <div class="hidden md:block w-1/4 overflow-hidden">
                     <img src="{{asset("assets/images/dash-line.png")}}" alt="dash line" class="w-full" />
@@ -107,9 +107,9 @@
                 </div>
                 <h2 class="section-title px-4 text-center w-1/2">
                     {{ langConverter(
-        siteContentHomePage('best_selling')->en_Description_One,
-        siteContentHomePage('best_selling')->fr_Description_One
-    ) }}
+    siteContentHomePage('best_selling')->en_Description_One,
+    siteContentHomePage('best_selling')->fr_Description_One
+) }}
                 </h2>
                 <div class="hidden md:block w-1/4 overflow-hidden">
                     <img src="{{asset("assets/images/dash-line.png")}}" alt="dash line" class="w-full" />
@@ -149,9 +149,9 @@
                 </div>
                 <h2 class="section-title px-4 text-center w-1/2">
                     {{ langConverter(
-        siteContentHomePage('featured')->en_Description_One,
-        siteContentHomePage('featured')->fr_Description_One
-    ) }}
+    siteContentHomePage('featured')->en_Description_One,
+    siteContentHomePage('featured')->fr_Description_One
+) }}
                 </h2>
                 <div class="hidden md:block w-1/4 overflow-hidden">
                     <img src="{{asset("assets/images/dash-line.png")}}" alt="dash line" class="w-full" />
@@ -182,9 +182,9 @@
                 </div>
                 <h2 class="section-title px-4 text-center w-1/2">
                     {{ langConverter(
-        siteContentHomePage('new_arrival')->en_Description_One,
-        siteContentHomePage('new_arrival')->fr_Description_One
-    ) }}
+    siteContentHomePage('new_arrival')->en_Description_One,
+    siteContentHomePage('new_arrival')->fr_Description_One
+) }}
                 </h2>
                 <div class="hidden md:block w-1/4 overflow-hidden">
                     <img src="{{asset("assets/images/dash-line.png")}}" alt="dash line" class="w-full" />

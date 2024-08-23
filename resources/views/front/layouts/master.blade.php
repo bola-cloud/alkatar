@@ -174,6 +174,7 @@
                     <button type="button" class="btn btn-primary" id="submitSelection">
                         {{ __('Add To Cart') }}
                     </button>
+                    
                 </div>
             </div>
         </div>
