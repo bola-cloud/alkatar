@@ -1,6 +1,21 @@
 @extends('admin.master', ['menu' => 'shipment', 'submenu' => 'orders_' . $status_prefix])
 @section('title', isset($title) ? $title : '')
 @section('content')
+
+<style>
+#AdvertiseTable {
+    table-layout: fixed;
+    width: 100%;
+}
+
+#AdvertiseTable th,
+#AdvertiseTable td {
+    word-wrap: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+</style>
+
 <div id="table-url" data-url="{{ route('admin.orders', $status_prefix) }}"></div>
 <div class="row">
     <div class="col-md-12">
@@ -28,7 +43,7 @@
                 <form action="{{ route('admin.orders.bulk_status_update') }}" method="POST" id="bulk-action-form">
                     @csrf
                     <div class="bulk-action-wrapper mb-3" style="display: flex; align-items: center; gap: 10px">
-                        <h1 style="font-size: 1rem;">Change Status:</h1>
+                        <h1 style="font-size: 1rem;">{{ __('Change Status:') }}</h1>
                         <select name="bulk_status" id="bulk-status-select" class="form-control d-inline-block mr-2"
                             style="width: 250px;">
                             <option value="">{{ __('Bulk Action') }}</option>
@@ -52,6 +67,7 @@
                                 <th>{{ __('Date') }}</th>
                                 <th>{{ __('Time') }}</th>
                                 <th>{{ __('User') }}</th>
+                                <th>{{ __('Phone Number') }}</th>
                                 <!-- <th>{{__("State")}}</th> -->
                                 <th>{{__("City")}}</th>
                                 <!-- <th>{{ __('Products') }}</th> -->

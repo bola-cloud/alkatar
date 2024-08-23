@@ -74,8 +74,9 @@
         @if(!$isInDetailsPage)
             <a href="javascript:void(0)" title="{{ __('Add To Cart') }}" class="add-cart addCart"
                 data-id="{{ $product->id }}" data-discount="{{$product->Discount_Price}}"
-                data-name="{{ $product->en_Product_Name }}" data-sizes="{{ json_encode($product->sizes) }}"
-                data-additions="{{json_encode($product->additions)}}" data-weights="{{ json_encode($product->weights) }}">
+                data-percenteng="{{ number_format($product->Discount, 0) }}" data-name="{{ $product->en_Product_Name }}"
+                data-sizes="{{ json_encode($product->sizes) }}" data-additions="{{json_encode($product->additions)}}"
+                data-weights="{{ json_encode($product->weights) }}">
                 <svg fill="#000000" class="size-8 hover:fill-white transition-colors" version="1.1" id="Capa_1"
                     xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 483.1 483.1"
                     xml:space="preserve">
