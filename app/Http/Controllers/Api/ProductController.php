@@ -24,6 +24,11 @@ class ProductController extends Controller
         $product = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->findOrFail($id);
         return ProductResource::make($product);
     }
+    public function productsWithDiscount()
+    {
+        $products = Product::withDiscount()->get();
+        return ProductResource::collection($products);
+    }
 
 
 }

@@ -11,7 +11,8 @@ use  \App\Http\Controllers\Api\{
     CityController,
     CouponController,
     TaxController,
-    DeliveryController
+    DeliveryController,
+    CheckoutController
 };
 
 /*
@@ -28,8 +29,8 @@ Route::post('otp-signin', [AuthController::class, 'otpSignInPost']);
 Route::post('otp-verify', [AuthController::class, 'otpVerifyPost']);
 
 Route::get('/products', [ProductController::class, 'index']);
+Route::get('/products-with-discount', [ProductController::class, 'productsWithDiscount']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
-
 Route::get('/categories', [CategoryController::class, 'index']);
 
 Route::apiResource('countries', CountryController::class);
@@ -45,6 +46,7 @@ Route::post('/calculate-delivery-charge', [DeliveryController::class, 'calculate
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/coupon-apply', [CouponController::class, 'couponApply']);
+    Route::post('/checkout', [CheckoutController::class, 'checkoutOrder']);
 });
 
 
