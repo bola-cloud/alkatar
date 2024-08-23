@@ -9,6 +9,7 @@
         var table = $("#AdvertiseTable").DataTable({
             processing: true,
             serverSide: true,
+            autoWidth: false,
             ajax: $("#table-url").data("url"),
             columns: [
                 {
@@ -45,6 +46,10 @@
                 {
                     data: "User",
                     name: "User",
+                },
+                {
+                    data: "phone_number",
+                    name: "phone_number",
                 },
                 // {
                 //     data: "State",
@@ -83,6 +88,20 @@
                     name: "action",
                     orderable: false,
                 },
+            ],
+            columnDefs: [
+                { width: "20px", targets: 1 },
+                { width: "70px", targets: 2 },
+                { width: "85px", targets: 3 },
+                { width: "70px", targets: 4 },
+                { width: "70px", targets: 5 },
+                { width: "100px", targets: 6 },
+                { width: "80px", targets: 7 },
+                { width: "80px", targets: 8 },
+                { width: "40px", targets: 9 },
+                { width: "70px", targets: 10 },
+                { width: "60px", targets: 11 },
+                { width: "60px", targets: 12 },
             ],
         });
 
