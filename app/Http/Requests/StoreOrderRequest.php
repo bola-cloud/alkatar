@@ -15,6 +15,7 @@ class StoreOrderRequest extends FormRequest
     {
         return [
             'billing_name' => 'required|string',
+            'Payment_Method' => 'required|string',
             'billing_email' => 'nullable|email',
             'billing_street_address' => 'nullable|string',
             'billing_zipcode' => 'required|string',
