@@ -43,6 +43,8 @@ Route::apiResource('countries.states.cities', CityController::class)->shallow();
 
 Route::post('/calculate-tax', [TaxController::class, 'calculate']);
 Route::post('/calculate-delivery-charge', [DeliveryController::class, 'calculateDeliveryCharge']);
+Route::get('success', [CheckoutController::class, 'success'])->name('api.thawani.success');
+Route::get('fail', [CheckoutController::class, 'fail'])->name('api.thawani.fail');
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/coupon-apply', [CouponController::class, 'couponApply']);

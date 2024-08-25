@@ -749,7 +749,6 @@ class CheckoutController extends Controller
     public function paymentSuccess(Request $request)
     {
         $data = $request->all();
-
         $order = Order::where('Order_Number', $data['order_number'])->first();
 
         $order->Is_Order_Successful = true;
