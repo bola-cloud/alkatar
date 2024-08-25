@@ -2,6 +2,7 @@
 
 use App\Models\Admin\Brand;
 use App\Models\Admin\Category;
+use App\Models\Subcategory;
 use App\Models\Admin\Color;
 use App\Models\Admin\CutomerService;
 use App\Models\Admin\GeneralSettings;
@@ -181,10 +182,18 @@ if (!function_exists('Category')) {
         return Category::where('en_Description', null)->orWhere('Category_Icon', null)->get();
     }
 }
+
 if (!function_exists('Category_Des_Icon')) {
     function Category_Des_Icon()
     {
         return Category::where('Status', ACTIVE)->orderBy('order', 'asc')->get();
+    }
+}
+
+if (!function_exists('SubCategory')) {
+    function SubCategory($id)
+    {
+        return Subcategory::where('Status', ACTIVE)->where('category_id', $id)->get();
     }
 }
 if (!function_exists('BrandImage')) {
@@ -352,6 +361,17 @@ if (!function_exists('sizeSelected')) {
         }
     }
 }
+
+if (!function_exists('productSubCategoryCount')) {
+    function productSubCategoryCount($id)
+    {
+        $subCategory = subCategory::with('products')->where('id', $id)->first();
+        $count = $subCategory->products->count('id');
+        return $count;
+    }
+}
+
+
 if (!function_exists('productCategoryCount')) {
     function productCategoryCount($id)
     {

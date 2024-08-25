@@ -119,6 +119,10 @@ class ProductController extends Controller
                 $filters = Product::where('status', 1)->where('en_Product_Name', 'LIKE', "%{$request->search}%")->get();
             } elseif ($request->min && $request->max) {
                 $filters = Product::where('status', 1)->whereBetween('Discount_Price', [$request->min, $request->max])->get();
+            } elseif ($request->checkSubCat) {
+                $filters = Product::where('status', 1)->with('subcategory')->whereHas('subcategory', function ($query) use ($request) {
+                    $query->whereIn('id', $request->checkSubCat);
+                })->get();
             } else {
                 $filters = Product::where('status', 1)->get();
             }
