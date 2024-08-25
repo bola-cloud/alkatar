@@ -186,7 +186,7 @@ class CheckoutController extends Controller
             'Payment_Status' => PAYMENT_SUCCESS,
             'Order_Status' => ORDER_PROCESSING
         ]);
-        return redirect()->to("/#/donations/paymentstatus/?payId={$order->Id}");
+        return redirect()->to("/#/donations/paymentstatus/?payId={$order->Order_Number}");
 //        return redirect()->to($request->getHost() . "/services/paymentstatus/?payId={$order->Id}");
     }
 
