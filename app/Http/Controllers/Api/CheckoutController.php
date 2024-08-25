@@ -160,7 +160,7 @@ class CheckoutController extends Controller
             ];
             $payment = PaymentModel::create($payment);
             // Redirect the user to the Thawani payment page
-            $paymentUrl = env('THAWANI_TEST_PAY_URL') . '/pay/' . $sessionId . "?key=" . env('THAWANI_TEST_PUBLIC_KEY');
+            $paymentUrl = env('THAWANI_TEST_PAY_URL')  . $sessionId . "?key=" . env('THAWANI_TEST_PUBLIC_KEY');
             return response()->json(['url' => $paymentUrl]);
         } else {
             return response()->json(['error' => 'Failed to create payment session'], 500);
