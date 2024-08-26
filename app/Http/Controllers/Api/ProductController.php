@@ -16,6 +16,10 @@ class ProductController extends Controller
             $categoryId = $request->get('category');
             $query->where('Category_Id', $categoryId);
         }
+        if ($request->filled('sub_category')) {
+            $categoryId = $request->get('sub_category');
+            $query->where('subcategory_id', $categoryId);
+        }
         $all_products = $query->latest()->paginate($request->get('per_page', 10));
         return ProductResource::collection($all_products);
     }

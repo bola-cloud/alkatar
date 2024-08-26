@@ -32,6 +32,7 @@ Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products-with-discount', [ProductController::class, 'productsWithDiscount']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/subcategories/{category_id}', [CategoryController::class, 'getSubCategories']);
 
 Route::apiResource('countries', CountryController::class);
 Route::apiResource('countries.states', StateController::class)->shallow();

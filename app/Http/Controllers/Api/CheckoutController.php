@@ -30,141 +30,170 @@ class CheckoutController extends Controller
         $user_id = Auth::id();
         Log::info('Checkout requested', ['request' => $validated]);
         try {
-        // Simulate cart items and calculate totals
-        $subtotal = $this->calculateSubtotal($validated['cart_items']);
-        $tax = tax_amount($subtotal, $validated['billing_country']);
-        $shipping_charge = delivery_charge($validated['billing_city'] ?? $validated['billing_country']);
-        $weight_charge = $this->calculateExtraWeightFees($validated['cart_items']);
-        $grandTotal = $subtotal + $shipping_charge + $weight_charge + $tax;
-        // Apply coupon discount if available
-        $discount = 0;
-        if (isset($validated['coupon_code'])) {
-            $coupon = Coupon::where('CouponCode', $validated['coupon_code'])
-                ->where('Status', 1)
-                ->where('ExpireDate', '>=', Carbon::now()->toDateString())
-                ->where('Min_Expenses', '<=', $subtotal)
-                ->first();
-            if ($coupon && !$this->hasCouponBeenUsed($coupon->id, $user_id)) {
-                $discount = $coupon->amount;
-                $grandTotal -= $discount;
-            } else {
-                return response()->json(['error' => 'Invalid or already used coupon code'], 400);
+            // Simulate cart items and calculate totals
+            $subtotal = $this->calculateSubtotal($validated['cart_items']);
+            $tax = tax_amount($subtotal, $validated['billing_country']);
+            $shipping_charge = delivery_charge($validated['billing_city'] ?? $validated['billing_country']);
+            $weight_charge = $this->calculateExtraWeightFees($validated['cart_items']);
+            $grandTotal = $subtotal + $shipping_charge + $weight_charge + $tax;
+            // Apply coupon discount if available
+            $discount = 0;
+            if (isset($validated['coupon_code'])) {
+                $coupon = Coupon::where('CouponCode', $validated['coupon_code'])
+                    ->where('Status', 1)
+                    ->where('ExpireDate', '>=', Carbon::now()->toDateString())
+                    ->where('Min_Expenses', '<=', $subtotal)
+                    ->first();
+                if ($coupon && !$this->hasCouponBeenUsed($coupon->id, $user_id)) {
+                    $discount = $coupon->amount;
+                    $grandTotal -= $discount;
+                } else {
+                    return response()->json(['error' => 'Invalid or already used coupon code'], 400);
+                }
             }
-        }
-        // Generate unique order number
-        $order_number = $this->generateOrderNumber();
-        // Address handling
-        if ($user_id) {
-            if (hasBlillingAddress($user_id)) {
-                $billing_create = $this->updateBillingAddress($request, $user_id);
-            } else {
-                $billing_create = $this->createBillingAddress($request, $user_id);
+            // Generate unique order number
+            $order_number = $this->generateOrderNumber();
+            // Address handling
+            if ($user_id) {
+                if (hasBlillingAddress($user_id)) {
+                    $billing_create = $this->updateBillingAddress($request, $user_id);
+                } else {
+                    $billing_create = $this->createBillingAddress($request, $user_id);
+                }
+
+                $billing_address = [
+                    'name' => $billing_create->Name,
+                    'email' => $billing_create->Email,
+                    'street' => $billing_create->Street,
+                    'state' => $billing_create->State,
+                    'city' => $billing_create->City,
+                    'zipcode' => $billing_create->Zipcode,
+                    'country' => $billing_create->Country,
+                ];
+
+                $shipping_address = $billing_address;
             }
+            $city = City::find($validated['billing_city'] ?? '');
+            $state = State::find($validated['billing_state']);
+            $billing_address['state_en'] = $city->name_en ?? '';
+            $billing_address['state_ar'] = $city->name_ar ?? '';
+            $billing_address['city_en'] = $state->name_en ?? '';
+            $billing_address['city_ar'] = $state->name_ar ?? '';
 
-            $billing_address = [
-                'name' => $billing_create->Name,
-                'email' => $billing_create->Email,
-                'street' => $billing_create->Street,
-                'state' => $billing_create->State,
-                'city' => $billing_create->City,
-                'zipcode' => $billing_create->Zipcode,
-                'country' => $billing_create->Country,
-            ];
-
-            $shipping_address = $billing_address;
-        }
-        $city = City::find($validated['billing_city'] ?? '');
-        $state = State::find($validated['billing_state']);
-        $billing_address['state_en'] = $city->name_en ?? '';
-        $billing_address['state_ar'] = $city->name_ar ?? '';
-        $billing_address['city_en'] = $state->name_en ?? '';
-        $billing_address['city_ar'] = $state->name_ar ?? '';
-
-        $order = Order::create([
-            'Order_Number' => $order_number,
-            'User_Id' => Auth::id(),
-            'Billing_Id' => $billing_create->id,
-            // 'Shipping_Id' => session('billing_id'),
-            'billing_address' => json_encode($billing_address,true),
-            'shipping_address' => json_encode($shipping_address,true),
-            'Delivery_Charge' => $shipping_charge,
-            'Tax' => $tax,
-            'Sub_Total' => $subtotal,
-            'Coupon_Id' => $validated['coupon_code'] ?? null,
-            'Coupon_Amount' => $discount,
-            'Grand_Total' => $grandTotal - $discount,
-            'Is_Free_Delivery' => false,
-            'Is_Order_Successful' => false,
-            'Is_Order_Completed' => false,
-            'Payment_Method' => $validated['Payment_Method'],
-            'Payment_Status' => PAYMENT_PENDING,
-            'Order_Status' => ORDER_PENDING,
+            $order = Order::create([
+                'Order_Number' => $order_number,
+                'User_Id' => Auth::id(),
+                'Billing_Id' => $billing_create->id,
+                // 'Shipping_Id' => session('billing_id'),
+                'billing_address' => json_encode($billing_address, true),
+                'shipping_address' => json_encode($shipping_address, true),
+                'Delivery_Charge' => $shipping_charge,
+                'Tax' => $tax,
+                'Sub_Total' => $subtotal,
+                'Coupon_Id' => $validated['coupon_code'] ?? null,
+                'Coupon_Amount' => $discount,
+                'Grand_Total' => $grandTotal - $discount,
+                'Is_Free_Delivery' => false,
+                'Is_Order_Successful' => false,
+                'Is_Order_Completed' => false,
+                'Payment_Method' => '',
+                'Payment_Status' => PAYMENT_PENDING,
+                'Order_Status' => ORDER_PENDING,
 //            'txn' => $txn != null ? $txn : randomString(8),
-        ]);
+            ]);
+            // Initialize the paymentData array with necessary information
+            $paymentData = [
+                'client_reference_id' => $order_number,
+                'mode' => 'payment',
+                'products' => [],
+                'success_url' => route('api.thawani.success', [
+                    'order_number' => $order_number,
+                ]),
+                'cancel_url' => route('api.thawani.fail', [
+                    'order_number' => $order_number,
+                ]),
+                'metadata' => [
+                    'order_number' => $order_number,
+                    'shipping_charge' => $shipping_charge,
+                    'subtotal' => $subtotal,
+                    'discount' => $discount,
+                    'grand_total' => $grandTotal,
+                    'tax' => $tax,
+                ]
+            ];
 
-        $paymentData = [
-            'client_reference_id' => $order_number,
-            'mode' => 'payment',
-            'products' => [],
-            'success_url' => route('api.thawani.success', [
-                'order_number' => $order_number,
-            ]),
-            'cancel_url' => route('api.thawani.fail', [
-                'order_number' => $order_number,
-            ]),
-            'metadata' => [
-                'order_number' => $order_number,
-                'shipping_charge' => $shipping_charge,
-                'subtotal' => $subtotal,
-                'discount' => $discount,
-                'grand_total' => $grandTotal,
-                'tax' => $tax,
-            ]
-        ];
-
-        foreach ($validated['cart_items'] as $item) {
-            $product = Product::find($item['product_id']);
-            $size = $product->sizes()->where('size_product.Size_Id', $item['size'])->first();
-
-            if ($size) {
-                $price = $size->pivot->price;
-                $weight = $size->pivot->weight;
-            } else {
-                $price = $product->Discount_Price ?? $product->Price;
-                $weight = 0;
+// Add tax to the paymentData if it exists
+            if ($tax) {
+                $paymentData['products'][] = [
+                    'name' => 'tax',
+                    'quantity' => 1,
+                    'unit_amount' => round($tax * 1000, 2),
+                ];
             }
 
-            $paymentData['products'][] = [
-                'name' => $product->name . ' (' . $item['size'] . ')',
-                'quantity' => $item['quantity'],
-                'unit_amount' => round($price * 1000, 2),  // Price after applying the discount
-            ];
-        }
-        // Make the API call to Thawani
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json',
-            'thawani-api-key' => env('THAWANI_TEST_SECRET_KEY')
-        ])->post(env('THAWANI_TEST_CHECKOUT_URL') . '/checkout/session', $paymentData);
+        // Add weight charge to the paymentData if it exists
+            if ($weight_charge) {
+                $paymentData['products'][] = [
+                    'name' => 'weight extra charge',
+                    'quantity' => 1,
+                    'unit_amount' => round($weight_charge * 1000, 2),
+                ];
+            }
 
-        Log::info('Thawani API session response', ['response' => $response->body()]);
+            // Add shipping charge to the paymentData if it exists
+            if ($shipping_charge) {
+                $paymentData['products'][] = [
+                    'name' => 'shipping charge',
+                    'quantity' => 1,
+                    'unit_amount' => round($shipping_charge * 1000, 2),
+                ];
+            }
 
-        if ($response->successful()) {
-            $sessionId = $response['data']['session_id'] ?? '';
-            $order->update(['session_id' => $sessionId]);
-            $payment = [
-                'session_id' => $sessionId,
-                'user_id' => $user_id,
-                'order_number' => $order_number,
-                'amount' => $grandTotal,
-                'status' => 'CREATED',
-            ];
-            $payment = PaymentModel::create($payment);
-            // Redirect the user to the Thawani payment page
-            $paymentUrl = env('THAWANI_TEST_PAY_URL')  . $sessionId . "?key=" . env('THAWANI_TEST_PUBLIC_KEY');
-            return response()->json(['url' => $paymentUrl]);
-        } else {
-            return response()->json(['error' => 'Failed to create payment session'], 500);
-        }
+            // Loop through each cart item and add the product details to paymentData
+            foreach ($validated['cart_items'] as $item) {
+                $product = Product::find($item['product_id']);
+                $size = $product->sizes()->where('size_product.Size_Id', $item['size'])->first();
+
+                if ($size) {
+                    $price = $size->pivot->price;
+                    $weight = $size->pivot->weight;
+                } else {
+                    $price = $product->Discount_Price ?? $product->Price;
+                    $weight = 0;
+                }
+
+                $paymentData['products'][] = [
+                    'name' => $product->name . ' (' . $item['size'] . ')',
+                    'quantity' => $item['quantity'],
+                    'unit_amount' => round($price * 1000, 2),  // Price after applying the discount
+                ];
+            }
+
+            // Make the API call to Thawani
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'thawani-api-key' => env('THAWANI_TEST_SECRET_KEY')
+            ])->post(env('THAWANI_TEST_CHECKOUT_URL') . '/checkout/session', $paymentData);
+
+            Log::info('Thawani API session response', ['response' => $response->body()]);
+
+            if ($response->successful()) {
+                $sessionId = $response['data']['session_id'] ?? '';
+                $order->update(['session_id' => $sessionId]);
+                $payment = [
+                    'session_id' => $sessionId,
+                    'user_id' => $user_id,
+                    'order_number' => $order_number,
+                    'amount' => $grandTotal,
+                    'status' => 'CREATED',
+                ];
+                $payment = PaymentModel::create($payment);
+                // Redirect the user to the Thawani payment page
+                $paymentUrl = env('THAWANI_TEST_PAY_URL') . $sessionId . "?key=" . env('THAWANI_TEST_PUBLIC_KEY');
+                return response()->json(['url' => $paymentUrl]);
+            } else {
+                return response()->json(['error' => 'Failed to create payment session'], 500);
+            }
 
         } catch (\Exception $e) {
             Log::error('Error during checkout', ['error' => $e->getMessage()]);
@@ -181,6 +210,7 @@ class CheckoutController extends Controller
         Log::info('Order status updated on success', ['order_id' => $order->Id]);
         $order->update([
             'order_status' => $response['data']['payment_status'] ?? $order->order_status,
+            'Payment_Method' => THAWANI,
             'Is_Order_Successful' => true,
             'Is_Order_Completed' => true,
             'Payment_Status' => PAYMENT_SUCCESS,
