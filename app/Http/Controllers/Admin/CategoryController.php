@@ -33,22 +33,22 @@ class CategoryController extends Controller
                     return $btn;
                 })
                 ->editColumn('Category_Name', function ($data) {
-                    return $data->en_Category_Name;
+                    return $data->fr_Category_Name;
                 })
-                ->editColumn('Category_Slug', function ($data) {
-                    return $data->en_Category_Slug;
-                })
+                // ->editColumn('Category_Slug', function ($data) {
+                //     return $data->en_Category_Slug;
+                // })
                 ->editColumn('Status', function ($data) {
                     if ($data->Status == 1) {
-                        $active = "Active";
+                        $active = "فعال";
                         return '<span class="status active">' . $active . '</span>';
                     } else {
-                        $active = "Inactive";
+                        $active = "غير فعال";
                         return '<span class="status blocked">' . $active . '</span>';
                     }
                 })
                 ->editColumn('Description', function ($data) {
-                    return Str::limit($data->en_Description, 10);
+                    return Str::limit($data->fr_Description, 10);
                 })
                 ->editColumn('Category_Icon', function ($data) {
                     return '<img src=' . asset(CategoryImage() . $data->Category_Icon) . ' width="50" height="50" alt="Category Icon" />';

@@ -35,15 +35,15 @@
                                             @csrf
                                             <input type="hidden" name="id">
                                             <div class="input__group mb-25">
-                                                <label for="size">{{ __('Size') }}</label>
+                                                <label for="size">{{ __('option (EN)') }}</label>
                                                 <input type="text" id="size" name="size"
-                                                    value="{{ old('size') }}" placeholder="{{ __('Size') }}">
+                                                    value="{{ old('size') }}" placeholder="{{ __('option (EN)') }}">
                                             </div>
 
                                             <div class="input__group mb-25">
-                                                <label for="Size_ar">{{ __('Size Arabic') }}</label>
+                                                <label for="Size_ar">{{ __('option (AR)') }}</label>
                                                 <input type="text" id="Size_ar" name="Size_ar"
-                                                    value="{{ old('Size_ar') }}" placeholder="{{ __('Size Arabic') }}">
+                                                    value="{{ old('Size_ar') }}" placeholder="{{ __('option (AR)') }}">
                                             </div>
                                             <div class="input__button">
                                                 <button type="submit" class="btn btn-blue">{{ __('Add') }}</button>

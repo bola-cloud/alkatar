@@ -133,21 +133,22 @@
                                             </div> --}}
 
                                             <div class="input__group mb-25">
-                                                <label>{{ __('Product Option') }}</label>
-                                                <div id="size-container">
-                                                    <!-- Size rows will be added here dynamically -->
-                                                </div>
-                                                <button type="button" class="btn btn-primary" id="add-size-btn">Add Size</button>
-                                            </div>
-
-                                            <div class="input__group mb-25">
                                             <label>{{ __('Product Weight') }}</label>
                                             <div id="weight-container">
                                                 <!-- Size rows will be added here dynamically -->
                                             </div>
-                                            <button type="button" class="btn btn-primary" id="add-weight-btn">Add
-                                            Weight</button>
+                                            <button type="button" class="btn btn-primary" id="add-weight-btn">اضافة وزن</button>
                                         </div>
+                                        
+                                            <div class="input__group mb-25">
+                                                <label>{{ __('Product Option') }}</label>
+                                                <div id="size-container">
+                                                    <!-- Size rows will be added here dynamically -->
+                                                </div>
+                                                <button type="button" class="btn btn-primary" id="add-size-btn">اضافة خيار</button>
+                                            </div>
+
+                                          
                                             
                                             
 
@@ -393,20 +394,20 @@
             const sizeRow = `
          <div class="row mb-3" id="size-row-${sizeCounter}">
             <div class="col-md-5">
-                <label for="size-${sizeCounter}">Size:</label>
+                <label for="size-${sizeCounter}">الخيار:</label>
                 <select class="form-control" name="size[]" id="size-${sizeCounter}">
                     @foreach ($sizes as $item)
-                        <option value="{{ $item->id }}" ${sizeId === {{ $item->id }} ? 'selected' : ''}>{{ $item->Size }}</option>
+                        <option value="{{ $item->id }}" ${sizeId === {{ $item->id }} ? 'selected' : ''}>{{ $item->Size_ar }}</option>
                     @endforeach
                 </select>
             </div>
             <div class="col-md-3">
-                <label for="price-${sizeCounter}">Price:</label>
-                <input type="text" class="form-control" id="price-${sizeCounter}" name="size_price[]" placeholder="Enter Price" value="${price || ''}">
+                <label for="price-${sizeCounter}">السعر:</label>
+                <input type="text" class="form-control" id="price-${sizeCounter}" name="size_price[]" placeholder="السعر" value="${price || ''}">
             </div>
             <div class="col-md-3">
-                <label for="weight-${sizeCounter}">Weight (grams):</label>
-                <input type="text" class="form-control" required id="weight-${sizeCounter}" name="size_weight[]" placeholder="Enter Weight (grams)" value="${weight || ''}">
+                <label for="weight-${sizeCounter}">الوزن (بالغرام):</label>
+                <input type="text" class="form-control" required id="weight-${sizeCounter}" name="size_weight[]" placeholder="الوزن (بالغرام)" value="${weight || ''}">
             </div>
             <div class="col-md-1">
                 <label class="d-block">&nbsp;</label>
@@ -454,18 +455,21 @@
         const weightRow = `
             <div class="row mb-3" id="weight-row-${weightCounter}">
                 <div class="col-md-3">
-                    <label for="weight-${weightCounter}">Weight (grams):</label>
-                    <input type="text" id="weight-${weightCounter}" class="form-control" required name="weight_amount[]" placeholder="Enter Weight (grams)" value="${weight || ''}">
+                    <label for="weight-${weightCounter}">الوزن (بالغرام):</label>
+                    <input type="text" id="weight-${weightCounter}" class="form-control" required name="weight_amount[]" placeholder="الوزن" value="${weight || ''}">
                 </div>
                 <div class="col-md-3">
-                    <label for="price-${weightCounter}">Price:</label>
-                    <input type="text" class="form-control" required name="weight_price[]" id="price-${weightCounter}" placeholder="Enter Price" value="${price || ''}">
+                    <label for="price-${weightCounter}">السعر:</label>
+                    <input type="text" class="form-control" required name="weight_price[]" id="price-${weightCounter}" placeholder="السعر" value="${price || ''}">
                 </div>
+                    ${weightCounter > 1 ? `
                 <div class="col-md-1">
                     <button type="button" class="btn btn-danger remove-weight-row" data-row-id="weight-row-${weightCounter}">
                         <i class="fa fa-times"></i>
                     </button>
                 </div>
+                ` : ''}
+             
             </div>
         `;
         $('#weight-container').append(weightRow);

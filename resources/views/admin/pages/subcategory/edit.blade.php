@@ -1,4 +1,4 @@
-@extends('admin.master', ['menu' => 'catbad', 'submenu' => 'category'])
+@extends('admin.master', ['menu' => 'catbad', 'submenu' => 'subcategory'])
 @section('title', isset($title) ? $title : '')
 @section('content')
 <div class="row">
@@ -34,23 +34,23 @@
                                         @csrf
                                         <input type="hidden" name="id" value="{{$edit->id}}">
                                         <div class="input__group mb-25">
-                                            <label>{{ __('Subcategory Name ' . langString('en'))}}</label>
+                                            <label>{{ __('Subcategory (EN)')}}</label>
                                             <input type="text" id="name" name="name"
-                                                value="{{$edit->name}}" placeholder="Name (English)">
+                                                value="{{$edit->name}}" placeholder="{{ __('Subcategory (EN)')}}">
                                         </div>
                                         <div class="input__group mb-25">
-                                            <label>{{ __('Subcategory Name ' . langString('fr'))}}</label>
+                                            <label>{{ __('Subcategory (AR)')}}</label>
                                             <input type="text" id="name_ar" name="name_ar"
-                                                value="{{$edit->name_ar}}" placeholder="Name (Arabic)">
+                                                value="{{$edit->name_ar}}" placeholder="{{ __('Subcategory (AR)')}}">
                                         </div>
                                         <div class="input__group mb-25">
                                             <label for="categorySelect">
-                                                Category
+                                                الفئة
                                             </label>
                                             <select id="categorySelect" name="category_id" >
                                                 @foreach(Category() as $category)
                                                     <option value="{{$category->id}}" {{$edit->category_id == $category->id ? 'selected' : ''}}>
-                                                        {{$category?->en_Category_Name}}
+                                                        {{$category?->fr_Category_Name}}
                                                     </option>
                                                 @endforeach
                                             </select>

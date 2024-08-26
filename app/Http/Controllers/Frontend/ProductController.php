@@ -25,7 +25,21 @@ class ProductController extends Controller
                 ->where('id', '!=', $product->id)
                 ->latest()->take(5)->get();
 
-            $products = Product::where('id', $product->id)->with('brand', 'category', 'colors', 'sizes', 'product_tags', 'product_reviews', 'product_reviews.user')->latest()->first();
+            $products = Product::where('id', $product->id)
+                ->with([
+                    'brand',
+                    'category',
+                    'colors',
+                    'sizes',
+                    'additions' => function ($query) {
+                        $query->where('status', 1); 
+                    },
+                    'product_tags',
+                    'product_reviews',
+                    'product_reviews.user'
+                ])
+                ->latest()
+                ->first();
             $data['products'] = $products;
             $data['title'] = $products->en_Product_Name;
             $data['description'] = $products->en_Product_Nam;

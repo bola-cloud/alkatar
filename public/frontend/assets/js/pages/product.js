@@ -70,6 +70,28 @@
             });
         });
 
+        //checkbox all
+        $("#product_subCategory_all").on("click", function () {
+            $(".CheckSubCategory").each(function () {
+                name = $(this).val();
+                if (checkSubCat.includes(name)) {
+                    return;
+                } else {
+                    checkSubCat.push(name);
+                }
+            });
+            $.ajax({
+                url: $("#CheckSubCategoryFilter").data("url"),
+                method: "get",
+                data: {
+                    checkSubCat: checkSubCat,
+                },
+                success: function (data) {
+                    $("#filterProduct").html(data);
+                },
+            });
+        });
+
         //checkbox brand
         $(".CheckBrand").on("click", function () {
             $(".CheckBrand").each(function () {

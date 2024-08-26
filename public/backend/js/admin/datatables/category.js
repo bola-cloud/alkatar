@@ -10,10 +10,10 @@
                     data: 'Category_Name',
                     name: 'Category_Name'
                 },
-                {
-                    data: 'Category_Slug',
-                    name: 'Category_Slug'
-                },
+                // {
+                //     data: 'Category_Slug',
+                //     name: 'Category_Slug'
+                // },
                 {
                     data: 'Description',
                     name: 'Description'

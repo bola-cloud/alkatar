@@ -50,13 +50,13 @@ class ProductController extends Controller
                     return '<img src=' . $url . ' border="0" width="50" class="img-rounded" align="center" />';
                 })
                 ->editColumn('ProductName', function ($data) {
-                    return $data->en_Product_Name;
+                    return $data->fr_Product_Name;
                 })
                 ->editColumn('Category', function ($data) {
-                    return $data->category?->en_Category_Name;
+                    return $data->category?->fr_Category_Name;
                 })
                 ->editColumn('subcategory', function ($data) {
-                    return $data->subcategory?->name;
+                    return $data->subcategory?->name_ar;
                 })
             
                 ->editColumn('Price', function ($data) {
@@ -72,10 +72,10 @@ class ProductController extends Controller
                 })
                 ->editColumn('Status', function ($data) {
                     if ($data->Status == 1) {
-                        $active = "Active";
+                        $active = "مفعل";
                         return '<span class="status active">' . $active . '</span>';
                     } else {
-                        $active = "Inactive";
+                        $active = "غير مفعل";
                         return '<span class="status blocked">' . $active . '</span>';
                     }
                 })

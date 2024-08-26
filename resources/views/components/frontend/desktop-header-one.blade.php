@@ -195,7 +195,8 @@
                     <ul class="main-menu flex gap-5 justify-center">
                         @foreach (Category_Des_Icon()->take(8) as $category)
                             <li class="menu-item text-3xl text-center">
-                                <a class="menu-link" href="{{ route('category.product', $category->id) }}">
+                                <a class="menu-link" href="{{ route('category.product', $category->id) }}"
+                                    id="{{$category->id}}">
                                     {{ langConverter($category->en_Category_Name, $category->fr_Category_Name) }}
                                 </a>
                             </li>

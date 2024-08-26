@@ -101,45 +101,77 @@ class CheckoutController extends Controller
             'Order_Status' => ORDER_PENDING,
 //            'txn' => $txn != null ? $txn : randomString(8),
         ]);
+            // Initialize the paymentData array with necessary information
+            $paymentData = [
+                'client_reference_id' => $order_number,
+                'mode' => 'payment',
+                'products' => [],
+                'success_url' => route('api.thawani.success', [
+                    'order_number' => $order_number,
+                ]),
+                'cancel_url' => route('api.thawani.fail', [
+                    'order_number' => $order_number,
+                ]),
+                'metadata' => [
+                    'order_number' => $order_number,
+                    'shipping_charge' => $shipping_charge,
+                    'subtotal' => $subtotal,
+                    'discount' => $discount,
+                    'grand_total' => $grandTotal,
+                    'tax' => $tax,
+                ]
+            ];
 
-        $paymentData = [
-            'client_reference_id' => $order_number,
-            'mode' => 'payment',
-            'products' => [],
-            'success_url' => route('api.thawani.success', [
-                'order_number' => $order_number,
-            ]),
-            'cancel_url' => route('api.thawani.fail', [
-                'order_number' => $order_number,
-            ]),
-            'metadata' => [
-                'order_number' => $order_number,
-                'shipping_charge' => $shipping_charge,
-                'subtotal' => $subtotal,
-                'discount' => $discount,
-                'grand_total' => $grandTotal,
-                'tax' => $tax,
-            ]
-        ];
 
-        foreach ($validated['cart_items'] as $item) {
-            $product = Product::find($item['product_id']);
-            $size = $product->sizes()->where('size_product.Size_Id', $item['size'])->first();
 
-            if ($size) {
-                $price = $size->pivot->price;
-                $weight = $size->pivot->weight;
-            } else {
-                $price = $product->Discount_Price ?? $product->Price;
-                $weight = 0;
+// Loop through each cart item and add the product details to paymentData
+            foreach ($validated['cart_items'] as $item) {
+                $product = Product::find($item['product_id']);
+                $size = $product->sizes()->where('size_product.Size_Id', $item['size'])->first();
+
+                if ($size) {
+                    $price = $size->pivot->price;
+                    $weight = $size->pivot->weight;
+                } else {
+                    $price = $product->Discount_Price ?? $product->Price;
+                    $weight = 0;
+                }
+
+                $paymentData['products'][] = [
+                    'name' => $product->name . ' (' . $item['size'] . ')',
+                    'quantity' => $item['quantity'],
+                    'unit_amount' => round($price * 1000, 2),  // Price after applying the discount
+                ];
             }
 
-            $paymentData['products'][] = [
-                'name' => $product->name . ' (' . $item['size'] . ')',
-                'quantity' => $item['quantity'],
-                'unit_amount' => round($price * 1000, 2),  // Price after applying the discount
-            ];
-        }
+
+            // Add tax to the paymentData if it exists
+            if ($tax) {
+                $paymentData['products'][] = [
+                    'name' => 'tax',
+                    'quantity' => 1,
+                    'unit_amount' => round($tax * 1000, 2),
+                ];
+            }
+
+// Add weight charge to the paymentData if it exists
+            if ($weight_charge) {
+                $paymentData['products'][] = [
+                    'name' => 'weight extra charge',
+                    'quantity' => 1,
+                    'unit_amount' => round($weight_charge * 1000, 2),
+                ];
+            }
+
+// Add shipping charge to the paymentData if it exists
+            if ($shipping_charge) {
+                $paymentData['products'][] = [
+                    'name' => 'shipping charge',
+                    'quantity' => 1,
+                    'unit_amount' => round($shipping_charge * 1000, 2),
+                ];
+            }
+            
         // Make the API call to Thawani
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',

@@ -28,15 +28,15 @@
             <div class="customers__area bg-style mb-30">
                 <div class="item-title">
                     <div class="col-xs-6">
-                        <a href="{{route('admin.product.size.create')}}" class="btn btn-md btn-info">{{ __('Add Product Size')}}</a>
+                        <a href="{{route('admin.product.size.create')}}" class="btn btn-md btn-info">{{ __('Add Product option')}}</a>
                     </div>
                 </div>
                 <div class="customers__table">
                     <table id="ProductSizeTable" class="row-border data-table-filter table-style">
                         <thead>
                         <tr>
-                            <th>{{ __('Product Size')}}</th>
-                            <th>{{ __('Arabic Name')}}</th>
+                            <th>{{ __('option (EN)')}}</th>
+                            <th>{{ __('option (AR)')}}</th>
                             <th>{{ __('Action')}}</th>
                         </tr>
                         </thead>
