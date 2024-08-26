@@ -44,21 +44,45 @@ class OrderController extends Controller
                 ->addColumn('User', function ($data) {
                     return $data->user != null ? $data->user->name : __('Guest User');
                 })
+                ->addColumn('phone_number', function ($data) {
+                    if (is_null($data->billing_address)) {
+                        return 'N/A';
+                    }
+                    $serialized_billing = json_decode($data->billing_address);
+
+                    if (isset($serialized_billing->phone_number)) {
+                        return $serialized_billing->phone_number;
+                    } else {
+                        return 'N/A';
+                    }
+                })
+
                 ->addColumn("State", function ($data) {
                     if (is_null($data->billing)) {
                         return 'N/A';
                     }
 
-                    $order_state = State::where("id", $data->billing->State)->first();
-                    return $order_state['name_en'];
+                    return $data->billing->state_en;
+
+
+                    // $order_state = State::where("id", $data->billing->State)->first();
+                    // return $order_state['name_en'];
                 })
                 ->addColumn("City", function ($data) {
-                    if (is_null($data->billing)) {
+                    if (is_null($data->billing_address)) {
                         return 'N/A';
                     }
 
-                    $order_city = City::where('id', $data->billing->City)->first();
-                    return $order_city['name_en'];
+
+                    $serialized_billing = json_decode($data->billing_address);
+
+                    if (isset($serialized_billing->city_en)) {
+                        return $serialized_billing->city_en;
+                    } else {
+                        return 'N/A';
+                    }
+                    // $order_city = City::where('id', $data->billing->City)->first();
+                    // return $order_city['name_en'];
                 })
                 ->addColumn('GrandTotal', function ($data) {
                     return $data->Grand_Total . ' OMR';
@@ -74,7 +98,8 @@ class OrderController extends Controller
                     return date('d-m-Y', strtotime($data->created_at));
                 })
                 ->addColumn('order_time', function ($data) {
-                    return date('h:i A', strtotime($data->created_at));
+                    return $data->created_at->timezone('Asia/Muscat')->format('h:i A');
+                    // return date('h:i A', strtotime($data->created_at));
                 })
                 ->addColumn('Payment_Method', function ($data) {
                     $payment_method = $data->Payment_Method;
@@ -117,21 +142,22 @@ class OrderController extends Controller
                 ->addColumn('Status', function ($data) {
                     $html = '';
                     if ($data->Order_Status == ORDER_PENDING) {
-                        $html = __('<span class="status bg-primary-light-varient">Pending</span>');
+                        // $html = __('<span class="status bg-primary-light-varient">Pending</span>');
+                        $html = '<span class="status bg-primary-light-varient" style="display: block; width: 126%;">' . __('Pending') . '</span>';
                     } elseif ($data->Order_Status == ORDER_PROCESSING) {
-                        $html = __('<span class="status bg-secondary-light-varient">Processing</span>');
+                        $html = '<span class="status bg-secondary-light-varient">' . __('Processing') . '</span>';
                     } elseif ($data->Order_Status == ORDER_SHIPPED) {
-                        $html = __('<span class="status bg-info-light-varient">Shipped</span>');
+                        $html = '<span class="status bg-info-light-varient">' . __('Shipped') . '</span>';
                     } elseif ($data->Order_Status == ORDER_DELIVERED) {
-                        $html = __('<span class="status bg-success-light-varient">Delivered</span>');
+                        $html = '<span class="status bg-success-light-varient">' . __('Delivered') . '</span>';
                     } elseif ($data->Order_Status == ORDER_CANCELLED) {
-                        $html = __('<span class="status bg-danger-light-varient">Canceled</span>');
+                        $html = '<span class="status bg-danger-light-varient">' . __('Canceled') . '</span>';
                     } elseif ($data->Order_Status == ORDER_RETURN) {
-                        $html = __('<span class="status bg-danger-light-varient">Returned</span>');
+                        $html = '<span class="status bg-danger-light-varient">' . __('Returned') . '</span>';
                     } elseif ($data->Order_Status == ORDER_NOT_PAYMENT_YET) {
-                        $html = __('<span class="status bg-warning-light-varient">Not Payment Yet</span>');
+                        $html = '<span class="status bg-warning-light-varient">' . __('Not Payment Yet') . '</span>';
                     } elseif ($data->Order_Status == ORDER_DELIVERED_FAILED) {
-                        $html = __('<span class="status bg-danger-light-varient">Delivery Failed</span>');
+                        $html = '<span class="status bg-danger-light-varient">' . __('Delivery Failed') . '</span>';
                     }
                     return $html;
                 })

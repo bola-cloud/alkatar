@@ -33,20 +33,20 @@
                     </div> --}}
 
                     <div class="single-widget categories-widget">
-                        <h3 class="widget-title">{{ __('Categories') }}</h3>
+                        <h3 class="widget-title">{{ __('Sub-Categories') }}</h3>
                         <div class="categories-list">
-                            @foreach (Category_Des_Icon() as $category)
+                            @foreach (SubCategory($selected_category) as $subCategory)
                                 <div class="single-categorie">
                                     <div class="categorie-left flex items-center gap-2">
-                                        <input class="form-check-input CheckCategory" type="checkbox"
-                                            value="{{ $category->en_Category_Name }}"
-                                            id="product_category_{{$category->id}}"
-                                            {{$category->id == $selected_category ? 'checked' : ''}} 
+                                        <input class="form-check-input CheckSubCategory" type="checkbox"
+                                            value="{{ $subCategory->id }}"
+                                            id="product_subCategory_{{$subCategory->id}}"
+                                            {{$subCategory->id == $selected_category ? 'checked' : ''}} 
                                             >
                                         <label class="form-check-label"
-                                            for="product_category_{{$category->id}}">{{ langConverter($category->en_Category_Name, $category->fr_Category_Name) }}</label>
+                                            for="product_subCategory_{{$subCategory->id}}">{{ langConverter($subCategory->name, $subCategory->name_ar) }}</label>
                                     </div>
-                                    <span class="categories-count">{{ productCategoryCount($category->id) }}</span>
+                                    <span class="categories-count">{{ productSubCategoryCount($subCategory->id) }}</span>
                                 </div>
                             @endforeach
                         </div>
@@ -214,6 +214,7 @@
     <div id="shortingUrl" data-url="{{ route('product.shorting') }}"></div>
     <div id="checkCategoryFilter" data-url="{{ route('product.filtering') }}"></div>
 
+    <div id="CheckSubCategoryFilter" data-url="{{ route('product.filtering') }}"></div>
     <div id="checkCategoryFilter" data-url="{{ route('product.filtering') }}"></div>
     <div id="checkColorFilter" data-url="{{ route('product.filtering') }}"></div>
     <div id="checkBrandFilter" data-url="{{ route('product.filtering') }}"></div>

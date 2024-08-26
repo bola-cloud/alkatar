@@ -36,6 +36,15 @@
                                 id="billing_name" name="billing_name" placeholder="{{ __('Name') }}"
                                 value="{{ isset($billing) ? $billing->Name ?? $billing->name : '' }}" required />
 
+                            <label for="billing_phone"
+                                class="block text-lg lg:text-2xl font-medium text-gray-700">{{ __('Phone Number') }}</label>
+                            <input type="text"
+                                class="w-11/12 lg:w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl"
+                                id="billing_phone" name="billing_phone" placeholder="{{ __('Phone Number') }}"
+                                value="{{ isset($user) ? $user->code . $user->Number ?? $user->code . $user->Number : '' }}"
+                                required />
+
+
                             <label for="billing_email"
                                 class="block text-lg lg:text-2xl font-medium text-gray-700">{{ __('Email Address (Optional)') }}</label>
                             <input type="email"

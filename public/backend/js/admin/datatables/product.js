@@ -24,6 +24,10 @@
                     name: 'Category'
                 },
                 {
+                    data: 'subcategory',
+                    name: 'subcategory'
+                },
+                {
                     data: 'Price',
                     name: 'Price'
                 },

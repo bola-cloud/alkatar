@@ -60,11 +60,12 @@ class CheckoutController extends Controller
 
         $shippingFee = 0;
 
-        if ($totalWeightKg >= 1 && $totalWeightKg <= 10) {
-            $shippingFee = 2; // 2 OMR for 1-10kg
-        } elseif ($totalWeightKg > 10) {
+        // if ($totalWeightKg >= 1 && $totalWeightKg <= 10) {
+        //     $shippingFee = 0; // 2 OMR for 1-10kg
+        // } else
+        if ($totalWeightKg > 10) {
             $extraKg = ceil($totalWeightKg - 10);
-            $shippingFee = 2 + ($extraKg * 0.100); // 2 OMR + 0.100 OMR for each extra kg
+            $shippingFee = ($extraKg * 0.100); //  0.100 OMR for each extra kg
         }
 
         return $shippingFee;
@@ -78,6 +79,7 @@ class CheckoutController extends Controller
             $data['content'] = Cart::content();
             $data['currencies'] = Currency::all();
             $data['paymentPlatforms'] = PaymentPlatform::where('status', ACTIVE)->get();
+            $data['user'] = Auth::user();
             $data['billing'] = Billing::where('User_Id', Auth::id())->first() ?? Auth::user();
             $data['shipping'] = Shipping::where('User_Id', Auth::id())->first();
             $seo = SeoSetting::where('slug', 'checkout')->first();
@@ -87,6 +89,7 @@ class CheckoutController extends Controller
             $data['extraWeightFees'] = $this->calculateExtraWeightFees();
             $oman_country_id = Country::where('name_en', 'Oman')->first()->id;
             $data['states'] = State::where('country_id', $oman_country_id)->get();
+            // dd($data);
 
             return view('front.pages.checkout.checkout', $data);
         } else {
@@ -114,9 +117,13 @@ class CheckoutController extends Controller
             'billing_street_address' => 'nullable',
             'billing_zipcode' => 'required',
             'billing_country' => 'required',
+            "billing_phone" => 'required|digits_between:8,11',
         ];
 
-        $validationMessages = [];
+        $validationMessages = [
+            'billing_phone.required' => __('The phone number field is required.'),
+            'billing_phone.digits_between' => __('The phone number must be correct number.'),
+        ];
         // dd($request->all());
 
         if (!$isLoggedIn) {
@@ -128,10 +135,10 @@ class CheckoutController extends Controller
             ];
 
             $validationMessages += [
-                'billing_name.required' => 'The name field is required.',
-                'billing_state.required' => 'The state field is required.',
-                'billing_zipcode.required' => 'The zip code field is required.',
-                'billing_country.required' => 'The country field is required.',
+                'billing_name.required' => __('The name field is required.'),
+                'billing_state.required' => __('The state field is required.'),
+                'billing_zipcode.required' => __('The zipcode field is required.'),
+                'billing_country.required' => __('The country field is required.'),
             ];
         }
 
@@ -195,11 +202,13 @@ class CheckoutController extends Controller
             $billing_address['state_ar'] = $shipping_state->name_ar;
             $billing_address['city_en'] = $shipping_city->name_en;
             $billing_address['city_ar'] = $shipping_city->name_ar;
+            $billing_address['phone_number'] = $request->billing_phone;
 
             $shipping_address['state_en'] = $shipping_state->name_en;
             $shipping_address['state_ar'] = $shipping_state->name_ar;
             $shipping_address['city_en'] = $shipping_city->name_en;
             $shipping_address['city_ar'] = $shipping_city->name_ar;
+            $shipping_address['phone_number'] = $request->billing_phone;
 
 
             Session::put('billing_address', $billing_address);
@@ -753,7 +762,8 @@ class CheckoutController extends Controller
 
         $order->Is_Order_Successful = true;
         $order->Is_Order_Completed = true;
-        $order->Payment_Status = THAWANI;
+        $order->Payment_Method = THAWANI;
+        $order->Payment_Status = PAYMENT_SUCCESS;
         $order->Order_Status = ORDER_PROCESSING;
 
         $order->save();
