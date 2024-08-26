@@ -62,6 +62,8 @@ class ProductResource extends JsonResource
                 'colors' => ColorResource::collection($this->whenLoaded('colors')),
                 'sizes' => SizeResource::collection($this->whenLoaded('sizes')),
                 'product_tags' => ProductTagResource::collection($this->whenLoaded('product_tags')),
+                'weights' =>  WeightProductResource::collection($this->whenLoaded('weights')),
+                'additions' => AdditionResource::collection($this->whenLoaded('additions')),
             ]);
         }
 

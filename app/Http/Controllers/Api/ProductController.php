@@ -11,7 +11,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags');
+        $query = Product::with('brand', 'category', 'colors', 'sizes','weights','additions', 'product_tags');
         if ($request->filled('category')) {
             $categoryId = $request->get('category');
             $query->where('Category_Id', $categoryId);
@@ -25,12 +25,12 @@ class ProductController extends Controller
     }
     public function show($id)
     {
-        $product = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->findOrFail($id);
+        $product = Product::with('brand', 'category', 'colors', 'sizes','weights','additions', 'product_tags')->findOrFail($id);
         return ProductResource::make($product);
     }
     public function productsWithDiscount()
     {
-        $products = Product::withDiscount()->get();
+        $products = Product::withDiscount()->with('brand', 'category', 'colors', 'sizes','weights','additions', 'product_tags')->get();
         return ProductResource::collection($products);
     }
 

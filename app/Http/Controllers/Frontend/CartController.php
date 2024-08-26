@@ -18,7 +18,7 @@ class CartController extends Controller
 {
     public function addToCart(Request $request)
     {
-        // dd($request->all()); 
+        // dd($request->all());
         // dd("request size", $request->selectedSize);
         if ($request->ajax()) {
             $product = Product::with('colors', 'sizes', )
