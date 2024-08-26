@@ -4,12 +4,17 @@
 @section('keywords', isset($keywords) ? $keywords : '')
 @section('content')
 <style>
-   
+    .active {
+        outline: 0 none;
+        color: var(--hover-color);
+    }
 </style>
 
 <!-- Product Area Start -->
+
+
 <div class="product-area section">
-    <div >
+    <div>
         <div class="row">
             <div class="col-xl-3 col-lg-4">
                 <div class="sidebar-widget-area mobile-sidebar">
@@ -35,14 +40,19 @@
                     <div class="single-widget categories-widget">
                         <h3 class="widget-title">{{ __('Sub-Categories') }}</h3>
                         <div class="categories-list">
+                            <div class="single-categorie">
+                                <div class="categorie-left flex items-center gap-2">
+                                    <input class="form-check-input" type="checkbox" value="all"
+                                        id="product_subCategory_all">
+                                    <label class="form-check-label"
+                                        for="product_subCategory_all">{{ __('All') }}</label>
+                                </div>
+                            </div>
                             @foreach (SubCategory($selected_category) as $subCategory)
                                 <div class="single-categorie">
                                     <div class="categorie-left flex items-center gap-2">
                                         <input class="form-check-input CheckSubCategory" type="checkbox"
-                                            value="{{ $subCategory->id }}"
-                                            id="product_subCategory_{{$subCategory->id}}"
-                                            {{$subCategory->id == $selected_category ? 'checked' : ''}} 
-                                            >
+                                            value="{{ $subCategory->id }}" id="product_subCategory_{{$subCategory->id}}">
                                         <label class="form-check-label"
                                             for="product_subCategory_{{$subCategory->id}}">{{ langConverter($subCategory->name, $subCategory->name_ar) }}</label>
                                     </div>
@@ -124,10 +134,10 @@
                             @endforelse
                         </div>
                         <div class="pagination-area" style="margin-block: 30px;">
-                                <ul class="paginations text-center">
-                                    {{ $products->links('vendor.pagination.custom') }}
-                                </ul>
-                            </div>
+                            <ul class="paginations text-center">
+                                {{ $products->links('vendor.pagination.custom') }}
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -209,6 +219,25 @@
 
     </div>
     <!-- For Mobile Filter Sidebar End -->
+
+    <script>
+        var specificId = {{$selected_category}};
+        var element = document.getElementById(specificId);
+        if (element) {
+            element.classList.toggle('active');
+        }
+
+    </script>
+
+    <script>
+        document.getElementById('product_subCategory_all').addEventListener('change', function () {
+            var checkboxes = document.querySelectorAll('.CheckSubCategory');
+            for (var i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = this.checked;
+            }
+        });
+    </script>
+
 
     <!-- Product Area End -->
     <div id="shortingUrl" data-url="{{ route('product.shorting') }}"></div>

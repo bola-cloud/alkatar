@@ -17,7 +17,7 @@
                 },
                 {
                     data: 'ProductName',
-                    name: 'ProductName'
+                    name: 'ProductName',
                 },
                 {
                     data: 'Category',

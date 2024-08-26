@@ -39,7 +39,7 @@ class SubcategoryController extends Controller
                     $category = Category::find($data->category_id);
 
 
-                    return $category?->en_Category_Name;
+                    return $category?->fr_Category_Name;
                 })
                 ->editColumn('status', function ($data) {
                     if ($data->status == 1) {

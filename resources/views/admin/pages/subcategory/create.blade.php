@@ -33,24 +33,24 @@
                                         action="{{route('admin.subcategory.store')}}">
                                         @csrf
                                         <div class="input__group mb-25">
-                                            <label>{{ __('Subcategory Name ' . langString('en'))}}</label>
+                                            <label>{{ __('Subcategory (EN)')}}</label>
                                             <input type="text" id="name" name="name"
-                                                value="{{ old('name') }}" placeholder="Name (English)">
+                                                value="{{ old('name') }}" placeholder="{{ __('Subcategory (EN)')}}">
                                         </div>
                                         <div class="input__group mb-25">
-                                            <label>{{ __('Subcategory Name ' . langString('fr'))}}</label>
+                                            <label>{{ __('Subcategory (AR)')}}</label>
                                             <input type="text" id="name_ar" name="name_ar"
-                                                value="{{ old('name_ar') }}" placeholder="Name (Arabic)">
+                                                value="{{ old('name_ar') }}" placeholder="{{ __('Subcategory (AR)')}}">
                                         </div>
 
                                         <div class="input__group mb-25">
                                             <label for="categorySelect">
-                                                Category
+                                                الفئة
                                             </label>
                                             <select id="categorySelect" name="category_id">
                                                 @foreach(Category_Des_Icon() as $category)
                                                     <option value="{{$category->id}}">
-                                                        {{$category?->en_Category_Name}}
+                                                        {{$category?->fr_Category_Name}}
                                                     </option>
                                                 @endforeach
                                             </select>

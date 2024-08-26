@@ -38,16 +38,16 @@ class AdditionController extends Controller
                     return $data->name_ar;
                 })
                 ->editColumn('product', function ($data) {
-                    return $data->product->en_Product_Name;
+                    return $data->product->fr_Product_Name;
                 })
                 ->editColumn('price', function ($data) {
                     return $data->price;
                 })
                 ->editColumn('status', function ($data) {
                     if ($data->status == 1) {
-                        return '<span class="status active">Active</span>';
+                        return '<span class="status active">فعال</span>';
                     } else {
-                        return '<span class="status blocked">Inactive</span>';
+                        return '<span class="status blocked">غير فعال</span>';
                     }
                 })
                 ->editColumn('icon', function ($data) {

@@ -34,7 +34,7 @@
                         <thead>
                         <tr>
                             <th>{{ __('Category Name')}}</th>
-                            <th>{{ __('Category Slug')}}</th>
+                            <!-- <th>{{ __('Category Slug')}}</th> -->
                             <th>{{ __('Description')}}</th>
                             <th>{{ __('Icon')}}</th>
                             <th>{{ __('Status')}}</th>

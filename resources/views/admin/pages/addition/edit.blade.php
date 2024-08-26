@@ -35,12 +35,12 @@
                                         <div class="input__group mb-25">
                                             <label>{{ __('Addition Name '.langString('en'))}}</label>
                                             <input type="text" id="en_addition_name" name="en_addition_name"
-                                                value="{{ old('en_addition_name', $addition->name) }}" placeholder="Name (English)" required>
+                                                value="{{ old('en_addition_name', $addition->name) }}" placeholder="الاسم (English)" required>
                                         </div>
                                         <div class="input__group mb-25">
                                             <label>{{ __('Addition Name '.langString('fr'))}}</label>
                                             <input type="text" id="fr_addition_name" name="fr_addition_name"
-                                                value="{{ old('fr_addition_name', $addition->name_ar) }}" placeholder="Name (Arabic)" required>
+                                                value="{{ old('fr_addition_name', $addition->name_ar) }}" placeholder="الاسم (Arabic)" required>
                                         </div>
 
                                         <div class="input__group mb-25">
@@ -48,7 +48,7 @@
                                             <select name="product_id" id="product_id" class="form-control select2">
                                                 @foreach($products as $product)
                                                     <option value="{{ $product->id }}" {{ $addition->product_id == $product->id ? 'selected' : '' }}>
-                                                        {{ $product->en_Product_Name }}
+                                                        {{ $product->fr_Product_Name }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -57,7 +57,7 @@
                                         <div class="input__group mb-25">
                                             <label>{{ __('Price')}}</label>
                                             <input type="number" id="price" required name="price" value="{{ old('price', $addition->price) }}"
-                                                placeholder="Price" step="0.001">
+                                                placeholder="السعر" step="0.001">
                                         </div>
                                         
                                         {{-- <div class="input__group mb-25">

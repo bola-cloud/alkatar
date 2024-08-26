@@ -158,7 +158,7 @@
 
                             @if (count($products->weights) > 0)
                             <div class="product-weight-area border-t pt-16">
-                                <h4 class="weight-title font-bold text-black mb-8">{{ __('Size') }}:</h4>
+                                <h4 class="weight-title font-bold text-black mb-8">{{ __('Weight') }}:</h4>
                                 <div class="weight-switch ">
                                     @foreach ($products->weights as $weight)
                                         <div>

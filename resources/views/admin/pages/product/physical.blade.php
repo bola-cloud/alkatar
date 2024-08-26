@@ -59,7 +59,7 @@
                                             <select class="form-control" id="en_category_name" name="en_category_name">
                                                 @foreach ($category as $item)
                                                     <option value="{{ $item->id }}">
-                                                        {{ $item?->en_Category_Name ?? "N/A" }}
+                                                        {{ $item?->fr_Category_Name ?? "N/A" }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -69,7 +69,7 @@
                                         </div>
 
                                         <div class="input__group mb-25">
-                                            <label for="subcategory_id">{{__("Subcategory Name")}}</label>
+                                            <label for="subcategory_id">{{__("Subcategory")}}</label>
                                             <select class="form-control" id="subcategory_id" name="subcategory_id">
                                                 <option value="">{{ __('Select Subcategory') }}</option>
                                             </select>
@@ -130,24 +130,24 @@
                                             <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div> --}}
+                                        <div class="input__group mb-25">
+                                            <label>{{ __('Product Weight') }}</label>
+                                            <div id="weight-container">
+                                                <!-- Size rows will be added here dynamically -->
+                                            </div>
+                                            <button type="button" class="btn btn-primary" id="add-weight-btn">اضافة
+                                                وزن</button>
+                                        </div>
 
                                         <div class="input__group mb-25">
                                             <label>{{ __('Product Option') }}</label>
                                             <div id="size-container">
                                                 <!-- Size rows will be added here dynamically -->
                                             </div>
-                                            <button type="button" class="btn btn-primary" id="add-size-btn">Add
-                                                Size</button>
+                                            <button type="button" class="btn btn-primary" id="add-size-btn">اضافة
+                                                خيار</button>
                                         </div>
 
-                                        <div class="input__group mb-25">
-                                            <label>{{ __('Product Weight') }}</label>
-                                            <div id="weight-container">
-                                                <!-- Size rows will be added here dynamically -->
-                                            </div>
-                                            <button type="button" class="btn btn-primary" id="add-weight-btn">Add
-                                            Weight</button>
-                                        </div>
 
                                         <div class="input__group mb-25">
                                             <label for="qty">{{ __('Quantity') }}</label>
@@ -331,7 +331,7 @@
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>
-                                        
+
                                     </div>
                                 </div>
                                 <div class="col-xxl-6">
@@ -395,8 +395,8 @@
                                     </div>
                                 </div>
                                 <div class="input__button">
-                                            <button type="submit" class="btn btn-blue">{{ __('Add') }}</button>
-                                        </div>
+                                    <button type="submit" class="btn btn-blue">{{ __('Add') }}</button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -466,33 +466,33 @@
             function createSizeRow(sizeId = null, price = null, weight = null) {
                 sizeCounter++;
                 const sizeRow = `
-                                                                                                            <div class="row mb-3" id="size-row-${sizeCounter}">
-                                                                                                                <div class="col-md-5">
-                                                                                                                     <label for="size-${sizeCounter}">Option:</label>
-                                    <select class="form-control" name="size[]" id="size-${sizeCounter}">
-                                                                                                                        @foreach (productSize() as $item)
-                                                                                                                            <option value="{{ $item->id }}" ${sizeId === {{ $item->id }} ? 'selected' : ''}>{{ $item->Size }}</option>
-                                                                                                                        @endforeach
-                                                                                                                    </select>
-                                                                                                                </div>
-                                                                                                                 <div class="col-md-3">
-                                                                                                                                 <label for="price-${sizeCounter}">Price:</label>
+                                                                                                                        <div class="row mb-3" id="size-row-${sizeCounter}">
+                                                                                                                            <div class="col-md-5">
+                                                                                                                                 <label for="size-${sizeCounter}"> الخيار:</label>
+                                                <select class="form-control" name="size[]" id="size-${sizeCounter}">
+                                                                                                                                    @foreach (productSize() as $item)
+                                                                                                                                        <option value="{{ $item->id }}" ${sizeId === {{ $item->id }} ? 'selected' : ''}>{{ $item->Size_ar }}</option>
+                                                                                                                                    @endforeach
+                                                                                                                                </select>
+                                                                                                                            </div>
+                                                                                                                             <div class="col-md-3">
+                                                                                                                                             <label for="price-${sizeCounter}">السعر:</label>
 
-                                                                                                                    <input type="text" class="form-control" required name="size_price[]"  id="price-${sizeCounter}" placeholder="Enter Price" value="${price || ''}">
-                                                                                                                </div>
+                                                                                                                                <input type="text" class="form-control" required name="size_price[]"  id="price-${sizeCounter}" placeholder="ادخل السعر" value="${price || ''}">
+                                                                                                                            </div>
 
-                                                                                                                 <div class="col-md-3">
-                                                                                                                 <label for="weight-${sizeCounter}">Weight (grams):</label>
-                                                                                                                    <input type="text" id="weight-${sizeCounter}" class="form-control" required name="size_weight[]" placeholder="Enter Weight (grams)" value="${weight || ''}">
-                                                                                                                </div>
+                                                                                                                             <div class="col-md-3">
+                                                                                                                             <label for="weight-${sizeCounter}">الوزن (بالغرام):</label>
+                                                                                                                                <input type="text" id="weight-${sizeCounter}" class="form-control" required name="size_weight[]" placeholder="ادخل الوزن (بالغرام)" value="${weight || ''}">
+                                                                                                                            </div>
 
-                                                                                                                <div class="col-md-1">
-                                                                                                                    <button type="button" class="btn btn-danger remove-size-row" data-row-id="size-row-${sizeCounter}">
-                                                                                                                        <i class="fa fa-times"></i>
-                                                                                                                    </button>
-                                                                                                                </div>
-                                                                                                            </div>
-                                                                                                        `;
+                                                                                                                            <div class="col-md-1">
+                                                                                                                                <button type="button" class="btn btn-danger remove-size-row" data-row-id="size-row-${sizeCounter}">
+                                                                                                                                    <i class="fa fa-times"></i>
+                                                                                                                                </button>
+                                                                                                                            </div>
+                                                                                                                        </div>
+                                                                                                                    `;
 
                 $('#size-container').append(sizeRow);
             }
@@ -514,7 +514,7 @@
         });
     </script>
 
-<script>
+    <script>
         $(document).ready(function () {
             let weightCounter = 0;
 
@@ -522,27 +522,26 @@
             function createWeightRow(weightId = null, price = null, weight = null) {
                 weightCounter++;
                 const weightRow = `
-                                                                                                            <div class="row mb-3" id="weight-row-${weightCounter}">
-                                                                                                              <div class="col-md-3">
-                                                                                                                 <label for="weight-${weightCounter}">Weight (grams):</label>
-                                                                                                                    <input type="text" id="weight-${weightCounter}" class="form-control" required name="weight_amount[]" placeholder="Enter Weight (grams)" value="${weight || ''}">
-                                                                                                                </div>
-                                                                                                                
-                                                                                                                 <div class="col-md-3">
-                                                                                                                                 <label for="price-${weightCounter}">Price:</label>
+            <div class="row mb-3" id="weight-row-${weightCounter}">
+                <div class="col-md-3">
+                    <label for="weight-${weightCounter}">الوزن (بالغراام):</label>
+                    <input type="text" id="weight-${weightCounter}" class="form-control" required name="weight_amount[]" placeholder="ادخل الوزن (بالغرام)" value="${weight || ''}">
+                </div>
 
-                                                                                                                    <input type="text" class="form-control" required name="weight_price[]"  id="price-${weightCounter}" placeholder="Enter Price" value="${price || ''}">
-                                                                                                                </div>
+                <div class="col-md-3">
+                    <label for="price-${weightCounter}">السعر:</label>
+                    <input type="text" class="form-control" required name="weight_price[]" id="price-${weightCounter}" placeholder="ادخل السعر" value="${price || ''}">
+                </div>
 
-                                                                                                               
-
-                                                                                                                <div class="col-md-1">
-                                                                                                                    <button type="button" class="btn btn-danger remove-weight-row" data-row-id="weight-row-${weightCounter}">
-                                                                                                                        <i class="fa fa-times"></i>
-                                                                                                                    </button>
-                                                                                                                </div>
-                                                                                                            </div>
-                                                                                                        `;
+                ${weightCounter > 1 ? `
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-danger remove-weight-row" data-row-id="weight-row-${weightCounter}">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+                ` : ''}
+            </div>
+        `;
 
                 $('#weight-container').append(weightRow);
             }
@@ -578,7 +577,7 @@
                             $('#subcategory_id').empty();
                             $('#subcategory_id').append('<option value="">{{ __("Select Subcategory") }}</option>');
                             $.each(data, function (key, value) {
-                                $('#subcategory_id').append('<option value="' + value.id + '">' + value.name + '</option>');
+                                $('#subcategory_id').append('<option value="' + value.id + '">' + value.name_ar + '</option>');
                             });
                         }
                     });
@@ -590,5 +589,5 @@
         });
     </script>
 
-    
+
 @endpush

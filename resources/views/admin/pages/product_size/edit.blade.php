@@ -36,15 +36,15 @@
 
                                             <input type="hidden" name="id" value="{{ $edit->id }}">
                                             <div class="input__group mb-25">
-                                                <label for="size">{{ __('Size') }}</label>
+                                                <label for="size">{{ __('option (EN)') }}</label>
                                                 <input type="text" id="size" name="size" value="{{ $edit->Size }}"
-                                                    placeholder="{{ __('Size') }}">
+                                                    placeholder="{{ __('option (EN)') }}">
                                             </div>
 
                                             <div class="input__group mb-25">
-                                                <label for="Size_ar">{{ __('Size Arabic') }}</label>
+                                                <label for="Size_ar">{{ __('option (AR)') }}</label>
                                                 <input type="text" id="Size_ar" name="Size_ar" value="{{ $edit->Size_ar }}"
-                                                    placeholder="{{ __('Size Arabic') }}">
+                                                    placeholder="{{ __('option (AR)') }}">
                                             </div>
                                             <div class="input__button">
                                                 <button type="submit" class="btn btn-blue">{{ __('Update') }}</button>

@@ -34,8 +34,8 @@
                 <table id="SubcategoryTable" class="row-border data-table-filter table-style">
                     <thead>
                         <tr>
-                            <th>{{ __('Subcategory Name')}}</th>
-                            <th>{{ __('Subcategory Arabic')}}</th>
+                            <th>{{ __('Subcategory (EN)')}}</th>
+                            <th>{{ __('Subcategory (AR)')}}</th>
                             <th>{{__('Parent Category')}}</th>
                             <th>{{ __('Action')}}</th>
                         </tr>

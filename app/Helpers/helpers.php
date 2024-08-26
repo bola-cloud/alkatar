@@ -366,7 +366,7 @@ if (!function_exists('productSubCategoryCount')) {
     function productSubCategoryCount($id)
     {
         $subCategory = subCategory::with('products')->where('id', $id)->first();
-        $count = $subCategory->products->count('id');
+        $count = $subCategory->products->where('Status', ACTIVE)->count('id');
         return $count;
     }
 }
