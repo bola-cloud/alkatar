@@ -20,17 +20,17 @@ class ProductController extends Controller
             $categoryId = $request->get('sub_category');
             $query->where('subcategory_id', $categoryId);
         }
-        $all_products = $query->latest()->paginate($request->get('per_page', 10));
+        $all_products = $query->where('Status',1)->latest()->paginate($request->get('per_page', 10));
         return ProductResource::collection($all_products);
     }
     public function show($id)
     {
-        $product = Product::with('brand', 'category', 'colors', 'sizes','weights','additions', 'product_tags')->findOrFail($id);
+        $product = Product::where('Status',1)->with('brand', 'category', 'colors', 'sizes','weights','additions', 'product_tags')->findOrFail($id);
         return ProductResource::make($product);
     }
     public function productsWithDiscount()
     {
-        $products = Product::withDiscount()->with('brand', 'category', 'colors', 'sizes','weights','additions', 'product_tags')->get();
+        $products = Product::where('Status',1)->withDiscount()->with('brand', 'category', 'colors', 'sizes','weights','additions', 'product_tags')->get();
         return ProductResource::collection($products);
     }
 
