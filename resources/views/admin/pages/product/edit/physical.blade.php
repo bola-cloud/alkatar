@@ -64,18 +64,18 @@
                                             </div> --}}
                                             <div class="input__group mb-25">
                                                 <label for="exampleInputEmail1">{{ __('Category Name') }}</label>
-                                                <select class="form-control" id="en_category_name" name="en_category_name">
+                                                <select class="form-control" id="en_category_name" name="en_category_name" data-category-id="{{$product->Category_Id}}">
                                                     <option value="">{{ __('---SELECT A CATEGORY---') }}</option>
                                                     @foreach (Category_Des_Icon() as $item)
                                                         <option value="{{ $item->id }}"
                                                             {{ $item->id == $product->Category_Id ? 'selected' : '' }}>
-                                                            {{ $item->en_Category_Name }}</option>
+                                                            {{ $item->fr_Category_Name }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
 
                                             <div class="input__group mb-25">
-                                            <label for="subcategory_id">{{__("Subcategory Name")}}</label>
+                                            <label for="subcategory_id">{{__("Subcategory")}}</label>
                                             <select class="form-control" id="subcategory_id" name="subcategory_id" data-subcategory-id="{{$product->subcategory_id}}">
                                                 <option value="">{{ __('Select Subcategory') }}</option>
                                             </select>
@@ -500,10 +500,11 @@
     </script>
 
 
-  <script>
+
+<script>
         $(document).ready(function () {
-            $('#en_category_name').change(function () {
-                var categoryId = $(this).val();
+                var categoryId = $('#en_category_name').data('category-id'); 
+                var currentSubcategoryId = $('#subcategory_id').data('subcategory-id'); 
                 if (categoryId) {
                     $.ajax({
                         url: '{{ route("admin.subcategory.all") }}',
@@ -513,7 +514,35 @@
                             $('#subcategory_id').empty();
                             $('#subcategory_id').append('<option value="">{{ __("Select Subcategory") }}</option>');
                             $.each(data, function (key, value) {
-                                $('#subcategory_id').append('<option value="' + value.id + '">' + value.name + '</option>');
+                                var isSelected = (value.id == currentSubcategoryId) ? 'selected' : '';
+                                $('#subcategory_id').append('<option value="' + value.id + '" ' + isSelected + '>' + value.name_ar + '</option>');
+                            });
+                        }
+                    });
+                } else {
+                    $('#subcategory_id').empty();
+                    $('#subcategory_id').append('<option value="">{{ __("Select Subcategory") }}</option>');
+                }
+            });
+    </script>
+
+  <script>
+        $(document).ready(function () {
+            $('#en_category_name').change(function () {
+                var categoryId = $(this).val();
+                var currentSubcategoryId = $('#subcategory_id').data('subcategory-id'); 
+
+                if (categoryId) {
+                    $.ajax({
+                        url: '{{ route("admin.subcategory.all") }}',
+                        type: 'GET',
+                        data: { category_id: categoryId },
+                        success: function (data) {
+                            $('#subcategory_id').empty();
+                            $('#subcategory_id').append('<option value="">{{ __("Select Subcategory") }}</option>');
+                            $.each(data, function (key, value) {
+                                var isSelected = (value.id == currentSubcategoryId) ? 'selected' : '';
+                                $('#subcategory_id').append('<option value="' + value.id + isSelected+ '">' + value.name_ar + '</option>');
                             });
                         }
                     });

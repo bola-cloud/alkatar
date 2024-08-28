@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Admin\Billing;
+use App\Models\Admin\Order;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -57,5 +58,15 @@ class User extends Authenticatable
     public function billing()
     {
         return $this->belongsTo(Billing::class, 'User_Id');
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(PaymentModel::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 }

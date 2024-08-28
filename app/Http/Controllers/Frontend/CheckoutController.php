@@ -8,7 +8,7 @@ use App\Http\Requests\CheckoutOrderRequest;
 use App\Http\Services\BasePaymentService;
 use App\Http\Services\InstamojoService;
 use App\Http\Services\PaymentService;
-use App\Jobs\OrderConfirmMail;
+// use App\Jobs\OrderConfirmMail;
 use App\Library\SslCommerz\SslCommerzNotification;
 use App\Models\Admin\Billing;
 use App\Models\Admin\Coupon;
@@ -30,6 +30,11 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use Razorpay\Api\Api;
 use Illuminate\Support\Facades\Http;
+use Exception;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderConfirmMail;
+use Illuminate\Support\Str;
+
 
 class CheckoutController extends Controller
 {
@@ -258,7 +263,7 @@ class CheckoutController extends Controller
 
                     foreach ($cartItems as $item) {
                         $checkoutProduct[] = [
-                            'name' => $item->name,
+                            'name' => Str::limit($item->name, 35),
                             'quantity' => $item->qty,
                             'unit_amount' => number_format($item->price, 3) * 1000,
                         ];
@@ -270,6 +275,7 @@ class CheckoutController extends Controller
                             'unit_amount' => $shipping_charge * 1000,
                         ];
                     }
+
 
                     $response = Http::withHeaders([
                         'Accept' => 'application/json',
@@ -321,7 +327,7 @@ class CheckoutController extends Controller
                         return redirect()->away($paymentUrl);
                     } else {
                         // Handle the error case
-                        return response()->json(['error' => 'Failed to create session'], 500);
+                        return response()->json(['error' => 'Failed to create session'.$response], 500);
                     }
 
                 case 'COD':
@@ -559,7 +565,22 @@ class CheckoutController extends Controller
         $data['subject'] = __('Order Confirm Mail');
         $data['data'] = $order->Order_Number;
         $data['template'] = 'email.order-confirm';
-        dispatch(new OrderConfirmMail($data))->onQueue('email-send');
+        // dispatch(new OrderConfirmMail($data))->onQueue('email-send');
+    }
+
+    public function sendOrderMail($id)
+    {
+        $order = Order::query()
+            ->with('order_details', 'user', 'coupon', 'order_details.product', 'billing', 'shipping')
+            ->find($id);
+
+        $order['billing_address'] = json_decode($order->billing_address, true);
+        try {
+            Mail::to('Alsaraamills@gmail.com')->send(new OrderConfirmMail($order));
+            return response()->json(['msg' => 'OK']);
+        } catch (Exception $ex) {
+            return response()->json(['msg' => "$ex"]);
+        }
     }
 
     public function paymentStatus($payment_method)
@@ -622,7 +643,10 @@ class CheckoutController extends Controller
                 $data['success'] = true;
             }
             // mail
-            $this->orderConfirmMail($order);
+            // $this->orderConfirmMail($order);
+
+            $this->sendOrderMail($order->id);
+
             return $data;
         } catch (\Exception $e) {
             info('dasd' . $e->getMessage());

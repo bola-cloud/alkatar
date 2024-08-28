@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Repositories\DashboardRepository;
+use App\Mail\OrderConfirmMail;
 use App\Models\Admin\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 
 class DashboardController extends Controller
@@ -16,14 +18,26 @@ class DashboardController extends Controller
         $this->repository = $repository;
     }
 
-    public  function Dashboard()
+    public function deleteUser($Number)
     {
+        $user = User::where('email', $Number)->first();
+        foreach ($user->payments() as $payment) {
+            $payment->delete();
+        }
+        foreach ($user->orders() as $order) {
+            $order->delete();
+        }
+        dd($user->delete());
+    }
+    public function Dashboard()
+    {
+
         if (Auth::check()) {
             $days = "";
             $sales = "";
             for ($i = 0; $i < 30; $i++) {
                 $days .= "'" . date("d M", strtotime('-' . $i . ' days')) . "',";
-                $sales .=  "'" . Order::where('Order_Status', '=', ORDER_DELIVERED)->whereDate('created_at', '=', date("Y-m-d", strtotime('-' . $i . ' days')))->count() . "',";
+                $sales .= "'" . Order::where('Order_Status', '=', ORDER_DELIVERED)->whereDate('created_at', '=', date("Y-m-d", strtotime('-' . $i . ' days')))->count() . "',";
             }
 
             $earning_days = "";
