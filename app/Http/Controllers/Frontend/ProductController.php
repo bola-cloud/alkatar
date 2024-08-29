@@ -32,7 +32,7 @@ class ProductController extends Controller
                     'colors',
                     'sizes',
                     'additions' => function ($query) {
-                        $query->where('status', 1); 
+                        $query->where('status', 1);
                     },
                     'product_tags',
                     'product_reviews',
@@ -55,7 +55,16 @@ class ProductController extends Controller
         $data['sizes'] = Size::with('products')->latest()->get();
         $data['category'] = Category::with('products')->where('en_Description', null)->orWhere('Category_Icon', null)->get();
         $data['brands'] = Brand::with('products')->get();
-        $products = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('status', 1)->latest()->paginate(9);
+        $products = Product::with([
+            'brand',
+            'category',
+            'colors',
+            'sizes',
+            'additions' => function ($query) {
+                $query->where('status', 1);
+            },
+            'product_tags'
+        ])->where('status', 1)->latest()->paginate(9);
         $data['products'] = $products;
         $seo = SeoSetting::where('slug', 'all-products')->first();
         $data['title'] = $seo->title;
@@ -73,7 +82,16 @@ class ProductController extends Controller
         $data['sizes'] = Size::with('products')->latest()->get();
         $data['category'] = Category::with('products')->where('en_Description', null)->orWhere('Category_Icon', null)->get();
         $data['brands'] = Brand::with('products')->get();
-        $products = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('status', 1)->latest()->paginate(9);
+        $products = Product::with([
+            'brand',
+            'category',
+            'colors',
+            'sizes',
+            'additions' => function ($query) {
+                $query->where('status', 1);
+            },
+            'product_tags'
+        ])->where('status', 1)->latest()->paginate(9);
         $data['products'] = $products;
         $seo = SeoSetting::where('slug', 'all-products')->first();
         $data['title'] = $seo->title;
@@ -114,19 +132,39 @@ class ProductController extends Controller
 
         if ($request->ajax()) {
             if ($request->checkCat) {
-                $filters = Product::where('status', 1)->with('category')->whereHas('category', function ($query) use ($request) {
+                $filters = Product::where('status', 1)->with([
+                    'category',
+                    'additions' => function ($query) {
+                        $query->where('status', 1);
+                    }
+                ])->whereHas('category', function ($query) use ($request) {
                     $query->whereIn('en_Category_Name', $request->checkCat);
                 })->get();
             } elseif ($request->checkBrand) {
-                $filters = Product::where('status', 1)->with('brand')->whereHas('brand', function ($query) use ($request) {
+                $filters = Product::where('status', 1)->with([
+                    'brand',
+                    'additions' => function ($query) {
+                        $query->where('status', 1);
+                    }
+                ])->whereHas('brand', function ($query) use ($request) {
                     $query->whereIn('en_BrandName', $request->checkBrand);
                 })->get();
             } elseif ($request->checkColor) {
-                $filters = Product::where('status', 1)->with('colors')->whereHas('colors', function ($query) use ($request) {
+                $filters = Product::where('status', 1)->with([
+                    'colors',
+                    'additions' => function ($query) {
+                        $query->where('status', 1);
+                    }
+                ])->whereHas('colors', function ($query) use ($request) {
                     $query->whereIn('Name', $request->checkColor);
                 })->get();
             } elseif ($request->checkSize) {
-                $filters = Product::where('status', 1)->with('sizes')->whereHas('sizes', function ($query) use ($request) {
+                $filters = Product::where('status', 1)->with([
+                    'sizes',
+                    'additions' => function ($query) {
+                        $query->where('status', 1);
+                    }
+                ])->whereHas('sizes', function ($query) use ($request) {
                     $query->whereIn('Size', $request->checkSize);
                 })->get();
             } elseif ($request->search) {
@@ -134,7 +172,12 @@ class ProductController extends Controller
             } elseif ($request->min && $request->max) {
                 $filters = Product::where('status', 1)->whereBetween('Discount_Price', [$request->min, $request->max])->get();
             } elseif ($request->checkSubCat) {
-                $filters = Product::where('status', 1)->with('subcategory')->whereHas('subcategory', function ($query) use ($request) {
+                $filters = Product::where('status', 1)->with([
+                    'subcategory',
+                    'additions' => function ($query) {
+                        $query->where('status', 1);
+                    }
+                ])->whereHas('subcategory', function ($query) use ($request) {
                     $query->whereIn('id', $request->checkSubCat);
                 })->get();
             } else {
@@ -211,7 +254,16 @@ class ProductController extends Controller
         if ($id) {
             // Category-specific search
             $category = Category::findOrFail($id);
-            $products = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')
+            $products = Product::with([
+                'brand',
+                'category',
+                'colors',
+                'sizes',
+                'additions' => function ($query) {
+                    $query->where('status', 1);
+                },
+                'product_tags'
+            ])
                 ->where('status', 1)
                 ->where('Category_Id', $id)
                 ->latest()
@@ -220,7 +272,16 @@ class ProductController extends Controller
         } else {
             // General search across all categories
             $search = request()->input('search');
-            $products = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')
+            $products = Product::with([
+                'brand',
+                'category',
+                'colors',
+                'sizes',
+                'additions' => function ($query) {
+                    $query->where('status', 1);
+                },
+                'product_tags'
+            ])
                 ->where('status', 1)
                 ->where(function ($query) use ($search) {
                     $query->where('en_Product_Name', 'LIKE', "%{$search}%")
@@ -251,7 +312,16 @@ class ProductController extends Controller
         $data['sizes'] = Size::with('products')->latest()->get();
         $data['category'] = Category::with('products')->where('en_Description', null)->orWhere('Category_Icon', null)->get();
         $data['brands'] = Brand::with('products')->get();
-        $products = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('status', 1)->where('Category_Id', $id)->latest()->paginate(9);
+        $products = Product::with([
+            'brand',
+            'category',
+            'colors',
+            'sizes',
+            'additions' => function ($query) {
+                $query->where('status', 1);
+            },
+            'product_tags'
+        ])->where('status', 1)->where('Category_Id', $id)->latest()->paginate(9);
         $data['products'] = $products;
         $seo = SeoSetting::where('slug', 'all-products')->first();
         $data['title'] = $seo->title;
@@ -310,7 +380,16 @@ class ProductController extends Controller
         $category = Category::with('products')->where('en_Description', null)->orWhere('Category_Icon', null)->get();
         $brands = Brand::with('products')->get();
         $products = Product::query();
-        $products = $products->with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('status', 1);
+        $products = $products->with([
+            'brand',
+            'category',
+            'colors',
+            'sizes',
+            'additions' => function ($query) {
+                $query->where('status', 1);
+            },
+            'product_tags'
+        ])->where('status', 1);
 
         $products = $products->where(function ($q) use ($search) {
             $q->where('en_Product_Name', 'LIKE', "%{$search}%")
