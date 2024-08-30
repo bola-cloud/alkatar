@@ -31,6 +31,7 @@ class Order extends Model
         'Order_Status',
         'Delivery_At',
         'txn',
+        'order_source',
     ];
 
     public function order_details()

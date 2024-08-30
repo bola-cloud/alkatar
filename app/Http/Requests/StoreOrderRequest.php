@@ -17,6 +17,7 @@ class StoreOrderRequest extends FormRequest
             'billing_name' => 'required|string|max:255',
             'Payment_Method' => 'required|string|in:Thawani,CreditCard,Paypal', // Add available payment methods
             'billing_email' => 'nullable|email|max:255',
+            'order_source' => 'required|string|max:255|in:whatsapp,mobile,web',
             'billing_street_address' => 'nullable|string|max:255',
             'billing_zipcode' => 'required|string|max:10',
             'billing_country' => 'required|string|max:255',

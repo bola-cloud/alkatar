@@ -108,6 +108,7 @@ class CheckoutController extends Controller
             'Payment_Method' => '',
             'Payment_Status' => PAYMENT_PENDING,
             'Order_Status' => ORDER_PENDING,
+            'order_source' => $validated['order_source'],
         ]);
 
         // Initialize payment data for Thawani
