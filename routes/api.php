@@ -47,7 +47,7 @@ Route::post('/calculate-delivery-charge', [DeliveryController::class, 'calculate
 Route::get('success', [CheckoutController::class, 'success'])->name('api.thawani.success');
 Route::get('fail', [CheckoutController::class, 'fail'])->name('api.thawani.fail');
 
-Route::group(['middleware' => 'auth:sanctum'], function () {
+Route::group(['middleware' => ['auth:sanctum', 'setLanguage']], function () {
     Route::post('/coupon-apply', [CouponController::class, 'couponApply']);
     Route::post('/checkout', [CheckoutController::class, 'checkoutOrder']);
 });

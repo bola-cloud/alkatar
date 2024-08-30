@@ -18,6 +18,7 @@ use App\Models\Tax;
 use App\Models\WeightProduct;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -187,8 +188,9 @@ class CheckoutController extends Controller
             }
 
             // Add product details to payment data
+            $productName = App::getLocale() === 'ar' ? $product->fr_Product_Name : $product->en_Product_Name;
             $paymentData['products'][] = [
-                'name' =>  Str::limit($product->fr_Product_Name, 35),
+                'name' =>  Str::limit($productName, 35),
                 'quantity' => $item['quantity'],
                 'unit_amount' => round($price * 1000, 2),
             ];
