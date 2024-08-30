@@ -20,6 +20,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
 {
@@ -30,180 +31,194 @@ class CheckoutController extends Controller
         Log::info('Checkout requested', ['request' => $validated]);
 
 //        try {
-            // Simulate cart items and calculate totals
-            $subtotal = $this->calculateSubtotal($validated['cart_items']);
-            $tax = tax_amount($subtotal, $validated['billing_country']);
-            $shipping_charge = delivery_charge($validated['billing_city'] ?? $validated['billing_country']);
-            $weight_charge = $this->calculateExtraWeightFees($validated['cart_items']);
-            $grandTotal = $subtotal + $shipping_charge + $weight_charge + $tax;
+        // Simulate cart items and calculate totals
+        $subtotal = $this->calculateSubtotal($validated['cart_items']);
+        $tax = tax_amount($subtotal, $validated['billing_country']);
+        $shipping_charge = delivery_charge($validated['billing_city'] ?? $validated['billing_country']);
+        $weight_charge = $this->calculateExtraWeightFees($validated['cart_items']);
+        $grandTotal = $subtotal + $shipping_charge + $weight_charge + $tax;
 
-            // Apply coupon discount if available
-            $discount = 0;
-            if (isset($validated['coupon_code'])) {
-                $coupon = Coupon::where('CouponCode', $validated['coupon_code'])
-                    ->where('Status', 1)
-                    ->where('ExpireDate', '>=', Carbon::now()->toDateString())
-                    ->where('Min_Expenses', '<=', $subtotal)
-                    ->first();
+        // Apply coupon discount if available
+        $discount = 0;
+        if (isset($validated['coupon_code'])) {
+            $coupon = Coupon::where('CouponCode', $validated['coupon_code'])
+                ->where('Status', 1)
+                ->where('ExpireDate', '>=', Carbon::now()->toDateString())
+                ->where('Min_Expenses', '<=', $subtotal)
+                ->first();
 
-                if ($coupon && !$this->hasCouponBeenUsed($coupon->id, $user_id)) {
-                    $discount = $coupon->amount;
-                    $grandTotal -= $discount;
-                } else {
-                    return response()->json(['error' => 'Invalid or already used coupon code'], 400);
-                }
+            if ($coupon && !$this->hasCouponBeenUsed($coupon->id, $user_id)) {
+                $discount = $coupon->amount;
+                $grandTotal -= $discount;
+            } else {
+                return response()->json(['error' => 'Invalid or already used coupon code'], 400);
+            }
+        }
+
+        // Generate unique order number
+        $order_number = $this->generateOrderNumber();
+
+        // Address handling
+        if ($user_id) {
+            if (hasBlillingAddress($user_id)) {
+                $billing_create = $this->updateBillingAddress($request, $user_id);
+            } else {
+                $billing_create = $this->createBillingAddress($request, $user_id);
             }
 
-            // Generate unique order number
-            $order_number = $this->generateOrderNumber();
-
-            // Address handling
-            if ($user_id) {
-                if (hasBlillingAddress($user_id)) {
-                    $billing_create = $this->updateBillingAddress($request, $user_id);
-                } else {
-                    $billing_create = $this->createBillingAddress($request, $user_id);
-                }
-
-                $billing_address = [
-                    'name' => $billing_create->Name,
-                    'email' => $billing_create->Email,
-                    'street' => $billing_create->Street,
-                    'state' => $billing_create->State,
-                    'city' => $billing_create->City,
-                    'zipcode' => $billing_create->Zipcode,
-                    'country' => $billing_create->Country,
-                ];
-
-                $shipping_address = $billing_address;
-            }
-
-            // Update city and state names
-            $city = City::find($validated['billing_city'] ?? '');
-            $state = State::find($validated['billing_state']);
-            $billing_address['state_en'] = $city->name_en ?? '';
-            $billing_address['state_ar'] = $city->name_ar ?? '';
-            $billing_address['city_en'] = $state->name_en ?? '';
-            $billing_address['city_ar'] = $state->name_ar ?? '';
-
-            // Create order
-            $order = Order::create([
-                'Order_Number' => $order_number,
-                'User_Id' => Auth::id(),
-                'Billing_Id' => $billing_create->id,
-                'billing_address' => json_encode($billing_address, true),
-                'shipping_address' => json_encode($shipping_address, true),
-                'Delivery_Charge' => $shipping_charge,
-                'Tax' => $tax,
-                'Sub_Total' => $subtotal,
-                'Coupon_Id' => $validated['coupon_code'] ?? null,
-                'Coupon_Amount' => $discount,
-                'Grand_Total' => $grandTotal - $discount,
-                'Is_Free_Delivery' => false,
-                'Is_Order_Successful' => false,
-                'Is_Order_Completed' => false,
-                'Payment_Method' => '',
-                'Payment_Status' => PAYMENT_PENDING,
-                'Order_Status' => ORDER_PENDING,
-            ]);
-
-            // Initialize payment data for Thawani
-            $paymentData = [
-                'client_reference_id' => $order_number,
-                'mode' => 'payment',
-                'products' => [],
-                'success_url' => route('api.thawani.success', ['order_number' => $order_number]),
-                'cancel_url' => route('api.thawani.fail', ['order_number' => $order_number]),
-                'metadata' => [
-                    'order_number' => $order_number,
-                    'shipping_charge' => $shipping_charge,
-                    'subtotal' => $subtotal,
-                    'discount' => $discount,
-                    'grand_total' => $grandTotal,
-                    'tax' => $tax,
-                ]
+            $billing_address = [
+                'name' => $billing_create->Name,
+                'email' => $billing_create->Email,
+                'street' => $billing_create->Street,
+                'state' => $billing_create->State,
+                'city' => $billing_create->City,
+                'zipcode' => $billing_create->Zipcode,
+                'country' => $billing_create->Country,
             ];
 
-            // Add tax to payment data if applicable
-            if ($tax) {
-                $paymentData['products'][] = [
-                    'name' => 'tax',
-                    'quantity' => 1,
-                    'unit_amount' => round($tax * 1000, 2),
-                ];
-            }
+            $shipping_address = $billing_address;
+        }
 
-            // Add weight charge to payment data if applicable
-            if ($weight_charge) {
-                $paymentData['products'][] = [
-                    'name' => 'weight extra charge',
-                    'quantity' => 1,
-                    'unit_amount' => round($weight_charge * 1000, 2),
-                ];
-            }
+        // Update city and state names
+        $city = City::find($validated['billing_city'] ?? '');
+        $state = State::find($validated['billing_state']);
+        $billing_address['state_en'] = $city->name_en ?? '';
+        $billing_address['state_ar'] = $city->name_ar ?? '';
+        $billing_address['city_en'] = $state->name_en ?? '';
+        $billing_address['city_ar'] = $state->name_ar ?? '';
 
-            // Add shipping charge to payment data if applicable
-            if ($shipping_charge) {
-                $paymentData['products'][] = [
-                    'name' => 'shipping charge',
-                    'quantity' => 1,
-                    'unit_amount' => round($shipping_charge * 1000, 2),
-                ];
-            }
+        // Create order
+        $order = Order::create([
+            'Order_Number' => $order_number,
+            'User_Id' => Auth::id(),
+            'Billing_Id' => $billing_create->id,
+            'billing_address' => json_encode($billing_address, true),
+            'shipping_address' => json_encode($shipping_address, true),
+            'Delivery_Charge' => $shipping_charge,
+            'Tax' => $tax,
+            'Sub_Total' => $subtotal,
+            'Coupon_Id' => $validated['coupon_code'] ?? null,
+            'Coupon_Amount' => $discount,
+            'Grand_Total' => $grandTotal - $discount,
+            'Is_Free_Delivery' => false,
+            'Is_Order_Successful' => false,
+            'Is_Order_Completed' => false,
+            'Payment_Method' => '',
+            'Payment_Status' => PAYMENT_PENDING,
+            'Order_Status' => ORDER_PENDING,
+        ]);
 
-            // Process each cart item
-            foreach ($validated['cart_items'] as $item) {
-                $product = Product::find($item['product_id']);
+        // Initialize payment data for Thawani
+        $paymentData = [
+            'client_reference_id' => $order_number,
+            'mode' => 'payment',
+            'products' => [],
+            'success_url' => route('api.thawani.success', ['order_number' => $order_number]),
+            'cancel_url' => route('api.thawani.fail', ['order_number' => $order_number]),
+            'metadata' => [
+                'order_number' => $order_number,
+                'shipping_charge' => $shipping_charge,
+                'subtotal' => $subtotal,
+                'discount' => $discount,
+                'grand_total' => $grandTotal,
+                'tax' => $tax,
+            ]
+        ];
+
+        // Add tax to payment data if applicable
+        if ($tax) {
+            $paymentData['products'][] = [
+                'name' => 'tax',
+                'quantity' => 1,
+                'unit_amount' => round($tax * 1000, 2),
+            ];
+        }
+
+        // Add weight charge to payment data if applicable
+        if ($weight_charge) {
+            $paymentData['products'][] = [
+                'name' => 'weight extra charge',
+                'quantity' => 1,
+                'unit_amount' => round($weight_charge * 1000, 2),
+            ];
+        }
+
+        // Add shipping charge to payment data if applicable
+        if ($shipping_charge) {
+            $paymentData['products'][] = [
+                'name' => 'shipping charge',
+                'quantity' => 1,
+                'unit_amount' => round($shipping_charge * 1000, 2),
+            ];
+        }
+
+        // Process each cart item
+        // Process each cart item
+        foreach ($validated['cart_items'] as $item) {
+            $product = Product::find($item['product_id']);
+            $sizePrice = 0;
+            $sizeWeight = 0;
+
+            // If size_id is provided, calculate the size price and weight
+            if (!empty($item['size_id'])) {
                 $size = $product->sizes()->where('size_product.Size_Id', $item['size_id'])->first();
-                $weight = WeightProduct::where('id', $item['weight_id'])->first();
-                $additions = Addition::whereIn('id', $item['addition_ids'] ?? [])->get();
-
-                $price = $size->pivot->price + ($weight->price ?? 0);
-                $weightValue = $size->pivot->weight + ($weight->weight ?? 0);
-
-                // Calculate addition prices
-                $additionPrice = $additions->sum('price');
-                $price += $additionPrice;
-
-                // Apply discount to the price if available
-                if ($product->Discount) {
-                    $discountAmount = ($product->Discount / 100) * $price;
-                    $price -= $discountAmount;
-                }
-
-                // Add product details to payment data
-                $paymentData['products'][] = [
-                    'name' => $product->name . ' (' . $item['size_id'] . ')',
-                    'quantity' => $item['quantity'],
-                    'unit_amount' => round($price * 1000, 2),  // Price after applying the discount
-                ];
+                $sizePrice = $size->pivot->price ?? 0;
+                $sizeWeight = $size->pivot->weight ?? 0;
             }
 
-            // Make the API call to Thawani
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-                'thawani-api-key' => env('THAWANI_TEST_SECRET_KEY')
-            ])->post(env('THAWANI_TEST_CHECKOUT_URL') . '/checkout/session', $paymentData);
+            // Calculate the weight price and weight value
+            $weight = WeightProduct::where('id', $item['weight_id'])->first();
+            $weightPrice = $weight->price ?? 0;
+            $weightValue = $weight->weight ?? 0;
 
-            Log::info('Thawani API session response', ['response' => $response->body()]);
+            // Calculate the total price for the item
+            $price = $sizePrice + $weightPrice;
 
-            if ($response->successful()) {
-                $sessionId = $response['data']['session_id'] ?? '';
-                $order->update(['session_id' => $sessionId]);
-                $payment = PaymentModel::create([
-                    'session_id' => $sessionId,
-                    'user_id' => $user_id,
-                    'order_number' => $order_number,
-                    'amount' => $grandTotal,
-                    'status' => 'CREATED',
-                ]);
+            // Calculate addition prices
+            $additions = Addition::whereIn('id', $item['addition_ids'] ?? [])->get();
+            $additionPrice = $additions->sum('price');
+            $price += $additionPrice;
 
-                // Redirect the user to the Thawani payment page
-                $paymentUrl = env('THAWANI_TEST_PAY_URL') . $sessionId . "?key=" . env('THAWANI_TEST_PUBLIC_KEY');
-                return response()->json(['url' => $paymentUrl]);
-            } else {
-                return response()->json(['error' => 'Failed to create payment session'], 500);
+            // Apply discount to the price if available
+            if ($product->Discount) {
+                $discountAmount = ($product->Discount / 100) * $price;
+                $price -= $discountAmount;
             }
+
+            // Add product details to payment data
+            $paymentData['products'][] = [
+                'name' =>  Str::limit($product->fr_Product_Name, 35),
+                'quantity' => $item['quantity'],
+                'unit_amount' => round($price * 1000, 2),
+            ];
+        }
+
+
+        // Make the API call to Thawani
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'thawani-api-key' => env('THAWANI_TEST_SECRET_KEY')
+        ])->post(env('THAWANI_TEST_CHECKOUT_URL') . '/checkout/session', $paymentData);
+
+        Log::info('Thawani API session response', ['response' => $response->body()]);
+
+        if ($response->successful()) {
+            $sessionId = $response['data']['session_id'] ?? '';
+            $order->update(['session_id' => $sessionId]);
+            $payment = PaymentModel::create([
+                'session_id' => $sessionId,
+                'user_id' => $user_id,
+                'order_number' => $order_number,
+                'amount' => $grandTotal,
+                'status' => 'CREATED',
+            ]);
+
+            // Redirect the user to the Thawani payment page
+            $paymentUrl = env('THAWANI_TEST_PAY_URL') . $sessionId . "?key=" . env('THAWANI_TEST_PUBLIC_KEY');
+            return response()->json(['url' => $paymentUrl]);
+        } else {
+            return response()->json(['error' => 'Failed to create payment session'], 500);
+        }
 
 //        } catch (\Exception $e) {
 //            Log::error('Error during checkout', ['error' => $e->getMessage()]);
@@ -214,36 +229,63 @@ class CheckoutController extends Controller
     protected function calculateSubtotal(array $cartItems)
     {
         $subtotal = 0;
+
         foreach ($cartItems as $item) {
+            // Retrieve the product and related data
             $product = Product::find($item['product_id']);
-            $size = $product->sizes()->where('size_product.Size_Id', $item['size_id'])->first();
+            $sizePrice = 0;
+
+            // If size_id is provided, calculate the size price
+            if (!empty($item['size_id'])) {
+                $size = $product->sizes()->where('size_product.Size_Id', $item['size_id'])->first();
+                $sizePrice = $size->pivot->price ?? 0;
+            }
+
+            // Calculate the weight price
             $weight = WeightProduct::find($item['weight_id']);
+            $weightPrice = $weight->price ?? 0;
+
+            // Calculate the addition prices
             $additions = Addition::whereIn('id', $item['addition_ids'] ?? [])->get();
-
-            $price = $size->pivot->price + ($weight->price ?? 0);
             $additionPrice = $additions->sum('price');
-            $price += $additionPrice;
 
-            // Apply discount
-            if ($product->Discount) {
-                $discountAmount = ($product->Discount / 100) * $price;
+            // Calculate the total price for the item
+            $price = $sizePrice + $weightPrice + $additionPrice;
+
+            // Apply discount if available
+            if ($product->discount) {
+                $discountAmount = ($product->discount / 100) * $price;
                 $price -= $discountAmount;
             }
 
+            // Add to subtotal considering the quantity
             $subtotal += $price * $item['quantity'];
         }
+
         return $subtotal;
     }
+
 
     protected function calculateExtraWeightFees(array $cartItems)
     {
         $totalWeightGrams = 0;
+
         foreach ($cartItems as $item) {
             $product = Product::find($item['product_id']);
-            $size = $product->sizes()->where('size_product.Size_Id', $item['size_id'])->first();
-            $weight = WeightProduct::find($item['weight_id']);
+            $sizeWeight = 0;
 
-            $itemWeight = ($size->pivot->weight ?? 0) + ($weight->weight ?? 0);
+            // If size_id is provided, calculate the size weight
+            if (!empty($item['size_id'])) {
+                $size = $product->sizes()->where('size_product.Size_Id', $item['size_id'])->first();
+                $sizeWeight = $size->pivot->weight ?? 0;
+            }
+
+            // Calculate the weight of the selected weight product
+            $weight = WeightProduct::find($item['weight_id']);
+            $weightValue = $weight->weight ?? 0;
+
+            // Calculate the total weight for the item
+            $itemWeight = $sizeWeight + $weightValue;
             $totalWeightGrams += $itemWeight * $item['quantity'];
         }
 
@@ -251,6 +293,7 @@ class CheckoutController extends Controller
         $totalWeightKg = $totalWeightGrams / 1000;
         $shippingFee = 0;
 
+        // Calculate shipping fee based on the total weight
         if ($totalWeightKg >= 1 && $totalWeightKg <= 10) {
             $shippingFee = 2; // Example: 2 OMR for 1-10kg
         } elseif ($totalWeightKg > 10) {
@@ -260,6 +303,7 @@ class CheckoutController extends Controller
 
         return $shippingFee;
     }
+
     protected function calculateTax($subtotal, $country = null)
     {
         $tax = 0;
