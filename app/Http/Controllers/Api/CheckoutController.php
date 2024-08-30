@@ -16,6 +16,7 @@ use App\Models\PaymentModel;
 use App\Models\State;
 use App\Models\Tax;
 use App\Models\WeightProduct;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -411,6 +412,42 @@ class CheckoutController extends Controller
         return $shipping;
     }
 
+    public function success(Request $request)
+    {
+        $orderNumber = $request->get('order_number');
+        Log::info('locak at request ', ['requesst' => $request->all()]);
+        Log::info('Payment order id accessed', ['order_id' => $orderNumber]);
+        $order = Order::where('Order_Number', $orderNumber)->first();
+        Log::info('Order status updated on success', ['order_id' => $order->Id]);
+        $order->update([
+            'order_status' => $response['data']['payment_status'] ?? $order->order_status,
+            'Is_Order_Successful' => true,
+            'Is_Order_Completed' => true,
+            'Payment_Status' => PAYMENT_SUCCESS,
+            'Order_Status' => ORDER_PROCESSING
+        ]);
+        return redirect()->to("/#/donations/paymentstatus/?payId={$order->Order_Number}");
+//        return redirect()->to($request->getHost() . "/services/paymentstatus/?payId={$order->Id}");
+    }
 
+    public function fail(Request $request)
+    {
+        $orderNumber = $request->get('order_id');
+        $order = Order::where('Order_Number', $orderNumber)->first();
+        Log::info('Payment failed', ['order_id' => $orderNumber]);
+        $order->update([
+            'order_status' => $response['data']['payment_status'] ?? $order->order_status,
+            'Is_Order_Successful' => false,
+            'Is_Order_Completed' => false,
+            'Payment_Status' => PAYMENT_SUCCESS,
+            'Order_Status' => ORDER_CANCELLED
+        ]);
+        Log::info('Order status updated on failure', ['order_id' => $order->Id]);
+        return redirect()->to("/#/donations/paymentstatus/?payId={$order->Id}");
+//        return redirect()->to($request->getHost()."/services/paymentstatus/?payId={$order->Id}");
+
+//        return redirect()->to('https://zakat-website.netlify.app/aboutus/');
+
+    }
 
 }
