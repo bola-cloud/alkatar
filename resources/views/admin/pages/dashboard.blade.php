@@ -403,11 +403,11 @@
         <div class="col-md-6 mb-3">
             <div class="card transactions-chart-card">
                 <div class="item-top card-header mb-30">
-                    <h2 class="card-title">{{ __('Transactions') }}</h2>
+                    <h2 class="card-title">{{ __('Orders Source') }}</h2>
                 </div>
                 <div class="card-body">
                     <div class="chart-container">
-                        <canvas id="earnSource"></canvas>
+                        <canvas id="earnSource" height="300"></canvas>
                     </div>
                 </div>
             </div>
@@ -451,7 +451,7 @@
 
     </div>
 
-    <div id="transaction_pie" data-dt='{!! json_encode($transactionPie) !!}'></div>
+    <div id="order_pie" data-dt='{!! json_encode($orderPie) !!}'></div>
     <div id="sales_ratio" data-dt='{!! json_encode($salesRatio) !!}'></div>
 
     @push('post_scripts')

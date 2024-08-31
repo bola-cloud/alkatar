@@ -72,6 +72,10 @@
                     name: "Coupon",
                 },
                 {
+                    data: "order_source",
+                    name: "order_source",
+                },
+                {
                     data: "Payment_Method",
                     name: "Payment_Method",
                 },
@@ -99,9 +103,10 @@
                 { width: "80px", targets: 7 },
                 { width: "80px", targets: 8 },
                 { width: "40px", targets: 9 },
-                { width: "70px", targets: 10 },
-                { width: "60px", targets: 11 },
+                { width: "80px", targets: 10 },
+                { width: "70px", targets: 11 },
                 { width: "60px", targets: 12 },
+                { width: "60px", targets: 13 },
             ],
         });
 

@@ -76,8 +76,8 @@ class OrderController extends Controller
 
                     $serialized_billing = json_decode($data->billing_address);
 
-                    if (isset($serialized_billing->city_en)) {
-                        return $serialized_billing->city_en;
+                    if (isset($serialized_billing->city_ar)) {
+                        return $serialized_billing->city_ar;
                     } else {
                         return 'N/A';
                     }
@@ -139,6 +139,9 @@ class OrderController extends Controller
                 //         return 'N/A';
                 //     }
                 // })
+                ->addColumn('order_source', function ($data) {
+                    return $data->order_source ?? 'الموقع الكتروني';
+                })
                 ->addColumn('Status', function ($data) {
                     $html = '';
                     if ($data->Order_Status == ORDER_PENDING) {

@@ -3,13 +3,14 @@
 
     var ctx = document.getElementById("earnSource");
     var myPieChart = new Chart(ctx, {
-        type: 'doughnut',
+        type: 'bar',
         data: {
-            labels: ["Cash On Deliver", "Paypal", "Stripe", 'Razorpay', 'Bank Transfer'],
+            labels: ["الموقع الإلكتروني", "الواتس اب"],
             datasets: [{
-                data: $('#transaction_pie').data("dt"),
-                backgroundColor: ['#33C4FF', '#2AD3C3', '#54B1FF', '#FF6E2B', '#D931FF'],
-                hoverBackgroundColor: ['#1C7193', '#1C8279', '#31638C', '#A2461C', '#812196'],
+                data: $('#order_pie').data("dt"),
+                label: "مصدر الطلبات",
+                backgroundColor: ['#33C4FF', '#2AD3C3'],
+                hoverBackgroundColor: ['#1C7193', '#1C8279'],
                 hoverBorderColor: "rgba(234, 236, 244, 1)",
             }],
         },

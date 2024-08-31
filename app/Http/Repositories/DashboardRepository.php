@@ -219,6 +219,27 @@ class DashboardRepository
 
     }
 
+
+    public function getOrderPie()
+    {
+        $orders = Order::get();
+        $order_count = $orders->count();
+        $whatsapp = $orders->where('order_source', "whatsapp")->count();
+        $website = $orders->where('order_source', null)->count();
+
+        $whatsapp_percent = $order_count == 0 ? 0 : ($whatsapp / $order_count) * 100;
+        $website_percent = $order_count == 0 ? 0 : ($website / $order_count) * 100;
+
+
+        $trans_array = [
+            $website_percent,
+            $whatsapp_percent,
+        ];
+        return $trans_array;
+
+    }
+
+
     public function getSalesRatio()
     {
         $orders = Order::where('Order_Status', ORDER_DELIVERED)->orwhere('Order_Status', ORDER_RETURN)->get();

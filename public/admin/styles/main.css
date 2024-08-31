@@ -778,6 +778,14 @@ img {
 }
 
 .sidebar__close {
+  /* display: none; */
+  position: absolute;
+  top: 20px;
+  right: 10px;
+}
+
+
+.sidebar__open {
   display: none;
   position: absolute;
   top: 20px;
@@ -786,6 +794,10 @@ img {
 
 @media screen and (max-width: 1199px) {
   .sidebar__close {
+    display: block;
+  }
+
+  .sidebar__open {
     display: block;
   }
 }
@@ -797,6 +809,16 @@ img {
   font-size: 20px;
   color: #F96363;
 }
+
+
+.sidebar__open button {
+  border: 0;
+  background-color: transparent;
+  padding: 5px;
+  font-size: 20px;
+  color: #F96363;
+}
+
 
 .sidebar__brand {
   padding: 24px 0 30px 30px;

@@ -73,6 +73,7 @@
                                 <!-- <th>{{ __('Products') }}</th> -->
                                 <th>{{ __('Total Amount') }}</th>
                                 <th>{{ __('Coupon Code') }}</th>
+                                <th>{{ __('order source') }}</th>
                                 <th>{{ __('Payment Method') }}</th>
                                 <!-- <th>{{ __('Digital Goods') }}</th> -->
                                 <th>{{ __('Status') }}</th>

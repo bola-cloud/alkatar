@@ -47,7 +47,8 @@ class DashboardController extends Controller
                 $incomes .= "'" . Order::where('Order_Status', '=', ORDER_DELIVERED)->whereDate('created_at', '=', date("Y-m-d", strtotime('-' . $i . ' days')))->sum('Grand_Total') . "',";
             }
 
-            $data['transactionPie'] = $this->repository->getTransactionPie();
+            $data['orderPie'] = $this->repository->getOrderPie();
+
             $data['salesRatio'] = $this->repository->getSalesRatio();
 
             $data['order_days'] = $days;

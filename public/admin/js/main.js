@@ -9,17 +9,24 @@ All javascript and jquery plugins activation
     ---------------------------*/
     const sidebarToggler = $('.sidebar-toggler');
     const sidebarClose = $('.sidebar__close');
+    const sidebarOpen = $('.sidebar__open');
     const sidebarArea = $('.sidebar__area');
-    //const mainContent = $('.main-content');
-    sidebarToggler.on('click', () => {
+    const mainContent = $('.main-content');
+    sidebarClose.on('click', () => {
         sidebarArea.addClass('active');
-        //mainContent.toggleClass('active');
+        mainContent.toggleClass('active');
+        sidebarClose.hide();
+        sidebarOpen.show();
     });
-    
-    sidebarClose.on('click', ()=>{
+
+    sidebarOpen.on('click', () => {
         sidebarArea.removeClass('active');
+        mainContent.removeClass('active');
+        sidebarClose.show();
+        sidebarOpen.hide();
     });
     
+
     var alterClass = function() {
         var ww = document.body.clientWidth;
         if (ww > 1199) {
