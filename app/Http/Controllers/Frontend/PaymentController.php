@@ -117,6 +117,7 @@ class PaymentController extends Controller
             foreach ($content as $item){
                 OrderDetails::create([
                     'Order_Id' => $order->id,
+
                     'Product_Id'=>$item->id,
                     'Product_Name'=>$item->name,
                     'Image'=>$item->options->image,

@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrderRequest;
+use App\Mail\OrderConfirmMail;
 use App\Models\Admin\Addition;
 use App\Models\Admin\Billing;
 use App\Models\Admin\Coupon;
 use App\Models\Admin\Order;
+use App\Models\Admin\OrderDetails;
 use App\Models\Admin\Product;
 use App\Models\Admin\Shipping;
 use App\Models\City;
@@ -22,6 +24,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
@@ -110,7 +113,57 @@ class CheckoutController extends Controller
             'Order_Status' => ORDER_PENDING,
             'order_source' => $validated['order_source'],
         ]);
+        if ($order) {
+            foreach ($validated['cart_items'] as $item) {
+                // Decrement the product quantity in stock
+                $this->subQtyProduct($item['product_id'], $item['quantity']);
+                $product = Product::find($item['product_id']);
+                $sizePrice = 0;
+                $sizeWeight = 0;
 
+                // If size_id is provided, calculate the size price and weight
+                if (!empty($item['size_id'])) {
+                    $size = $product->sizes()->where('size_product.Size_Id', $item['size_id'])->first();
+                    $sizePrice = $size->pivot->price ?? 0;
+                    $sizeWeight = $size->pivot->weight ?? 0;
+                }
+
+                // Calculate the weight price and weight value
+                $weight = WeightProduct::where('id', $item['weight_id'])->first();
+                $weightPrice = $weight->price ?? 0;
+                $weightValue = $weight->weight ?? 0;
+
+                // Calculate the total price for the item
+                $price = $sizePrice + $weightPrice;
+
+                // Calculate addition prices
+                $additions = Addition::whereIn('id', $item['addition_ids'] ?? [])->get();
+                $additionPrice = $additions->sum('price');
+                $price += $additionPrice;
+
+                // Apply discount to the price if available
+                if ($product->Discount) {
+                    $discountAmount = ($product->Discount / 100) * $price;
+                    $price -= $discountAmount;
+                }
+                $productName = App::getLocale() === 'ar' ? $product->fr_Product_Name : $product->en_Product_Name;
+
+                // Create order details
+                OrderDetails::create([
+                    'Order_Id' => $order->id,
+                    'Product_Id' => $item['product_id'],
+                    'Product_Name' => $productName,
+                    'Image' => $product->Primary_Image,
+                    'Price' => $price,
+//                    'Color' => $item['color'] ?? null,
+                    'Size' => $sizeWeight,
+                    'Quantity' => $item['quantity'],
+                    'Total_Price' => $price * $item['quantity'],
+                ]);
+            }
+            $this->sendOrderMail($order->id);
+
+        }
         // Initialize payment data for Thawani
         $paymentData = [
             'client_reference_id' => $order_number,
@@ -156,7 +209,6 @@ class CheckoutController extends Controller
         }
 
         // Process each cart item
-        // Process each cart item
         foreach ($validated['cart_items'] as $item) {
             $product = Product::find($item['product_id']);
             $sizePrice = 0;
@@ -191,7 +243,7 @@ class CheckoutController extends Controller
             // Add product details to payment data
             $productName = App::getLocale() === 'ar' ? $product->fr_Product_Name : $product->en_Product_Name;
             $paymentData['products'][] = [
-                'name' =>  Str::limit($productName, 35),
+                'name' => Str::limit($productName, 35),
                 'quantity' => $item['quantity'],
                 'unit_amount' => round($price * 1000, 2),
             ];
@@ -288,6 +340,7 @@ class CheckoutController extends Controller
             $weight = WeightProduct::find($item['weight_id']);
             $weightValue = $weight->weight ?? 0;
 
+
             // Calculate the total weight for the item
             $itemWeight = $sizeWeight + $weightValue;
             $totalWeightGrams += $itemWeight * $item['quantity'];
@@ -297,10 +350,7 @@ class CheckoutController extends Controller
         $totalWeightKg = $totalWeightGrams / 1000;
         $shippingFee = 0;
 
-        // Calculate shipping fee based on the total weight
-        if ($totalWeightKg >= 1 && $totalWeightKg <= 10) {
-            $shippingFee = 2; // Example: 2 OMR for 1-10kg
-        } elseif ($totalWeightKg > 10) {
+        if ($totalWeightKg > 10) {
             $extraKg = ceil($totalWeightKg - 10);
             $shippingFee = 2 + ($extraKg * 0.100); // Example: 2 OMR + 0.100 OMR for each extra kg
         }
@@ -413,6 +463,35 @@ class CheckoutController extends Controller
             'Country' => $request->shipping_country
         ]);
         return $shipping;
+    }
+
+    public function subQtyProduct($product_id, $qty)
+    {
+        $product = Product::whereId($product_id)->first();
+        $new_qty = $product->Quantity - $qty;
+        if ($new_qty < 1) {
+            $nn_qty = 0;
+        } else {
+            $nn_qty = $new_qty;
+        }
+        $product->update([
+            'Quantity' => $nn_qty,
+        ]);
+    }
+
+    public function sendOrderMail($id)
+    {
+        $order = Order::query()
+            ->with('order_details', 'user', 'coupon', 'order_details.product', 'billing', 'shipping')
+            ->find($id);
+
+        $order['billing_address'] = json_decode($order->billing_address, true);
+        try {
+            Mail::to('Alsaraamills@gmail.com')->send(new OrderConfirmMail($order));
+            return response()->json(['msg' => 'OK']);
+        } catch (Exception $ex) {
+            return response()->json(['msg' => "$ex"]);
+        }
     }
 
     public function success(Request $request)
