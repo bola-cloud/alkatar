@@ -164,12 +164,13 @@ class CheckoutController extends Controller
             $this->sendOrderMail($order->id);
 
         }
+        $phoneNumber = auth()->user()->code . auth()->user()->Number;
         // Initialize payment data for Thawani
         $paymentData = [
             'client_reference_id' => $order_number,
             'mode' => 'payment',
             'products' => [],
-            'success_url' => route('api.thawani.success', ['order_number' => $order_number]),
+            'success_url' => route('api.thawani.success', ['order_number' => $order_number, 'phone_number' => $phoneNumber]),
             'cancel_url' => route('api.thawani.fail', ['order_number' => $order_number]),
             'metadata' => [
                 'order_number' => $order_number,
@@ -497,6 +498,7 @@ class CheckoutController extends Controller
     public function success(Request $request)
     {
         $orderNumber = $request->get('order_number');
+        $phoneNumber = $request->get('phone_number');
         Log::info('locak at request ', ['requesst' => $request->all()]);
         Log::info('Payment order id accessed', ['order_id' => $orderNumber]);
         $order = Order::where('Order_Number', $orderNumber)->first();
@@ -508,6 +510,16 @@ class CheckoutController extends Controller
             'Payment_Status' => PAYMENT_SUCCESS,
             'Order_Status' => ORDER_PROCESSING
         ]);
+        $pdfUrl = route('order.print', ['id' => $order->id]);
+        $response = Http::asForm()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/success/payment', [
+            'phone_number' => $phoneNumber,
+            'booking_id' => $order->Order_Number,
+            'pdf' => $pdfUrl,
+        ]);
+
+        // Log the response from the API call
+        Log::info('WhatsApp API response', ['response' => $response->json()]);
+
         return redirect()->to("/#/donations/paymentstatus/?payId={$order->Order_Number}");
 //        return redirect()->to($request->getHost() . "/services/paymentstatus/?payId={$order->Id}");
     }

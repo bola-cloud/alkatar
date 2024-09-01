@@ -12,7 +12,8 @@ use  \App\Http\Controllers\Api\{
     CouponController,
     TaxController,
     DeliveryController,
-    CheckoutController
+    CheckoutController,
+    OrderController
 };
 
 /*
@@ -50,6 +51,7 @@ Route::get('fail', [CheckoutController::class, 'fail'])->name('api.thawani.fail'
 Route::group(['middleware' => ['auth:sanctum', 'setLanguage']], function () {
     Route::post('/coupon-apply', [CouponController::class, 'couponApply']);
     Route::post('/checkout', [CheckoutController::class, 'checkoutOrder']);
+    Route::get('/order-print/{id}', [OrderController::class, 'order_print'])->name('order.print');
 });
 
 
