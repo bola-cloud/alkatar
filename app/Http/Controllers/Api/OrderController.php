@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Admin\Order;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class OrderController extends Controller
 {
@@ -15,7 +16,9 @@ class OrderController extends Controller
             ->find($request->id);
         $order['billing_address'] = json_decode($order->billing_address, true);
 
-        return view('admin.pages.orders.invoice', compact('order'));
+        // return view('admin.pages.orders.invoice', compact('order'));
+        $pdf = Pdf::loadView('admin.pages.orders.invoice', compact('order'));
+        return $pdf->download('order_invoice.pdf');
     }
 
 }

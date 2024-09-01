@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" dir="rtl">
+<html lang="ar" dir="rtl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link href="https://fonts.cdnfonts.com/css/firefly" rel="stylesheet">
+                
+
     <title>Invoice</title>
     <style>
         @page {
@@ -12,7 +16,8 @@
         }
 
         body {
-            font-family: Arial, sans-serif;
+            /* font-family: DejaVu Sans, serif, Arial, sans-serif; */
+            font-family: 'Firefly', sans-serif;                                               
             line-height: 1.3;
             color: #333;
             margin: 0;
@@ -114,7 +119,7 @@
     <div class="invoice-container">
         <div class="invoice-header">
             <img src="{{ asset(IMG_LOGO_PATH . allsetting()['main_logo']) }}" alt="Logo" class="invoice-logo">
-            <span class="invoice-title">الفاتورة</span>
+            <span class="invoice-title" style="font-family: Firefly;">الفاتورة</span>
         </div>
 
         <div class="invoice-details">
