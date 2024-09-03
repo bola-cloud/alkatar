@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Admin\Order;
 use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Mccarlosen\LaravelMpdf\Facades\LaravelMpdf as PDF;
 
 class OrderController extends Controller
 {
@@ -16,9 +16,18 @@ class OrderController extends Controller
             ->find($request->id);
         $order['billing_address'] = json_decode($order->billing_address, true);
 
-        // return view('admin.pages.orders.invoice', compact('order'));
-        $pdf = Pdf::loadView('admin.pages.orders.invoice', compact('order'));
-        return $pdf->download('order_invoice.pdf');
+
+        $currentLocale = app()->getLocale();
+        app()->setLocale('en');
+
+        $pdf = PDF::loadView('admin.pages.orders.api-invoice', compact('order'), [], [
+            'title' => 'Order #' . $order->id,
+            'autoScriptToLang' => true,
+            'autoLangToFont' => true,
+            'autoArabic' => true,
+        ]);
+
+        return $pdf->download($order->id . '.pdf');
     }
 
 }
