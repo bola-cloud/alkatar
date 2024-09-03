@@ -55,6 +55,15 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+        static::deleting(function ($user) {
+            $user->orders()->delete();
+            $user->payments()->delete();
+        });
+    }
+
     public function billing()
     {
         return $this->belongsTo(Billing::class, 'User_Id');

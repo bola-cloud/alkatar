@@ -18,15 +18,14 @@ class DashboardController extends Controller
         $this->repository = $repository;
     }
 
+
+    public function product_price() {
+        
+    }
     public function deleteUser($Number)
     {
-        $user = User::where('email', $Number)->first();
-        foreach ($user->payments() as $payment) {
-            $payment->delete();
-        }
-        foreach ($user->orders() as $order) {
-            $order->delete();
-        }
+        $user = User::where('Number', $Number)->first();
+        // dd($user->billing_address);
         dd($user->delete());
     }
     public function Dashboard()

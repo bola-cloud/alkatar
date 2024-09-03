@@ -87,10 +87,11 @@ class CheckoutController extends Controller
         // Update city and state names
         $city = City::find($validated['billing_city'] ?? '');
         $state = State::find($validated['billing_state']);
-        $billing_address['state_en'] = $city->name_en ?? '';
-        $billing_address['state_ar'] = $city->name_ar ?? '';
-        $billing_address['city_en'] = $state->name_en ?? '';
-        $billing_address['city_ar'] = $state->name_ar ?? '';
+        $billing_address['state_en'] = $state->name_en ?? '';
+        $billing_address['state_ar'] = $state->name_ar ?? '';
+
+        $billing_address['city_en'] = $city->name_en ?? '';
+        $billing_address['city_ar'] = $city->name_ar ?? '';
 
         // Create order
         $order = Order::create([

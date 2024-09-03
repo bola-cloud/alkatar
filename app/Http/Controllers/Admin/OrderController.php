@@ -75,7 +75,6 @@ class OrderController extends Controller
 
 
                     $serialized_billing = json_decode($data->billing_address);
-
                     if (isset($serialized_billing->city_ar)) {
                         return $serialized_billing->city_ar;
                     } else {

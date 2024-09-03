@@ -1908,7 +1908,7 @@ h3 {
     display: flex;
     gap: 2.5rem;
     right: 40%;
-    top: unset;
+    top: 106%;
 }
 @media (min-width: 768px) {
     .hero-section .hero-slider .slick-dots {

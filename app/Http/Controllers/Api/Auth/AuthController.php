@@ -43,11 +43,13 @@ class AuthController extends Controller
     {
        $validated =  $request->validate([
             'phone_number' => 'required',
+            'name' => 'required',
             'code' => 'required',
             'otp' => 'required|digits:5',
         ]);
 
         $phone_number = $validated['phone_number'];
+        $name = $validated['name'];
         $entered_otp = $validated['otp'];
         $full_phone = $validated['code'] . $validated['phone_number'];
         $otp_record = Otp::where('phone_number', $full_phone)->latest()->first();
@@ -57,7 +59,7 @@ class AuthController extends Controller
 
             if (!$user) {
                 $user = User::create([
-                    'name' => $phone_number,
+                    'name' => $name,
                     'email' => 'default' . $phone_number . '@default.com',
                     'password' => Hash::make($phone_number),
                     'Number' => $phone_number,
