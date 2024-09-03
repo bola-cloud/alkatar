@@ -105,7 +105,7 @@ class CheckoutController extends Controller
             'Sub_Total' => $subtotal,
             'Coupon_Id' => $validated['coupon_code'] ?? null,
             'Coupon_Amount' => $discount,
-            'Grand_Total' => $grandTotal - $discount,
+            'Grand_Total' => $grandTotal,
             'Is_Free_Delivery' => false,
             'Is_Order_Successful' => false,
             'Is_Order_Completed' => false,
