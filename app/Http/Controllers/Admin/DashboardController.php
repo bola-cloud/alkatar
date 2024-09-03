@@ -9,6 +9,7 @@ use App\Models\Admin\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Admin\Product;
 
 
 class DashboardController extends Controller
@@ -20,7 +21,11 @@ class DashboardController extends Controller
 
 
     public function product_price() {
-        
+        $products = Product::whereDoesntHave('weights', function ($query) {
+            $query->whereColumn('price', '=', 'products.price');
+        })->select('id', 'price', 'en_Product_Name', 'fr_Product_Name')->with('weights')->get();
+
+        return response()->json($products);
     }
     public function deleteUser($Number)
     {
