@@ -52,7 +52,6 @@ Route::get('/order-print/{id}', [OrderController::class, 'order_print'])->name('
 Route::group(['middleware' => ['auth:sanctum', 'setLanguage']], function () {
     Route::post('/coupon-apply', [CouponController::class, 'couponApply']);
     Route::post('/checkout', [CheckoutController::class, 'checkoutOrder']);
-    Route::post('/whatsapp/change-status', [OrderController::class, 'changeStatus']);
 
 });
 

@@ -9,6 +9,7 @@ use App\Models\Admin\OrderDetails;
 use App\Models\City;
 use App\Models\State;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Yajra\DataTables\Facades\DataTables;
 
 class OrderController extends Controller
@@ -212,6 +213,19 @@ class OrderController extends Controller
                 'Order_Status' => $request->Order_Status,
             ]);
             if (!empty($update)) {
+                if ($order->order_source === 'whatsapp') {
+                    $response = Http::asForm()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/change_status', [
+                        'phone_number' => $order->user()->Number,
+                        'booking_id' => $order->id,
+                        'status' => $request->Order_Status,
+                        'url' => "https://alsharashoping.com/admin/orders/all",
+                    ]);
+
+                    if ($response->failed()) {
+                        return response()->json(['error' => __('Failed to notify via WhatsApp.')], 500);
+                    }
+                }
+
                 $this->statusChangeEmail($order, $request->Order_Status);
                 return redirect()->back()->with('success', __('Status successfully changed!'));
             }
