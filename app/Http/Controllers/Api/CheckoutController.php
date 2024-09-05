@@ -271,7 +271,6 @@ class CheckoutController extends Controller
                 'status' => 'CREATED',
             ]);
 
-            $this->sendOrderMail($order->id);
 
 
             // Redirect the user to the Thawani payment page
@@ -314,8 +313,8 @@ class CheckoutController extends Controller
             $price = $sizePrice + $weightPrice + $additionPrice;
 
             // Apply discount if available
-            if ($product->discount) {
-                $discountAmount = ($product->discount / 100) * $price;
+            if ($product->Discount) {
+                $discountAmount = ($product->Discount / 100) * $price;
                 $price -= $discountAmount;
             }
 
@@ -514,12 +513,14 @@ class CheckoutController extends Controller
             'Payment_Status' => PAYMENT_SUCCESS,
             'Order_Status' => ORDER_PROCESSING
         ]);
+        $this->sendOrderMail($order->id);
         $pdfUrl = route('order.print', ['id' => $order->id]);
         $response = Http::asForm()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/success/payment', [
             'phone_number' => $phoneNumber,
             'booking_id' => $order->Order_Number,
             'pdf' => $pdfUrl,
         ]);
+
 
         // Log the response from the API call
         Log::info('WhatsApp API response', ['response' => $response->json()]);
