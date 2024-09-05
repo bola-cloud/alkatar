@@ -28,7 +28,7 @@
                         <thead>
                         <tr>
                             <th>{{ __('Name')}}</th>
-                            <th>{{ __('Thumb')}}</th>
+                            <!-- <th>{{ __('Thumb')}}</th> -->
                             <th>{{ __('Status')}}</th>
                             <th>{{ __('Action')}}</th>
                         </tr>
@@ -37,7 +37,7 @@
                         @forelse ($languages as $lang)
                             <tr>
                                 <td>{{$lang->name}}</td>
-                                <td><img src="{{asset(IMG_LANGUAGE.$lang->thumb)}}" alt="{{$lang->locale}}"></td>
+                                <!-- <td><img src="{{asset(IMG_LANGUAGE.$lang->thumb)}}" alt="{{$lang->locale}}"></td> -->
                                 <td>
                                     @if($lang->status == 1)
                                         <span class="status active">Active</span>

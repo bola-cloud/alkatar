@@ -645,7 +645,7 @@ class CheckoutController extends Controller
             // mail
             // $this->orderConfirmMail($order);
 
-            $this->sendOrderMail($order->id);
+            // $this->sendOrderMail($order->id);
 
             return $data;
         } catch (\Exception $e) {
@@ -791,7 +791,7 @@ class CheckoutController extends Controller
         $order->Order_Status = ORDER_PROCESSING;
 
         $order->save();
-
+        $this->sendOrderMail($order->id);
         return redirect()->route('checkout.thankyou_page')->with('success', 'Order successfully created!');
     }
 

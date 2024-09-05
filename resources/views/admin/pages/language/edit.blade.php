@@ -49,7 +49,7 @@
                                                     <option value="0" {{$data->status != 1 ? 'selected' : ''}}>{{__('Disable')}}</option>
                                                 </select>
                                             </div>
-                                            <div class="input__group mb-25">
+                                            <div class="input__group mb-25 d-none">
                                                 <label for="exampleInputEmail1">{{ __('Thumb')}}</label>
                                                 <input type="file" class="form-control putImage2"  name="thumb" id="thumb">
                                                 <img src="{{asset(IMG_LANGUAGE.$data->thumb)}}" id="target2" class="admin_image mt-2"/>
