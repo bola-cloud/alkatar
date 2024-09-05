@@ -39,6 +39,7 @@ class CheckoutController extends Controller
         // Simulate cart items and calculate totals
         $subtotal = $this->calculateSubtotal($validated['cart_items']);
         $tax = tax_amount($subtotal, $validated['billing_country']);
+        $tax = tax_amount($subtotal, $validated['billing_country']);
         $shipping_charge = delivery_charge($validated['billing_city'] ?? $validated['billing_country']);
         $weight_charge = $this->calculateExtraWeightFees($validated['cart_items']);
         $grandTotal = $subtotal + $shipping_charge + $weight_charge + $tax;
@@ -162,7 +163,6 @@ class CheckoutController extends Controller
                     'Total_Price' => $price * $item['quantity'],
                 ]);
             }
-            $this->sendOrderMail($order->id);
 
         }
         $phoneNumber = auth()->user()->code . auth()->user()->Number;
@@ -270,6 +270,8 @@ class CheckoutController extends Controller
                 'amount' => $grandTotal,
                 'status' => 'CREATED',
             ]);
+            $this->sendOrderMail($order->id);
+
 
             // Redirect the user to the Thawani payment page
             $paymentUrl = env('THAWANI_TEST_PAY_URL') . $sessionId . "?key=" . env('THAWANI_TEST_PUBLIC_KEY');
