@@ -270,6 +270,7 @@ class CheckoutController extends Controller
                 'amount' => $grandTotal,
                 'status' => 'CREATED',
             ]);
+
             $this->sendOrderMail($order->id);
 
 
