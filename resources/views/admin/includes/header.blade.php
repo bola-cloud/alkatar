@@ -15,10 +15,10 @@
                             <div class="dropdown">
                                 <button class="btn btn-secondary dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                     @if(app()->getLocale() == 'en')
-                                        <img src="{{ asset(IMG_LANGUAGE . 'en.png') }}" alt="English" width="24" height="24" class="me-2">
+                                        <!-- <img src="{{ asset(IMG_LANGUAGE . 'en.png') }}" alt="English" width="24" height="24" class="me-2"> -->
                                         English
                                     @elseif(app()->getLocale() == 'fr')
-                                        <img src="{{ asset(IMG_LANGUAGE . 'fr.png') }}" alt="Arabic" width="24" height="24" class="me-2">
+                                        <!-- <img src="{{ asset(IMG_LANGUAGE . 'fr.png') }}" alt="Arabic" width="24" height="24" class="me-2"> -->
                                         Arabic
                                     @endif
                                 </button>
@@ -26,7 +26,7 @@
                                     @if(getLanguage('en')->status == 1 && app()->getLocale() != 'en')
                                         <li>
                                             <a class="dropdown-item" href="{{ route('locale.switch', 'en') }}">
-                                                <img src="{{ asset(IMG_LANGUAGE . 'en.png') }}" alt="English" width="24" height="24" class="me-2">
+                                                <!-- <img src="{{ asset(IMG_LANGUAGE . 'en.png') }}" alt="English" width="24" height="24" class="me-2"> -->
                                                 English
                                             </a>
                                         </li>
@@ -34,7 +34,7 @@
                                     @if(getLanguage('fr')->status == 1 && app()->getLocale() != 'fr')
                                         <li>
                                             <a class="dropdown-item" href="{{ route('locale.switch', 'fr') }}">
-                                                <img src="{{ asset(IMG_LANGUAGE . 'fr.png') }}" alt="Arabic" width="24" height="24" class="me-2">
+                                                <!-- <img src="{{ asset(IMG_LANGUAGE . 'fr.png') }}" alt="Arabic" width="24" height="24" class="me-2"> -->
                                                 Arabic
                                             </a>
                                         </li>

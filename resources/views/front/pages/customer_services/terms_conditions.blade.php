@@ -36,9 +36,9 @@
                             <li class="menu-item {{ Route::is('faq') ? 'active' : '' }}"><a class="menu-link"
                                     href="{{ route('faq') }}"><i
                                         class="menu-icon far fa-file-alt"></i>{{ __('FAQ') }}</a></li>
-                            <li class="menu-item {{ Route::is('refund.policy') ? 'active' : '' }}"><a class="menu-link"
+                            <!-- <li class="menu-item {{ Route::is('refund.policy') ? 'active' : '' }}"><a class="menu-link"
                                     href="{{ route('refund.policy') }}"><i
-                                        class="menu-icon far fa-file-alt"></i>{{ __('Refund Policy') }}</a></li>
+                                        class="menu-icon far fa-file-alt"></i>{{ __('Refund Policy') }}</a></li> -->
                         </ul>
                     </div>
                 </div>

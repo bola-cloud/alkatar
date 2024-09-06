@@ -28,7 +28,7 @@
                             <li class="menu-item {{Route::is('privacy.policy') ? 'active' : '' }}"><a class="menu-link" href="{{route('privacy.policy')}}"><i class="menu-icon far fa-file-alt"></i>{{__('Privacy Policy')}}</a></li>
                             <li class="menu-item {{Route::is('shipping.return') ? 'active' : '' }}"><a class="menu-link" href="{{route('shipping.return')}}"><i class="menu-icon far fa-file-alt"></i>{{__('Shipping & Return')}}</a></li>
                             <li class="menu-item {{Route::is('faq') ? 'active' : '' }}"><a class="menu-link" href="{{route('faq')}}"><i class="menu-icon far fa-file-alt"></i>{{__('FAQ')}}</a></li>
-                            <li class="menu-item {{Route::is('refund.policy') ? 'active' : '' }}"><a class="menu-link" href="{{route('refund.policy')}}"><i class="menu-icon far fa-file-alt"></i>{{__('Refund Policy')}}y</a></li>
+                            <!-- <li class="menu-item {{Route::is('refund.policy') ? 'active' : '' }}"><a class="menu-link" href="{{route('refund.policy')}}"><i class="menu-icon far fa-file-alt"></i>{{__('Refund Policy')}}y</a></li> -->
                         </ul>
                     </div>
                 </div>
