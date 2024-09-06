@@ -218,7 +218,7 @@ class OrderController extends Controller
                         'phone_number' => $order->user->Number ?? '',
                         'booking_id' => $order->id,
                         'status' => $request->Order_Status,
-                        'url' => "https://alsharashoping.com/admin/orders/all",
+                        'url' => "https://alsharashoping.com",
                     ]);
 
                     if ($response->failed()) {
