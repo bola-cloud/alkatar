@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-use App\Traits\EnumTrait;
+use App\Traits;
 
 enum OrderStatus: int
 {
