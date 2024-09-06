@@ -215,7 +215,7 @@ class OrderController extends Controller
             if (!empty($update)) {
                 if ($order->order_source === 'whatsapp') {
                     $response = Http::asForm()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/change_status', [
-                        'phone_number' => $order->user()->Number,
+                        'phone_number' => $order->user->Number ?? '',
                         'booking_id' => $order->id,
                         'status' => $request->Order_Status,
                         'url' => "https://alsharashoping.com/admin/orders/all",
