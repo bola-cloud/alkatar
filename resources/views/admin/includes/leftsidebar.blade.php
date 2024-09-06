@@ -552,12 +552,12 @@
                             <span>{{ __('Privacy Policy') }}</span>
                         </a>
                     </li>
-                    <li class="{{ isset($submenu) && $submenu == 'return_policy' ? 'mm-active' : '' }}">
+                    <!-- <li class="{{ isset($submenu) && $submenu == 'return_policy' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.refund_policy') }}">
                             <i class="fa fa-circle"></i>
                             <span>{{ __('Refund Policy') }}</span>
                         </a>
-                    </li>
+                    </li> -->
                     <li class="{{ isset($submenu) && $submenu == 'shipping_return' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.shipping_return') }}">
                             <i class="fa fa-circle"></i>
@@ -570,12 +570,12 @@
                             <span>{{ __('Terms & Condition') }}</span>
                         </a>
                     </li>
-                    <li class="{{ isset($submenu) && $submenu == 'company_story' ? 'mm-active' : '' }}">
+                    <!-- <li class="{{ isset($submenu) && $submenu == 'company_story' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.company.story') }}">
                             <i class="fa fa-circle"></i>
                             <span>{{ __('Company Story') }}</span>
                         </a>
-                    </li>
+                    </li> -->
                 </ul>
             </li>
         @endcanany

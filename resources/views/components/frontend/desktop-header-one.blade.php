@@ -103,7 +103,8 @@
                             <div class="lang-switcher">
                                 @if (app()->getLocale() == 'en')
                                     <span class="flag">
-                                        <img src="{{ asset(IMG_LANGUAGE . 'en.png') }}" alt="united-states" />
+                                        <!-- <img src="{{ asset(IMG_LANGUAGE . 'en.png') }}" alt="united-states" /> -->
+                                        English
                                     </span>
                                     <a href="javascript:void(0)" class="lang">
                                         @if (getLanguage('en')->status == 1 && getLanguage('fr')->status == 1)
@@ -112,7 +113,8 @@
                                     </a>
                                 @elseif(app()->getLocale() == 'fr')
                                     <span class="flag">
-                                        <img src="{{ asset(IMG_LANGUAGE . 'fr.png') }}" alt="india" />
+                                        <!-- <img src="{{ asset(IMG_LANGUAGE . 'fr.png') }}" alt="india" /> -->
+                                         العربية
                                     </span>
                                     <a href="javascript:void(0)" class="lang">
                                         @if (getLanguage('en')->status == 1 && getLanguage('fr')->status == 1)
@@ -126,7 +128,8 @@
                                         @if (getLanguage('fr')->status == 1)
                                             <li class="single-lang">.
                                                 <a class="lang-text" href="{{ route('locale.switch', 'fr') }}">
-                                                    <img src="{{ asset(IMG_LANGUAGE . 'fr.png') }}" alt="oman">
+                                                    <!-- <img src="{{ asset(IMG_LANGUAGE . 'fr.png') }}" alt="oman"> -->
+                                                     العربية
                                                 </a>
                                             </li>
                                         @endif
@@ -134,7 +137,8 @@
                                         @if (getLanguage('en')->status == 1)
                                             <li class="single-lang">
                                                 <a class="lang-text" href="{{ route('locale.switch', 'en') }}">
-                                                    <img src="{{ asset(IMG_LANGUAGE . 'en.png') }}" alt="united-states" />
+                                                    <!-- <img src="{{ asset(IMG_LANGUAGE . 'en.png') }}" alt="united-states" /> -->
+                                                     English
                                                 </a>
                                             </li>
                                         @endif
