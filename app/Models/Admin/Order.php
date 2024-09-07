@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     use HasFactory;
-    protected $fillable=[
+    protected $fillable = [
         'Order_Number',
         'User_Id',
         'Billing_Id',
@@ -57,5 +57,43 @@ class Order extends Model
     public function shipping()
     {
         return $this->belongsTo(Shipping::class, 'Shipping_Id');
+    }
+
+    public function getStatusLang()
+    {
+        return [
+            ORDER_PENDING => [
+                'status_en' => 'Pending',
+                'status_ar' => 'معلق',
+            ],
+            ORDER_PROCESSING => [
+                'status_en' => 'Processing',
+                'status_ar' => 'قيد المعالجة',
+            ],
+            ORDER_SHIPPED => [
+                'status_en' => 'Shipped',
+                'status_ar' => 'تم الشحن',
+            ],
+            ORDER_DELIVERED => [
+                'status_en' => 'Delivered',
+                'status_ar' => 'تم التوصيل',
+            ],
+            ORDER_CANCELLED => [
+                'status_en' => 'Cancelled',
+                'status_ar' => 'ملغي',
+            ],
+            ORDER_RETURN => [
+                'status_en' => 'Returned',
+                'status_ar' => 'مرجع',
+            ],
+            ORDER_NOT_PAYMENT_YET => [
+                'status_en' => 'Not Paid Yet',
+                'status_ar' => 'لم يُدفع بعد',
+            ],
+            ORDER_DELIVERED_FAILED => [
+                'status_en' => 'Delivery Failed',
+                'status_ar' => 'فشل التسليم',
+            ],
+        ];
     }
 }

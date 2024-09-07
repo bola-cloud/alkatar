@@ -35,11 +35,10 @@ class UserProfileController extends Controller
         $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users,email,' . Auth::user()->id,
-            'dob' => 'required',
             'gender' => 'required',
             'number' => 'required'
         ], [
-            'dob' => 'The date of birth is required'
+            'name' => 'يجب ادخال الاسم'
         ]);
 
         if (!empty($request->image)) {
@@ -58,8 +57,8 @@ class UserProfileController extends Controller
             'street_address' => $request->street_address,
             'Number' => $request->number,
             'Gender' => $request->gender,
-            'DOB' => $request->dob,
-            'About' => $request->about,
+            'DOB' => $request->dob ?? null,
+            'About' => $request->about ?? null,
         ]);
         if ($user) {
             return redirect()->back()->with('success', __('Successfully Updated!'));
@@ -68,7 +67,9 @@ class UserProfileController extends Controller
     }
     public function myOrder()
     {
-        $orders = Order::with('order_details', 'order_details.product')->latest()->get();
+        $authId = Auth::user()->id;
+
+        $orders = Order::with('order_details', 'order_details.product')->where('User_Id',$authId)->latest()->get();
         $data['all_orders'] = $orders->whereIn('Order_Status', [ORDER_PENDING, ORDER_PROCESSING, ORDER_SHIPPED]);
         $data['delivered_orders'] = $orders->where('Order_Status', ORDER_DELIVERED);
         $data['canceled_orders'] = $orders->whereIn('Order_Status', [ORDER_CANCELLED, ORDER_DELIVERED_FAILED, ORDER_RETURN]);

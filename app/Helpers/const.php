@@ -4,7 +4,6 @@ const ACTIVE = 1;
 const INACTIVE = 0;
 
 #orders
-
 const ORDER_PENDING = 1;
 const ORDER_PROCESSING = 2;
 const ORDER_SHIPPED = 3;

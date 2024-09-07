@@ -29,7 +29,7 @@ class DashboardController extends Controller
     }
     public function deleteUser($Number)
     {
-        $user = User::where('Number', $Number)->first();
+        $user = User::where('email', $Number)->first();
         // dd($user->billing_address);
         dd($user->delete());
     }

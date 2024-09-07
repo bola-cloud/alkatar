@@ -22,6 +22,17 @@
                         @csrf
                         <div class="mt-32 mb-20">
                             <label for="phone_number" class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+                                {{__("Name")}}:
+                            </label>
+                            <div class="relative w-full">
+                                <input type="text" id="name" name="name"
+                                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-red focus:border-primary-red dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-primary-red"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="mt-32 mb-20">
+                            <label for="phone_number" class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
                                 {{__("Phone Number")}}:
                             </label>
                             <div class="relative w-full">

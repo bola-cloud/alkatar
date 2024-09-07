@@ -21,12 +21,12 @@
                                         aria-controls="pills-profile" aria-selected="true">
                                         {{ __('Change Profile Info') }}</button>
                                 </li>
-                                <li class="nav-item" role="presentation">
+                                <!-- <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="pills-password-tab" data-bs-toggle="pill"
                                         data-bs-target="#pills-password" type="button" role="tab"
                                         aria-controls="pills-password" aria-selected="false">
                                         {{ __('Change Password') }}</button>
-                                </li>
+                                </li> -->
                             </ul>
 
                             <div class="tab-content" id="pills-tabContent">
@@ -98,7 +98,7 @@
                                                     <div class="form-group">
                                                         <label for="phone">{{ __('Phone') }}</label>
                                                         <input type="text" class="form-control" id="phone"
-                                                            name="number" value="{{ $user->Number }}">
+                                                            name="number" value="{{ $user->Number }}" readonly>
                                                         @error('number')
                                                             <span class="text-danger">{{ $message }}</span>
                                                         @enderror
@@ -126,7 +126,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="col-lg-12">
-                                                    <div class="form-group">
+                                                    <div class="form-group d-none">
                                                         <label for="about-info">{{ __('About') }}</label>
                                                         <textarea class="form-control info-box" id="about-info" name="about" rows="3"
                                                             placeholder="{{ __('Say something about yourself') }}">{{ $user->About }}</textarea>

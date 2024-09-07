@@ -49,14 +49,14 @@ class DashboardRepository
     public function getTotalTodayProductOrder()
     {
         $current_date = Carbon::now();
-        $orders = Order::whereDate('created_at', '=', $current_date)->with('order_details')->get();
-        $total_items_qty = 0;
-        foreach($orders as $order) {
-            foreach($order->order_details as $od) {
-                $total_items_qty += $od->Quantity;
-            }
-        }
-        return $total_items_qty;
+        $orders = Order::whereDate('created_at', '=', $current_date)->with('order_details')->count();
+        // $total_items_qty = 0;
+        // foreach($orders as $order) {
+        //     foreach($order->order_details as $od) {
+        //         $total_items_qty += $od->Quantity;
+        //     }
+        // }
+        return $orders;
     }
 
     public function getcurrentMonthProductSale()

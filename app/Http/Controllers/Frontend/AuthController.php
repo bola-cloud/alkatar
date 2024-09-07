@@ -276,52 +276,8 @@ class AuthController extends Controller
 
     public function otpSignInPost(Request $request)
     {
-
-        //     $request->validate([
-        //         'phone_number' => 'required',
-        //     ]);
-
-        //     // $response = Http::post(
-        //     //     'https://muscatapps.smsoman.com/api/GenOTP',
-        //     //     [
-        //     //         "UserName" => "Mufraji",
-        //     //         "Password" => "Mufraji123",
-        //     //         "Phoneno" => $request->input('phone_number'),
-        //     //         "MsgTemplate" => "{OTP} is your verification code for Sharaa Dates. Do not share this code with anyone."
-        //     //     ]
-        //     // );
-
-        //     // $data = $response->json();
-
-        //     // info($data);
-
-        //     $otp
-
-
-        //     $response = Http::asForm()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/send_otp', [
-        //         'phone_number' => '201159774052',
-        //         'otp' => '337'
-        //     ]);
-
-        //     if ($response->successful()) {
-        //         // Handle successful response
-        //         echo $response->body();
-        //     } else {
-        //         // Handle error response
-        //         echo $response->body();
-        //     }
-
-
-        //     if ($data['StatusDesc'] == 'Success') {
-        //         return redirect()->route('user.otp.verify.get', [
-        //             'phone_number' => $request->input('phone_number'),
-        //             'RefNo' => $data['RefNo']
-        //         ]);
-        //     } else {
-        //         return redirect()->back()->with('error', 'Something went wrong! SMS not sent');
-        //     }
-
         $request->validate([
+            'name' => 'required',
             'phone_number' => 'required',
             'country_code' => 'required',
         ]);
@@ -346,6 +302,7 @@ class AuthController extends Controller
         if ($response->successful()) {
             return redirect()->route('user.otp.verify.get', [
                 'phone_number' => $request->input('full_phone'),
+                'name' => $request->input('name'),
                 'country_code' => $request->input('country_code')
             ]);
         } else {
@@ -357,6 +314,7 @@ class AuthController extends Controller
     {
         $data['phone_number'] = $request->phone_number;
         $data['country_code'] = $request->country_code;
+        $data['name'] = $request->name;
 
         return view('front.auth.otp_form', $data);
     }
@@ -366,10 +324,12 @@ class AuthController extends Controller
         $request->validate([
             'phone_number' => 'required',
             'otp' => 'required|digits:5',
+            'name' => 'required',
         ]);
 
         $phone_number = $request->input('phone_number');
         $country_code = $request->input('country_code');
+        $name = $request->input('name');
         $phone_without_country_code = ltrim($phone_number, '+' . $country_code);
         $entered_otp = $request->input('otp');
         $stored_otp = session('whatsapp_otp');
@@ -380,14 +340,14 @@ class AuthController extends Controller
             // OTP is valid
             session()->forget('whatsapp_otp'); // Clear the OTP from session
 
-            $user = User::where('Number', $phone_number)->where("is_admin", 0)->first();
+            $user = User::where('Number', $phone_without_country_code)->where("is_admin", 0)->first();
 
             if ($user) {
                 Auth::login($user);
                 return redirect()->route('front')->with('success', 'Login Successfully');
             } else {
                 $user = User::create([
-                    'name' => $phone_number,
+                    'name' => $name,
                     'email' => 'default' . $phone_number . '@default.com',
                     'password' => Hash::make($phone_number),
                     'code' => $country_code,

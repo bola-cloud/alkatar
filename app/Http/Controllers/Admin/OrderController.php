@@ -201,6 +201,7 @@ class OrderController extends Controller
         return view('admin.pages.orders.status', compact('order'));
     }
 
+
     public function orderStatusChange(Request $request, $id)
     {
         $id = decrypt($id);
@@ -212,17 +213,18 @@ class OrderController extends Controller
             $update = $order->update([
                 'Order_Status' => $request->Order_Status,
             ]);
+
             if (!empty($update)) {
                 if ($order->order_source === 'whatsapp') {
-                    $response = Http::asForm()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/change_status', [
+                    $response = Http::asJson()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/change_status', [
                         'phone_number' => $order->user->Number ?? '',
                         'booking_id' => $order->id,
-                        'status' => $request->Order_Status,
+                        'status' => $order->getStatusLang()[$request->Order_Status],
                         'url' => "https://alsharashoping.com",
                     ]);
-
                     if ($response->failed()) {
-                        return response()->json(['error' => __('Failed to notify via WhatsApp.')], 500);
+                        dd($response);
+                        return response()->json(['error' => $response], 500);
                     }
                 }
 
@@ -233,6 +235,8 @@ class OrderController extends Controller
         }
         return redirect()->back()->with('error', __('Order not found!'));
     }
+
+
 
     public function bulkStatusUpdate(Request $request)
     {
