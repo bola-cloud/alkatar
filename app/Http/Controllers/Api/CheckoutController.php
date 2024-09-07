@@ -510,6 +510,7 @@ class CheckoutController extends Controller
             'order_status' => $response['data']['payment_status'] ?? $order->order_status,
             'Is_Order_Successful' => true,
             'Is_Order_Completed' => true,
+            'Payment_Method' => THAWANI,
             'Payment_Status' => PAYMENT_SUCCESS,
             'Order_Status' => ORDER_PROCESSING
         ]);
