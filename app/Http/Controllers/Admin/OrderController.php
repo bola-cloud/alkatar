@@ -57,7 +57,6 @@ class OrderController extends Controller
                         return 'N/A';
                     }
                 })
-
                 ->addColumn("State", function ($data) {
                     if (is_null($data->billing)) {
                         return 'N/A';
@@ -216,11 +215,15 @@ class OrderController extends Controller
 
             if (!empty($update)) {
                 if ($order->order_source === 'whatsapp') {
+                    $url = "https://alsharashoping.com";
+                    if ($request->Order_Status == ORDER_DELIVERED)
+                        $url = route('user.profile.track.my.order', ['id' => encrypt($order->id)]);
+
                     $response = Http::asJson()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/change_status', [
                         'phone_number' => $order->user->Number ?? '',
                         'booking_id' => $order->id,
                         'status' => $order->getStatusLang()[$request->Order_Status],
-                        'url' => "https://alsharashoping.com",
+                        'url' => $url,
                     ]);
                     if ($response->failed()) {
                         dd($response);
@@ -235,7 +238,6 @@ class OrderController extends Controller
         }
         return redirect()->back()->with('error', __('Order not found!'));
     }
-
 
 
     public function bulkStatusUpdate(Request $request)

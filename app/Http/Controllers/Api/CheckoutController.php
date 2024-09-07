@@ -514,7 +514,7 @@ class CheckoutController extends Controller
             'Payment_Status' => PAYMENT_SUCCESS,
             'Order_Status' => ORDER_PROCESSING
         ]);
-        $this->sendOrderMail($order->id);
+//        $this->sendOrderMail($order->id);
         $pdfUrl = route('order.print', ['id' => $order->id]);
         $response = Http::asForm()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/success/payment', [
             'phone_number' => $phoneNumber,
@@ -526,8 +526,9 @@ class CheckoutController extends Controller
         // Log the response from the API call
         Log::info('WhatsApp API response', ['response' => $response->json()]);
 
-        return redirect()->to("/#/donations/paymentstatus/?payId={$order->Order_Number}");
-//        return redirect()->to($request->getHost() . "/services/paymentstatus/?payId={$order->Id}");
+//        return redirect()->to("/#/donations/paymentstatus/?payId={$order->Order_Number}");
+        return redirect()->to($request->getHost());
+        //        return redirect()->to($request->getHost() . "/services/paymentstatus/?payId={$order->Id}");
     }
 
     public function fail(Request $request)
