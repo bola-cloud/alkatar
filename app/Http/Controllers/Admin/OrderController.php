@@ -221,7 +221,7 @@ class OrderController extends Controller
 
                     $response = Http::asJson()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/change_status', [
                         'phone_number' => $order->user->Number ?? '',
-                        'booking_id' => $order->id,
+                        'booking_id' => $order->Order_Number,
                         'status' => $order->getStatusLang()[$request->Order_Status],
                         'url' => $url,
                     ]);

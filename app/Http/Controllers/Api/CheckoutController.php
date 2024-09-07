@@ -32,7 +32,8 @@ class CheckoutController extends Controller
     public function checkoutOrder(StoreOrderRequest $request)
     {
         $validated = $request->validated();
-        $user_id = Auth::id();
+        $user = auth()->user();
+        $user_id = $user->id;
         Log::info('Checkout requested', ['request' => $validated]);
 
 //        try {
@@ -83,6 +84,7 @@ class CheckoutController extends Controller
             ];
 
             $shipping_address = $billing_address;
+
         }
 
         // Update city and state names
@@ -93,6 +95,10 @@ class CheckoutController extends Controller
 
         $billing_address['city_en'] = $city->name_en ?? '';
         $billing_address['city_ar'] = $city->name_ar ?? '';
+        $billing_address['phone_number'] = $user->Number ?? '';
+
+        $shipping_address['phone_number'] = $user->Number ?? '';
+
 
         // Create order
         $order = Order::create([
@@ -270,7 +276,6 @@ class CheckoutController extends Controller
                 'amount' => $grandTotal,
                 'status' => 'CREATED',
             ]);
-
 
 
             // Redirect the user to the Thawani payment page
@@ -526,8 +531,9 @@ class CheckoutController extends Controller
         // Log the response from the API call
         Log::info('WhatsApp API response', ['response' => $response->json()]);
 
+        return redirect()->to(url('/'));
 //        return redirect()->to("/#/donations/paymentstatus/?payId={$order->Order_Number}");
-        return redirect()->to($request->getHost());
+//        return redirect()->to($request->getHost());
         //        return redirect()->to($request->getHost() . "/services/paymentstatus/?payId={$order->Id}");
     }
 
