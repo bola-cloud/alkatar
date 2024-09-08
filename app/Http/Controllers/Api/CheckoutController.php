@@ -519,7 +519,7 @@ class CheckoutController extends Controller
             'Payment_Status' => PAYMENT_SUCCESS,
             'Order_Status' => ORDER_PROCESSING
         ]);
-//        $this->sendOrderMail($order->id);
+        $this->sendOrderMail($order->id);
         $pdfUrl = route('order.print', ['id' => $order->id]);
         $response = Http::asForm()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/success/payment', [
             'phone_number' => $phoneNumber,
