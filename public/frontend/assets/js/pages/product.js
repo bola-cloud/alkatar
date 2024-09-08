@@ -230,7 +230,7 @@
                 }
             });
             $.ajax({
-                url: $("#checkCategoryFilter").data("url"),
+                url: $("#CheckSubCategoryFilter").data("url"),
                 method: "get",
                 data: {
                     checkCat: checkCat,

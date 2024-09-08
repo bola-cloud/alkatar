@@ -8,11 +8,20 @@
         outline: 0 none;
         color: var(--hover-color);
     }
+    .filter-btn{
+        position: absolute;
+        right: 3%;
+        /* bottom: 55%; */
+        color: black;
+    }
 </style>
 
 <!-- Product Area Start -->
 
-
+    <button class="btn btn-primary filter-btn d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+    <i class="fas fa-filter"></i>
+    {{ __('Filter') }}
+    </button>
 <div class="product-area section">
     <div>
         <div class="row">
@@ -24,18 +33,6 @@
                             <button type="button" class="btn-close text-reset sidebar-close"></button>
                         </div>
                     </div>
-
-                    {{-- <div class="single-widget search-widget">
-                        <h3 class="widget-title">{{ __('Search Here') }}</h3>
-                        <form>
-                            <div class="form-group">
-                                <input type="text" class="form-control" id="searchwidget" name="searchwidget"
-                                    placeholder="{{ __('Product Store') }}" />
-                                <button type="button" class="search-btn"><i
-                                        class="flaticon-search searchWidget"></i></button>
-                            </div>
-                        </form>
-                    </div> --}}
 
                     <div class="single-widget categories-widget">
                         <h3 class="widget-title">{{ __('Sub-Categories') }}</h3>
@@ -61,67 +58,10 @@
                             @endforeach
                         </div>
                     </div>
-                    {{--
-                    <div class="single-widget price-widget">
-                        <h3 class="widget-title">{{ __('Price') }}</h3>
-                        <form>
-                            <div class="price-wrap">
-                                <div class="price-wrap-left">
-                                    <div class="single-price">
-                                        <input type="number" class="form-control" id="minPrice" name="min_price"
-                                            placeholder="{{ __('$ Min') }}" min="1" />
-                                    </div>
-                                    <div class="single-price">
-                                        <input type="number" class="form-control" id="maxPrice" name="max_price"
-                                            placeholder="{{ __('$ Max') }}" />
-                                    </div>
-                                </div>
-                                <button type="button" class="price-submit PriceSubmit"><i
-                                        class="fas fa-play"></i></button>
-                            </div>
-                        </form>
-                    </div> --}}
-
-                    {{-- <div class="single-widget size-widget">
-                        <h3 class="widget-title">{{ __('Size') }}</h3>
-                        <div class="size-list">
-                            @foreach ($sizes as $size)
-                            <div class="single-size">
-                                <input class="form-check-input checkSize" type="checkbox" id="{{ $size->id }}"
-                                    value="{{ $size->Size }}">
-                                <label class="form-check-label" for="{{ $size->id }}">{{ $size->Size }}</label>
-                            </div>
-                            @endforeach
                         </div>
-                    </div> --}}
-                </div>
             </div>
             <div class="col-xl-9 col-lg-8">
                 <div class="product-section-top">
-                    {{-- <div class="row align-items-center">
-                        <div class="col-md-3">
-                            <div class="product-section-top-left">
-                                <button class="sidebar-filter d-block d-lg-none" type="button"
-                                    data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample"
-                                    aria-controls="offcanvasExample">
-                                    {{ __('Filter') }} <img src="{{ asset('frontend/assets/images/angle-down.svg') }}"
-                                        alt="angle-down" />
-                                </button>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-end gap-5">
-                            <div class="form-group flex items-center">
-                                <label for="sortBy" class="w-full">Sort By:</label>
-                                <select id="sortBy" class="form-control w-36" onchange="sortRecords(this.value)">
-                                    <option value="latest">Latest</option>
-                                    <option value="highest">Highest Price</option>
-                                    <option value="lowest">Lowest Price</option>
-                                </select>
-                            </div>
-                            <p class="!text-end font-bold text-2xl">{{ __("Total Results:", ['count' =>
-                                count($products)])}}</p>
-                        </div>
-                    </div> --}}
                 </div>
 
                 <div id="filterProduct">
@@ -153,7 +93,7 @@
         </div>
         <div class="offcanvas-body">
             <div class="sidebar-widget-area">
-                <div class="single-widget search-widget p-0 bg-transparent">
+                <!-- <div class="single-widget search-widget p-0 bg-transparent">
                     <h3 class="widget-title">{{ __('Search Here') }}</h3>
                     <form action="#">
                         <div class="form-group">
@@ -163,56 +103,31 @@
                                     class="flaticon-search"></i></button>
                         </div>
                     </form>
-                </div>
+                </div> -->
                 <div class="single-widget categories-widget p-0 bg-transparent">
-                    <h3 class="widget-title">{{ __('Categories') }}</h3>
+                    <h3 class="widget-title">{{ __('Sub-Categories') }}</h3>
                     <div class="categories-list">
-                        @foreach (Category_Des_Icon() as $category)
+                    <div class="single-categorie">
+                                <div class="categorie-left flex items-center gap-2">
+                                    <input class="form-check-input" type="checkbox" value="all"
+                                        id="product_subCategory_all">
+                                    <label class="form-check-label"
+                                        for="product_subCategory_all">{{ __('All') }}</label>
+                                </div>
+                            </div>
+                            @foreach (SubCategory($selected_category) as $subCategory)
                             <div class="single-categorie">
                                 <div class="categorie-left">
-                                    <input class="form-check-input CheckCategoryMobile" type="checkbox"
-                                        value="{{ $category->en_Category_Name }}">
-                                    <label class="form-check-label">{{ $category->en_Category_Name }}</label>
+                                    <input class="form-check-input CheckCategoryMobile CheckSubCategory" type="checkbox"
+                                    value="{{ $subCategory->id }}" id="product_subCategory_{{$subCategory->id}}">
+                                    <label for="product_subCategory_{{$subCategory->id}}" class="form-check-label">{{ langConverter($subCategory->name, $subCategory->name_ar) }}</label>
                                 </div>
-                                <span class="categories-count">{{ productCategoryCount($category->id) }}</span>
+                                <span class="categories-count">{{ productSubCategoryCount($subCategory->id) }}</span>
                             </div>
                         @endforeach
                     </div>
                 </div>
-                <div class="single-widget price-widget p-0 bg-transparent">
-                    <h3 class="widget-title">{{ __('Price') }}</h3>
-                    <form>
-                        <div class="price-wrap">
-                            <div class="price-wrap-left">
-                                <div class="single-price">
-                                    <input type="number" class="form-control" id="minPriceMobile" name="minprice1"
-                                        placeholder="{{ currencySymbol()[currency()] }} {{ __('Min') }}" />
-                                </div>
-                                <div class="single-price">
-                                    <input type="number" class="form-control" id="maxPriceMobile" name="maxprice1"
-                                        placeholder="{{ currencySymbol()[currency()] }} {{ __('Max') }}" />
-                                </div>
-                            </div>
-                            <button type="button" class="price-submit PriceSubmitMobile"><i
-                                    class="fas fa-play"></i></button>
-                        </div>
-                    </form>
-                </div>
-
-                {{-- <div class="single-widget size-widget p-0 bg-transparent">
-                    <h3 class="widget-title">{{ __('Size') }}</h3>
-                    <div class="size-list">
-
-                        @foreach ($sizes as $size)
-                        <div class="single-size">
-                            <input class="form-check-input checkSizeMobile" type="checkbox" id="{{ $size->id }}"
-                                value="{{ $size->Size }}">
-                            <label class="form-check-label" for="{{ $size->id }}">{{ $size->Size }}</label>
-                        </div>
-                        @endforeach
-
-                    </div>
-                </div> --}}
+             
             </div>
         </div>
 

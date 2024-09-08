@@ -339,6 +339,7 @@
         } else {
             $(".addCart").on("click", function () {
                 var productId = $(this).data("id");
+                $("#submitSelection").hide();
                 selectedProductId = productId;
                 var productName = $(this).data("name");
                 var sizes = $(this).data("sizes");
@@ -431,6 +432,7 @@
         });
 
         $(document).on("click", ".weight-option", function () {
+            $("#submitSelection").show();
             $(".weight-option").removeClass("selected");
             $(this).addClass("selected");
             selectedWeightId = $(this).data("weight-id");
