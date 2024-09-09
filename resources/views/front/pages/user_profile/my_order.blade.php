@@ -57,7 +57,7 @@
                                                     <th>{{__('Item')}}</th>
                                                     <th>{{__('Total Price')}}</th>
                                                     <th>{{__('Track order')}}</th>
-                                                    <th>{{__('Pay')}}</th>
+                                                    <!-- <th>{{__('Pay')}}</th> -->
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -82,7 +82,7 @@
                                                         </td>
                                                         <td class="my-order-td-row"><a href="{{route('user.profile.track.my.order', encrypt($ao->id))}}"><i class="fas fa-user-cog"></i></a></td>
                                                         
-                                                        <td class="my-order-td-row"><a href="{{route('user.profile.track.my.order', encrypt($ao->id))}}"><i class="fas fa-user-cog"></i></a></td>
+                                                        <!-- <td class="my-order-td-row"><a href="{{route('user.profile.track.my.order', encrypt($ao->id))}}"><i class="fas fa-user-cog"></i></a></td> -->
                                                     </tr>
                                                 @empty
                                                     <tr><td colspan="4" class="text-center"><h1>{{__('No data found!')}}</h1></td></tr>
