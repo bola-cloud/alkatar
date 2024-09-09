@@ -17,10 +17,10 @@
 </style>
 
 <!-- Product Area Start -->
-
-    <button class="btn btn-primary filter-btn d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+    <!-- <input type="hidden" value="{{$selected_category}}" id = "category_id"> -->
+    <button class="btn btn-primary filter-btn d-lg-none btn-lg" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
     <i class="fas fa-filter"></i>
-    {{ __('Filter') }}
+    {{ __('Sub-Categories') }}
     </button>
 <div class="product-area section">
     <div>
@@ -29,7 +29,7 @@
                 <div class="sidebar-widget-area mobile-sidebar">
                     <div class="sidebar-widget-header d-block d-lg-none">
                         <div class="widget-header-wrap">
-                            <h5 class="offcanvas-title">{{ __('Filter') }}</h5>
+                            <h5 class="offcanvas-title">{{ __('Sub-Categories') }}</h5>
                             <button type="button" class="btn-close text-reset sidebar-close"></button>
                         </div>
                     </div>
@@ -86,7 +86,7 @@
 
 
     <!-- For Mobile Filter Sidebar Start -->
-    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas offcanvas-start !w-[250px]" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="offcanvasExampleLabel">{{ __('Filter') }}</h5>
             <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -110,15 +110,15 @@
                     <div class="single-categorie">
                                 <div class="categorie-left flex items-center gap-2">
                                     <input class="form-check-input" type="checkbox" value="all"
-                                        id="product_subCategory_all">
+                                        id="product_subCategoryMobile_all">
                                     <label class="form-check-label"
-                                        for="product_subCategory_all">{{ __('All') }}</label>
+                                        for="product_subCategoryMobile_all">{{ __('All') }}</label>
                                 </div>
                             </div>
                             @foreach (SubCategory($selected_category) as $subCategory)
                             <div class="single-categorie">
                                 <div class="categorie-left">
-                                    <input class="form-check-input CheckCategoryMobile CheckSubCategory" type="checkbox"
+                                    <input class="form-check-input CheckCategoryMobile" type="checkbox"
                                     value="{{ $subCategory->id }}" id="product_subCategory_{{$subCategory->id}}">
                                     <label for="product_subCategory_{{$subCategory->id}}" class="form-check-label">{{ langConverter($subCategory->name, $subCategory->name_ar) }}</label>
                                 </div>
@@ -153,6 +153,15 @@
         });
     </script>
 
+
+<script>
+        document.getElementById('product_subCategoryMobile_all').addEventListener('change', function () {
+            var checkboxes = document.querySelectorAll('.CheckCategoryMobile');
+            for (var i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = this.checked;
+            }
+        });
+    </script>
 
     <!-- Product Area End -->
     <div id="shortingUrl" data-url="{{ route('product.shorting') }}"></div>

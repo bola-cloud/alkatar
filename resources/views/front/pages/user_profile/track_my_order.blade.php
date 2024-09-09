@@ -179,11 +179,11 @@
                                     <select class="form-select form-control" aria-label="Default select example"
                                         name="rating">
                                         <option selected>{{ __('Select') }}</option>
-                                        <option value="5">{{ __('Best (5 Star)') }}</option>
-                                        <option value="4">{{ __('Better (4 Star)') }}</option>
-                                        <option value="3">{{ __('Good (3 Star)') }}</option>
-                                        <option value="2">{{ __('Bad (2 Star)') }}</option>
-                                        <option value="1">{{ __('Worst (1 Star)') }}</option>
+                                        <option value="5">5</option>
+                                        <option value="4">4</option>
+                                        <option value="3">3</option>
+                                        <option value="2">2</option>
+                                        <option value="1">1</option>
                                     </select>
                                 </div>
 

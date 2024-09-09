@@ -6,9 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Repositories\DashboardRepository;
 use App\Mail\OrderConfirmMail;
 use App\Models\Admin\Order;
+use App\Models\City;
+use App\Models\State;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\DeliveryCharge;
 use App\Models\Admin\Product;
 
 
@@ -19,14 +22,30 @@ class DashboardController extends Controller
         $this->repository = $repository;
     }
 
+    public function customQuery()
+    {
+        // $cities = DeliveryCharge::where('charge',3)->get();
+        // foreach ($cities as $value) {
+        //     $value->charge = 2;
+        //     $value->save();
 
-    public function product_price() {
-        $products = Product::whereDoesntHave('weights', function ($query) {
-            $query->whereColumn('price', '=', 'products.price');
-        })->select('id', 'price', 'en_Product_Name', 'fr_Product_Name')->with('weights')->get();
-
-        return response()->json($products);
+        // }
+        // dd($cities->toJson());
+        // foreach ($cities as $city) {
+        //     $exists = DeliveryCharge::where('city_id', $city->id)
+        //                             ->where('state_id', $city->state_id)
+        //                             ->exists();
+        //     if (!$exists) {
+        //         DeliveryCharge::create([
+        //             'city_id' => $city->id,
+        //             'state_id' => $city->state_id,
+        //             'charge' => 2,
+        //             'country' => 'Oman',
+        //         ]);
+        //     }
+        // }
     }
+ 
     public function deleteUser($Number)
     {
         $user = User::where('email', $Number)->first();

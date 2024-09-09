@@ -107,6 +107,9 @@ class UserController extends Controller
             $data = User::where('is_admin', INACTIVE);
             return DataTables::of($data)
                 ->addIndexColumn()
+                ->addColumn('Number', function ($data) {
+                    return $data->Number;
+                })
                 ->addColumn('orders', function ($data) {
                     return orderCountuser($data->id);
                 })

@@ -50,6 +50,7 @@
                 {
                     data: "phone_number",
                     name: "phone_number",
+                    searchable: true,
                 },
                 // {
                 //     data: "State",

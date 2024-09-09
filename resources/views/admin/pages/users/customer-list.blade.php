@@ -30,6 +30,7 @@
                         <thead>
                         <tr>
                             <th>{{ __('Name')}}</th>
+                            <th>{{ __('Number')}}</th>
                             <th>{{ __('Email')}}</th>
                             <th>{{ __('Orders')}}</th>
                             <th>{{__("Registered At")}}</th>

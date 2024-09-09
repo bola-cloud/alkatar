@@ -9,20 +9,6 @@
                 </div>
 
                 <div class="header-right">
-                    {{-- <a href="{{ route('wishlist') }}" class="wishlist-btn header-btn">
-                        <div class="btn-left">
-                            <i class="btn-icon flaticon-like"></i>
-                            <span class="count wishListCuntFromController">{{ session()->has('wishlist') ?
-                                count(session()->get('wishlist')) : '0' }}</span>
-                        </div>
-                    </a>
-                    <a href="{{ route('compare') }}" class="compare-btn header-btn">
-                        <div class="btn-left">
-                            <i class="btn-icon flaticon-bar-chart"></i>
-                            <span class="count CompareCuntFromController">{{ session()->has('compare') ?
-                                count(session()->get('compare')) : '0' }}</span>
-                        </div>
-                    </a> --}}
                     <a role="button" class="cart-btn header-btn" href="{{ route('cart.content') }}">
                         <div class="btn-left">
                             <i class="btn-icon flaticon-shopping-bag"></i>
@@ -34,8 +20,6 @@
                     <button class="menu-bar" type="button" data-bs-toggle="offcanvas"
                         data-bs-target="#offcanvasMobileMenu" aria-controls="offcanvasMobileMenu"><i
                             class="fas fa-bars"></i></button>
-
-
                 </div>
             </div>
 

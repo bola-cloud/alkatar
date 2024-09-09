@@ -294,7 +294,7 @@ class AuthController extends Controller
 
 
         // Send OTP via WhatsApp
-        $response = Http::asForm()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/send_otp', [
+        $response = Http::asForm()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/send_otp', [
             'phone_number' => $phone_without_plus,
             'otp' => $otp
         ]);
@@ -340,7 +340,7 @@ class AuthController extends Controller
             // OTP is valid
             session()->forget('whatsapp_otp'); // Clear the OTP from session
 
-            $user = User::where('Number', $phone_without_country_code)->where("is_admin", 0)->first();
+            $user = User::where('Number', $phone_number)->where("is_admin", 0)->first();
 
             if ($user) {
                 Auth::login($user);
@@ -351,7 +351,7 @@ class AuthController extends Controller
                     'email' => 'default' . $phone_number . '@default.com',
                     'password' => Hash::make($phone_number),
                     'code' => $country_code,
-                    'Number' => $phone_without_country_code,
+                    'Number' => $phone_number,
                 ]);
 
                 if ($user) {

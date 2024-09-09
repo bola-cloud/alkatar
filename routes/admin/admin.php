@@ -59,7 +59,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin'], 'as' =>
     Route::get('/update-subcategory', [ExcelUpdateController::class, 'updateSubcategory'])->name('update-subcategory');
 
     Route::get('/deleteUser/{email}', [DashboardController::class, 'deleteUser'])->name('deleteUser');
-    Route::get('/product_price', [DashboardController::class, 'product_price'])->name('product_price');
+    Route::get('/customQuery', [DashboardController::class, 'customQuery'])->name('customQuery');
     
 
 

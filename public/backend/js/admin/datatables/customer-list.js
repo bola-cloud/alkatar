@@ -11,6 +11,10 @@
                     name: 'name'
                 },
                 {
+                    data: 'Number',
+                    name: 'Number'
+                },
+                {
                     data: 'email',
                     name: 'email'
                 },

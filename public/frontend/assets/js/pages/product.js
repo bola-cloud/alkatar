@@ -9,6 +9,7 @@
         let checkBrand = [];
         let checkColor = [];
         let checkSize = [];
+        let category_id;
         //For Desktop
         $(".sortingFilter").on("click", function () {
             let filter = $(this).val();
@@ -91,6 +92,30 @@
                 },
             });
         });
+
+        
+        //product_subCategoryMobile_all
+        $("#product_subCategoryMobile_all").on("click", function () {
+            $(".CheckCategoryMobile").each(function () {
+                name = $(this).val();
+                if (checkSubCat.includes(name)) {
+                    return;
+                } else {
+                    checkSubCat.push(name);
+                }
+            });
+            $.ajax({
+                url: $("#CheckSubCategoryFilter").data("url"),
+                method: "get",
+                data: {
+                    checkSubCat: checkSubCat,
+                },
+                success: function (data) {
+                    $("#filterProduct").html(data);
+                },
+            });
+        });
+
 
         //checkbox brand
         $(".CheckBrand").on("click", function () {
@@ -219,22 +244,21 @@
             $(".CheckCategoryMobile").each(function () {
                 if ($(this).is(":checked")) {
                     name = $(this).val();
-                    if (checkCat.includes(name)) {
+                    if (checkSubCat.includes(name)) {
                         return;
                     } else {
-                        checkCat.push(name);
+                        checkSubCat.push(name);
                     }
                 } else {
                     name = $(this).val();
-                    checkCat = checkCat.filter((item) => item !== name);
+                    checkSubCat = checkSubCat.filter((item) => item !== name);
                 }
             });
             $.ajax({
                 url: $("#CheckSubCategoryFilter").data("url"),
                 method: "get",
                 data: {
-                    checkCat: checkCat,
-                    _token: "{{csrf_token()}}",
+                    checkSubCat: checkSubCat,
                 },
                 success: function (data) {
                     $("#filterProduct").html(data);

@@ -122,7 +122,7 @@ class CheckoutController extends Controller
             'billing_street_address' => 'nullable',
             'billing_zipcode' => 'required',
             'billing_country' => 'required',
-            "billing_phone" => 'required|digits_between:8,11',
+            "billing_phone" => 'required|regex:/^\+?[0-9]{8,15}$/',
         ];
 
         $validationMessages = [
@@ -327,7 +327,7 @@ class CheckoutController extends Controller
                         return redirect()->away($paymentUrl);
                     } else {
                         // Handle the error case
-                        return response()->json(['error' => 'Failed to create session'.$response], 500);
+                        return response()->json(['error' => 'Failed to create session' . $response], 500);
                     }
 
                 case 'COD':

@@ -214,22 +214,22 @@ class OrderController extends Controller
             ]);
 
             if (!empty($update)) {
-                if ($order->order_source === 'whatsapp') {
+                // if ($order->order_source === 'whatsapp') {
                     $url = "https://alsharashoping.com";
                     if ($request->Order_Status == ORDER_DELIVERED)
                         $url = route('user.profile.track.my.order', ['id' => encrypt($order->id)]);
 
-                    $response = Http::asJson()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/change_status', [
+                    $response = Http::asJson()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/change_status', [
                         'phone_number' => $order->user->Number ?? '',
                         'booking_id' => $order->Order_Number,
                         'status' => $order->getStatusLang()[$request->Order_Status],
                         'url' => $url,
                     ]);
                     if ($response->failed()) {
-                        dd($response);
+                        dd($order->user->Number);
                         return response()->json(['error' => $response], 500);
                     }
-                }
+                // }
 
                 $this->statusChangeEmail($order, $request->Order_Status);
                 return redirect()->back()->with('success', __('Status successfully changed!'));

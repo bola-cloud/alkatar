@@ -41,7 +41,7 @@
                             <input type="text"
                                 class="w-11/12 lg:w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl"
                                 id="billing_phone" name="billing_phone" placeholder="{{ __('Phone Number') }}"
-                                value="{{ isset($user) ? $user->code . $user->Number ?? $user->code . $user->Number : '' }}"
+                                value="{{ isset($user) ? $user->Number ??  $user->Number : '' }}"
                                 required />
 
 

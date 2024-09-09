@@ -521,7 +521,7 @@ class CheckoutController extends Controller
         ]);
         $this->sendOrderMail($order->id);
         $pdfUrl = route('order.print', ['id' => $order->id]);
-        $response = Http::asForm()->post('https://al-sharea-dates.glitch.me/api/v1/whatsapp/success/payment', [
+        $response = Http::asForm()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/success/payment', [
             'phone_number' => $phoneNumber,
             'booking_id' => $order->Order_Number,
             'pdf' => $pdfUrl,
