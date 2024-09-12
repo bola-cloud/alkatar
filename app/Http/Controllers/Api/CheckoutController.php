@@ -498,7 +498,7 @@ class CheckoutController extends Controller
         try {
             Mail::to('Alsaraamills@gmail.com')->send(new OrderConfirmMail($order));
             return response()->json(['msg' => 'OK']);
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             return response()->json(['msg' => "$ex"]);
         }
     }
@@ -511,6 +511,9 @@ class CheckoutController extends Controller
         Log::info('Payment order id accessed', ['order_id' => $orderNumber]);
         $order = Order::where('Order_Number', $orderNumber)->first();
         Log::info('Order status updated on success', ['order_id' => $order->Id]);
+        if(!$order)
+            return redirect()->to(url('/'));
+
         $order->update([
             'order_status' => $response['data']['payment_status'] ?? $order->order_status,
             'Is_Order_Successful' => true,
@@ -539,9 +542,12 @@ class CheckoutController extends Controller
 
     public function fail(Request $request)
     {
-        $orderNumber = $request->get('order_id');
+        $orderNumber = $request->get('order_number');
         $order = Order::where('Order_Number', $orderNumber)->first();
         Log::info('Payment failed', ['order_id' => $orderNumber]);
+        if(!$order)
+            return redirect()->to(url('/'));
+
         $order->update([
             'order_status' => $response['data']['payment_status'] ?? $order->order_status,
             'Is_Order_Successful' => false,
@@ -550,7 +556,7 @@ class CheckoutController extends Controller
             'Order_Status' => ORDER_CANCELLED
         ]);
         Log::info('Order status updated on failure', ['order_id' => $order->Id]);
-        return redirect()->to("/#/donations/paymentstatus/?payId={$order->Id}");
+        return redirect()->to(url('/'));
 //        return redirect()->to($request->getHost()."/services/paymentstatus/?payId={$order->Id}");
 
 //        return redirect()->to('https://zakat-website.netlify.app/aboutus/');
