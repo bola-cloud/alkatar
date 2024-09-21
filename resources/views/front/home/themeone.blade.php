@@ -5,12 +5,12 @@
             @if (isset($slider->slider_link))
                 <a href="{{$slider->slider_link}}">
                     <div class="signle-slide"
-                        style="background-image: url('{{ asset(SliderImage() . $slider->Background_Image) }}');">
+                        style="background-image: url('{{ asset(SliderImage() . $slider->Background_Image) }}');background-size:cover;">
                     </div>
                 </a>
             @else
                 <div class="signle-slide"
-                    style="background-image: url('{{ asset(SliderImage() . $slider->Background_Image) }}');">
+                    style="background-image: url('{{ asset(SliderImage() . $slider->Background_Image) }}');background-size:cover;">
                 </div>
             @endif
         @endforeach
