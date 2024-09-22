@@ -28,6 +28,7 @@ use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
+use Log;
 use Razorpay\Api\Api;
 use Illuminate\Support\Facades\Http;
 use Exception;
@@ -792,6 +793,14 @@ class CheckoutController extends Controller
 
         $order->save();
         $this->sendOrderMail($order->id);
+
+        $pdfUrl = route('order.print', ['id' => $order->id]);
+        $response = Http::asForm()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/success/payment', [
+            'phone_number' => $order->user->Number ?? '',
+            'booking_id' => $order->Order_Number,
+            'pdf' => $pdfUrl,
+        ]);
+        Log::info('WhatsApp API response', ['response' => $response->json()]);
         return redirect()->route('checkout.thankyou_page')->with('success', 'Order successfully created!');
     }
 

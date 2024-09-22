@@ -221,12 +221,13 @@ class OrderController extends Controller
 
                     $response = Http::asJson()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/change_status', [
                         'phone_number' => $order->user->Number ?? '',
+                        'name' => $order->user->name ?? '',
                         'booking_id' => $order->Order_Number,
                         'status' => $order->getStatusLang()[$request->Order_Status],
                         'url' => $url,
                     ]);
                     if ($response->failed()) {
-                        dd($order->user->Number);
+                        dd($response);
                         return response()->json(['error' => $response], 500);
                     }
                 // }

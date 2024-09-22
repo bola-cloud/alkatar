@@ -256,7 +256,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 col-sm-6">
+        <!-- <div class="col-lg-3 col-md-6 col-sm-6">
             <div class="status__box-3 bg-style">
                 <div class="item__left">
                     <h2>{{ __('Brands') }}</h2>
@@ -270,7 +270,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
         <!-- Products -->
 
         <!-- Transactions -->
@@ -289,7 +289,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 col-sm-6">
+        <!-- <div class="col-lg-3 col-md-6 col-sm-6">
             <div class="status__box-3 bg-style">
                 <div class="item__left">
                     <h2>{{__('Paypal Transactions')}}</h2>
@@ -303,8 +303,8 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-3 col-md-6 col-sm-6">
+        </div> -->
+        <!-- <div class="col-lg-3 col-md-6 col-sm-6">
             <div class="status__box-3 bg-style">
                 <div class="item__left">
                     <h2>{{__('Stripe Transactions')}}</h2>
@@ -318,8 +318,8 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-3 col-md-6 col-sm-6">
+        </div> -->
+        <!-- <div class="col-lg-3 col-md-6 col-sm-6">
             <div class="status__box-3 bg-style">
                 <div class="item__left">
                     <h2>{{ __('Razorpay Transactions') }}</h2>
@@ -333,10 +333,10 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
         <!-- Transactions -->
 
-        <div class="col-lg-3 col-md-6 col-sm-6">
+        <!-- <div class="col-lg-3 col-md-6 col-sm-6">
             <div class="status__box-3 bg-style">
                 <div class="item__left">
                     <h2>{{__('Bank Transactions')}}</h2>
@@ -350,7 +350,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
         <div class="col-lg-3 col-md-6 col-sm-6">
             <div class="status__box-3 bg-style">
                 <div class="item__left">
@@ -366,7 +366,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 col-sm-6">
+        <!-- <div class="col-lg-3 col-md-6 col-sm-6">
             <div class="status__box-3 bg-style">
                 <div class="item__left">
                     <h2>{{__('Blogs')}}</h2>
@@ -380,8 +380,8 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-3 col-md-6 col-sm-6">
+        </div> -->
+        <!-- <div class="col-lg-3 col-md-6 col-sm-6">
             <div class="status__box-3 bg-style">
                 <div class="item__left">
                     <h2>{{ __('Subscribers') }}</h2>
@@ -395,7 +395,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
     </div>
 
