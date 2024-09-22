@@ -4,13 +4,13 @@
         @foreach ($sliders as $slider)
             @if (isset($slider->slider_link))
                 <a href="{{$slider->slider_link}}">
-                    <div class="signle-slide"
-                        style="background-image: url('{{ asset(SliderImage() . $slider->Background_Image) }}');background-size:cover;">
+                    <div class="signle-slide custom-slider-styles"
+                        style="background-image: url('{{ asset(SliderImage() . $slider->Background_Image) }}');">
                     </div>
                 </a>
             @else
-                <div class="signle-slide"
-                    style="background-image: url('{{ asset(SliderImage() . $slider->Background_Image) }}');background-size:cover;">
+                <div class="signle-slide custom-slider-styles"
+                    style="background-image: url('{{ asset(SliderImage() . $slider->Background_Image) }}');">
                 </div>
             @endif
         @endforeach

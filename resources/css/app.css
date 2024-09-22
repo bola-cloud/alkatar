@@ -1013,3 +1013,13 @@ h3 {
 /* .related_products_section .product-thumbnal {
     @apply !size-[200px];
 } */
+
+.custom-slider-styles {
+    background-size: cover !important;
+}
+
+@media (max-width: 400px) {
+    .custom-slider-styles {
+        background-size: contain !important;
+    }
+}
