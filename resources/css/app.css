@@ -1018,7 +1018,7 @@ h3 {
     background-size: cover !important;
 }
 
-@media (max-width: 400px) {
+@media (max-width: 600px) {
     .custom-slider-styles {
         background-size: contain !important;
     }
