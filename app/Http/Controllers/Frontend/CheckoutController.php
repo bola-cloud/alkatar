@@ -153,6 +153,9 @@ class CheckoutController extends Controller
         try {
             $subtotal = Cart::subtotal();
             $cartItems = Cart::content();
+            if(Cart::countItems() == 0){
+                return redirect()->route(route: 'front')->with('error', __('Cart is empty. Go to product page and cart something.'));
+            }
             $tax = tax_amount($subtotal, $request->billing_country);
             $shipping_charge = delivery_charge($request->billing_city ?? $request->billing_country);
             $weight_charge = $this->calculateExtraWeightFees();

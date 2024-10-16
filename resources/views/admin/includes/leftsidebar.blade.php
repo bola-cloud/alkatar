@@ -580,7 +580,7 @@
             </li>
         @endcanany
 
-        @canany(['menu-list'])
+        <!-- @canany(['menu-list'])
             <li class="{{ isset($menu) && $menu == 'pages' ? 'mm-active' : '' }}">
                 <a href="{{ route('admin.pages') }}">
                     <i class="fas fa-book"></i>
@@ -613,7 +613,7 @@
                     </li>
                 </ul>
             </li>
-        @endcanany
+        @endcanany -->
         {{-- @canany(['cms-list'])
         <li class="{{ isset($menu) && $menu == 'sitemap' ? 'mm-active' : '' }}">
             <a href="{{ route('admin.sitemap_list') }}">

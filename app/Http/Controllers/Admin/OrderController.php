@@ -300,7 +300,7 @@ class OrderController extends Controller
                     return $email['email'];
                 })
                 ->addColumn('GrandTotal', function ($data) {
-                    return '$' . $data->Grand_Total;
+                    return  $data->Grand_Total . ' OMR';
                 })
                 ->addColumn('status', function ($data) {
                     $html = '';

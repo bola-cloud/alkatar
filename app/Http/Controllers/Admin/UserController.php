@@ -104,7 +104,7 @@ class UserController extends Controller
     public function customerList(Request $request)
     {
         if ($request->ajax()) {
-            $data = User::where('is_admin', INACTIVE);
+            $data = User::where('is_admin', INACTIVE)->orderBy('created_at','desc');
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('Number', function ($data) {
