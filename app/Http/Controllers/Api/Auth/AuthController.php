@@ -55,14 +55,14 @@ class AuthController extends Controller
         $otp_record = Otp::where('phone_number', $full_phone)->latest()->first();
         if (isset($otp_record) && $entered_otp === $otp_record->otp) {
             $otp_record->delete();
-            $user = User::where('Number', $full_phone)->where("is_admin", 0)->first();
+            $user = User::where('Number', $phone_number)->where("is_admin", 0)->first();
 
             if (!$user) {
                 $user = User::create([
                     'name' => $name,
-                    'email' => 'default' . $full_phone . '@default.com',
+                    'email' => 'default' . $phone_number . '@default.com',
                     'password' => Hash::make($full_phone),
-                    'Number' => $full_phone,
+                    'Number' => $phone_number,
                     'code' => $validated['code'],
                 ]);
             }
