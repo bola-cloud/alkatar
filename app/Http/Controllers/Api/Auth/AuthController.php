@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -55,14 +56,14 @@ class AuthController extends Controller
         $otp_record = Otp::where('phone_number', $full_phone)->latest()->first();
         if (isset($otp_record) && $entered_otp === $otp_record->otp) {
             $otp_record->delete();
-            $user = User::where('Number', $phone_number)->where("is_admin", 0)->first();
+            $user = User::where('Number', $full_phone)->where("is_admin", 0)->first();
 
             if (!$user) {
                 $user = User::create([
                     'name' => $name,
-                    'email' => 'default' . $phone_number . '@default.com',
+                    'email' => 'default' . Str::random(6). '@default.com',
                     'password' => Hash::make($full_phone),
-                    'Number' => $phone_number,
+                    'Number' => $full_phone,
                     'code' => $validated['code'],
                 ]);
             }

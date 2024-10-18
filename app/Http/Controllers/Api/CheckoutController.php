@@ -171,7 +171,7 @@ class CheckoutController extends Controller
             }
 
         }
-        $phoneNumber = auth()->user()->code . auth()->user()->Number;
+        $phoneNumber = auth()->user()->Number;
         // Initialize payment data for Thawani
         $paymentData = [
             'client_reference_id' => $order_number,
