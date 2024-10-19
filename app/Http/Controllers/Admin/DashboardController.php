@@ -24,26 +24,8 @@ class DashboardController extends Controller
 
     public function customQuery()
     {
-        // $cities = DeliveryCharge::where('charge',3)->get();
-        // foreach ($cities as $value) {
-        //     $value->charge = 2;
-        //     $value->save();
-
-        // }
-        // dd($cities->toJson());
-        // foreach ($cities as $city) {
-        //     $exists = DeliveryCharge::where('city_id', $city->id)
-        //                             ->where('state_id', $city->state_id)
-        //                             ->exists();
-        //     if (!$exists) {
-        //         DeliveryCharge::create([
-        //             'city_id' => $city->id,
-        //             'state_id' => $city->state_id,
-        //             'charge' => 2,
-        //             'country' => 'Oman',
-        //         ]);
-        //     }
-        // }
+        $user = User::select('Number')->where("is_admin", 0)->get();
+        dd( $user->toJson() );
     }
  
     public function deleteUser($Number)
