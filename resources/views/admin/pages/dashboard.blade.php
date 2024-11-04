@@ -439,7 +439,7 @@
         <div class="col-md-6 mb-3">
             <div class="card">
                 <div class="item-top card-header mb-30">
-                    <h2 class="card-title">{{\Carbon\Carbon::now()->format('F').__(' Earnings')}}</h2>
+                    <h2 class="card-title">{{\Carbon\Carbon::now()->format('Y').__(' Sales')}}</h2>
                 </div>
                 <div class="card-body">
                     <div class="chart-container">

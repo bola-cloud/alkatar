@@ -52,6 +52,7 @@
                     </div>
                     <form method="post" action="{{ route('contact.us.store') }}">
                         @csrf
+                        <input type="text" name="spam_field" style="display:none;">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">

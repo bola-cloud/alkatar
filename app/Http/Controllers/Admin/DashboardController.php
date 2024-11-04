@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Repositories\DashboardRepository;
 use App\Mail\OrderConfirmMail;
+use App\Models\Admin\Category;
 use App\Models\Admin\Order;
 use App\Models\City;
 use App\Models\State;
@@ -24,8 +25,14 @@ class DashboardController extends Controller
 
     public function customQuery()
     {
-        $user = User::select('Number')->where("is_admin", 0)->get();
-        dd( $user->toJson() );
+        // $state = State::where('country_id', 1)->get();
+        $city = Product::where('Price', '>','3500')->get();
+    //  City::create([
+    //         'state_id' => 8,
+    //         'name_en' => 'Snow',
+    //         'name_ar' => 'سناو'
+    //     ]);
+        dd($city);
     }
  
     public function deleteUser($Number)
@@ -45,11 +52,11 @@ class DashboardController extends Controller
                 $sales .= "'" . Order::where('Order_Status', '=', ORDER_DELIVERED)->whereDate('created_at', '=', date("Y-m-d", strtotime('-' . $i . ' days')))->count() . "',";
             }
 
-            $earning_days = "";
+            $earning_month = "";
             $incomes = "";
-            for ($i = 0; $i < 30; $i++) {
-                $earning_days .= "'" . date("d M", strtotime('-' . $i . ' days')) . "',";
-                $incomes .= "'" . Order::where('Order_Status', '=', ORDER_DELIVERED)->whereDate('created_at', '=', date("Y-m-d", strtotime('-' . $i . ' days')))->sum('Grand_Total') . "',";
+            for ($i = 0; $i < 12; $i++) {
+                $earning_month  .= "'" . date("M Y", strtotime('-' . $i . ' months')) . "',";
+                $incomes .= "'" . Order::where('Order_Status', '=', ORDER_DELIVERED)->whereDate('created_at', '=', date("Y-m-d", strtotime('-' . $i . ' days')))->count() . "',";
             }
 
             $data['orderPie'] = $this->repository->getOrderPie();
@@ -58,7 +65,7 @@ class DashboardController extends Controller
 
             $data['order_days'] = $days;
             $data['order_sales'] = $sales;
-            $data['earning_days'] = $earning_days;
+            $data['earning_days'] = $earning_month;
             $data['total_incomess'] = $incomes;
             $data['title'] = __('Dashboard');
             $data['totalOrders'] = $this->repository->getTotalOrders();

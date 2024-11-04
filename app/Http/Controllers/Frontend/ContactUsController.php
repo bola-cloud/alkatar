@@ -20,6 +20,9 @@ class ContactUsController extends Controller
 
     public function contactUsStore(ContactUsRequest $request)
     {
+        if(!empty($request->spam_field)) {
+            dd("Spam detected!");
+        }
         Contactus::create([
             'FirstName' => $request->firstname,
             'Email' => $request->email,

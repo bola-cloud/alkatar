@@ -276,10 +276,9 @@ class CheckoutController extends Controller
                         $checkoutProduct[] = [
                             'name' => 'Shipping Charge',
                             'quantity' => 1,
-                            'unit_amount' => $shipping_charge * 1000,
+                            'unit_amount' => number_format($shipping_charge, 3) * 1000,
                         ];
                     }
-
 
                     $response = Http::withHeaders([
                         'Accept' => 'application/json',

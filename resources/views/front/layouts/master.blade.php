@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 @include('front.layouts.include.head')
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-CDGYGLXRKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-CDGYGLXRKV');
+</script>
+
 @stack('post_css')
 
 <style>
