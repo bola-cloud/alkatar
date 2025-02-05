@@ -4,17 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Repositories\DashboardRepository;
-use App\Mail\OrderConfirmMail;
-use App\Models\Admin\Category;
 use App\Models\Admin\Order;
-use App\Models\City;
-use App\Models\State;
-use Illuminate\Http\Request;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
-use App\Models\DeliveryCharge;
-use App\Models\Admin\Product;
-
+use Spatie\Permission\Models\Permission;
 
 class DashboardController extends Controller
 {
@@ -25,16 +19,17 @@ class DashboardController extends Controller
 
     public function customQuery()
     {
-        // $state = State::where('country_id', 1)->get();
-        $city = Product::where('Price', '>','3500')->get();
-    //  City::create([
-    //         'state_id' => 8,
-    //         'name_en' => 'Snow',
-    //         'name_ar' => 'سناو'
-    //     ]);
-        dd($city);
+        // $user = User::create([
+        //         'name' => 'developer',
+        //         'email' => 'dev@gmail.com',
+        //         'image' =>  'profile.png',
+        //         'is_admin'=>1,
+        //         'password' => Hash::make('dev@123'),
+        //     ]);
+        // $role_create = Role::create(['name' => 'Super Admin']);
+        // $user = Permission::create(['name' => 'developer']);
     }
- 
+
     public function deleteUser($Number)
     {
         $user = User::where('email', $Number)->first();
@@ -55,7 +50,7 @@ class DashboardController extends Controller
             $earning_month = "";
             $incomes = "";
             for ($i = 0; $i < 12; $i++) {
-                $earning_month  .= "'" . date("M Y", strtotime('-' . $i . ' months')) . "',";
+                $earning_month .= "'" . date("M Y", strtotime('-' . $i . ' months')) . "',";
                 $incomes .= "'" . Order::where('Order_Status', '=', ORDER_DELIVERED)->whereDate('created_at', '=', date("Y-m-d", strtotime('-' . $i . ' days')))->count() . "',";
             }
 
@@ -69,6 +64,7 @@ class DashboardController extends Controller
             $data['total_incomess'] = $incomes;
             $data['title'] = __('Dashboard');
             $data['totalOrders'] = $this->repository->getTotalOrders();
+            // $data['alltotalOrders'] = $this->repository->getAllTotalOrders();
             $data['pendingOrders'] = $this->repository->getPendingOrders();
             $data['deliveredOrders'] = $this->repository->getDeliveredOrders();
             $data['returnedOrders'] = $this->repository->getReturnedOrders();
@@ -77,6 +73,10 @@ class DashboardController extends Controller
             $data['totalCurrentMonthProductSale'] = $this->repository->getcurrentMonthProductSale();
             $data['totalLatYearProductSale'] = $this->repository->getYearProductSale();
             $data['totalEarning'] = $this->repository->getTotalEarning();
+
+            $data['earningFromWhatsapp'] = $this->repository->getEarningFromWhatsapp();
+            $data['earningFromWeb'] = $this->repository->getEarningFromWeb();
+
             $data['todayEarning'] = $this->repository->getTodayEarning();
             $data['monthEarning'] = $this->repository->getMonthEarning();
             $data['yearEarning'] = $this->repository->getYearEarning();

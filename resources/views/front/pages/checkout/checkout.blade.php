@@ -3,6 +3,7 @@
 @section('description', isset($description) ? $description : '')
 @section('keywords', isset($keywords) ? $keywords : '')
 @section('content')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
 
 <!-- checkout page area start here  -->
 <section class="page-content section">
@@ -38,12 +39,19 @@
 
                             <label for="billing_phone"
                                 class="block text-lg lg:text-2xl font-medium text-gray-700">{{ __('Phone Number') }}</label>
-                            <input type="text"
+                            <!-- <input type="text"
                                 class="w-11/12 lg:w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl"
                                 id="billing_phone" name="billing_phone" placeholder="{{ __('Phone Number') }}"
-                                value="{{ isset($user) ? $user->Number ??  $user->Number : '' }}"
-                                required />
+                                value="{{ isset($user) ? $user->Number ?? $user->Number : '' }}" required /> -->
 
+                            <div class="space-y-4">
+                                <input type="tel" id="phone_number" name="phone_number"
+                                    class="h-14 lg:h-16 lg:text-xl w-11/12 lg:w-full lg:p-4 p-2.5 text-lg rounded-lg border border-gray-300 focus:ring-primary-red focus:border-primary-red dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-primary-red"
+                                    required value="{{ isset($user) ? $user->Number ?? $user->Number : '' }}">
+                            </div>
+                            <input type="hidden" name="billing_phone" id="billing_phone"
+                                value="{{ isset($user) ? $user->Number ?? $user->Number : '' }}" />
+                            <input type="hidden" name="country_code" id="country_code" />
 
                             <label for="billing_email"
                                 class="block text-lg lg:text-2xl font-medium text-gray-700">{{ __('Email Address (Optional)') }}</label>
@@ -229,8 +237,19 @@
                 <ul class="mt-10 lg:mt-20 space-y-2 text-2xl lg:text-3xl">
                     <li class="flex justify-between">
                         <span>{{ __('Subtotal') }}</span>
-                        <span>{{ currencyConverter(\Cart::subtotal()) }}</span>
+                        <span id="subtotal">{{ currencyConverter(\Cart::subtotal()) }}</span>
                     </li>
+
+
+                    <li class="flex justify-between d-none" id="offer-Discount-li">
+                        <span>{{ __('offer Discount (-)') }}</span>
+                        <span id="offer-Discount"></span>
+                    </li>
+                    <li class="flex justify-between d-none" id="total-After-offer-Discount-li">
+                        <span>{{ __('Total After Discount') }}</span>
+                        <span id="total-After-offer-Discount"></span>
+                    </li>
+
                     <li class="flex justify-between">
                         <span>{{ __('Shipping Cost') }}</span>
                         <span id="delivery-charge-curr"></span>
@@ -249,6 +268,7 @@
                             <span>{{ currencyConverter(Session::get('CouponAmount')) }}</span>
                         </li>
                     @endif
+
                 </ul>
                 <div class="mt-6 pt-4 border-t">
                     <h3 class="text-2xl lg:text-3xl font-bold flex justify-between">
@@ -268,9 +288,48 @@
 <div id="user-name" data-key="{{ auth()->check() ? auth()->user()->name : 'Guest User' }}"></div>
 <div id="user-email" data-key="{{ auth()->check() ? auth()->user()->email : 'guest@gmail.com' }}"></div>
 <div id="get-tax-amount" data-url="{{ route('checkout.get_tax_amount') }}"></div>
-<!-- checkout page area end here  -->
 
 @push('post_script')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var input = document.querySelector("#phone_number");
+            var iti = window.intlTelInput(input, {
+                utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+                initialCountry: "om",
+                excludeCountries: ["il"],
+                separateDialCode: true,
+                preferredCountries: ["om", "ae", "sa", "kw", "bh", "qa"]
+            });
+
+            var form = document.querySelector("form");
+            var fullPhoneInput = document.querySelector("#billing_phone");
+            var countryCodeInput = document.querySelector("#country_code");
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                if (iti.isValidNumber()) {
+                    var fullNumber = iti.getNumber();
+                    var countryCode = iti.getSelectedCountryData().dialCode;
+                    countryCodeInput.value = countryCode;
+                    fullPhoneInput.value = fullNumber;
+                    form.submit();
+                } else {
+                    console.error("Invalid phone number");
+                    alert("Please enter a valid phone number.");
+                }
+            });
+
+            input.addEventListener('input', function () {
+                var fullNumber = iti.getNumber();
+                var countryCode = iti.getSelectedCountryData().dialCode;
+                countryCodeInput.value = countryCode;
+                fullPhoneInput.value = fullNumber;
+            });
+        });
+    </script>
+
     <script src="{{ asset('frontend/assets/js/pages/checkout.js') }}"></script>
     <script>
         $(document).ready(function () {
@@ -296,7 +355,6 @@
             });
         });
 
-        // add the shipping charge depending on selected city
         $('#city').on('change', function () {
             var cityId = $(this).val();
             if (cityId) {
@@ -307,9 +365,16 @@
                     success: function (data) {
                         console.log("city change data", data);
                         $('#delivery-charge-curr').text(data.formatted_charge);
-                        // $('#weight-charge-curr').text(data.weight_charge);
-                        // $('#tax-show-curr').text(data.tax_amount);
                         $('#total-cost-curr').text(data.total_cost);
+                        $('#subtotal').text(data.subtotal);
+                        if (data.is_offer) {
+                            $('#offer-Discount-li').removeClass('d-none');
+                            $('#total-After-offer-Discount-li').removeClass('d-none');
+                            $('#total-After-offer-Discount').text(data.subtotal_After_offer);
+                            $('#offer-Discount').text(data.offer_Discount);
+                            toastr.success("تم تطبيق العرض! لقد وفرت:" + data.offer_Discount);
+                        }
+
                     }
                 });
             }

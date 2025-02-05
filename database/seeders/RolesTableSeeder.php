@@ -93,7 +93,7 @@ class RolesTableSeeder extends Seeder
         foreach ($permissions as $permission) {
             Permission::create(['name' => $permission]);
         }
-
+        
         $role_create = Role::create(['name' => 'Super Admin']);
         $pers = Permission::all();
         foreach($pers as $p) {

@@ -80,3 +80,4 @@
         <script src="{{ asset('backend/js/admin/products/digital.js') }}"></script>
     @endpush
 @endsection
+

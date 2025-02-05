@@ -162,26 +162,45 @@
                 </thead>
                 <tbody>
                     @foreach ($order->order_details as $od)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $od->product->fr_Product_Name }}</td>
-                            <td>{{ $od->Quantity }}</td>
-                            <td>{{ is_null($od->Size) ? 'N/A' : $od->Size }}</td>
-                            <td>{{ $od->Price }}</td>
-                            <td>{{ $od->Total_Price }} OMR</td>
-                        </tr>
+                                    <tr>
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $od->product->fr_Product_Name }}</td>
+                                        <td>{{ $od->Quantity }}</td>
+                                        @if ($order->order_source == 'whatsapp')
+                                            <td>{{ $od->Size }}</td>
+
+                                        @else
+                                                            @php
+                                                                $size = json_decode($od->Size); 
+                                                            @endphp
+                                                            <td>{{ is_null($size?->weight) ? 'N/A' : $size?->weight }} جرام</td>
+                                        @endif
+                                        <td>{{ $od->Price }}</td>
+                                        <td>{{ $od->Total_Price }} OMR</td>
+                                    </tr>
                     @endforeach
                     <tr class="total-row">
                         <td colspan="5">الإجمالي قبل النهائي</td>
                         <td>{{ $order->Sub_Total }} OMR</td>
                     </tr>
+                    @if ($order->Coupon_Amount > 0)
+                        <tr>
+                            <td colspan="5">الخصم</td>
+                            <td>{{ $order->Coupon_Amount }} %</td>
+                        </tr>
+                        <tr>
+                            <td colspan="5">الإجمالي بعد الخصم</td>
+                            <td>{{ $order->Sub_Total - ($order->Sub_Total * ($order->Coupon_Amount / 100))}} OMR</td>
+                        </tr>
+                    @endif
                     <tr>
                         <td colspan="5">مصاريف الشحن</td>
                         <td>{{ $order->Delivery_Charge }} OMR</td>
                     </tr>
                     <tr class="total-row">
                         <td colspan="5">المجموع النهائي:</td>
-                        <td>{{ $order->Grand_Total }} OMR</td>
+                        <td>{{ $order->Sub_Total - ($order->Sub_Total * ($order->Coupon_Amount / 100)) + $order->Delivery_Charge }}
+                            OMR</td>
                     </tr>
                 </tbody>
             </table>

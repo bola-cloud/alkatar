@@ -44,9 +44,6 @@ class CartController extends Controller
             if (isset($request->additions)) {
                 $additions = DB::table('additions')->where('product_id', $request->product_id)->whereIn('id', $request->additions)->get();
             }
-
-            //            dd($request->additions);
-
             if ($color_id == 0) {
                 $color_id = null;
             }
@@ -59,8 +56,6 @@ class CartController extends Controller
 
             $selected_size = DB::table('size_product')->where('Product_Id', $request->product_id)->where('Size_Id', $request->size_id)->first();
             $selected_weight = WeightProduct::where('product_id', $request->product_id)->where('id', $request->weight_id)->first();
-
-            // dd($selected_weight);
 
             $cart = Cart::add([
                 'id' => $request->product_id,

@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\discountsController;
 use App\Http\Controllers\Admin\ExcelUpdateController;
+use App\Http\Controllers\Admin\offersController;
 use App\Http\Controllers\SubcategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
@@ -60,7 +62,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin'], 'as' =>
 
     Route::get('/deleteUser/{email}', [DashboardController::class, 'deleteUser'])->name('deleteUser');
     Route::get('/customQuery', [DashboardController::class, 'customQuery'])->name('customQuery');
-    
+
 
 
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
@@ -251,6 +253,27 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin'], 'as' =>
         Route::post('/update', [CouponController::class, 'couponUpdate'])->name('coupon.update')->middleware(['permission:coupon-edit', 'isDemo']);
         Route::get('/delete/{id}', [CouponController::class, 'couponDelete'])->name('coupon.delete')->middleware(['permission:coupon-delete', 'isDemo']);
     });
+
+
+
+    Route::group(['prefix' => 'offers'], function () {
+        Route::get('', [offersController::class, 'offers'])->name('offers')->middleware(['permission:coupon-list|coupon-create|coupon-edit|coupon-delete']);
+        Route::get('/create', [offersController::class, 'offersCreate'])->name('offers.create')->middleware(['permission:coupon-create']);
+        Route::post('/create', [offersController::class, 'offersStore'])->name('offers.store')->middleware(['permission:coupon-create', 'isDemo']);
+        Route::get('/edit/{id}', [offersController::class, 'offersEdit'])->name('offers.edit')->middleware(['permission:coupon-edit']);
+        Route::post('/update', [offersController::class, 'offersUpdate'])->name('offers.update')->middleware(['permission:coupon-edit', 'isDemo']);
+        Route::get('/delete/{id}', [offersController::class, 'offersDelete'])->name('offers.delete')->middleware(['permission:coupon-delete', 'isDemo']);
+        Route::get('/free/Shipping/active', [offersController::class, 'freeShippingActive'])->name('offers.freeShippingActive');
+        Route::get('/free/Shipping/inactive', [offersController::class, 'freeShippingInActive'])->name('offers.freeShippingInActive');
+
+        Route::get('/active/{id}', [offersController::class, 'offersActive'])->name('offers.active');
+        Route::get('/inactive/{id}', [offersController::class, 'offersInactive'])->name('offers.inactive');
+
+
+    });
+
+
+
 
     Route::group(['prefix' => 'site-content/home-page'], function () {
         Route::get('', [HomePageController::class, 'homePage'])->name('home.page.site.content')->middleware(['permission:cms-list|cms-create|cms-edit|cms-delete']);

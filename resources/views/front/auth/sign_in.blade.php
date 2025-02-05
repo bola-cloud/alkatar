@@ -98,7 +98,6 @@
         form.addEventListener('submit', function (e) {
             e.preventDefault();
 
-            // Check if the phone number is valid
             if (iti.isValidNumber()) {
                 var fullNumber = iti.getNumber();
                 var countryCode = iti.getSelectedCountryData().dialCode;
@@ -107,12 +106,10 @@
                 form.submit();
             } else {
                 console.error("Invalid phone number");
-                // You can add user feedback here, e.g., display an error message
                 alert("Please enter a valid phone number.");
             }
         });
 
-        // Update the hidden input whenever the phone number changes
         input.addEventListener('input', function () {
             var fullNumber = iti.getNumber();
             var countryCode = iti.getSelectedCountryData().dialCode;

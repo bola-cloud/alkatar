@@ -11,21 +11,26 @@ use App\Http\Services\PaymentService;
 // use App\Jobs\OrderConfirmMail;
 use App\Library\SslCommerz\SslCommerzNotification;
 use App\Models\Admin\Billing;
+use App\Models\Admin\Color;
 use App\Models\Admin\Coupon;
 use App\Models\Admin\Order;
 use App\Models\Admin\OrderDetails;
 use App\Models\Admin\Product;
 use App\Models\Admin\Shipping;
+use App\Models\Admin\Size;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Currency;
 use App\Models\PaymentPlatform;
 use App\Models\SeoSetting;
+use App\Models\Setting;
 use App\Models\State;
+use App\Models\WeightProduct;
 use App\Resolvers\PaymentPlatformResolver;
 use Illuminate\Http\Request;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use Log;
@@ -35,6 +40,8 @@ use Exception;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OrderConfirmMail;
 use Illuminate\Support\Str;
+use App\Models\Offer;
+
 
 
 class CheckoutController extends Controller
@@ -60,18 +67,12 @@ class CheckoutController extends Controller
             $itemWeight = $item->options->weight->weight ?? 0;
             $totalWeightGrams += $itemWeight * $item->qty;
         }
-
-        // Convert grams to kilograms
         $totalWeightKg = $totalWeightGrams / 1000;
 
         $shippingFee = 0;
-
-        // if ($totalWeightKg >= 1 && $totalWeightKg <= 10) {
-        //     $shippingFee = 0; // 2 OMR for 1-10kg
-        // } else
         if ($totalWeightKg > 10) {
             $extraKg = ceil($totalWeightKg - 10);
-            $shippingFee = ($extraKg * 0.100); //  0.100 OMR for each extra kg
+            $shippingFee = ($extraKg * 0.100);
         }
 
         return $shippingFee;
@@ -95,8 +96,69 @@ class CheckoutController extends Controller
             $data['extraWeightFees'] = $this->calculateExtraWeightFees();
             $oman_country_id = Country::where('name_en', 'Oman')->first()->id;
             $data['states'] = State::where('country_id', $oman_country_id)->get();
-            // dd($data);
 
+            $offers = Offer::where('type', 'buy_x_get_z')
+                ->whereDate('start_date', '<=', now())
+                ->whereDate('end_date', '>=', now())
+                ->where('status', 1)
+                ->get();
+
+            $cartProductIds = $data['content']->pluck('id')->toArray();
+
+            foreach ($offers as $offer) {
+                $requiredProductIds = $offer->required_product_ids;
+                $giftProductIds = $offer->gift_product_ids;
+
+                if (!is_array($requiredProductIds) || !is_array($giftProductIds)) {
+                    continue;
+                }
+
+                $found = array_intersect($requiredProductIds, $cartProductIds);
+
+                if (!empty($found)) {
+                    foreach ($giftProductIds as $giftProductId) {
+                        $giftExists = Cart::search(fn($cartItem, $rowId) => $cartItem->id == $giftProductId)->isNotEmpty();
+                        if (!$giftExists) {
+                            $giftProduct = Product::find($giftProductId);
+                            if ($giftProduct) {
+                                $color_id = DB::table('color_product')->where('Product_Id', $giftProduct->id)->first();
+                                $size_id = DB::table('size_product')->where('Product_Id', $giftProduct->id)->first();
+                                $selected_size = DB::table('size_product')->where('Product_Id', $giftProduct->id)->first();
+                                $selected_weight = WeightProduct::where('product_id', $giftProduct->id)->first();
+                                $color_name = Color::where('id', $color_id?->color_id)->first();
+                                $size_name = Size::where('id', $size_id?->size_id)->first();
+
+                                Cart::add([
+                                    'id' => $giftProduct->id,
+                                    'name' => $giftProduct->en_Product_Name,
+                                    'qty' => 1,
+                                    'price' => 0,
+                                    'size' => $size_id == 0 ? $size_id : $size_name->Size,
+                                    'selectedSize' => $request->selectedSize ?? null,
+                                    'selectedWeight' => $selected_weight ?? null,
+                                    'weight' => $selected_size->weight ?? 0,
+                                    'options' => [
+                                        'name_ar' => $giftProduct->fr_Product_Name,
+                                        'additions' => $additions ?? [],
+                                        'size' => $size_id == 0 ? $size_id : $size_name->Size,
+                                        'size_ar' => $size_id == 0 ? $size_id : $size_name->Size_ar,
+                                        'color' => $color_id == 0 ? $color_id : $color_name->ColorCode,
+                                        'image' => $giftProduct->Primary_Image,
+                                        'weight' => $selected_weight ?? null,
+                                        'slug' => $giftProduct->en_Product_Slug,
+                                        'discount_price' => 0,
+                                        'item_tag' => $giftProduct->ItemTag,
+                                        'discount_parcent' => 100,
+                                        'voucher' => $giftProduct->Voucher,
+                                    ]
+                                ]);
+                            }
+                        }
+                    }
+                    session()->flash('success', ('تم اضافة منتج مجاني من العروض'));
+                    return view('front.pages.checkout.checkout', $data);
+                }
+            }
             return view('front.pages.checkout.checkout', $data);
         } else {
             return redirect()->route('front')->with('toast_warning', 'Cart is Empty');
@@ -153,18 +215,45 @@ class CheckoutController extends Controller
         try {
             $subtotal = Cart::subtotal();
             $cartItems = Cart::content();
-            if(Cart::countItems() == 0){
+            if (Cart::countItems() == 0) {
                 return redirect()->route(route: 'front')->with('error', __('Cart is empty. Go to product page and cart something.'));
             }
             $tax = tax_amount($subtotal, $request->billing_country);
             $shipping_charge = delivery_charge($request->billing_city ?? $request->billing_country);
             $weight_charge = $this->calculateExtraWeightFees();
             $shipping_charge += $weight_charge;
+
+            $free_shipping = Setting::where('slug', 'free_shipping')->get()[0]['value'];
+
+            $free_shipping_offer = Offer::where('type', 'free_shipping_with_total_bill')
+                ->whereDate('start_date', '<=', now())
+                ->whereDate('end_date', '>=', now())
+                ->where('status', 1)
+                ->where('minimum_total', '<=', $subtotal)
+                ->first();
+
+            if ($free_shipping_offer) {
+                $shipping_charge = 0;
+            }
+
+            if ($free_shipping == 1) {
+                $shipping_charge = 0;
+            }
+
+
             $this->grand_total = $subtotal + $shipping_charge;
+
+            $offers = Offer::where('type', "total_bill_discount")->orderBy('minimum_total', 'desc')->get();
+            foreach ($offers as $offer) {
+                if ($subtotal >= $offer->minimum_total) {
+                    $this->discount = $offer->discount_value;
+                    break;
+                }
+            }
+
 
             $shipping_city = City::find($request->billing_city);
             $shipping_state = State::find($request->billing_state);
-
 
             // Address handling
             if ($isLoggedIn) {
@@ -263,15 +352,25 @@ class CheckoutController extends Controller
                     return $this->pay($this->grand_total * (conversion_rate('USD') ? conversion_rate('USD') : 0), $this->discount, 'USD', 2, $request->payment_method);
 
                 case 'paypal':
+
                     $checkoutProduct = [];
+                    $totalItems = Cart::countItems();
+                    $discountAmount = ($this->discount / 100) * $subtotal;
 
                     foreach ($cartItems as $item) {
-                        $checkoutProduct[] = [
-                            'name' => Str::limit($item->name, 35),
-                            'quantity' => $item->qty,
-                            'unit_amount' => number_format($item->price, 3) * 1000,
-                        ];
+                        $unit_amount = $item->price;
+                        if ($unit_amount != 0) {
+                            $itemTotalPrice = $unit_amount * $item->qty;
+                            $itemDiscount = ($itemTotalPrice / $subtotal) * $discountAmount;
+                            $newUnitAmount = $unit_amount - ($itemDiscount / $item->qty);
+                            $checkoutProduct[] = [
+                                'name' => Str::limit($item->name, 35),
+                                'quantity' => $item->qty,
+                                'unit_amount' => number_format($newUnitAmount, 3) * 1000,
+                            ];
+                        }
                     }
+                    // dd($checkoutProduct);
                     if ($shipping_charge) {
                         $checkoutProduct[] = [
                             'name' => 'Shipping Charge',
@@ -611,7 +710,7 @@ class CheckoutController extends Controller
                 'Sub_Total' => $subtotal,
                 'Coupon_Id' => Session::get('Coupon_Id'),
                 'Coupon_Amount' => $discount,
-                'Grand_Total' => $grand_total - $discount,
+                'Grand_Total' => $grand_total,
                 'Is_Free_Delivery' => false,
                 'Is_Order_Successful' => false,
                 'Is_Order_Completed' => false,
@@ -638,7 +737,7 @@ class CheckoutController extends Controller
                         'Image' => $item->options->image,
                         'Price' => $item->price,
                         'Color' => $item->options->color,
-                        'Size' => $item->options->size,
+                        'Size' => $item->options->weight,
                         'Quantity' => $item->qty,
                         'Total_Price' => $item->price * $item->qty,
                     ]);
@@ -763,6 +862,19 @@ class CheckoutController extends Controller
         $data['tax_show'] = currencyConverter(tax_amount(Cart::subtotal(), $request->country));
         $data['delivery_charge'] = delivery_charge($request->country);
         $data['delivery_charge_curr'] = currencyConverter(delivery_charge($request->country));
+        $subtotal = Cart::subtotal();
+        $free_shipping_offer = Offer::where('type', 'free_shipping_with_total_bill')
+            ->whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now())
+            ->where('status', 1)
+            ->where('minimum_total', '<=', $subtotal)
+            ->first();
+
+        if ($free_shipping_offer) {
+            $data['delivery_charge'] = 0;
+            $data['delivery_charge_curr'] = currencyConverter(0);
+        }
+
         $data['total_cost'] = Cart::subtotal() + delivery_charge($request->country) + tax_amount(Cart::subtotal(), $request->country) - Session::get('CouponAmount');
         $data['total_cost_curr'] = currencyConverter(Cart::subtotal() + delivery_charge($request->country) + tax_amount(Cart::subtotal(), $request->country) - Session::get('CouponAmount'));
         $data['success'] = true;

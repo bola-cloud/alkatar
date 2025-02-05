@@ -36,10 +36,10 @@ class DashboardRepository
 
     public function getTotalProductSale()
     {
-        $orders = Order::where('Order_Status', ORDER_DELIVERED)->with('order_details')->get();
+        $orders = Order::where('Payment_Method', 'thawani')->with('order_details')->get();
         $total_items_qty = 0;
-        foreach($orders as $order) {
-            foreach($order->order_details as $od) {
+        foreach ($orders as $order) {
+            foreach ($order->order_details as $od) {
                 $total_items_qty += $od->Quantity;
             }
         }
@@ -49,7 +49,7 @@ class DashboardRepository
     public function getTotalTodayProductOrder()
     {
         $current_date = Carbon::now();
-        $orders = Order::whereDate('created_at', '=', $current_date)->with('order_details')->count();
+        $orders = Order::where('Payment_Method', 'thawani')->whereDate('created_at', '=', $current_date)->with('order_details')->count();
         // $total_items_qty = 0;
         // foreach($orders as $order) {
         //     foreach($order->order_details as $od) {
@@ -62,68 +62,81 @@ class DashboardRepository
     public function getcurrentMonthProductSale()
     {
         $current_date = Carbon::now();
-        $explode = explode('-',$current_date->format('d-m-Y'));
+        $explode = explode('-', $current_date->format('d-m-Y'));
         $explode[0] = '1';
-        $implode= implode("-",$explode);
+        $implode = implode("-", $explode);
         $first_day = Carbon::parse($implode);
-        $orders = Order::where('Order_Status', ORDER_DELIVERED)->whereDate('created_at','>=',$first_day)->whereDate('created_at','<=',$current_date)->with('order_details')->get();
+        $orders = Order::where('Payment_Method', 'thawani')->whereDate('created_at', '>=', $first_day)->whereDate('created_at', '<=', $current_date)->with('order_details')->count();
 
-        $total_items_qty = 0;
-        foreach($orders as $order) {
-            foreach($order->order_details as $od) {
-                $total_items_qty += $od->Quantity;
-            }
-        }
-        return $total_items_qty;
+        // $total_items_qty = 0;
+        // foreach ($orders as $order) {
+        //     foreach ($order->order_details as $od) {
+        //         $total_items_qty += $od->Quantity;
+        //     }
+        // }
+        return $orders;
     }
 
     public function getYearProductSale()
     {
         $current_date = Carbon::now();
-        $explode = explode('-',$current_date->format('d-m-Y'));
+        $explode = explode('-', $current_date->format('d-m-Y'));
         $explode[0] = '1';
         $year = date('Y-m-d', strtotime('today - 365 days'));
-        $orders = Order::where('Order_Status', ORDER_DELIVERED)->whereDate('created_at','>=',$year)->whereDate('created_at','<=',$current_date)->with('order_details')->get();
-        $total_items_qty = 0;
-        foreach($orders as $order){
-            foreach($order->order_details as $od) {
-                $total_items_qty += $od->Quantity;
-            }
-        }
-        return $total_items_qty;
+        $orders = Order::where('Payment_Method', 'thawani')->whereDate('created_at', '>=', $year)->whereDate('created_at', '<=', $current_date)->with('order_details')->count();
+        // $total_items_qty = 0;
+        // foreach ($orders as $order) {
+        //     foreach ($order->order_details as $od) {
+        //         $total_items_qty += $od->Quantity;
+        //     }
+        // }
+        return $orders;
     }
 
     public function getTotalEarning()
     {
-        $earnings = Order::where('Order_Status', ORDER_DELIVERED)->sum('Grand_Total');
+        $earnings = Order::where('Payment_Method', 'thawani')->sum('Grand_Total');
+        return number_format($earnings, 3);
+    }
+
+
+    public function getEarningFromWeb()
+    {
+        $earnings = Order::where('Payment_Method', 'thawani')->where('order_source', null)->sum('Grand_Total');
+        return number_format($earnings, 3);
+    }
+
+    public function getEarningFromWhatsapp()
+    {
+        $earnings = Order::where('Payment_Method', 'thawani')->where('order_source', 'whatsapp')->sum('Grand_Total');
         return number_format($earnings, 3);
     }
 
     public function getTodayEarning()
     {
         $current_date = Carbon::now();
-        $earnings = Order::where('Order_Status', ORDER_DELIVERED)->whereDate('created_at','=',$current_date)->sum('Grand_Total');
+        $earnings = Order::where('Order_Status', ORDER_DELIVERED)->whereDate('created_at', '=', $current_date)->sum('Grand_Total');
         return number_format($earnings, 3);
     }
 
     public function getMonthEarning()
     {
         $current_date = Carbon::now();
-        $explode = explode('-',$current_date->format('d-m-Y'));
+        $explode = explode('-', $current_date->format('d-m-Y'));
         $explode[0] = '1';
-        $implode= implode("-",$explode);
+        $implode = implode("-", $explode);
         $first_day = Carbon::parse($implode);
-        $earnings = Order::where('Order_Status', ORDER_DELIVERED)->whereDate('created_at','>=',$first_day)->whereDate('created_at','<=',$current_date)->sum('Grand_Total');
+        $earnings = Order::where('Order_Status', ORDER_DELIVERED)->whereDate('created_at', '>=', $first_day)->whereDate('created_at', '<=', $current_date)->sum('Grand_Total');
         return number_format($earnings, 3);
     }
 
     public function getYearEarning()
     {
         $current_date = Carbon::now();
-        $explode = explode('-',$current_date->format('d-m-Y'));
+        $explode = explode('-', $current_date->format('d-m-Y'));
         $explode[0] = '1';
         $year = date('Y-m-d', strtotime('today - 365 days'));
-        $earnings = Order::where('Order_Status', ORDER_DELIVERED)->whereDate('created_at','>=',$year)->whereDate('created_at','<=',$current_date)->sum('Grand_Total');
+        $earnings = Order::whereDate('created_at', '>=', $year)->whereDate('created_at', '<=', $current_date)->where('Payment_Method', 'thawani')->sum('Grand_Total');
         return number_format($earnings, 3);
     }
 

@@ -7,6 +7,8 @@ use App\Models\DeliveryCharge;
 use Illuminate\Http\Request;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Support\Facades\Session;
+use App\Models\Setting;
+use App\Models\Offer;
 
 
 
@@ -91,7 +93,7 @@ class CityController extends Controller
     public function getCitiesByState($state_id)
     {
         $cities = City::where('state_id', $state_id)->get();
-        if(app()->getLocale() == 'fr') {
+        if (app()->getLocale() == 'fr') {
             foreach ($cities as $city) {
                 $city->name_en = $city->name_ar;
             }
@@ -101,20 +103,32 @@ class CityController extends Controller
 
     public function calculateExtraWeightFees()
     {
+        $free_shipping = Setting::where('slug', 'free_shipping')->get()[0]['value'];
+        $subtotal = Cart::subtotal();
+        $free_shipping_offer = Offer::where('type', 'free_shipping_with_total_bill')
+            ->whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now())
+            ->where('status', 1)
+            ->where('minimum_total', '<=', $subtotal)
+            ->first();
+
+        if ($free_shipping_offer) {
+            return 0;
+        }
+
+        if ($free_shipping == 1) {
+            return 0;
+        }
+
         $totalWeightGrams = 0;
         foreach (Cart::content() as $item) {
             $itemWeight = $item->options->weight->weight ?? 0;
             $totalWeightGrams += $itemWeight * $item->qty;
         }
-
-        // Convert grams to kilograms
         $totalWeightKg = $totalWeightGrams / 1000;
 
         $shippingFee = 0;
 
-        // if ($totalWeightKg >= 1 && $totalWeightKg <= 10) {
-        //     $shippingFee = 0; // 2 OMR for 1-10kg
-        // } else
         if ($totalWeightKg > 10) {
             $extraKg = ceil($totalWeightKg - 10);
             $shippingFee = ($extraKg * 0.100); //  0.100 OMR for each extra kg
@@ -133,12 +147,53 @@ class CityController extends Controller
         $coupon = Session::get('CouponAmount', 0);
         $weight_charge = $this->calculateExtraWeightFees();
 
-        $total_cost = $subtotal + $charge + $weight_charge + $tax - $coupon;
+        $free_shipping = Setting::where('slug', 'free_shipping')->get()[0]['value'];
+
+        $free_shipping_offer = Offer::where('type', 'free_shipping_with_total_bill')
+            ->whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now())
+            ->where('status', 1)
+            ->where('minimum_total', '<=', $subtotal)
+            ->first();
+
+        if ($free_shipping_offer) {
+            $weight_charge = 0;
+            $charge = 0;
+        }
+
+
+        if ($free_shipping == 1) {
+            $weight_charge = 0;
+            $charge = 0;
+        }
+
+        $subtotal_After_offer = $subtotal;
+        $offers = Offer::where('type', 'total_bill_discount')
+            ->whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now())
+            ->where('status', 1)
+            ->orderBy('minimum_total', 'desc')
+            ->get();
+        $is_offer = false;
+        $offer_Discount_value = 0;
+        foreach ($offers as $offer) {
+            if ($subtotal >= $offer->minimum_total) {
+                $subtotal_After_offer = $subtotal - ($subtotal * $offer->discount_value / 100);
+                $is_offer = true;
+                $offer_Discount_value = $offer->discount_value;
+                break;
+            }
+        }
+        $total_cost = $subtotal_After_offer + $charge + $weight_charge + $tax - $coupon;
 
         return response()->json([
             'delivery_charge' => $charge,
             'formatted_charge' => currencyConverter($charge),
             'total_cost' => currencyConverter($total_cost),
+            'subtotal_After_offer' => currencyConverter($subtotal_After_offer),
+            'subtotal' => currencyConverter($subtotal),
+            'is_offer' => $is_offer,
+            'offer_Discount' => $offer_Discount_value . '%',
         ]);
     }
 }
