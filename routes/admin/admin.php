@@ -304,7 +304,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin'], 'as' =>
         Route::get('/edit/{id}', [SocialLinkController::class, 'socialLinkEdit'])->name('social.link.edit')->middleware(['permission:cms-edit']);
         Route::post('/update', [SocialLinkController::class, 'socialLinkUpdate'])->name('social.link.update')->middleware(['permission:cms-edit', 'isDemo']);
     });
-
     Route::group(['prefix' => 'footer-information'], function () {
         Route::get('/edit', [FooterInformationController::class, 'footerInformationEdit'])->name('footer.information.edit')->middleware(['permission:cms-list|cms-create|cms-edit|cms-delete']);
         Route::post('/update', [FooterInformationController::class, 'footerInformationUpdate'])->name('footer.information.update')->middleware(['permission:cms-edit', 'isDemo']);
@@ -326,6 +325,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin'], 'as' =>
     Route::post('/order-status-edit', [OrderController::class, 'orderStatusEdit'])->name('order_status_edit')->middleware(['permission:order-edit', 'isDemo']);
     Route::post('/order-status-change/{id}', [OrderController::class, 'orderStatusChange'])->name('order_status_change')->middleware(['permission:order-edit', 'isDemo']);
     Route::get('/order-delete/{id}', [OrderController::class, 'orderDelete'])->name('order_delete')->middleware(['permission:order-delete', 'isDemo']);
+    Route::get('/order-send-to-whatsapp/{id}', [OrderController::class, 'orderSendToWhatsapp'])->name('order_send_to_whatsapp')->middleware(['permission:order-delete', 'isDemo']);
     Route::get('/order/digital-products/{id}', [OrderController::class, 'digitalProductSend'])->name('digital_product_send')->middleware(['permission:order-edit']);
     Route::post('/order/digital-products-mail', [OrderController::class, 'digitalProductMail'])->name('digital_product_mail')->middleware(['permission:order-edit', 'isDemo']);
     Route::post('/admin/orders/bulk-status-update', [OrderController::class, 'bulkStatusUpdate'])->name('orders.bulk_status_update');

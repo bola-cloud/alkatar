@@ -104,4 +104,22 @@
             }
         })
     });
+
+    $(document).on('click', '.send-to-whatsapp', function (event) {
+        event.preventDefault();
+        const url = $(this).attr('href');
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You will send invoice and payment link to user whatsapp",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, send'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        })
+    });
 })(jQuery);

@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="{{ asset('backend/vendor/select2/css/select2-bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/css/metisMenu.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/css/image-preview.css') }}">
-    <link rel="stylesheet" href="{{ asset('admin/styles/main.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin/styles/main.css?v1.0') }}">
     <link rel="stylesheet" href="{{ asset('admin/css/summernote.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/css/summernote-lite.min.css') }}">
     <link href="{{ asset('backend/css/admin/extra.css') }}" rel="stylesheet">

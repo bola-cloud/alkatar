@@ -9231,7 +9231,7 @@ img {
 }
 
 .action__buttons a:not(:first-child) {
-  margin-left: 15px;
+  margin-left: 5px;
 }
 
 .user-contact {
@@ -11443,7 +11443,7 @@ img {
 }
 
 .action__buttons a:not(:first-child) {
-  margin-left: 15px;
+  margin-left: 5px;
 }
 
 .shop__item {
@@ -11773,7 +11773,7 @@ img {
 }
 
 .action__buttons a:not(:first-child) {
-  margin-left: 15px;
+  margin-left: 5px;
 }
 
 .social-feed__area {
@@ -18870,5 +18870,25 @@ blockquote.right span::before {
 .mtb-250 {
   margin-top: 250px;
   margin-bottom: 250px;
+}
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #fcf9f9;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #20509a;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #153464;
 }
 /*# sourceMappingURL=main.css.map */
