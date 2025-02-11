@@ -149,8 +149,10 @@
                         <p style="line-height: 1.5;">https://alsharashopping.com</p>
                     </td>
                     <td style="text-align: right;">
-                        <p style="line-height: 1.5;">تاريخ الشراء: {{ date('d/m/Y', strtotime($order->created_at)) }}</p>
-                        <p style="line-height: 1.5;">وقت الشراء: {{ $order->created_at->timezone('Asia/Muscat')->format('h:i A') }}</p>
+                        <p style="line-height: 1.5;">تاريخ الشراء: {{ date('d/m/Y', strtotime($order->created_at)) }}
+                        </p>
+                        <p style="line-height: 1.5;">وقت الشراء:
+                            {{ $order->created_at->timezone('Asia/Muscat')->format('h:i A') }}</p>
                         <p style="line-height: 1.5;">رقم الطلب: {{ $order->Order_Number }}</p>
                         <p style="line-height: 1.5;">طريقة الدفع: {{ $order->Payment_Method }}</p>
                         <p style="line-height: 1.5;">طريقة الشحن: مصاريف الشحن</p>
@@ -165,9 +167,11 @@
                     <td style="text-align: right; border: 1px solid #ddd;">
                         <div class="address-title" style="font-weight: bold;">الفاتورة الى</div>
                         <p style="line-height: 1.5;">اسم العميل: {{ $order->billing_address['name'] ?? 'N/A' }}</p>
-                        <p style="line-height: 1.5;">البريد الاكتروني: {{ $order->billing_address['email'] ?? 'N/A' }}</p>
+                        <p style="line-height: 1.5;">البريد الاكتروني: {{ $order->billing_address['email'] ?? 'N/A' }}
+                        </p>
                         @if ($order->user)
-                            <p style="line-height: 1.5;">رقم الهاتف: {{ $order->user->code . $order->user->Number ?? 'N/A' }}</p>
+                            <p style="line-height: 1.5;">رقم الهاتف:
+                                {{ $order->user->code . $order->user->Number ?? 'N/A' }}</p>
                         @endif
                     </td>
                     <td style="text-align: right; vertical-align: top; padding: 10px; border: 1px solid #ddd;">
@@ -176,7 +180,8 @@
                         <p style="line-height: 1.5;">المحافظة: {{ $order->billing_address['state_ar'] ?? 'N/A' }}</p>
                         <p style="line-height: 1.5;">المدينة: {{ $order->billing_address['city_ar'] ?? 'N/A' }}</p>
                         <p style="line-height: 1.5;">الدولة: سلطنة عمان</p>
-                        <p style="line-height: 1.5;">رقم الهاتف: {{ $order->billing_address['phone_number'] ?? 'N/A' }}</p>
+                        <p style="line-height: 1.5;">رقم الهاتف: {{ $order->billing_address['phone_number'] ?? 'N/A' }}
+                        </p>
                     </td>
                 </tr>
             </table>
@@ -199,7 +204,15 @@
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $od->product->fr_Product_Name }}</td>
                         <td>{{ $od->Quantity }}</td>
-                        <td>{{ is_null($od->Size) ? 'N/A' : $od->Size }}</td>
+                        {{-- <td>{{ is_null($od->Size) ? 'N/A' : $od->Size }}</td> --}}
+                        @if ($order->order_source == 'whatsapp')
+                            <td>{{ $od->Size }}</td>
+                        @else
+                            @php
+                                $size = json_decode($od->Size);
+                            @endphp
+                            <td>{{ is_null($size?->weight) ? 'N/A' : $size?->weight }} جرام</td>
+                        @endif
                         <td>{{ $od->Price }}</td>
                         <td>{{ $od->Total_Price }} OMR</td>
                     </tr>
