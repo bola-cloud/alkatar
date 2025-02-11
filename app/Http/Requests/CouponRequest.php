@@ -27,6 +27,15 @@ class CouponRequest extends FormRequest
             'coupon_code'=>'required',
             'amount'=>'required',
             'expire_date'=>'required',
+            'usage_count' => request()->user_id ? 'nullable' : 'required|integer|min:1',
+            'user_id' => 'nullable|exists:users,id',
         ];
     }
+
+    public function prepareForValidation()
+    {
+        return $this->merge([
+            'usage_count' => request()->user_id ? 1 : request()->usage_count,
+        ]);
+    } // end of prepareForValidation
 }

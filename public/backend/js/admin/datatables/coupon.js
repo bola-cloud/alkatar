@@ -19,6 +19,14 @@
                     name: 'Min_Expenses'
                 },
                 {
+                    data: 'user',
+                    name: 'user'
+                },
+                {
+                    data: 'usage_count',
+                    name: 'usage_count'
+                },
+                {
                     data: 'ExpireDate',
                     name: 'ExpireDate'
                 },

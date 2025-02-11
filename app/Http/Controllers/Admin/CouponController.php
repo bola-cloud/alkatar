@@ -7,6 +7,7 @@ use App\Http\Requests\CouponRequest;
 use App\Models\Admin\Blog;
 use App\Models\Admin\Coupon;
 use App\Models\Admin\Order;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -31,10 +32,17 @@ class CouponController extends Controller
                     return $data->ExpireDate;
                 })
                 ->addColumn('Validity', function ($data) {
-                    if (Carbon::parse($data->ExpireDate)->isPast()) {
+                    if (Carbon::parse($data->ExpireDate)->isPast() || $data->usage_count == 0) {
                         return '<span class="status blocked">' . __('Invalid') . '</span>';
                     } else {
                         return '<span class="status active">' . __('Valid') . '</span>';
+                    }
+                })
+                ->addColumn('user', function ($data) {
+                    if ($data->user) {
+                        return $data->user->name . ' ( ' . $data->user->Number . ' )';
+                    } else {
+                        return 'No User';
                     }
                 })
                 ->rawColumns(['action', 'ExpireDate', 'Validity'])
@@ -46,6 +54,9 @@ class CouponController extends Controller
     public function couponCreate()
     {
         $data['title'] = __('Coupon Create');
+        $data['users'] = User::where(['is_admin' => 0, 'status' => 1])
+            ->select('id', 'name', 'number')
+            ->get();
         return view('admin.pages.coupon.create', $data);
     }
     public function couponStore(CouponRequest $request)
@@ -58,6 +69,8 @@ class CouponController extends Controller
             'Amount' => $request->amount,
             'Min_Expenses' => $request->min_expenses,
             'ExpireDate' => $request->expire_date,
+            'usage_count' => $request->usage_count,
+            'user_id' => $request->user_id
         ]);
         if ($coupon) {
             return redirect()->route('admin.coupon')->with('success', __('Successfully Stored !'));
@@ -81,6 +94,10 @@ class CouponController extends Controller
     {
         $data['title'] = __('Coupon Create');
         $data['edit'] = Coupon::where('id', $id)->first();
+        $data['users'] = User::where(['is_admin' => 0, 'status' => 1])
+        ->select('id', 'name', 'number')
+        ->get();
+
         return view('admin.pages.coupon.edit', $data);
     }
 
@@ -96,6 +113,9 @@ class CouponController extends Controller
             'Amount' => is_null($request->amount) ? $coupon->Amount : $request->amount,
             'Min_Expenses' => is_null($request->min_expenses) ? $coupon->Min_Expenses : $request->min_expenses,
             'ExpireDate' => is_null($request->expire_date) ? $coupon->ExpireDate : $request->expire_date,
+            'usage_count' =>   $request->user_id ? 1 : (is_null($request->usage_count) ? $coupon->usage_count : $request->usage_count),
+            'user_id' => $request->user_id
+
         ]);
         if ($update) {
             return redirect()->route('admin.coupon')->with('success', __('Successfully Updated !'));

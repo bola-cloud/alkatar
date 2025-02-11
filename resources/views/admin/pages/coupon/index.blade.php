@@ -37,6 +37,8 @@
                             <th>{{ __('Coupon Code')}}</th>
                             <th>{{ __('Amount')}}</th>
                             <th>{{ __('Min Expenses')}}</th>
+                            <th>{{ __('User')}}</th>
+                            <th>{{ __('Usage Count')}}</th>
                             <th>{{ __('Expire Date')}}</th>
                             <th>{{__('Validity')}}</th>
                             <th>{{ __('Action')}}</th>

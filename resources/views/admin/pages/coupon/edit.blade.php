@@ -42,16 +42,35 @@
                                             </div>
                                             <div class="input__group mb-25">
                                                 <label for="exampleInputEmail1">{{ __('Amount') }}</label>
-                                                <input type="number" min="1" step="0.01" class="form-control" id="amount"
-                                                    name="amount" value="{{ $edit->Amount }}"
+                                                <input type="number" min="1" step="0.01" class="form-control"
+                                                    id="amount" name="amount" value="{{ $edit->Amount }}"
                                                     placeholder="{{ __('Amount') }}">
                                             </div>
                                             <div class="input__group mb-25">
                                                 <label for="exampleInputEmail1">{{ __('Minimum Expense') }}</label>
                                                 <input type="number" min="0" step="0.01" class="form-control"
-                                                    id="min_expenses" name="min_expenses"
-                                                    value="{{ $edit->Min_Expenses }}"  placeholder="{{ __('Minimum Expenses') }}">
+                                                    id="min_expenses" name="min_expenses" value="{{ $edit->Min_Expenses }}"
+                                                    placeholder="{{ __('Minimum Expenses') }}">
                                             </div>
+                                            <div class="input__group mb-25">
+                                                <label for="exampleInputEmail1">{{ __('Usage Count') }}</label>
+                                                <input type="number" min="0" step="1" class="form-control"
+                                                    id="usage_count" name="usage_count" value="{{ $edit->usage_count }}"
+                                                    placeholder="{{ __('Usage Count') }}">
+                                            </div>
+                                            <div class="input__group mb-25">
+                                                <label for="user_id">{{ __('Select User') }}</label>
+                                                <select id="user_id" name="user_id" class="form-control">
+                                                    <option value="">{{ __('No User') }}</option>
+                                                    @foreach ($users as $user)
+                                                        <option value="{{ $user->id }}"
+                                                            {{ $edit->user_id == $user->id ? 'selected' : '' }}>
+                                                            {{ $user->name }} ({{ $user->number }})
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
                                             <div class="input__group mb-25">
                                                 <label for="exampleInputEmail1">{{ __('Expire Date') }}</label>
                                                 <input type="date" class="form-control" id="expire_date"
@@ -72,3 +91,24 @@
         </div>
     </div>
 @endsection
+
+@push('coupon_scripts')
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const userSelect = document.getElementById("user_id");
+            const usageCount = document.getElementById("usage_count");
+
+            function toggleUsageCount() {
+                if (userSelect.value) {
+                    usageCount.value = 1;
+                    usageCount.setAttribute("disabled", "disabled");
+                } else {
+                    usageCount.removeAttribute("disabled");
+                }
+            }
+
+            userSelect.addEventListener("change", toggleUsageCount);
+            toggleUsageCount(); // Run on page load
+        });
+    </script>
+@endpush

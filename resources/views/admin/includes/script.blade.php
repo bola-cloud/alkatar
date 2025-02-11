@@ -14,3 +14,4 @@
 <script src="{{ asset('admin/js/toastr.min.js') }}"></script>
 
 @stack('post_scripts')
+@stack('coupon_scripts')

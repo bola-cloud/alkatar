@@ -50,6 +50,22 @@
                                                     placeholder="{{ __('Minimum Expenses') }}">
                                             </div>
                                             <div class="input__group mb-25">
+                                                <label for="usage_count">{{ __('Usage Count') }}</label>
+                                                <input type="number" min="1" step="1" id="usage_count" name="usage_count"
+                                                    value="{{ old('usage_count') ?? 1 }}" placeholder="{{ __('Usage Count') }}">
+                                            </div>
+
+                                            <div class="input__group mb-25">
+                                                <label for="user_id">{{ __('Select User') }}</label>
+                                                <select id="user_id" name="user_id" class="form-control select2">
+                                                    <option value="">{{ __('No User') }}</option>
+                                                    @foreach($users as $user)
+                                                        <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->number }})</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            <div class="input__group mb-25">
                                                 <label for="expire_date">{{ __('Expire Date') }}</label>
                                                 <input type="date" id="expire_date" name="expire_date"
                                                     value="{{ old('expire_date') }}">
@@ -69,3 +85,24 @@
         </div>
     </div>
 @endsection
+
+@push('coupon_scripts')
+    <!-- Include Select2 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2
+            $('.select2').select2();
+
+            // Handle user selection change
+            $('#user_id').on('change', function() {
+                console.log('User selected');
+                if ($(this).val()) {
+                    $('#usage_count').val(1).prop('disabled', true);
+                } else {
+                    $('#usage_count').prop('disabled', false);
+                }
+            });
+        });
+    </script>
+@endpush
