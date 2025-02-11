@@ -382,7 +382,8 @@ class OrderController extends Controller
                 'phone_number' => $phoneNumber,
                 'payment_url' => $paymentUrl,
                 'pdf' => $pdfUrl,
-                'price' => $order->Grand_Total
+                'price' => $order->Grand_Total,
+                'language' => session('APP_LOCALE') == 'fr' ? 'ar' : 'en'
             ]);
 
 
