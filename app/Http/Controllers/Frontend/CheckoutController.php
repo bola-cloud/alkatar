@@ -41,8 +41,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\OrderConfirmMail;
 use Illuminate\Support\Str;
 use App\Models\Offer;
-
-
+use App\Models\User;
 
 class CheckoutController extends Controller
 {
@@ -96,6 +95,10 @@ class CheckoutController extends Controller
             $data['extraWeightFees'] = $this->calculateExtraWeightFees();
             $oman_country_id = Country::where('name_en', 'Oman')->first()->id;
             $data['states'] = State::where('country_id', $oman_country_id)->get();
+            $data['users'] = User::where(['is_admin' => 0, 'status' => 1])
+                // ->with('billing')
+                // ->select('id', 'name', 'number')
+                ->get();
 
             $offers = Offer::where('type', 'buy_x_get_z')
                 ->whereDate('start_date', '<=', now())
@@ -175,8 +178,23 @@ class CheckoutController extends Controller
     public function checkoutOrder(Request $request)
     {
         $isLoggedIn = Auth::check();
-        $user_id = $isLoggedIn ? Auth::id() : null;
+        // $user_id = $isLoggedIn ? Auth::id() : null;
+        $buy_for = null;
+        $admin_id = null;
 
+        if ($isLoggedIn) {
+            if (Auth::user()->is_admin) {
+                $user_id = $request->user_id;
+                $buy_for = $request->user_id;
+                $admin_id =  Auth::id();
+            } else {
+                $user_id =  Auth::id();
+            }
+        } else {
+            $user_id = null;
+        }
+
+        // dd($request->all(), $isLoggedIn, Auth::user()->is_admin, $user_id);
 
         // Validation
         $validationRules = [
@@ -256,7 +274,7 @@ class CheckoutController extends Controller
             $shipping_state = State::find($request->billing_state);
 
             // Address handling
-            if ($isLoggedIn) {
+            if ($isLoggedIn && is_null($admin_id)) {
                 if (hasBlillingAddress($user_id) == 1) {
                     $billing_create = $this->updateBillingAddress($request, $user_id);
                 } else {
@@ -313,7 +331,7 @@ class CheckoutController extends Controller
             Session::put('shipping_address', $shipping_address);
             Session::put('checkout_email', $billing_address['email']);
 
-            if ($isLoggedIn) {
+            if ($isLoggedIn && is_null($admin_id)) {
                 Session::put('billing_id', $billing_create->id);
                 Session::put('shipping_id', $billing_create->id);
             }
@@ -328,11 +346,14 @@ class CheckoutController extends Controller
             if ($isLoggedIn && Session::has('Coupon_Id')) {
                 $coupon = Coupon::whereId(Session::get('Coupon_Id'))->first();
                 if ($coupon) {
-                    $orderCoupon = Order::where('Coupon_Id', $coupon->id)->where('User_Id', $user_id)->count();
-                    if ($orderCoupon != 0) {
-                        session()->put('couponCode', null);
-                        return redirect()->back()->with('error', 'Already used coupon Code');
+                    if (is_null($admin_id)) {
+                        $orderCoupon = Order::where('Coupon_Id', $coupon->id)->where('User_Id', $user_id)->count();
+                        if ($orderCoupon != 0) {
+                            session()->put('couponCode', null);
+                            return redirect()->back()->with('error', 'Already used coupon Code');
+                        }
                     }
+
                     $this->discount = $coupon->Amount;
                 }
             }
@@ -384,24 +405,24 @@ class CheckoutController extends Controller
                         'Content-Type' => 'application/json',
                         'thawani-api-key' => env('THAWANI_TEST_SECRET_KEY'),
                     ])->post(env('THAWANI_TEST_CHECKOUT_URL') . '/checkout/session', [
-                                'client_reference_id' => $order_number,
-                                'mode' => 'payment',
-                                'products' => $checkoutProduct,
-                                'success_url' => route('thawani.success', [
-                                    'order_number' => $order_number,
-                                ]),
-                                'cancel_url' => route('thawani.cancel', [
-                                    'order_number' => $order_number,
-                                ]),
-                                'metadata' => [
-                                    'order_number' => $order_number,
-                                    'shipping_charge' => $shipping_charge,
-                                    'subtotal' => $subtotal,
-                                    'discount' => $this->discount,
-                                    'grand_total' => $this->grand_total,
-                                    'tax' => $tax,
-                                ]
-                            ]);
+                        'client_reference_id' => $order_number,
+                        'mode' => 'payment',
+                        'products' => $checkoutProduct,
+                        'success_url' => route('thawani.success', [
+                            'order_number' => $order_number,
+                        ]),
+                        'cancel_url' => route('thawani.cancel', [
+                            'order_number' => $order_number,
+                        ]),
+                        'metadata' => [
+                            'order_number' => $order_number,
+                            'shipping_charge' => $shipping_charge,
+                            'subtotal' => $subtotal,
+                            'discount' => $this->discount,
+                            'grand_total' => $this->grand_total,
+                            'tax' => $tax,
+                        ]
+                    ]);
 
 
                     if ($response->successful()) {
@@ -411,6 +432,7 @@ class CheckoutController extends Controller
                         $payment = [
                             'session_id' => $paymentJsonData['data']['session_id'],
                             'user_id' => $user_id,
+                            'admin_id' => $admin_id,
                             'order_number' => $order_number,
                             'amount' => $this->grand_total,
                             'status' => 'CREATED',
@@ -424,7 +446,38 @@ class CheckoutController extends Controller
                         $this->paymentController->createPayment($paymentRequest);
 
                         $paymentUrl = env('THAWANI_TEST_PAY_URL') . $paymentJsonData['data']['session_id'] . '?key=' . env("THAWANI_TEST_PUBLIC_KEY");
-                        $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, " ");
+                        $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, " ", null, $buy_for);
+
+
+                        if ($admin_id) {
+                            $order = Order::where('Order_Number', $order_number)->where('admin_id', $admin_id)->where('User_Id', $user_id)->first();
+                            $serialized_billing = json_decode($order->billing_address);
+
+                            $phoneNumber = null;
+                            if (isset($serialized_billing->phone_number)) {
+                                $phoneNumber = $serialized_billing->phone_number;
+                            }
+
+                            $pdfUrl = route('order.print', ['id' => $order->id]);
+                            $response = Http::asForm()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/payment_pdf', [
+                                'phone_number' => $phoneNumber,
+                                'payment_url' => $paymentUrl,
+                                'created_by' =>  'admin',
+                                'pdf' => $pdfUrl,
+                                'price' => $order->Grand_Total,
+                                'language' => session('APP_LOCALE') == 'fr' ? 'ar' : 'en'
+                            ]);
+
+
+
+                            if ($response->successful()) {
+
+                                return redirect()->route('front')->with('success', 'Order Created successfully');
+                            } else {
+                                return redirect()->back()->with('error', __('Something went wrong!'));
+                            }
+                        }
+
 
                         return redirect()->away($paymentUrl);
                     } else {
@@ -645,10 +698,10 @@ class CheckoutController extends Controller
         return redirect()->back()->with('error', 'Payment cancelled!');
     }
 
-    public function orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $discount, $grand_total, $payment_method, $txn = null)
+    public function orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $discount, $grand_total, $payment_method, $txn = null, $buy_for = null)
     {
         $payment_status = $this->paymentStatus($payment_method);
-        $order = $this->orederCreate($order_number, $shipping_charge, $tax, $subtotal, $discount, $grand_total, $payment_method, $payment_status, $txn);
+        $order = $this->orederCreate($order_number, $shipping_charge, $tax, $subtotal, $discount, $grand_total, $payment_method, $payment_status, $txn, $buy_for);
         if ($order['success'] == true) {
             session()->forget('Coupon_Id');
             Cart::destroy();
@@ -693,14 +746,26 @@ class CheckoutController extends Controller
         return PAYMENT_PENDING;
     }
 
-    public function orederCreate($order_number, $shipping_charge, $tax, $subtotal, $discount, $grand_total, $payment_method, $payment_status, $txn = null)
+    public function orederCreate($order_number, $shipping_charge, $tax, $subtotal, $discount, $grand_total, $payment_method, $payment_status, $txn = null, $buy_for = null)
     {
         try {
             $data = ['success' => false, 'data' => []];
 
+
+            if (Auth::user()->is_admin == 1) {
+                $user_id = $buy_for;
+                $admin_id = Auth::id();
+            } else {
+                $user_id = Auth::check() ? Auth::id() : null;
+                $admin_id = null;
+            }
+
+
+
             $order = Order::create([
                 'Order_Number' => $order_number,
-                'User_Id' => Auth::check() ? Auth::id() : null,
+                'User_Id' => $user_id, //Auth::check() ? Auth::id() : null,
+                'admin_id' => $admin_id,
                 'Billing_Id' => session('billing_id'),
                 // 'Shipping_Id' => session('billing_id'),
                 'billing_address' => json_encode(Session::get('billing_address'), true),

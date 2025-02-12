@@ -22,6 +22,8 @@
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/plugins.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/owl.carousel.min.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/owl.theme.default.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('backend/vendor/select2/css/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('backend/vendor/select2/css/select2-bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/style.min.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/extra.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/responsive.css') }}">

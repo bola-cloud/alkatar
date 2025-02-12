@@ -7,6 +7,7 @@ use App\Models\Admin\Color;
 use App\Models\Admin\Product;
 use App\Models\Admin\Size;
 use App\Models\SeoSetting;
+use App\Models\User;
 use App\Models\WeightProduct;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -106,6 +107,10 @@ class CartController extends Controller
         $data['title'] = $seo->title;
         $data['description'] = $seo->description;
         $data['keywords'] = $seo->keywords;
+        $data['users'] = User::where(['is_admin' => 0, 'status' => 1])
+                    ->select('id', 'name', 'number')
+                    ->get();
+
         if ($content->count()) {
             return view('front.pages.cart.cart_content', $data);
         }

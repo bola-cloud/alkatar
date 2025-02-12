@@ -67,6 +67,7 @@
                                 <th>{{ __('Date') }}</th>
                                 <th>{{ __('Time') }}</th>
                                 <th>{{ __('User') }}</th>
+                                <th>{{ __('Admin who created the Order') }}</th>
                                 <th>{{ __('Phone Number') }}</th>
                                 <!-- <th>{{__("State")}}</th> -->
                                 <th>{{__("City")}}</th>

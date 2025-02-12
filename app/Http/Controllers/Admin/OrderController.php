@@ -58,6 +58,9 @@ class OrderController extends Controller
                 ->addColumn('User', function ($data) {
                     return $data->user != null ? $data->user->name : __('Guest User');
                 })
+                ->addColumn('admin', function ($data) {
+                    return $data->admin != null ? $data->admin->name : '-';
+                })
                 ->addColumn('phone_number', function ($data) {
                     if (is_null($data->billing_address)) {
                         return 'N/A';
@@ -381,6 +384,7 @@ class OrderController extends Controller
             $response = Http::asForm()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/payment_pdf', [
                 'phone_number' => $phoneNumber,
                 'payment_url' => $paymentUrl,
+                'created_by' => $order->admin ? 'admin' : 'user',
                 'pdf' => $pdfUrl,
                 'price' => $order->Grand_Total,
                 'language' => session('APP_LOCALE') == 'fr' ? 'ar' : 'en'

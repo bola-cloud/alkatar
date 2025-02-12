@@ -12,6 +12,7 @@ class Order extends Model
     protected $fillable = [
         'Order_Number',
         'User_Id',
+        'admin_id',
         'Billing_Id',
         'Shipping_Id',
         'billing_address',
@@ -42,6 +43,11 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'User_Id');
+    }
+
+    public function admin()
+    {
+        return $this->belongsTo(User::class, 'admin_id');
     }
 
     public function coupon()

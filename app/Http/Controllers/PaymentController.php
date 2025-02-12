@@ -12,6 +12,7 @@ class PaymentController extends Controller
         $request->validate([
             "session_id" => "required|string",
             "user_id" => "nullable|integer",
+            "admin_id" => "nullable|integer",
             "order_number" => "required|string",
             "amount" => "required|numeric",
             "status" => "required|string|in:CREATED,PAYED,REJECTED",
@@ -20,6 +21,7 @@ class PaymentController extends Controller
         $payment = PaymentModel::create([
             "session_id" => $request->session_id,
             "user_id" => $request->user_id,
+            "admin_id" => $request->admin_id,
             "order_number" => $request->order_number,
             "amount" => $request->amount,
             "status" => $request->status,

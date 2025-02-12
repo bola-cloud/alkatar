@@ -410,5 +410,11 @@
     "Discount Price": "سعر الخصم",
     "Discount Type": "نوع الخصم",
     "Discount": "الخصم",
-    "Discount (in Percentage)": "الخصم (بالنسبة المئوية)"
+    "Discount (in Percentage)": "الخصم (بالنسبة المئوية)",
+    "Select User Coupon": "اختر المستخدم المرتبط بالقسيمة",
+    "No User Coupon": "قسيمة عامة غير مرتبطة بمستخدم",
+    "New User": "مستخدم جديد غير موجود بالزبائن",
+    "Select User To Buy For": "اختر الزبون",
+    "Admin who created the Order": "المشرف الذي أنشأ الطلب"
+
 }

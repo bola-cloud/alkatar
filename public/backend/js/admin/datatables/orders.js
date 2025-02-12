@@ -48,6 +48,10 @@
                     name: "User",
                 },
                 {
+                    data: "admin",
+                    name: "admin",
+                },
+                {
                     data: "phone_number",
                     name: "phone_number",
                     searchable: true,
@@ -108,6 +112,9 @@
                 { width: "70px", targets: 11 },
                 { width: "60px", targets: 12 },
                 { width: "60px", targets: 13 },
+                { width: "60px", targets: 14 },
+    
+
             ],
         });
 

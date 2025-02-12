@@ -145,7 +145,7 @@ Route::group(['middleware' => ['is_user']], function () {
     });
 
     Route::group(['prefix' => 'checkout'], function () {
-        Route::get('', [CheckoutController::class, 'checkoutPage'])->name('checkout');
+        Route::get('/{buyFor?}', [CheckoutController::class, 'checkoutPage'])->name('checkout');
         Route::post('order', [CheckoutController::class, 'checkoutOrder'])->name('checkout.order');
         Route::post('guest-order', [CheckoutController::class, 'guestCheckoutOrder'])->name('guest.checkout.order');
         Route::post('get-tax-amount', [CheckoutController::class, 'getTaxAmount'])->name('checkout.get_tax_amount');

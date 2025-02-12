@@ -16,17 +16,21 @@ class CouponController extends Controller
     public function couponApply(Request $request)
     {
         if (Auth::check()) {
-
             return DB::transaction(function () use ($request) {
-                // $couponDetails = Coupon::where('CouponCode', $request->coupon_code)->first();
-                $user = Auth::user();
+                // $couponDetails = Coupon::where('CouponCode', $request->coupon_code)->first();.
+
+                if(Auth::user()->is_admin == 1){
+                    $user_id = (int)$request->user_id;
+                }else{
+                    $user_id = Auth::user()->id;
+                }
                 $couponDetails = Coupon::where('CouponCode', $request->coupon_code)
                     ->where('usage_count', '>', 0) // Ensure it's not overused
                     ->lockForUpdate() // Prevent race condition
                     ->first();
                     
 
-                if ($couponDetails && $couponDetails->user && $user->id != $couponDetails->user_id) {
+                if ($couponDetails && $couponDetails->user && $user_id != $couponDetails->user_id) {
                     return redirect()->back()->with('error', __('Coupon does not exits !'));
                 }
                 $subtotal = Cart::subtotal();
