@@ -48,7 +48,7 @@ class OrderController extends Controller
                     $btn = $btn . '<a href="javascript:void(0)" class="btn-action" onclick="orderDetails(' . $data->id . ')" title="' . __('Invoice') . '"><i class="fas fa-file-invoice"></i></a>';
                     $btn = $btn . '<a href="javascript:void(0)" class="btn-action" onclick="orderStatusEdit(' . $data->id . ')" title="' . __('Change Status') . '"><i class="fas fa-info-circle"></i></a>';
 
-                    if ($data->Order_Status == ORDER_PENDING ) {
+                    if (in_array($data->Order_Status, [ORDER_PENDING, ORDER_CANCELLED]) ) {
                         $btn = $btn . '<a href="' . route('admin.order_send_to_whatsapp', encrypt($data->id)) . '" class="btn-action send-to-whatsapp"><i class="fa-brands fa-whatsapp"></i></a>';
                     }
                     $btn = $btn . '<a href="' . route('admin.order_delete', encrypt($data->id)) . '" class="btn-action delete"><i class="fas fa-trash-alt"></i></a>';
