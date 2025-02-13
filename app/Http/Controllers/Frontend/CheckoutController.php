@@ -183,7 +183,7 @@ class CheckoutController extends Controller
         $admin_id = null;
 
         if ($isLoggedIn) {
-            if (Auth::user()->is_admin) {
+            if (Auth::user() && Auth::user()->is_admin) {
                 $user_id = $request->user_id;
                 $buy_for = $request->user_id;
                 $admin_id =  Auth::id();
@@ -752,7 +752,7 @@ class CheckoutController extends Controller
             $data = ['success' => false, 'data' => []];
 
 
-            if (Auth::user()->is_admin == 1) {
+            if (Auth::user() && Auth::user()->is_admin == 1) {
                 $user_id = $buy_for;
                 $admin_id = Auth::id();
             } else {

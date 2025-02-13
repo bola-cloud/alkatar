@@ -30,7 +30,7 @@
                                 <h2 class="text-3xl lg:text-4xl font-bold mb-4">{{ __('Billing Address') }}</h2>
                             </div>
                             <div class="space-y-4">
-                                @if (auth()->user()->is_admin == 1)
+                                @if (auth()->user() && auth()->user()->is_admin == 1)
                                     <label for="user_id"
                                         class="block text-lg lg:text-2xl font-medium text-gray-700">{{ __('Select User To Buy For') }}</label>
                                     <select id="user_id" name="user_id"
@@ -58,7 +58,7 @@
                                                 class="w-11/12 lg:w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl"
                                                 id="billing_phone" name="billing_phone" placeholder="{{ __('Phone Number') }}"
                                                 value="{{ isset($user) ? $user->Number ?? $user->Number : '' }}" required /> -->
-                                @if (auth()->user()->is_admin == 1)
+                                @if (auth()->user() && auth()->user()->is_admin == 1)
                                     <label for="billing_name"
                                         class="block text-lg lg:text-2xl font-medium text-gray-700">{{ __('Name') }}</label>
                                     <input type="text"
@@ -310,7 +310,7 @@
                             <input type="text"
                                 class="flex-grow p-2 lg:p-3 border rounded h-14 lg:h-16 text-lg lg:text-2xl"
                                 name="coupon_code" placeholder="{{ __('Enter your coupon code') }}" required />
-                            @if (auth()->user()->is_admin)
+                            @if (auth()->user() && auth()->user()->is_admin)
                                 <div class="flex-grow p-2 lg:p-3 border rounded h-14 lg:h-16 text-lg lg:text-2xl">
                                     {{-- <label for="user_id">{{ __('Select User Coupon') }}</label> --}}
                                     <select id="user_id" name="user_id" class="form-control select2">

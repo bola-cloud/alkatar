@@ -151,7 +151,7 @@
                         <input type="text" class="form-control" name="coupon_code"
                             placeholder="{{ __('Enter your coupon code') }}" />
                     </div>
-                    @if (auth()->user()->is_admin)
+                    @if (auth()->user() && auth()->user()->is_admin)
                         <div class="form-group mb-5">
                             {{-- <label for="user_id">{{ __('Select User Coupon') }}</label> --}}
                             <select id="user_id" name="user_id" class="form-control select2">
@@ -160,7 +160,7 @@
                                     <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->number }})
                                     </option>
                                 @endforeach
-                            </select>
+                            </select> 
                         </div>
                     @endif
                     <div class="form-button text-center">
