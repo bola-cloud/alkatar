@@ -197,16 +197,16 @@
                 @if ($order->Coupon_Amount > 0)
                     <tr>
                         <td colspan="5">الخصم</td>
-                        <td>{{ $order->Coupon_Amount }} %</td>
+                        <td>{{ $order->Coupon_Amount }}</td>
                     </tr>
                     <tr>
                         <td colspan="5">الإجمالي بعد الخصم</td>
-                        <td>{{ $order->Sub_Total - ($order->Sub_Total * ($order->Coupon_Amount / 100))}} OMR</td>
+                        <td>{{ $order->Sub_Total - $order->Coupon_Amount}} OMR</td>
                     </tr>
                 @endif
                 <tr class="total-row">
                     <td colspan="5">المجموع النهائي:</td>
-                    <td>{{ $order->Sub_Total - ($order->Sub_Total * ($order->Coupon_Amount / 100)) + $order->Delivery_Charge }} OMR</td>
+                    <td>{{ $order->Sub_Total - $order->Coupon_Amount + $order->Delivery_Charge }} OMR</td>
                 </tr>
             </tbody>
         </table>

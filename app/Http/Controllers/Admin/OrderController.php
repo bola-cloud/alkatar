@@ -100,7 +100,7 @@ class OrderController extends Controller
                     // return $order_city['name_en'];
                 })
                 ->addColumn('GrandTotal', function ($data) {
-                    return $data->Grand_Total . ' OMR';
+                    return $data->Sub_Total -$data->Coupon_Amount  + $data->Delivery_Charge . ' OMR';
                 })
                 // ->addColumn('Products', function ($data) {
                 //     $html = '';
