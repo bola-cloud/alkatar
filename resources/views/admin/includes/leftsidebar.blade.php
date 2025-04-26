@@ -626,6 +626,12 @@
                 </ul>
             </li>
         @endcanany -->
+        <li class="{{ isset($menu) && $menu == 'delivery_charge_report' ? 'mm-active' : '' }}">
+        <a href="{{ route('admin.delivery.charge.report') }}">
+            <i class="fas fa-chart-line"></i>
+            <span>{{ __('Delivery Charge Report') }}</span>
+        </a>
+    </li>
         {{-- @canany(['cms-list'])
         <li class="{{ isset($menu) && $menu == 'sitemap' ? 'mm-active' : '' }}">
             <a href="{{ route('admin.sitemap_list') }}">

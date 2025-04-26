@@ -415,6 +415,14 @@
     "No User Coupon": "قسيمة عامة غير مرتبطة بمستخدم",
     "New User": "مستخدم جديد غير موجود بالزبائن",
     "Select User To Buy For": "اختر الزبون",
-    "Admin who created the Order": "المشرف الذي أنشأ الطلب"
-
+    "Admin who created the Order": "المشرف الذي أنشأ الطلب",
+    "Monthly Delivery Charge Report": "تقرير رسوم التوصيل الشهرية",
+    "Delivery Charge Report": "تقرير رسوم التوصيل",
+    "Filter by date range": "تصفية حسب النطاق الزمني",
+    "Export to Excel": "تصدير إلى إكسل",
+    "Year": "السنة",
+    "Month": "الشهر",
+    "Total Orders": "إجمالي الطلبات",
+    "Total Delivery Charge": "إجمالي رسوم التوصيل",
+    "Grand Total:": "المجموع الكلي:"
 }

@@ -408,3 +408,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin'], 'as' =>
     Route::get('/payment-gateway', [PaymentGatewayController::class, 'index'])->name('payment_gateway_list')->middleware(['permission:payment-gateway-list|payment-gateway-create|payment-gateway-edit|payment-gateway-delete']);
     Route::post('/payment-gateway-update/{slug}', [PaymentGatewayController::class, 'paymentGatewayUpdate'])->name('payment_gateway_update')->middleware(['permission:payment-gateway-edit', 'isDemo']);
 });
+
+// Route::group(['middleware' => ['auth:admin', 'permission'], 'prefix' => 'admin'], function () {
+    // Reports Routes
+    Route::get('delivery-charge-report', [App\Http\Controllers\Frontend\HomeController::class, 'deliveryChargeReport'])->name('admin.delivery.charge.report');
+    Route::post('export-delivery-charge-report', [App\Http\Controllers\Frontend\HomeController::class, 'exportDeliveryChargeReport'])->name('admin.export.delivery.charge.report');
+// });
