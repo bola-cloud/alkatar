@@ -24,7 +24,9 @@ use App\Http\Controllers\Frontend\PaymentController;
 use App\Http\Controllers\Frontend\PageController;
 use App\Http\Controllers\SslCommerzPaymentController;
 use App\Models\Admin\Category;
+use App\Models\Admin\Order;
 use App\Models\Admin\Product;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use League\Csv\Reader;
@@ -181,6 +183,15 @@ Route::get("/get-city-charge/{city_id}", [CityController::class, "getCityCharge"
 Route::get('/search/suggest', [ProductController::class, 'autoSuggest'])->name('search.suggest');
 
 
+Route::get("find-test-order", function () {
+    $products = Product::all();
+    foreach ($products as $product) {
+        $product->Discount_Price = $product->Price;
+        $product->Discount = 0;
+        $product->save();
+    }
+    return "oky";
+});
 
 
 

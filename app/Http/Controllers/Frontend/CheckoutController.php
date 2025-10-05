@@ -446,37 +446,44 @@ class CheckoutController extends Controller
                         $this->paymentController->createPayment($paymentRequest);
 
                         $paymentUrl = env('THAWANI_TEST_PAY_URL') . $paymentJsonData['data']['session_id'] . '?key=' . env("THAWANI_TEST_PUBLIC_KEY");
+                        info("paymentUrl: ", [
+                            'paymentUrl' => $paymentUrl,
+                            'session_id' => $paymentJsonData['data']['session_id'],
+                            'order_number' => $order_number,
+                            'user_id' => $user_id,
+                            'admin_id' => $admin_id,
+                        ]);
                         $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, " ", null, $buy_for);
 
 
-                        if ($admin_id) {
-                            $order = Order::where('Order_Number', $order_number)->where('admin_id', $admin_id)->where('User_Id', $user_id)->first();
-                            $serialized_billing = json_decode($order->billing_address);
+                        // if ($admin_id) {
+                        //     $order = Order::where('Order_Number', $order_number)->where('admin_id', $admin_id)->where('User_Id', $user_id)->first();
+                        //     $serialized_billing = json_decode($order->billing_address);
 
-                            $phoneNumber = null;
-                            if (isset($serialized_billing->phone_number)) {
-                                $phoneNumber = $serialized_billing->phone_number;
-                            }
+                        //     $phoneNumber = null;
+                        //     if (isset($serialized_billing->phone_number)) {
+                        //         $phoneNumber = $serialized_billing->phone_number;
+                        //     }
 
-                            $pdfUrl = route('order.print', ['id' => $order->id]);
-                            $response = Http::asForm()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/payment_pdf', [
-                                'phone_number' => $phoneNumber,
-                                'payment_url' => $paymentUrl,
-                                'created_by' =>  'admin',
-                                'pdf' => $pdfUrl,
-                                'price' => $order->Grand_Total,
-                                'language' => session('APP_LOCALE') == 'fr' ? 'ar' : 'en'
-                            ]);
+                        //     $pdfUrl = route('order.print', ['id' => $order->id]);
+                        //     $response = Http::asForm()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/payment_pdf', [
+                        //         'phone_number' => $phoneNumber,
+                        //         'payment_url' => $paymentUrl,
+                        //         'created_by' =>  'admin',
+                        //         'pdf' => $pdfUrl,
+                        //         'price' => $order->Grand_Total,
+                        //         'language' => session('APP_LOCALE') == 'fr' ? 'ar' : 'en'
+                        //     ]);
 
 
 
-                            if ($response->successful()) {
+                        //     if ($response->successful()) {
 
-                                return redirect()->route('front')->with('success', 'Order Created successfully');
-                            } else {
-                                return redirect()->back()->with('error', __('Something went wrong!'));
-                            }
-                        }
+                        //         return redirect()->route('front')->with('success', 'Order Created successfully');
+                        //     } else {
+                        //         return redirect()->back()->with('error', __('Something went wrong!'));
+                        //     }
+                        // }
 
 
                         return redirect()->away($paymentUrl);
@@ -963,22 +970,24 @@ class CheckoutController extends Controller
     {
         $data = $request->all();
         $order = Order::where('Order_Number', $data['order_number'])->first();
-
         $order->Is_Order_Successful = true;
         $order->Is_Order_Completed = true;
         $order->Payment_Method = THAWANI;
         $order->Payment_Status = PAYMENT_SUCCESS;
         $order->Order_Status = ORDER_PROCESSING;
-
+        
         $order->save();
         $this->sendOrderMail($order->id);
+        info("phone from billing address", ['phone' => json_decode($order->billing_address)->phone_number]);
 
         $pdfUrl = route('order.print', ['id' => $order->id]);
+        info("inside thawani success");
         $response = Http::asForm()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/success/payment', [
-            'phone_number' => $order->user->Number ?? '',
+            'phone_number' => json_decode($order->billing_address)->phone_number ?? '',
             'booking_id' => $order->Order_Number,
             'pdf' => $pdfUrl,
         ]);
+
         Log::info('WhatsApp API response', ['response' => $response->json()]);
         return redirect()->route('checkout.thankyou_page')->with('success', 'Order successfully created!');
     }

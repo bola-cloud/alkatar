@@ -99,16 +99,15 @@ class OrderController extends Controller
                     // $order_city = City::where('id', $data->billing->City)->first();
                     // return $order_city['name_en'];
                 })
-                ->addColumn('GrandTotal', function ($data) {
+                ->addColumn('Subtotal', function ($data) {
+                    return $data->Sub_Total . ' OMR';
+                })
+                 ->addColumn('DeliveryCharge', function ($data) {
+                    return  $data->Delivery_Charge . ' OMR';
+                })
+                 ->addColumn('GrandTotal', function ($data) {
                     return $data->Sub_Total -$data->Coupon_Amount  + $data->Delivery_Charge . ' OMR';
                 })
-                // ->addColumn('Products', function ($data) {
-                //     $html = '';
-                //     foreach ($data->order_details as $or) {
-                //         $html .= '<img src="' . asset(IMG_PRODUCT_PATH . $or->product->Primary_Image) . '" border="0" height="50" class="img-rounded mr-1" align="center" />';
-                //     }
-                //     return $html;
-                // })
                 ->addColumn("order_date", function ($data) {
                     return date('d-m-Y', strtotime($data->created_at));
                 })

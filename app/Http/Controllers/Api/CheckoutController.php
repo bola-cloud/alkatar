@@ -280,6 +280,7 @@ class CheckoutController extends Controller
 
             // Redirect the user to the Thawani payment page
             $paymentUrl = env('THAWANI_TEST_PAY_URL') . $sessionId . "?key=" . env('THAWANI_TEST_PUBLIC_KEY');
+            info("payment url", ['url' => $paymentUrl]);
             return response()->json(['url' => $paymentUrl]);
         } else {
             return response()->json(['error' => 'Failed to create payment session'], 500);
@@ -505,6 +506,8 @@ class CheckoutController extends Controller
 
     public function success(Request $request)
     {
+        info("inside success checkout controller");
+        info($request->all());
         $orderNumber = $request->get('order_number');
         $phoneNumber = $request->get('phone_number');
         Log::info('locak at request ', ['requesst' => $request->all()]);

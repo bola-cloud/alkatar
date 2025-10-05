@@ -36,12 +36,12 @@
                                         <div class="input__group mb-25">
                                             <label for="offer_type">{{ __('Offer Type') }}</label>
                                             <select name="offer_type" id="offer_type" required>
-                                                <option value="">select Offer Type</option>
-                                                <option value="percentage_discount">Percentage Discount</option>
-                                                <option value="fixed_discount">Fixed Discount</option>
-                                                <option value="buy_x_get_z">Buy X Get Z</option>
-                                                <option value="total_bill_discount">Total Bill Discount</option>
-                                                <option value="free_shipping_with_total_bill">Free Shipping With Total Bill</option>
+                                                <option value="">اختار نوع العرض</option>
+                                                <option value="percentage_discount">خصم بنسبة</option>
+                                                <option value="fixed_discount">خصم مبلغ ثابت</option>
+                                                <option value="buy_x_get_z">اشتري منتج واحصل على اخر مجاناً</option>
+                                                <option value="total_bill_discount">خصم على اجمالي الفاتورة</option>
+                                                <option value="free_shipping_with_total_bill">شحن مجاني</option>
                                             </select>
                                         </div>
 
@@ -49,15 +49,16 @@
                                         <div class="input__group mb-25" id="applies_to_div" style="display: none;">
                                             <label for="applies_to">{{ __('Applies To') }}</label>
                                             <select name="applies_to" id="applies_to" class="form-control">
-                                                <option value="">-- select Applies To --</option>
-                                                <option value="product">on Product</option>
-                                                <option value="category">on Category</option>
-                                                <option value="sub_category">on Sub Category</option>
+                                                <option value="">-- اختر التنفيذ على --</option>
+                                                <option value="product">على منتج</option>
+                                                <option value="allProduct">على كل المنتجات</option>
+                                                <option value="category">على قسم</option>
+                                                <option value="sub_category">على قسم فرعي</option>
                                             </select>
                                         </div>
 
                                         <div class="input__group mb-25" id="product_div" style="display: none;">
-                                            <label for="product_id">Product</label>
+                                            <label for="product_id">المنتج</label>
                                             <select name="product_id" id="product_id" class="form-control">
                                                 @foreach ($products as $product)
                                                     <option value="{{ $product->id }}">{{ $product->fr_Product_Name }}
@@ -67,7 +68,7 @@
                                         </div>
 
                                         <div class="input__group mb-25" id="category_div" style="display: none;">
-                                            <label for="category_id">Category</label>
+                                            <label for="category_id">القسم</label>
                                             <select name="category_id" id="category_id" class="form-control">
                                                 @foreach ($categorys as $category)
                                                     <option value="{{ $category->id }}">{{ $category->fr_Category_Name }}
@@ -78,7 +79,7 @@
 
 
                                         <div class="input__group mb-25" id="sub_category_id_div" style="display: none;">
-                                            <label for="sub_category_id">sub Category</label>
+                                            <label for="sub_category_id">القسم الفرعي</label>
                                             <select name="sub_category_id" id="sub_category_id" class="form-control">
                                                 @foreach ($sub_categorys as $sub_category)
                                                     <option value="{{ $sub_category->id }}">{{ $sub_category->name_ar }}
@@ -115,7 +116,7 @@
 
                                         <div class="input__group mb-25" id="required_product_div"
                                             style="display: none;">
-                                            <label for="required_product_ids">Required Product(s)</label>
+                                            <label for="required_product_ids">المنتجات المطلوب شراءها</label>
                                             <select name="required_product_ids[]" id="required_product_ids"
                                                 class="form-control required_product_ids" multiple>
                                                 @foreach ($products as $product)
@@ -127,7 +128,7 @@
 
 
                                         <div class="input__group mb-25" id="gift_product_div" style="display: none;">
-                                            <label for="gift_product_ids">Gift Product(s)</label>
+                                            <label for="gift_product_ids">المنتجات المجانية</label>
                                             <select name="gift_product_ids[]" id="gift_product_ids"
                                                 class="form-control gift_product_ids" multiple>
                                                 @foreach ($products as $product)
@@ -138,7 +139,7 @@
                                         </div>
 
                                         <div class="input__group mb-25" id="minimum_total_div" style="display: none;">
-                                            <label for="minimum_total">Minimum Total</label>
+                                            <label for="minimum_total">الحد الأدنى</label>
                                             <input type="number" name="minimum_total" id="minimum_total"
                                                 class="form-control" step="0.01">
                                         </div>

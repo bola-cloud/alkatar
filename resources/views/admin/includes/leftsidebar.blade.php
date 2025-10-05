@@ -257,6 +257,15 @@
             </li>
         @endcanany
 
+        @canany(['developer'])
+            <li class="{{ isset($menu) && $menu == 'AI' ? 'mm-active' : '' }}">
+                <a href="{{ route('admin.ai.chat.show') }}">
+                    <i class="fas fa-comment-alt"></i>
+                    <span>{{ __('AI') }}</span>
+                </a>
+            </li>
+        @endcanany
+
         @canany(['currency-list'])
             <li class="{{ isset($menu) && $menu == 'coupon' ? 'mm-active' : '' }}">
                 <a href="{{ route('admin.coupon') }}">
@@ -382,11 +391,11 @@
                         </a>
                     </li> --}}
                     <!-- <li class="{{ isset($submenu) && $submenu == 'testimonial' ? 'mm-active' : '' }}">
-                                    <a href="{{ route('admin.testimonial') }}">
-                                        <i class="fa fa-circle"></i>
-                                        <span>{{ __('Testimonial') }}</span>
-                                    </a>
-                                </li> -->
+                                        <a href="{{ route('admin.testimonial') }}">
+                                            <i class="fa fa-circle"></i>
+                                            <span>{{ __('Testimonial') }}</span>
+                                        </a>
+                                    </li> -->
                     <li class="{{ isset($submenu) && $submenu == 'languages' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.language_list') }}">
                             <i class="fa fa-circle"></i>
@@ -565,11 +574,11 @@
                         </a>
                     </li>
                     <!-- <li class="{{ isset($submenu) && $submenu == 'return_policy' ? 'mm-active' : '' }}">
-                                    <a href="{{ route('admin.refund_policy') }}">
-                                        <i class="fa fa-circle"></i>
-                                        <span>{{ __('Refund Policy') }}</span>
-                                    </a>
-                                </li> -->
+                                        <a href="{{ route('admin.refund_policy') }}">
+                                            <i class="fa fa-circle"></i>
+                                            <span>{{ __('Refund Policy') }}</span>
+                                        </a>
+                                    </li> -->
                     <li class="{{ isset($submenu) && $submenu == 'shipping_return' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.shipping_return') }}">
                             <i class="fa fa-circle"></i>
@@ -583,11 +592,11 @@
                         </a>
                     </li>
                     <!-- <li class="{{ isset($submenu) && $submenu == 'company_story' ? 'mm-active' : '' }}">
-                                    <a href="{{ route('admin.company.story') }}">
-                                        <i class="fa fa-circle"></i>
-                                        <span>{{ __('Company Story') }}</span>
-                                    </a>
-                                </li> -->
+                                        <a href="{{ route('admin.company.story') }}">
+                                            <i class="fa fa-circle"></i>
+                                            <span>{{ __('Company Story') }}</span>
+                                        </a>
+                                    </li> -->
                 </ul>
             </li>
         @endcanany
@@ -627,11 +636,11 @@
             </li>
         @endcanany -->
         <li class="{{ isset($menu) && $menu == 'delivery_charge_report' ? 'mm-active' : '' }}">
-        <a href="{{ route('admin.delivery.charge.report') }}">
-            <i class="fas fa-chart-line"></i>
-            <span>{{ __('Delivery Charge Report') }}</span>
-        </a>
-    </li>
+            <a href="{{ route('admin.delivery.charge.report') }}">
+                <i class="fas fa-chart-line"></i>
+                <span>{{ __('Delivery Charge Report') }}</span>
+            </a>
+        </li>
         {{-- @canany(['cms-list'])
         <li class="{{ isset($menu) && $menu == 'sitemap' ? 'mm-active' : '' }}">
             <a href="{{ route('admin.sitemap_list') }}">

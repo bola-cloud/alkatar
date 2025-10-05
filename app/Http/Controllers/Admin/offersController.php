@@ -98,6 +98,18 @@ class offersController extends Controller
                 }
                 $product->save();
             }
+        } else if ($request->applies_to == 'allProduct') {
+            $products = Product::where('status', 1)->get();
+            foreach ($products as $product) {
+                if ($request->is_percentage) {
+                    $product->Discount_Price = $product->Price - ($product->Price * $request->discount_value / 100);
+                    $product->Discount = $request->discount_value;
+                } else {
+                    $product->Discount_Price = $product->Price - $request->discount_value;
+                    $product->Discount = ($request->discount_value / $product->Price) * 100;
+                }
+                $product->save();
+            }
         }
 
         $offer->discount_value = $request->discount_value;
@@ -134,6 +146,13 @@ class offersController extends Controller
             }
         } elseif ($delete->applies_to == 'sub_category') {
             $products = Product::where('subcategory_id', $delete->sub_category_id)->get();
+            foreach ($products as $product) {
+                $product->Discount_Price = $product->Price;
+                $product->Discount = 0;
+                $product->save();
+            }
+        } else if ($delete->applies_to == 'allProduct') {
+            $products = Product::where('status', 1)->get();
             foreach ($products as $product) {
                 $product->Discount_Price = $product->Price;
                 $product->Discount = 0;
@@ -218,6 +237,18 @@ class offersController extends Controller
                 }
                 $product->save();
             }
+        } else if ($request->applies_to == 'allProduct') {
+            $products = Product::where('status', 1)->get();
+            foreach ($products as $product) {
+                if ($request->is_percentage) {
+                    $product->Discount_Price = $product->Price - ($product->Price * $request->discount_value / 100);
+                    $product->Discount = $request->discount_value;
+                } else {
+                    $product->Discount_Price = $product->Price - $request->discount_value;
+                    $product->Discount = ($request->discount_value / $product->Price) * 100;
+                }
+                $product->save();
+            }
         }
 
         $update = $Offer->update([
@@ -279,6 +310,13 @@ class offersController extends Controller
 
         } elseif ($inactive->applies_to == 'category') {
             $products = Product::where('Category_Id', $inactive->category_id)->get();
+            foreach ($products as $product) {
+                $product->Discount_Price = $product->Price;
+                $product->Discount = 0;
+                $product->save();
+            }
+        } else if ($inactive->applies_to == 'allProduct') {
+            $products = Product::where('status', 1)->get();
             foreach ($products as $product) {
                 $product->Discount_Price = $product->Price;
                 $product->Discount = 0;

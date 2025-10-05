@@ -45,6 +45,7 @@ use App\Http\Controllers\Admin\SeoController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SitemapController;
+use App\Http\Controllers\Admin\AIController;
 
 Route::get('/admin/login', [AuthController::class, 'login'])->name('admin.login')->middleware('guest');
 Route::post('/admin/login', [AuthController::class, 'LoginDashboard'])->name('login.post');
@@ -58,6 +59,11 @@ Route::group(['prefix' => 'subscribe'], function () {
 });
 
 Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin'], 'as' => 'admin.'], function () {
+
+    Route::get('/chat', [AIController::class, 'show_chat'])->name('ai.chat.show');
+    Route::post('/ai-chat', [AIController::class, 'chat'])->name('ai.chat');
+
+
     Route::get('/update-subcategory', [ExcelUpdateController::class, 'updateSubcategory'])->name('update-subcategory');
 
     Route::get('/deleteUser/{email}', [DashboardController::class, 'deleteUser'])->name('deleteUser');
@@ -410,7 +416,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin'], 'as' =>
 });
 
 // Route::group(['middleware' => ['auth:admin', 'permission'], 'prefix' => 'admin'], function () {
-    // Reports Routes
-    Route::get('delivery-charge-report', [App\Http\Controllers\Frontend\HomeController::class, 'deliveryChargeReport'])->name('admin.delivery.charge.report');
-    Route::post('export-delivery-charge-report', [App\Http\Controllers\Frontend\HomeController::class, 'exportDeliveryChargeReport'])->name('admin.export.delivery.charge.report');
+// Reports Routes
+Route::get('delivery-charge-report', [App\Http\Controllers\Frontend\HomeController::class, 'deliveryChargeReport'])->name('admin.delivery.charge.report');
+Route::post('export-delivery-charge-report', [App\Http\Controllers\Frontend\HomeController::class, 'exportDeliveryChargeReport'])->name('admin.export.delivery.charge.report');
+
+
 // });

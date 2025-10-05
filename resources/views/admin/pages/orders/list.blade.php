@@ -72,6 +72,8 @@
                                 <!-- <th>{{__("State")}}</th> -->
                                 <th>{{__("City")}}</th>
                                 <!-- <th>{{ __('Products') }}</th> -->
+                                <th>{{ __('Subtotal') }}</th>
+                                <th>{{ __('Delivery Charge') }}</th>
                                 <th>{{ __('Total Amount') }}</th>
                                 <th>{{ __('Coupon Code') }}</th>
                                 <th>{{ __('order source') }}</th>

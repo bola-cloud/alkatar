@@ -69,6 +69,14 @@
                 //     name: 'Products'
                 // },
                 {
+                    data: "Subtotal",
+                    name: "Subtotal",
+                },
+                 {
+                    data: "DeliveryCharge",
+                    name: "DeliveryCharge",
+                },
+                 {
                     data: "GrandTotal",
                     name: "GrandTotal",
                 },

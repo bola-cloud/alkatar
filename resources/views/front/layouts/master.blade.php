@@ -4,11 +4,14 @@
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-CDGYGLXRKV"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    window.dataLayer = window.dataLayer || [];
 
-  gtag('config', 'G-CDGYGLXRKV');
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+
+    gtag('config', 'G-CDGYGLXRKV');
 </script>
 
 @stack('post_css')
@@ -191,7 +194,7 @@
 
     </div>
 
-    <a href="https://api.whatsapp.com/send?phone=96893904070" class="whats-float" target="_blank">
+    <a href="https://api.whatsapp.com/send?phone=96894974726" class="whats-float" target="_blank">
         <i class="fa fa-whatsapp whats-my-float"></i>
     </a>
 
@@ -213,7 +216,8 @@
     @stack('post_script')
 
     <script>
-        var locale = '{{ config('app.locale') }}';
+        var locale = '{{ config('
+        app.locale ') }}';
     </script>
 
     {{-- @include('sweetalert::alert') --}}
