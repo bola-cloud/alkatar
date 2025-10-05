@@ -123,7 +123,7 @@
         <div class="invoice-details">
             <div>
                 <p><strong>شركة مطاحن و تمور الشرع</strong></p>
-                <p>الهاتف: +96893904070</p>
+                <p>الهاتف: +968 94974726</p>
                 <p>alsaraamills@gmail.com</p>
                 <p>https://alsharashopping.com</p>
             </div>

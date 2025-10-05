@@ -144,7 +144,7 @@
                 <tr>
                     <td style="text-align: right;">
                         <p style="line-height: 1.5;"><strong>شركة مطاحن و تمور الشرع</strong></p>
-                        <p style="line-height: 1.5;">الهاتف: +96893904070</p>
+                        <p style="line-height: 1.5;">الهاتف: +968 94974726</p>
                         <p style="line-height: 1.5;">alsaraamills@gmail.com</p>
                         <p style="line-height: 1.5;">https://alsharashopping.com</p>
                     </td>
