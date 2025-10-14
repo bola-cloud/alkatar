@@ -45,6 +45,9 @@ use App\Models\User;
 
 class CheckoutController extends Controller
 {
+    // Free weight allowance in kilograms before extra weight fees apply
+    const FREE_WEIGHT_LIMIT_KG = 25;
+    
     private $grand_total;
     private $discount;
     protected $paymentPlatformResolver;
@@ -69,8 +72,8 @@ class CheckoutController extends Controller
         $totalWeightKg = $totalWeightGrams / 1000;
 
         $shippingFee = 0;
-        if ($totalWeightKg > 10) {
-            $extraKg = ceil($totalWeightKg - 10);
+        if ($totalWeightKg > self::FREE_WEIGHT_LIMIT_KG) {
+            $extraKg = ceil($totalWeightKg - self::FREE_WEIGHT_LIMIT_KG);
             $shippingFee = ($extraKg * 0.100);
         }
 

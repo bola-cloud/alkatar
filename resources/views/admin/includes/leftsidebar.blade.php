@@ -210,6 +210,13 @@
                             <span class="badge bg-info text-white">{{ orderCount(ORDER_RETURN) }}</span>
                         </a>
                     </li>
+                    <!-- New: Orders Report link (inserted under Order Management) -->
+                    <li class="{{ isset($submenu) && $submenu == 'orders_report' ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.reports.orders.index') }}">
+                            <i class="fa fa-circle"></i>
+                            <span>{{ __('Orders Report') }}</span>
+                        </a>
+                    </li>
                 </ul>
             </li>
         @endcanany

@@ -142,137 +142,137 @@
 @endpush
 
 @push('post_scripts')
-<script>
-(function () {
-    const elScroll = document.getElementById('aiChatScroll');
-    const elForm = document.getElementById('aiChatForm');
-    const elInput = document.getElementById('aiChatInput');
-    const elClear = document.getElementById('aiChatClear');
-    const elTyping = document.getElementById('aiTyping');
-    const elStatus = document.getElementById('aiChatStatus');
-    const elError = document.getElementById('aiChatError');
-    const CSRF = document.querySelector('meta[name=csrf-token]').content;
-    const isRTL = document.body.classList.contains('direction-rtl');
+    <script>
+        (function () {
+            const elScroll = document.getElementById('aiChatScroll');
+            const elForm = document.getElementById('aiChatForm');
+            const elInput = document.getElementById('aiChatInput');
+            const elClear = document.getElementById('aiChatClear');
+            const elTyping = document.getElementById('aiTyping');
+            const elStatus = document.getElementById('aiChatStatus');
+            const elError = document.getElementById('aiChatError');
+            const CSRF = document.querySelector('meta[name=csrf-token]').content;
+            const isRTL = document.body.classList.contains('direction-rtl');
 
-    let loading = false;
-    let messages = [{ role: 'assistant', content: 'Hello! Ask me anything.' }];
+            let loading = false;
+            let messages = [{ role: 'assistant', content: 'Hello! Ask me anything.' }];
 
-    function esc(html) {
-        return html.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    }
-    function md(s) {
-        return esc(s)
-            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.+?)\*/g, '<em>$1</em>')
-            .replace(/`(.+?)`/g, "<code class='bg-light px-1 rounded'>$1</code>")
-            .replace(/\n/g, '<br>');
-    }
-    function scrollBottom() { elScroll.scrollTop = elScroll.scrollHeight; }
+            function esc(html) {
+                return html.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            }
+            function md(s) {
+                return esc(s)
+                    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                    .replace(/`(.+?)`/g, "<code class='bg-light px-1 rounded'>$1</code>")
+                    .replace(/\n/g, '<br>');
+            }
+            function scrollBottom() { elScroll.scrollTop = elScroll.scrollHeight; }
 
-    function addBubble(role, content) {
-        const isUser = role === 'user';
-        const row = document.createElement('div');
-        row.className = 'd-flex align-items-start mb-3 ' + (isUser ? (isRTL ? '' : 'justify-content-end') : '');
-        const bubble = document.createElement('div');
-        bubble.className = 'bubble ' + (isUser ? 'bubble-user' : 'bubble-assistant');
-        bubble.innerHTML =
-            `<div class="bubble-meta">${isUser ? (isRTL ? 'أنت' : 'You') : (isRTL ? 'المساعد' : 'Assistant')}</div>
-             <div class="bubble-text">${md(content)}</div>`;
-        row.appendChild(bubble);
-        elScroll.appendChild(row);
-        scrollBottom();
-    }
+            function addBubble(role, content) {
+                const isUser = role === 'user';
+                const row = document.createElement('div');
+                row.className = 'd-flex align-items-start mb-3 ' + (isUser ? (isRTL ? '' : 'justify-content-end') : '');
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble ' + (isUser ? 'bubble-user' : 'bubble-assistant');
+                bubble.innerHTML =
+                    `<div class="bubble-meta">${isUser ? (isRTL ? 'أنت' : 'You') : (isRTL ? 'المساعد' : 'Assistant')}</div>
+                 <div class="bubble-text">${md(content)}</div>`;
+                row.appendChild(bubble);
+                elScroll.appendChild(row);
+                scrollBottom();
+            }
 
-    function showTyping(show) {
-        elTyping.classList.toggle('d-none', !show);
-        if (show) scrollBottom();
-    }
-    function setStatus(txt) { elStatus.textContent = txt; }
-    function setError(txt) { elError.textContent = txt || ''; }
+            function showTyping(show) {
+                elTyping.classList.toggle('d-none', !show);
+                if (show) scrollBottom();
+            }
+            function setStatus(txt) { elStatus.textContent = txt; }
+            function setError(txt) { elError.textContent = txt || ''; }
 
-    function autoResize() {
-        elInput.style.height = 'auto';
-        elInput.style.height = Math.min(elInput.scrollHeight, 200) + 'px';
-    }
-    elInput.addEventListener('input', autoResize);
+            function autoResize() {
+                elInput.style.height = 'auto';
+                elInput.style.height = Math.min(elInput.scrollHeight, 200) + 'px';
+            }
+            elInput.addEventListener('input', autoResize);
 
-    // Enter to send, Shift+Enter newline
-    elInput.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            elForm.dispatchEvent(new Event('submit'));
-        }
-    });
-
-    elClear.addEventListener('click', function () {
-        elScroll.innerHTML = '';
-        messages = [];
-        addBubble('assistant', isRTL ? 'تم مسح المحادثة. كيف أساعدك؟' : 'Chat cleared. How can I help?');
-    });
-
-    elForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        if (loading) return;
-        const text = elInput.value.trim();
-        if (!text) return;
-
-        setError('');
-        loading = true;
-        setStatus(isRTL ? 'يتم الإرسال…' : 'Sending…');
-        addBubble('user', text);
-        messages.push({ role: 'user', content: text });
-        elInput.value = '';
-        autoResize();
-        showTyping(true);
-
-        const payload = { message: text, history: messages.slice(-10) };
-
-        try {
-            const res = await fetch("{{ route('admin.ai.chat') }}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': CSRF,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(payload)
+            // Enter to send, Shift+Enter newline
+            elInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    elForm.dispatchEvent(new Event('submit'));
+                }
             });
 
-            if (!res.ok) {
-                throw new Error("HTTP error " + res.status);
-            }
+            elClear.addEventListener('click', function () {
+                elScroll.innerHTML = '';
+                messages = [];
+                addBubble('assistant', isRTL ? 'تم مسح المحادثة. كيف أساعدك؟' : 'Chat cleared. How can I help?');
+            });
 
-            const json = await res.json();
+            elForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                if (loading) return;
+                const text = elInput.value.trim();
+                if (!text) return;
 
-            if (!json.ok) {
-                throw new Error(json.error || 'Unknown error');
-            }
+                setError('');
+                loading = true;
+                setStatus(isRTL ? 'يتم الإرسال…' : 'Sending…');
+                addBubble('user', text);
+                messages.push({ role: 'user', content: text });
+                elInput.value = '';
+                autoResize();
+                showTyping(true);
 
-            // Add AI response bubble
-            addBubble('assistant', json.ai_text || (isRTL ? 'لا توجد إجابة' : 'No reply'));
+                const payload = { message: text, history: messages.slice(-10) };
 
-            // Save to history
-            messages.push({ role: 'assistant', content: json.ai_text });
+                try {
+                    const res = await fetch("{{ route('admin.ai.chat') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': CSRF,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
 
-            // Optionally: show executed SQL + results
-            if (json.sql) {
-                addBubble('assistant', (isRTL ? 'الاستعلام المُنفّذ:' : 'Executed SQL:') + "<br><code>" + esc(json.sql) + "</code>");
-            }
-            if (json.db_data && json.db_data.length) {
-                const preview = JSON.stringify(json.db_data.slice(0, 3), null, 2);
-                addBubble('assistant', (isRTL ? 'عينة من النتائج:' : 'Sample results:') + "<pre>" + esc(preview) + "</pre>");
-            }
+                    if (!res.ok) {
+                        throw new Error("HTTP error " + res.status);
+                    }
 
-            setStatus('Ready');
-        } catch (err) {
-            console.error(err);
-            setError(isRTL ? 'حدث خطأ. حاول مرة أخرى.' : 'Something went wrong. Please try again.');
-            setStatus('Error');
-        } finally {
-            loading = false;
-            showTyping(false);
-        }
-    });
-})();
-</script>
+                    const json = await res.json();
+
+                    if (!json.ok) {
+                        throw new Error(json.error || 'Unknown error');
+                    }
+
+                    // Add AI response bubble
+                    addBubble('assistant', json.ai_text || (isRTL ? 'لا توجد إجابة' : 'No reply'));
+
+                    // Save to history
+                    messages.push({ role: 'assistant', content: json.ai_text });
+
+                    // Optionally: show executed SQL + results
+                    if (json.sql) {
+                        addBubble('assistant', (isRTL ? 'الاستعلام المُنفّذ:' : 'Executed SQL:') + "<br><code>" + esc(json.sql) + "</code>");
+                    }
+                    if (json.db_data && json.db_data.length) {
+                        const preview = JSON.stringify(json.db_data.slice(0, 3), null, 2);
+                        addBubble('assistant', (isRTL ? 'عينة من النتائج:' : 'Sample results:') + "<pre>" + esc(preview) + "</pre>");
+                    }
+
+                    setStatus('Ready');
+                } catch (err) {
+                    console.error(err);
+                    setError(isRTL ? 'حدث خطأ. حاول مرة أخرى.' : 'Something went wrong. Please try again.');
+                    setStatus('Error');
+                } finally {
+                    loading = false;
+                    showTyping(false);
+                }
+            });
+        })();
+    </script>
 @endpush

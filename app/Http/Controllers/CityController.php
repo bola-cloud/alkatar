@@ -14,6 +14,8 @@ use App\Models\Offer;
 
 class CityController extends Controller
 {
+    // Free weight allowance in kilograms before extra weight fees apply
+    const FREE_WEIGHT_LIMIT_KG = 25;
     /**
      * Display a listing of the resource.
      *
@@ -129,8 +131,8 @@ class CityController extends Controller
 
         $shippingFee = 0;
 
-        if ($totalWeightKg > 10) {
-            $extraKg = ceil($totalWeightKg - 10);
+        if ($totalWeightKg > self::FREE_WEIGHT_LIMIT_KG) {
+            $extraKg = ceil($totalWeightKg - self::FREE_WEIGHT_LIMIT_KG);
             $shippingFee = ($extraKg * 0.100); //  0.100 OMR for each extra kg
         }
         return $shippingFee;

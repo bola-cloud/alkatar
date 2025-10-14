@@ -46,6 +46,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SitemapController;
 use App\Http\Controllers\Admin\AIController;
+use App\Http\Controllers\Admin\Reports\OrdersReportController;
 
 Route::get('/admin/login', [AuthController::class, 'login'])->name('admin.login')->middleware('guest');
 Route::post('/admin/login', [AuthController::class, 'LoginDashboard'])->name('login.post');
@@ -337,6 +338,11 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin'], 'as' =>
     Route::post('/admin/orders/bulk-status-update', [OrderController::class, 'bulkStatusUpdate'])->name('orders.bulk_status_update');
 
     Route::get('/transactions', [OrderController::class, 'transactionsList'])->name('transactions')->middleware(['permission:transaction-list|transaction-create|transaction-edit|transaction-delete']);
+
+    // Reports: Orders
+    // Note: Uses existing admin middleware (auth + is_admin) applied on the group.
+    Route::get('/reports/orders', [OrdersReportController::class, 'index'])->name('reports.orders.index');
+    Route::get('/reports/orders/pdf', [OrdersReportController::class, 'pdf'])->name('reports.orders.pdf');
 
     //Manage Pages
     Route::get('/pages', [PageController::class, 'pages'])->name('pages')->middleware(['permission:menu-list|menu-create|menu-edit|menu-delete']);

@@ -46,6 +46,7 @@ class OmanStatesSeeder extends Seeder
                     ['name_en' => 'Khasab', 'name_ar' => 'خصب'],
                     ['name_en' => 'Bukha', 'name_ar' => 'بخاء'],
                     ['name_en' => 'Dibba Al-Baya', 'name_ar' => 'دبا البيعة'],
+                    ['name_en' => 'Madha', 'name_ar' => 'مدحاء'],
                 ]
             ],
             [
