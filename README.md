@@ -1,3 +1,30 @@
+## Orders Report – Quick Copy
+
+Install PDF library and publish config (if not already installed):
+
+```bash
+composer require barryvdh/laravel-dompdf:^2.0
+php artisan vendor:publish --provider="Barryvdh\\DomPDF\\ServiceProvider"
+```
+
+Run migrations (adds helpful indexes for performance):
+
+```bash
+php artisan migrate
+```
+
+Seed demo orders data (only seeds if table is empty):
+
+```bash
+php artisan db:seed --class=OrderSeeder
+```
+
+Access the report (requires admin auth):
+
+- Admin URL: /admin/reports/orders
+
+PDF export preserves the current filters and downloads as: orders-report-<range>-YYYYMMDD-HHMM.pdf
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
 
 <p align="center">

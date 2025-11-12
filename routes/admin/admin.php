@@ -61,6 +61,14 @@ Route::group(['prefix' => 'subscribe'], function () {
 
 Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin'], 'as' => 'admin.'], function () {
 
+    // Reports
+    Route::group(['prefix' => 'reports'], function () {
+        // Orders Report
+        // NOTE: Middleware already applied in parent group (auth + is_admin). Replace 'is_admin' if your admin guard differs.
+        Route::get('/orders', [OrdersReportController::class, 'index'])->name('reports.orders.index');
+        Route::get('/orders/pdf', [OrdersReportController::class, 'pdf'])->name('reports.orders.pdf');
+    });
+
     Route::get('/chat', [AIController::class, 'show_chat'])->name('ai.chat.show');
     Route::post('/ai-chat', [AIController::class, 'chat'])->name('ai.chat');
 

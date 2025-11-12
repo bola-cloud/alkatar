@@ -13,7 +13,8 @@ use  \App\Http\Controllers\Api\{
     TaxController,
     DeliveryController,
     CheckoutController,
-    OrderController
+    OrderController,
+    UserController
 };
 
 /*
@@ -34,6 +35,7 @@ Route::get('/products-with-discount', [ProductController::class, 'productsWithDi
 Route::get('/products/{id}', [ProductController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/subcategories/{category_id}', [CategoryController::class, 'getSubCategories']);
+Route::get('/users', [UserController::class, 'index']);
 
 Route::apiResource('countries', CountryController::class);
 Route::apiResource('countries.states', StateController::class)->shallow();

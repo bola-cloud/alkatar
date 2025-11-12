@@ -6,7 +6,7 @@ use Carbon\Carbon;
 
 /**
  * DateRange helper to resolve a start/end Carbon pair for standard ranges.
- * Supported ranges: today, week (Mon–Sun), month, year, custom
+ * Supported ranges: today, week (Mon–Sun), month, year, custom.
  */
 class DateRange
 {
@@ -20,6 +20,7 @@ class DateRange
      */
     public static function resolve(string $range, ?string $start = null, ?string $end = null): array
     {
+        $range = strtolower($range ?: 'today');
         $now = Carbon::now();
 
         switch ($range) {
@@ -42,8 +43,8 @@ class DateRange
                 break;
             case 'custom':
                 // Expecting Y-m-d strings; default to today if missing (validation should protect this)
-                $startAt = Carbon::parse($start ?? $now->toDateString())->startOfDay();
-                $endAt = Carbon::parse($end ?? $now->toDateString())->endOfDay();
+                $startAt = Carbon::parse($start ?: $now->toDateString())->startOfDay();
+                $endAt = Carbon::parse($end ?: $now->toDateString())->endOfDay();
                 break;
             default:
                 // Fallback to month for safety
@@ -52,5 +53,15 @@ class DateRange
         }
 
         return ['start' => $startAt, 'end' => $endAt];
+    }
+
+    /**
+     * Backwards-friendly alias that returns [Carbon $start, Carbon $end]
+     * instead of a named array.
+     */
+    public static function from(string $mode, ?string $startDate = null, ?string $endDate = null): array
+    {
+        $range = self::resolve($mode, $startDate, $endDate);
+        return [$range['start'], $range['end']];
     }
 }

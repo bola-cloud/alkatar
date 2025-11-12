@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" dir="rtl">
+<html lang="ar" dir="rtl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice</title>
+    <title>الفاتورة</title>
     <style>
         .invoice-container {
             font-family: Arial, sans-serif;
@@ -128,23 +128,51 @@
                 </div>
             </div>
 
+
+            @php
+                $phone = $order->user->Number ?? null;
+
+                if ($phone && preg_match('/^\+?(\d{3})(\d+)/', $phone, $matches)) {
+                    $formattedUserPhone = "({$matches[1]}) {$matches[2]}";
+                } else {
+                    $formattedUserPhone = 'N/A';
+                }
+            @endphp
+
             <div class="address-container">
                 <div class="address-box">
                     <div class="address-title">الفاتورة الى</div>
                     <p>اسم العميل: {{ $order->billing_address['name'] ?? 'N/A' }}</p>
                     <p>البريد الاكتروني: {{ $order->billing_address['email'] ?? 'N/A' }}</p>
                     @if ($order->user)
-                        <p>رقم الهاتف: {{ $order->user->code . $order->user->Number ?? 'N/A' }}</p>
+                        <p>رقم الهاتف:
+                            <span dir="ltr" style="unicode-bidi: plaintext">
+                                {{ $formattedUserPhone }}
+                            </span>
+                        </p>
                     @endif
 
                 </div>
+                @php
+                    $phone = $order->billing_address['phone_number'] ?? null;
+
+                    if ($phone && preg_match('/^\+?(\d{3})(\d+)/', $phone, $matches)) {
+                        $formattedPhone = "({$matches[1]}) {$matches[2]}";
+                    } else {
+                        $formattedPhone = 'N/A';
+                    }
+                @endphp
                 <div class="address-box">
                     <div class="address-title">الشحن الى</div>
                     <p>العنوان: {{ $order->billing_address['street'] ?? 'N/A' }}</p>
                     <p>المحافظة: {{ $order->billing_address['state_ar'] ?? 'N/A' }}</p>
                     <p>المدينة: {{ $order->billing_address['city_ar'] ?? 'N/A' }}</p>
                     <p>الدولة: سلطنة عمان</p>
-                    <p>رقم الهاتف: {{ $order->billing_address['phone_number'] ?? 'N/A' }}</p>
+                    <p>رقم الهاتف:
+                        <span dir="ltr" style="unicode-bidi: plaintext">
+                            {{ $formattedPhone }}
+                        </span>
+                    </p>
 
                 </div>
             </div>
@@ -162,22 +190,22 @@
                 </thead>
                 <tbody>
                     @foreach ($order->order_details as $od)
-                                    <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $od->product->fr_Product_Name }}</td>
-                                        <td>{{ $od->Quantity }}</td>
-                                        @if ($order->order_source == 'whatsapp')
-                                            <td>{{ $od->Size }}</td>
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $od->product->fr_Product_Name }}</td>
+                            <td>{{ $od->Quantity }}</td>
+                            @if ($order->order_source == 'whatsapp')
+                                <td>{{ $od->Size }}</td>
 
-                                        @else
-                                                            @php
-                                                                $size = json_decode($od->Size); 
-                                                            @endphp
-                                                            <td>{{ is_null($size?->weight) ? 'N/A' : $size?->weight }} جرام</td>
-                                        @endif
-                                        <td>{{ $od->Price }}</td>
-                                        <td>{{ $od->Total_Price }} OMR</td>
-                                    </tr>
+                            @else
+                                @php
+                                    $size = json_decode($od->Size); 
+                                @endphp
+                                <td>{{ is_null($size?->weight) ? 'N/A' : $size?->weight }} جرام</td>
+                            @endif
+                            <td>{{ $od->Price }}</td>
+                            <td>{{ $od->Total_Price }} OMR</td>
+                        </tr>
                     @endforeach
                     <tr class="total-row">
                         <td colspan="5">الإجمالي قبل النهائي</td>
@@ -190,7 +218,7 @@
                         </tr>
                         <tr>
                             <td colspan="5">الإجمالي بعد الخصم</td>
-                            <td>{{ $order->Sub_Total -$order->Coupon_Amount }} OMR</td>
+                            <td>{{ $order->Sub_Total - $order->Coupon_Amount }} OMR</td>
                         </tr>
                     @endif
                     <tr>
@@ -199,7 +227,7 @@
                     </tr>
                     <tr class="total-row">
                         <td colspan="5">المجموع النهائي:</td>
-                        <td>{{ $order->Sub_Total -$order->Coupon_Amount  + $order->Delivery_Charge }}
+                        <td>{{ $order->Sub_Total - $order->Coupon_Amount + $order->Delivery_Charge }}
                             OMR</td>
                     </tr>
                 </tbody>
