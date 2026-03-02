@@ -34,7 +34,7 @@
                                     <div class="col-md-6">
                                         <div class="form-vertical__item bg-style">
                                             <div class="item-top mb-30">
-                                                <h2>{{ langString('en', false) . ':' }}</h2>
+                                                <h2>{{ __('English') }}:</h2>
                                             </div>
                                             <input type="hidden" name="id" value="{{ $edit->id }}">
                                             @if ($edit->en_Title)
@@ -46,7 +46,7 @@
                                             @endif
                                             @if ($edit->en_Subtitle)
                                                 <div class="input__group mb-25">
-                                                    <label for="exampleInputEmail1">{{ __('English Subtitle') }}</label>
+                                                    <label for="en_subtitle">{{ __('English Subtitle') }}</label>
                                                     <input type="text" class="form-control" id="en_subtitle"
                                                         name="en_subtitle" required="" value="{{ $edit->en_Subtitle }}">
                                                 </div>
@@ -103,7 +103,7 @@
                                             @endif
                                             @if ($edit->Image)
                                                 <div class="input__group mb-25">
-                                                    <label for="exampleInputEmail1">{{ __('Image') }} (450x450)</label>
+                                                    <label for="image">{{ __('Image') }} (450x450)</label>
                                                     <input type="file" class="form-control putImage1" name="image"
                                                         id="image">
                                                     <img class="admin_image"
@@ -142,7 +142,7 @@
                                             @endif
                                             @if ($edit->Icon_Four)
                                                 <div class="input__group mb-25">
-                                                    <label for="exampleInputEmail1">{{ __('Icon Four') }}</label>
+                                                    <label for="icon_four">{{ __('Icon Four') }}</label>
                                                     <input type="file" class="form-control putImage5" name="icon_four"
                                                         id="icon_four">
                                                     <img class="admin_image"
@@ -158,11 +158,18 @@
                                     <div class="col-md-6">
                                         <div class="form-vertical__item bg-style">
                                             <div class="item-top mb-30">
-                                                <h2>{{ langString('fr', false) . ':' }}</h2>
+                                                <h2>{{ __('Arabic') }}:</h2>
                                             </div>
+                                            <!-- @if (Schema::hasColumn('about_us_pages', 'fr_Title'))
+                                                <div class="input__group mb-25">
+                                                    <label for="fr_Title">{{ __('Arabic Title') }}</label>
+                                                    <input type="text" class="form-control" id="fr_Title"
+                                                        name="fr_Title" value="{{ $edit->fr_Title }}">
+                                                </div>
+                                            @endif -->
                                             @if ($edit->fr_Subtitle)
                                                 <div class="input__group mb-25">
-                                                    <label for="exampleInputEmail1">{{ __('France Subtitle') }}</label>
+                                                    <label for="fr_subtitle">{{ __('Arabic Subtitle') }}</label>
                                                     <input type="text" class="form-control" id="fr_subtitle"
                                                         name="fr_subtitle" required=""
                                                         value="{{ $edit->fr_Subtitle }}">
@@ -208,19 +215,19 @@
                                             @endif
                                             @if ($edit->fr_Description_Two)
                                                 <div class="input__group mb-25">
-                                                    <label for="exampleInputEmail1">{{ __('Description One') }}</label>
+                                                    <label for="fr_description_two">{{ __('Description Two') }}</label>
                                                     <textarea name="fr_description_two" id="summernote6" class="form-control " required="">{{ $edit->fr_Description_Two }}</textarea>
                                                 </div>
                                             @endif
                                             @if ($edit->fr_Description_Three)
                                                 <div class="input__group mb-25">
-                                                    <label for="exampleInputEmail1">{{ __('Description One') }}</label>
+                                                    <label for="fr_description_three">{{ __('Description Three') }}</label>
                                                     <textarea name="fr_description_three" id="summernote7" class="form-control " required="">{{ $edit->fr_Description_Three }}</textarea>
                                                 </div>
                                             @endif
                                             @if ($edit->fr_Description_Four)
                                                 <div class="input__group mb-25">
-                                                    <label for="exampleInputEmail1">{{ __('Description One') }}</label>
+                                                    <label for="fr_description_four">{{ __('Description Four') }}</label>
                                                     <textarea name="fr_description_four" id="summernote8" class="form-control " required="">{{ $edit->fr_Description_Four }}</textarea>
                                                 </div>
                                             @endif

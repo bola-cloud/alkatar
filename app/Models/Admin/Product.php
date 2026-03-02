@@ -8,13 +8,65 @@ use App\Models\WeightProduct;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Intervention\Image\Facades\Image;
 
 class Product extends Model
 {
-    use HasFactory, Sluggable;
+    use HasFactory, Sluggable, SoftDeletes;
+
+    // ... (Fillable array omitted for brevity, keeping original content)
+
+    public function comboItems()
+    {
+        return $this->belongsToMany(Product::class, 'product_combos', 'product_id', 'combo_product_id')
+            ->withPivot('quantity')
+            ->withTimestamps();
+    }
+
+    public function parentCombos()
+    {
+        return $this->belongsToMany(Product::class, 'product_combos', 'combo_product_id', 'product_id')
+            ->withPivot('quantity')
+            ->withTimestamps();
+    }
+
+    public function getVirtualStockAttribute()
+    {
+        if ($this->product_type === 'Combo' || $this->product_type === 'تجميعي') {
+            if ($this->comboItems->isEmpty()) {
+                return $this->Quantity;
+            }
+
+            // 1:1 Mirroring: Combo stock equals related product stock ONLY if quantity is 1
+            if ($this->comboItems->count() === 1 && $this->comboItems->first()->pivot->quantity == 1) {
+                return (int) $this->comboItems->first()->virtual_stock;
+            }
+
+            $maxQuotients = [];
+            foreach ($this->comboItems as $item) {
+                // Use virtual_stock of the component to support nested combos
+                $itemStock = $item->virtual_stock;
+
+                if ($itemStock <= 0) {
+                    return 0;
+                }
+
+                $requiredQty = $item->pivot->quantity > 0 ? $item->pivot->quantity : 1;
+                $maxQuotients[] = floor($itemStock / $requiredQty);
+            }
+
+            return empty($maxQuotients) ? 0 : (int) min($maxQuotients);
+        }
+
+        // For Standard products, return actual DB quantity
+        return $this->Quantity;
+    }
+
     protected $fillable = [
         'Category_Id',
+        'smartlife_id',
+        'barcode',
         'en_Product_Name',
         'en_Product_Slug',
         'fr_Product_Name',
@@ -23,9 +75,12 @@ class Product extends Model
         'fr_About',
         'ItemTag',
         'Price',
+        'cost',
         'Discount',
         'Discount_Price',
         'Quantity',
+        'alert_quantity',
+        'unit',
         'Sold',
         'Primary_Image',
         'Image2',
@@ -35,6 +90,7 @@ class Product extends Model
         'Featured_Product',
         'Best_Selling',
         'New_Arrival',
+        'Today_Special',
         'On_Sale',
         'Status',
         'en_Description',
@@ -51,8 +107,26 @@ class Product extends Model
         'license_key',
         'affiliate_link',
         'type',
+        'product_type',
+        'show_pos',
+        'synced_from_smartlife',
         'points',
         'subcategory_id'
+    ];
+
+    protected $casts = [
+        'Price' => 'decimal:3',
+        'cost' => 'decimal:3',
+        'Discount' => 'decimal:2',
+        'Discount_Price' => 'decimal:3',
+        'Featured_Product' => 'boolean',
+        'Best_Selling' => 'boolean',
+        'New_Arrival' => 'boolean',
+        'Today_Special' => 'boolean',
+        'On_Sale' => 'boolean',
+        'Status' => 'boolean',
+        'show_pos' => 'boolean',
+        'synced_from_smartlife' => 'boolean',
     ];
     /**
      * Return the sluggable configuration array for this model.
@@ -114,8 +188,10 @@ class Product extends Model
     {
         return $this->hasMany(WeightProduct::class, 'Product_Id');
     }
-
-
+    public function order_details()
+    {
+        return $this->hasMany(OrderDetails::class, 'Product_Id');
+    }
     public function resizeImage()
     {
         $originalPath = public_path(ProductImage() . $this->Primary_Image);
@@ -150,4 +226,30 @@ class Product extends Model
         return $query->where('Discount', '>', 0);
     }
 
+    public function getLocalizedNameAttribute()
+    {
+        $locale = app()->getLocale();
+        if ($locale == 'en') {
+            return $this->en_Product_Name;
+        }
+        return $this->fr_Product_Name;
+    }
+
+    public function getLocalizedAboutAttribute()
+    {
+        $locale = app()->getLocale();
+        if ($locale == 'en') {
+            return $this->en_About;
+        }
+        return $this->fr_About;
+    }
+
+    public function getLocalizedDescriptionAttribute()
+    {
+        $locale = app()->getLocale();
+        if ($locale == 'en') {
+            return $this->en_Description;
+        }
+        return $this->fr_Description;
+    }
 }

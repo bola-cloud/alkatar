@@ -2,7 +2,9 @@
     "use strict";
     let _token = $('meta[name="csrf-token"]').attr('content')
     $(document).ready(function () {
-        taxAmount($('#billing_country').val())
+        // Calculate tax immediately on page load
+        taxAmount($('#billing_country').val() || 'OM');
+
         $('#copy_address').on('click', function () {
             if ($('#copy_address').is(':checked')) {
                 $('#shipping_name').val($('#billing_name').val());
@@ -12,7 +14,6 @@
                 $('#shipping_zipcode').val($('#billing_zipcode').val());
                 let state = $('#billing_country option:selected').val();
                 $('#shipping_country').val(state);
-
             } else {
                 $('#shipping_name').val("");
                 $('#shipping_email').val("");
@@ -36,7 +37,7 @@
                     const stripe = Stripe($('#stripe-key').attr("data-key"));
 
                     const elements = stripe.elements({ locale: 'en' });
-                    const cardElement = elements.create('card',{hidePostalCode:true});
+                    const cardElement = elements.create('card', { hidePostalCode: true });
 
                     cardElement.mount('#cardElement');
 
@@ -115,8 +116,19 @@
     });
 
     $('#billing_country').on('change', function () {
+        // When the state changes, reset displayed shipping to zero and fetch tax for the country
+        // Shipping should remain 0 until a city is selected (city AJAX will update it)
         let country = $(this).val();
-        taxAmount(country);
+        var deliveryZero = $('#delivery-charge-curr').data('zero') || '0';
+        var taxZero = $('#tax-show-curr').data('zero') || '0';
+        $('#delivery-charge-curr').text(deliveryZero);
+        $('#tax-show-curr').text(taxZero);
+        var initialTotal = $('#total-cost-curr').data('initial') || $('#subtotal').text();
+        $('#total-cost-curr').text(initialTotal);
+        // Request tax amount for the selected state (server will resolve to country)
+        if (country) {
+            taxAmount(country);
+        }
     })
 
     function taxAmount(country) {
@@ -130,7 +142,7 @@
             success: function (data) {
                 $('#tax-show-curr').text(data.tax_show)
                 $('#delivery-charge-curr').text(data.delivery_charge_curr)
-                // $('#total-cost-curr').text(data.total_cost_curr)
+                $('#total-cost-curr').text(data.total_cost_curr)
             }
         });
     }

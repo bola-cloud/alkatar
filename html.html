@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Education MIS – National Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap 5 CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --primary: #1f6fd9;
+      --primary-soft: #e1edff;
+      --accent: #00b894;
+      --accent-soft: #e7faf6;
+      --card-bg: #ffffff;
+      --border: #e0e7f1;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --danger: #e11d48;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.08);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        background: linear-gradient(180deg, #1f6fd9, #15335c);
+        color: #fff;
+        min-height: 100vh;
+        padding: 1.5rem 1.25rem;
+        box-shadow: 0 0 40px rgba(15, 23, 42, 0.3);
+        min-width: 28vh;
+    }
+
+    .logo-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background: radial-gradient(circle at 20% 20%, #ffffff, #4ea3ff);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: #0b1f3b;
+    }
+
+    .logo-text-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .logo-text-sub {
+      font-size: 0.7rem;
+      opacity: 0.85;
+    }
+
+    .nav-section-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.7);
+      margin-top: 1.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .nav-item-custom {
+      border-radius: 10px;
+      padding: 0.5rem 0.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    .nav-item-custom svg {
+      width: 15px;
+      height: 15px;
+      margin-right: 0.4rem;
+      opacity: 0.85;
+    }
+
+    .nav-item-custom.active {
+      background: rgba(15, 23, 42, 0.3);
+      box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.4);
+    }
+
+    .nav-item-custom:hover {
+      background: rgba(15, 23, 42, 0.22);
+      transform: translateY(-1px);
+    }
+
+    .env-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.35);
+      font-size: 0.65rem;
+      margin-top: 0.4rem;
+    }
+
+    .env-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    /* Main */
+    .main-wrapper {
+      padding: 1.25rem 1.5rem 1.5rem;
+    }
+
+    .badge-soft {
+      background: var(--primary-soft);
+      color: var(--primary);
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+
+    .btn-outline-soft {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      padding: 0.35rem 0.75rem;
+    }
+
+    .btn-primary-soft {
+      border-radius: 999px;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.8rem;
+      padding: 0.4rem 1rem;
+      font-weight: 600;
+      box-shadow: 0 12px 25px rgba(37, 99, 235, 0.35);
+    }
+
+    /* Filter bar */
+    .filter-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      padding: 0.75rem 1rem;
+      font-size: 0.78rem;
+    }
+
+    .filter-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-right: 0.4rem;
+    }
+
+    .chip {
+      background: var(--primary-soft);
+      color: var(--primary);
+      border-radius: 999px;
+      padding: 0.3rem 0.7rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin: 0.15rem;
+    }
+
+    .chip-muted {
+      background: #f3f4ff;
+      color: #4b5563;
+    }
+
+    .chip-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(37, 99, 235, 0.75);
+    }
+
+    .chip-tag {
+      background: rgba(15, 23, 42, 0.08);
+      border-radius: 999px;
+      padding: 0.1rem 0.45rem;
+      font-size: 0.7rem;
+    }
+
+    /* KPI cards */
+    .kpi-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-md);
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      min-height: 82px;
+    }
+
+    .kpi-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .kpi-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-top: 0.1rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.25rem;
+    }
+
+    .kpi-unit {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .kpi-trend {
+      font-size: 0.72rem;
+      margin-top: 0.1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .kpi-trend.up { color: var(--accent); }
+    .kpi-trend.down { color: var(--danger); }
+
+    .kpi-trend svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    /* Cards & charts */
+    .card-custom {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    .card-tag {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-weight: 500;
+    }
+
+    .map-placeholder {
+      border-radius: 14px;
+      background: radial-gradient(circle at 20% 0, #e0efff, #c7d2fe);
+      height: 210px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 0.6rem;
+    }
+
+    .map-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.25) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.25) 1px, transparent 1px);
+      background-size: 26px 26px;
+      mix-blend-mode: soft-light;
+      opacity: 0.7;
+    }
+
+    .map-egypt {
+      position: absolute;
+      inset: 18px 60px;
+      border-radius: 40px;
+      border: 2px solid rgba(15, 23, 42, 0.06);
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      box-shadow: 0 20px 40px rgba(30, 64, 175, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #e5f0ff;
+      font-size: 0.75rem;
+      text-align: center;
+      padding: 0 1.2rem;
+    }
+
+    .map-legend {
+      position: absolute;
+      bottom: 10px;
+      left: 14px;
+      background: rgba(15, 23, 42, 0.8);
+      color: #e5e7eb;
+      padding: 0.25rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .legend-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 99px;
+      background: #bfdbfe;
+      box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.35);
+    }
+
+    .chart-placeholder {
+      height: 140px;
+      border-radius: 12px;
+      background:
+        repeating-linear-gradient(
+          to right,
+          rgba(148, 163, 184, 0.18),
+          rgba(148, 163, 184, 0.18) 1px,
+          transparent 1px,
+          transparent 26px
+        ),
+        linear-gradient(135deg, #eff6ff, #e0f2fe);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bars {
+      position: absolute;
+      inset: 16px 18px 10px 18px;
+      display: flex;
+      align-items: flex-end;
+      gap: 0.5rem;
+    }
+
+    .bar {
+      flex: 1;
+      border-radius: 6px 6px 3px 3px;
+      background: linear-gradient(180deg, #1d4ed8, #60a5fa);
+      opacity: 0.9;
+    }
+
+    .bar:nth-child(2),
+    .bar:nth-child(5) {
+      background: linear-gradient(180deg, #0ea5e9, #38bdf8);
+    }
+
+    .bar:nth-child(3) {
+      background: linear-gradient(180deg, #22c55e, #4ade80);
+    }
+
+    .trend-line {
+      position: absolute;
+      inset: 14px 10px;
+      border-radius: 10px;
+      background: linear-gradient(
+        135deg,
+        rgba(56, 189, 248, 0.2),
+        rgba(37, 99, 235, 0.6)
+      );
+      mask-image: linear-gradient(to right, transparent, black 25%, black 75%, transparent);
+      opacity: 0.85;
+    }
+
+    .chart-caption {
+      position: absolute;
+      bottom: 6px;
+      right: 10px;
+      font-size: 0.65rem;
+      color: #1e293b;
+      opacity: 0.7;
+    }
+
+    .mini-kpi {
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 0.55rem 0.6rem;
+      border: 1px solid #e5e7eb;
+      font-size: 0.75rem;
+    }
+
+    .mini-kpi strong {
+      display: block;
+      font-size: 0.82rem;
+      margin-bottom: 0.1rem;
+    }
+
+    .pill-soft {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.7rem;
+      padding: 0.18rem 0.5rem;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: #047857;
+      margin-top: 0.15rem;
+    }
+
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    /* Table */
+    .table-wrapper {
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: #fff;
+      margin-top: 0.4rem;
+    }
+
+    .tag-soft {
+      padding: 0.1rem 0.45rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      background: #ecfdf3;
+      color: #15803d;
+    }
+
+    .tag-soft.red {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+
+    .tag-soft.amber {
+      background: #fffbeb;
+      color: #92400e;
+    }
+
+    .pagination-bar {
+      padding: 0.35rem 0.6rem;
+      font-size: 0.7rem;
+      background: #f9fafb;
+    }
+
+    /* Mobile tweaks */
+    @media (max-width: 991.98px) {
+      .sidebar {
+        display: none;
+      }
+
+      .main-wrapper {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="d-flex">
+  <!-- Sidebar (hidden on small screens) -->
+  <aside class="sidebar d-none d-lg-flex flex-column justify-content-between">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="logo-mark">E</div>
+        <div>
+          <div class="logo-text-title">Education MIS</div>
+          <div class="logo-text-sub">UNICEF • ICTC</div>
+        </div>
+      </div>
+
+      <div class="nav-section-title">Main</div>
+      <div class="d-flex flex-column gap-1">
+        <div class="nav-item-custom active">
+          <div class="d-flex align-items-center">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M3 9.5 10 3l7 6.5V17a1 1 0 0 1-1 1h-4.5v-4h-3v4H4a1 1 0 0 1-1-1V9.5Z" />
+            </svg>
+            <span>Dashboard</span>
+          </div>
+          <small>National</small>
+        </div>
+
+        <div class="nav-item-custom">
+          <div class="d-flex align-items-center">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M4 3h12v3H4V3Zm0 5h12v3H4V8Zm0 5h7v3H4v-3Z" />
+            </svg>
+            <span>Yearbook Analytics</span>
+          </div>
+        </div>
+
+        <div class="nav-item-custom">
+          <div class="d-flex align-items-center">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M4 4h12v2H4V4Zm0 4h8v2H4V8Zm0 4h5v2H4v-2Z" />
+            </svg>
+            <span>Bulk Uploads</span>
+          </div>
+        </div>
+
+        <div class="nav-item-custom">
+          <div class="d-flex align-items-center">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M2 10a8 8 0 1 1 13.86 5.32L18 18l-1.41 1.41-2.14-2.13A8 8 0 0 1 2 10Zm8-5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z" />
+            </svg>
+            <span>Data Quality</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-section-title">Support</div>
+      <div class="d-flex flex-column gap-1">
+        <div class="nav-item-custom">
+          <div class="d-flex align-items-center">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 2a7 7 0 0 0-7 7v3a3 3 0 0 0 3 3h1v-6H4a6 6 0 0 1 12 0h-3v6h1a3 3 0 0 0 3-3V9a7 7 0 0 0-7-7Z" />
+            </svg>
+            <span>Helpdesk</span>
+          </div>
+        </div>
+        <div class="nav-item-custom">
+          <div class="d-flex align-items-center">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 2a8 8 0 0 0-8 8v5l3-2a8 8 0 1 0 5-11Z" />
+            </svg>
+            <span>Feedback</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 small">
+      <div>Environment</div>
+      <div class="env-pill">
+        <span class="env-dot"></span>
+        Production • Class III
+      </div>
+      <div class="mt-2">
+        Logged in as<br>
+        <strong>UNICEF Planning Officer</strong>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-grow-1 main-wrapper">
+    <!-- Simple top bar for mobile -->
+    <div class="d-lg-none mb-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+          <div class="logo-mark">E</div>
+          <div>
+            <div class="logo-text-title">Education MIS</div>
+            <div class="logo-text-sub">National Overview</div>
+          </div>
+        </div>
+        <span class="badge-soft">2024/25</span>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <section class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center mb-3 gap-2">
+      <div>
+        <h1 class="h5 mb-1">National Overview Dashboard</h1>
+        <p class="text-muted small mb-0">
+          At-a-glance view of learners, schools and programme coverage, powered by MoETE Yearbook and field monitoring data.
+        </p>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <span class="badge-soft d-none d-md-inline">2024/25 Academic Year</span>
+        <button class="btn btn-outline-soft">Export PDF</button>
+        <button class="btn btn-primary-soft">Share view with partners</button>
+      </div>
+    </section>
+
+    <!-- Filter bar -->
+    <section class="filter-card mb-3">
+      <div class="d-flex flex-wrap align-items-center">
+        <span class="filter-label">Filters</span>
+
+        <div class="chip">
+          <span class="chip-dot"></span>
+          Year: <strong>2024</strong>
+        </div>
+
+        <div class="chip chip-muted">
+          Level:
+          <span class="chip-tag">Primary</span>
+          <span class="chip-tag">Preparatory</span>
+        </div>
+
+        <div class="chip chip-muted">
+          Geography:
+          <span class="chip-tag">National</span>
+        </div>
+
+        <div class="chip chip-muted">
+          Programme:
+          <span class="chip-tag">UNICEF-supported</span>
+        </div>
+
+        <div class="chip chip-muted">
+          Disaggregation:
+          <span class="chip-tag">Gender</span>
+          <span class="chip-tag">Disability</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- KPIs -->
+    <section class="row g-2 mb-3">
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="kpi-card h-100">
+          <div class="kpi-label">Learners reached</div>
+          <div class="kpi-value">1,243,980</div>
+          <div class="kpi-trend up">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M5 12 9.5 7.5 12 10l3-4v7H5Z" />
+            </svg>
+            +8.4% vs last year
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="kpi-card h-100">
+          <div class="kpi-label">% girls enrolled</div>
+          <div class="kpi-value">
+            51.2<span class="kpi-unit">%</span>
+          </div>
+          <div class="kpi-trend up">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M5 12 9.5 7.5 12 10l3-4v7H5Z" />
+            </svg>
+            +1.1 pp vs last year
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="kpi-card h-100">
+          <div class="kpi-label">Children with disabilities</div>
+          <div class="kpi-value">28,430</div>
+          <div class="kpi-trend up">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M5 12 9.5 7.5 12 10l3-4v7H5Z" />
+            </svg>
+            +12.6% coverage
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="kpi-card h-100">
+          <div class="kpi-label">Schools / learning spaces</div>
+          <div class="kpi-value">4,382</div>
+          <div class="kpi-trend">
+            Updated from Yearbook 2024
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="kpi-card h-100">
+          <div class="kpi-label">Teachers / facilitators trained</div>
+          <div class="kpi-value">19,274</div>
+          <div class="kpi-trend up">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M5 12 9.5 7.5 12 10l3-4v7H5Z" />
+            </svg>
+            +5.7% vs target
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="kpi-card h-100">
+          <div class="kpi-label">Data completeness</div>
+          <div class="kpi-value">
+            92<span class="kpi-unit">%</span>
+          </div>
+          <div class="kpi-trend up">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M5 12 9.5 7.5 12 10l3-4v7H5Z" />
+            </svg>
+            +4 pp vs previous cycle
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main grid: left + right -->
+    <section class="row g-3 mb-3">
+      <!-- Left card -->
+      <div class="col-lg-7">
+        <div class="card-custom p-3 h-100">
+          <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+            <div>
+              <div class="fw-semibold small">Geographic coverage by governorate</div>
+              <div class="card-subtitle text-muted small">
+                Number of learners supported in formal and non-formal settings.
+              </div>
+            </div>
+            <span class="card-tag">Drill-down enabled</span>
+          </div>
+
+          <div class="map-placeholder mb-2">
+            <div class="map-grid"></div>
+            <div class="map-egypt">
+              <span>Interactive Egypt map placeholder – colour intensity reflects learners reached per governorate</span>
+            </div>
+            <div class="map-legend">
+              <span class="legend-dot"></span>
+              Higher programme coverage
+            </div>
+          </div>
+
+          <div class="chart-placeholder">
+            <div class="bars">
+              <div class="bar" style="height: 60%;"></div>
+              <div class="bar" style="height: 82%;"></div>
+              <div class="bar" style="height: 45%;"></div>
+              <div class="bar" style="height: 70%;"></div>
+              <div class="bar" style="height: 55%;"></div>
+              <div class="bar" style="height: 90%;"></div>
+            </div>
+            <div class="chart-caption">
+              Top 6 governorates by learners reached
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right card -->
+      <div class="col-lg-5">
+        <div class="card-custom p-3 h-100">
+          <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+            <div>
+              <div class="fw-semibold small">Equity & trends</div>
+              <div class="card-subtitle text-muted small">
+                Gender and disability disaggregation over the last five years.
+              </div>
+            </div>
+            <span class="card-tag">Yearbook + programme data</span>
+          </div>
+
+          <div class="chart-placeholder mb-2">
+            <div class="trend-line"></div>
+            <div class="chart-caption">
+              2019–2024 trend – girls vs boys
+            </div>
+          </div>
+
+          <div class="row g-2">
+            <div class="col-12 col-md-4">
+              <div class="mini-kpi h-100">
+                <strong>Gender parity index</strong>
+                0.98
+                <div class="pill-soft">
+                  <span class="pill-dot"></span>
+                  Close to parity
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="mini-kpi h-100">
+                <strong>Disability coverage</strong>
+                2.3% of learners
+                <div class="pill-soft">
+                  <span class="pill-dot"></span>
+                  Up from 1.9% in 2023
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="mini-kpi h-100">
+                <strong>On-time submissions</strong>
+                88%
+                <div class="pill-soft">
+                  <span class="pill-dot"></span>
+                  Improved timeliness
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Table card -->
+    <section class="card-custom p-3">
+      <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+        <div>
+          <div class="fw-semibold small">Partner & governorate summary</div>
+          <div class="card-subtitle text-muted small">
+            Snapshot of reach and data quality for selected filters. Rows are clickable in the live system.
+          </div>
+        </div>
+        <span class="card-tag">Exportable (Excel / CSV / PDF)</span>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="table table-sm mb-0 align-middle">
+          <thead class="table-light">
+          <tr>
+            <th scope="col">Partner</th>
+            <th scope="col">Governorate</th>
+            <th scope="col">Learners reached</th>
+            <th scope="col">% girls</th>
+            <th scope="col">Children with disabilities</th>
+            <th scope="col">Last submission</th>
+            <th scope="col">Data quality</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td>Partner A</td>
+            <td>Cairo</td>
+            <td>124,500</td>
+            <td>52%</td>
+            <td>2,310</td>
+            <td>2024-05-10</td>
+            <td><span class="tag-soft">On track</span></td>
+          </tr>
+          <tr>
+            <td>Partner B</td>
+            <td>Assiut</td>
+            <td>47,820</td>
+            <td>49%</td>
+            <td>890</td>
+            <td>2024-05-08</td>
+            <td><span class="tag-soft amber">Attention</span></td>
+          </tr>
+          <tr>
+            <td>Partner C</td>
+            <td>Aswan</td>
+            <td>22,340</td>
+            <td>53%</td>
+            <td>420</td>
+            <td>2024-05-06</td>
+            <td><span class="tag-soft">On track</span></td>
+          </tr>
+          <tr>
+            <td>Partner D</td>
+            <td>Giza</td>
+            <td>89,120</td>
+            <td>50%</td>
+            <td>1,740</td>
+            <td>2024-04-29</td>
+            <td><span class="tag-soft red">Late data</span></td>
+          </tr>
+          </tbody>
+        </table>
+
+        <div class="d-flex justify-content-between align-items-center pagination-bar">
+          <span>Showing 1–4 of 32 partner–governorate combinations</span>
+          <div class="d-flex gap-1">
+            <button class="btn btn-outline-soft btn-sm">Previous</button>
+            <button class="btn btn-outline-soft btn-sm">Next</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Bootstrap 5 JS (optional for this static mockup, but nice to have) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

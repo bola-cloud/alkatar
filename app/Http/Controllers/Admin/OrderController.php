@@ -43,15 +43,15 @@ class OrderController extends Controller
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('action', function ($data) use ($status) {
-                    $btn = '<div class="action__buttons">';
+                    $btn = '<div class="action__buttons" style="display: flex; gap: 8px;">';
                     // $btn = $btn . '<a href="javascript:void(0)" class="btn-action" data-bs-toggle="modal" data-bs-target="#invoiceModal' . $data->id . '" title="' . __('Invoice') . '"><i class="fas fa-file-invoice"></i></a>';
-                    $btn = $btn . '<a href="javascript:void(0)" class="btn-action" onclick="orderDetails(' . $data->id . ')" title="' . __('Invoice') . '"><i class="fas fa-file-invoice"></i></a>';
-                    $btn = $btn . '<a href="javascript:void(0)" class="btn-action" onclick="orderStatusEdit(' . $data->id . ')" title="' . __('Change Status') . '"><i class="fas fa-info-circle"></i></a>';
+                    $btn = $btn . '<a href="javascript:void(0)" class="btn-action" onclick="orderDetails(' . $data->id . ')" title="' . __('Invoice') . '" style="padding: 6px 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><i class="fas fa-file-invoice"></i></a>';
+                    $btn = $btn . '<a href="javascript:void(0)" class="btn-action" onclick="orderStatusEdit(' . $data->id . ')" title="' . __('Change Status') . '" style="padding: 6px 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><i class="fas fa-info-circle"></i></a>';
 
-                    if (in_array($data->Order_Status, [ORDER_PENDING, ORDER_CANCELLED]) ) {
-                        $btn = $btn . '<a href="' . route('admin.order_send_to_whatsapp', encrypt($data->id)) . '" class="btn-action send-to-whatsapp"><i class="fa-brands fa-whatsapp"></i></a>';
+                    if (in_array($data->Order_Status, [ORDER_PENDING, ORDER_CANCELLED])) {
+                        $btn = $btn . '<a href="' . route('admin.order_send_to_whatsapp', encrypt($data->id)) . '" class="btn-action send-to-whatsapp" style="padding: 6px 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><i class="fa-brands fa-whatsapp"></i></a>';
                     }
-                    $btn = $btn . '<a href="' . route('admin.order_delete', encrypt($data->id)) . '" class="btn-action delete"><i class="fas fa-trash-alt"></i></a>';
+                    $btn = $btn . '<a href="' . route('admin.order_delete', encrypt($data->id)) . '" class="btn-action delete" style="padding: 6px 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><i class="fas fa-trash-alt"></i></a>';
                     $btn = $btn . '</div>';
                     return $btn;
                 })
@@ -65,7 +65,7 @@ class OrderController extends Controller
                     if (is_null($data->billing_address)) {
                         return 'N/A';
                     }
-                    $serialized_billing = json_decode($data->billing_address);
+                    $serialized_billing = $data->billing_address;
 
                     if (isset($serialized_billing->phone_number)) {
                         return $serialized_billing->phone_number;
@@ -90,7 +90,7 @@ class OrderController extends Controller
                     }
 
 
-                    $serialized_billing = json_decode($data->billing_address);
+                    $serialized_billing = $data->billing_address;
                     if (isset($serialized_billing->city_ar)) {
                         return $serialized_billing->city_ar;
                     } else {
@@ -102,11 +102,11 @@ class OrderController extends Controller
                 ->addColumn('Subtotal', function ($data) {
                     return $data->Sub_Total . ' OMR';
                 })
-                 ->addColumn('DeliveryCharge', function ($data) {
-                    return  $data->Delivery_Charge . ' OMR';
+                ->addColumn('DeliveryCharge', function ($data) {
+                    return $data->Delivery_Charge . ' OMR';
                 })
-                 ->addColumn('GrandTotal', function ($data) {
-                    return $data->Sub_Total -$data->Coupon_Amount  + $data->Delivery_Charge . ' OMR';
+                ->addColumn('GrandTotal', function ($data) {
+                    return $data->Sub_Total - $data->Coupon_Amount + $data->Delivery_Charge . ' OMR';
                 })
                 ->addColumn("order_date", function ($data) {
                     return date('d-m-Y', strtotime($data->created_at));
@@ -125,23 +125,22 @@ class OrderController extends Controller
                     }
                 })
                 ->addColumn('types', function ($data) {
-                    $html = '';
+                    $types = [];
                     foreach ($data->order_details as $key => $or) {
-                        if (count($data->order_details) - 1 == $key) {
-                            if ($or->product->type == PRODUCT_PHYSICAL) {
-                                $html .= 'Physical';
-                            } elseif ($or->product->type == PRODUCT_DIGITAL) {
-                                $html .= 'Digital';
-                            }
-                        } else {
-                            if ($or->product->type == PRODUCT_PHYSICAL) {
-                                $html .= 'Physical,';
-                            } elseif ($or->product->type == PRODUCT_DIGITAL) {
-                                $html .= 'Digital,';
-                            }
+                        $product = $or->product;
+                        if (is_null($product)) {
+                            continue;
+                        }
+                        if ($product->type == PRODUCT_PHYSICAL) {
+                            $types[] = 'Physical';
+                        } elseif ($product->type == PRODUCT_DIGITAL) {
+                            $types[] = 'Digital';
                         }
                     }
-                    return $html;
+
+                    // Remove duplicates and return a comma-separated string or N/A
+                    $types = array_unique($types);
+                    return empty($types) ? 'N/A' : implode(',', $types);
                 })
                 ->addColumn('Coupon', function ($data) {
                     return is_null($data->Coupon_Id) ? 'N/A' : $data->coupon->CouponCode;
@@ -159,22 +158,21 @@ class OrderController extends Controller
                 ->addColumn('Status', function ($data) {
                     $html = '';
                     if ($data->Order_Status == ORDER_PENDING) {
-                        // $html = __('<span class="status bg-primary-light-varient">Pending</span>');
-                        $html = '<span class="status bg-primary-light-varient" style="display: block; width: 126%;">' . __('Pending') . '</span>';
+                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-clock mr-1"></i>' . __('Pending') . '</span>';
                     } elseif ($data->Order_Status == ORDER_PROCESSING) {
-                        $html = '<span class="status bg-secondary-light-varient">' . __('Processing') . '</span>';
+                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-spinner mr-1"></i>' . __('Processing') . '</span>';
                     } elseif ($data->Order_Status == ORDER_SHIPPED) {
-                        $html = '<span class="status bg-info-light-varient">' . __('Shipped') . '</span>';
+                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-shipping-fast mr-1"></i>' . __('Shipped') . '</span>';
                     } elseif ($data->Order_Status == ORDER_DELIVERED) {
-                        $html = '<span class="status bg-success-light-varient">' . __('Delivered') . '</span>';
+                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-check-circle mr-1"></i>' . __('Delivered') . '</span>';
                     } elseif ($data->Order_Status == ORDER_CANCELLED) {
-                        $html = '<span class="status bg-danger-light-varient">' . __('Canceled') . '</span>';
+                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-times-circle mr-1"></i>' . __('Canceled') . '</span>';
                     } elseif ($data->Order_Status == ORDER_RETURN) {
-                        $html = '<span class="status bg-danger-light-varient">' . __('Returned') . '</span>';
+                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-undo mr-1"></i>' . __('Returned') . '</span>';
                     } elseif ($data->Order_Status == ORDER_NOT_PAYMENT_YET) {
-                        $html = '<span class="status bg-warning-light-varient">' . __('Not Payment Yet') . '</span>';
+                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-money-bill-wave mr-1"></i>' . __('Not Payment Yet') . '</span>';
                     } elseif ($data->Order_Status == ORDER_DELIVERED_FAILED) {
-                        $html = '<span class="status bg-danger-light-varient">' . __('Delivery Failed') . '</span>';
+                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-exclamation-triangle mr-1"></i>' . __('Delivery Failed') . '</span>';
                     }
                     return $html;
                 })
@@ -192,7 +190,7 @@ class OrderController extends Controller
             ->with('order_details', 'user', 'coupon', 'order_details.product', 'billing', 'shipping')
             ->find($request->id);
 
-        $order['billing_address'] = json_decode($order->billing_address, true);
+        $order['billing_address'] = $order->billing_address;
 
         return view('admin.pages.orders.details', compact('order'));
     }
@@ -203,7 +201,7 @@ class OrderController extends Controller
             ->with('order_details', 'user', 'coupon', 'order_details.product', 'billing', 'shipping')
             ->find($request->id);
 
-        $order['billing_address'] = json_decode($order->billing_address, true);
+        $order['billing_address'] = $order->billing_address;
 
         return view('admin.pages.orders.invoice', compact('order'));
     }
@@ -234,16 +232,22 @@ class OrderController extends Controller
                 if ($request->Order_Status == ORDER_DELIVERED)
                     $url = route('user.profile.track.my.order', ['id' => encrypt($order->id)]);
 
+                $phoneNumber = $order->user->Number ?? null;
+                if (empty($phoneNumber)) {
+                    $billingAddress = $order->billing_address;
+                    $phoneNumber = $billingAddress->phone_number ?? '';
+                }
+
                 $response = Http::asJson()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/change_status', [
-                    'phone_number' => $order->user->Number ?? '',
-                    'name' => $order->user->name ?? '',
+                    'phone_number' => $phoneNumber,
+                    'name' => $order->user->name ?? $billingAddress->name ?? '',
                     'booking_id' => $order->Order_Number,
                     'status' => $order->getStatusLang()[$request->Order_Status],
                     'url' => $url,
                 ]);
+
                 if ($response->failed()) {
-                    dd($response);
-                    return response()->json(['error' => $response], 500);
+                    \Illuminate\Support\Facades\Log::error('WhatsApp API Validation Error: ' . $response->body());
                 }
                 // }
 
@@ -282,7 +286,7 @@ class OrderController extends Controller
 
     public function statusChangeEmail($order, $order_status)
     {
-        $ship = json_decode($order->shipping_address, true);
+        $ship = $order->shipping_address;
         $data['userName'] = $ship['name'] ?? null;
         $data['userEmail'] = $ship['email'] ?? null;
         $data['order'] = $order;
@@ -314,7 +318,7 @@ class OrderController extends Controller
         foreach ($order->order_details as $item) {
             $checkoutProduct[] = [
                 'name' => Str::limit($item->product->en_Product_Name, 35),
-                'quantity' => (int)$item->Quantity,
+                'quantity' => (int) $item->Quantity,
                 'unit_amount' => number_format($item->Price, 3) * 1000,
             ];
         }
@@ -331,26 +335,26 @@ class OrderController extends Controller
         $response = Http::withHeaders([
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
-            'thawani-api-key' => env('THAWANI_TEST_SECRET_KEY'),
-        ])->post(env('THAWANI_TEST_CHECKOUT_URL') . '/checkout/session', [
-            'client_reference_id' => $order->Order_Number,
-            'mode' => 'payment',
-            'products' => $checkoutProduct,
-            'success_url' => route('thawani.success', [
-                'order_number' => $order->Order_Number,
-            ]),
-            'cancel_url' => route('thawani.cancel', [
-                'order_number' => $order->Order_Number,
-            ]),
-            'metadata' => [
-                'order_number' => $order->Order_Number,
-                'shipping_charge' =>  (float)$order->Delivery_Charge,
-                'subtotal' =>  $order->Sub_Total,
-                'discount' =>  (float)$order->Coupon_Amount,
-                'grand_total' =>  (float)$order->Grand_Total,
-                'tax' =>  (float)$order->Tax,
-            ]
-        ]);
+            'thawani-api-key' => config('services.thawani.secret_key'),
+        ])->post(config('services.thawani.checkout_url') . '/checkout/session', [
+                    'client_reference_id' => $order->Order_Number,
+                    'mode' => 'payment',
+                    'products' => $checkoutProduct,
+                    'success_url' => route('thawani.success', [
+                        'order_number' => $order->Order_Number,
+                    ]),
+                    'cancel_url' => route('thawani.cancel', [
+                        'order_number' => $order->Order_Number,
+                    ]),
+                    'metadata' => [
+                        'order_number' => $order->Order_Number,
+                        'shipping_charge' => (float) $order->Delivery_Charge,
+                        'subtotal' => $order->Sub_Total,
+                        'discount' => (float) $order->Coupon_Amount,
+                        'grand_total' => (float) $order->Grand_Total,
+                        'tax' => (float) $order->Tax,
+                    ]
+                ]);
 
         if ($response->successful()) {
             $paymentJsonData = $response->json();
@@ -370,9 +374,9 @@ class OrderController extends Controller
             // create payment
             $this->paymentController->createPayment($paymentRequest);
 
-            $paymentUrl = env('THAWANI_TEST_PAY_URL') . $paymentJsonData['data']['session_id'] . '?key=' . env("THAWANI_TEST_PUBLIC_KEY");
+            $paymentUrl = config('services.thawani.pay_url') . $paymentJsonData['data']['session_id'] . '?key=' . config('services.thawani.public_key');
 
-            $serialized_billing = json_decode($order->billing_address);
+            $serialized_billing = $order->billing_address;
 
             $phoneNumber = null;
             if (isset($serialized_billing->phone_number)) {
@@ -411,30 +415,30 @@ class OrderController extends Controller
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('user_email', function ($data) {
-                    $email = json_decode($data->billing_address, true);
+                    $email = $data->billing_address;
                     return $email['email'];
                 })
                 ->addColumn('GrandTotal', function ($data) {
-                    return  $data->Grand_Total . ' OMR';
+                    return $data->Grand_Total . ' OMR';
                 })
                 ->addColumn('status', function ($data) {
                     $html = '';
                     if ($data->Order_Status == ORDER_PENDING) {
-                        $html = __('<span class="status bg-primary-light-varient">Pending</span>');
+                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-clock mr-1"></i>' . __('Pending') . '</span>';
                     } elseif ($data->Order_Status == ORDER_PROCESSING) {
-                        $html = __('<span class="status bg-secondary-light-varient">Processing</span>');
+                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-spinner mr-1"></i>' . __('Processing') . '</span>';
                     } elseif ($data->Order_Status == ORDER_SHIPPED) {
-                        $html = __('<span class="status bg-info-light-varient">Shipped</span>');
+                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-shipping-fast mr-1"></i>' . __('Shipped') . '</span>';
                     } elseif ($data->Order_Status == ORDER_DELIVERED) {
-                        $html = __('<span class="status bg-success-light-varient">Delivered</span>');
+                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-check-circle mr-1"></i>' . __('Delivered') . '</span>';
                     } elseif ($data->Order_Status == ORDER_CANCELLED) {
-                        $html = __('<span class="status bg-danger-light-varient">Canceled</span>');
+                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-times-circle mr-1"></i>' . __('Canceled') . '</span>';
                     } elseif ($data->Order_Status == ORDER_RETURN) {
-                        $html = __('<span class="status bg-danger-light-varient">Returned</span>');
+                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-undo mr-1"></i>' . __('Returned') . '</span>';
                     } elseif ($data->Order_Status == ORDER_NOT_PAYMENT_YET) {
-                        $html = __('<span class="status bg-warning-light-varient">Not Payment Yet</span>');
+                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-money-bill-wave mr-1"></i>' . __('Not Payment Yet') . '</span>';
                     } elseif ($data->Order_Status == ORDER_DELIVERED_FAILED) {
-                        $html = __('<span class="status bg-danger-light-varient">Delivery Failed</span>');
+                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-exclamation-triangle mr-1"></i>' . __('Delivery Failed') . '</span>';
                     }
                     return $html;
                 })

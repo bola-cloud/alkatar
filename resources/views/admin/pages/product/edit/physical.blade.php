@@ -32,7 +32,7 @@
                                     <div class="col-xxl-6">
                                         <div class="form-vertical__item bg-style">
                                             <div class="item-top mb-30">
-                                                <h2>{{ langString('en', false) . ':' }}</h2>
+                                                <h2>{{ __('English') . ':' }}</h2>
                                             </div>
                                             <input type="hidden" name="product_type" value="{{ PRODUCT_PHYSICAL }}">
                                             <input type="hidden" name="id" value="{{ $product->id }}">
@@ -46,10 +46,15 @@
                                                 <label for="en-product-slug">{{ __('Product Slug') }}</label>
                                                 <input type="text" class="form-control" id="en-product-slug"
                                                     name="en_product_slug" value="{{ $product->en_Product_Slug }}"
-                                                    placeholder="Slug">
+                                                    placeholder="{{ __('Slug') }}">
                                                 @error('en_product_slug')
                                                     <span class="text-danger">{{ $message }}</span>
                                                 @enderror
+                                            </div>
+                                            <div class="input__group mb-25">
+                                                <label for="barcode">{{ __('Barcode') }}</label>
+                                                <input type="text" class="form-control" id="barcode"
+                                                    value="{{ $product->barcode }}" disabled readonly>
                                             </div>
                                             {{-- <div class="input__group mb-25">
                                                 <label for="exampleInputEmail1">{{ __('Brand Name') }}</label>
@@ -118,7 +123,7 @@
                                                             {{ $item->Name }}</option>
                                                     @endforeach
                                                 </select>
-                                            </div> 
+                                            </div>
 
                                             <div class="input__group mb-25">
                                                 <label for="select2Multiple">{{ __('Product Size') }}</label>
@@ -133,24 +138,27 @@
                                             </div> --}}
 
                                             <div class="input__group mb-25">
-                                            <label>{{ __('Product Weight') }}</label>
+                                            <!-- <label>{{ __('Product Weight') }}</label>
                                             <div id="weight-container">
-                                                <!-- Size rows will be added here dynamically -->
-                                            </div>
+                                            </div> -->
+                                            @if(!$product->synced_from_smartlife && empty($product->smartlife_id))
                                             <button type="button" class="btn btn-primary" id="add-weight-btn">اضافة وزن</button>
+                                            @endif
                                         </div>
-                                        
+
                                             <div class="input__group mb-25">
                                                 <label>{{ __('Product Option') }}</label>
                                                 <div id="size-container">
                                                     <!-- Size rows will be added here dynamically -->
                                                 </div>
+                                                @if(!$product->synced_from_smartlife && empty($product->smartlife_id))
                                                 <button type="button" class="btn btn-primary" id="add-size-btn">اضافة خيار</button>
+                                                @endif
                                             </div>
 
-                                          
-                                            
-                                            
+
+
+
 
                                             <div class="input__group mb-25">
                                                 <label for="exampleInputEmail1">{{ __('Points To Add') }}</label>
@@ -167,7 +175,11 @@
                                             <div class="input__group mb-25">
                                                 <label for="exampleInputEmail1">{{ __('Price') }}</label>
                                                 <input type="text" class="form-control" id="price" name="price"
-                                                    value="{{ $product->Price }}">
+                                                    value="{{ $product->Price }}" @if($product->synced_from_smartlife || !empty($product->smartlife_id)) disabled @endif>
+                                                @if($product->synced_from_smartlife || !empty($product->smartlife_id))
+                                                    <input type="hidden" name="price" value="{{ $product->Price }}">
+                                                    <small class="text-muted">{{ __('Price is controlled by SmartLife and cannot be edited here.') }}</small>
+                                                @endif
                                             </div>
                                             <div class="input__group mb-25">
                                                 <label
@@ -283,18 +295,32 @@
                                                         for="customSwitch5">{{ __('New Arrival') }}</label>
                                                 </div>
                                             </div>
-                                          
+                                            <div class="input__group mb-25">
+                                                <div class="custom-control custom-switch">
+                                                    <input type="checkbox" value="1"
+                                                        {{ $product->Today_Special == 1 ? 'checked' : '' }}
+                                                        name="today_special" class="custom-control-input"
+                                                        id="customSwitchTodaySpecial">
+                                                    <label class="custom-control-label"
+                                                        for="customSwitchTodaySpecial">{{ __('Today Special') }}</label>
+                                                </div>
+                                            </div>
+
                                         </div>
                                     </div>
                                     <div class="col-xxl-6">
                                         <div class="form-vertical__item bg-style">
                                             <div class="item-top mb-30">
-                                                <h2>{{ langString('fr', false) . ':' }}</h2>
+                                                <h2>{{ __('Arabic') . ':' }}</h2>
                                             </div>
                                             <div class="input__group mb-25">
                                                 <label for="exampleInputEmail1">{{ __('Product Name') }}</label>
                                                 <input type="text" class="form-control" id="fr_product_name"
-                                                    value="{{ $product->fr_Product_Name }}" name="fr_product_name">
+                                                    value="{{ $product->fr_Product_Name }}" name="fr_product_name" @if($product->synced_from_smartlife || !empty($product->smartlife_id)) disabled @endif>
+                                                @if($product->synced_from_smartlife || !empty($product->smartlife_id))
+                                                    <input type="hidden" name="fr_product_name" value="{{ $product->fr_Product_Name }}">
+                                                    <small class="text-muted">{{ __('This product is synced from SmartLife — name cannot be changed here.') }}</small>
+                                                @endif
                                             </div>
                                             <div class="input__group mb-25">
                                                 <label for="fr-product-slug">{{ __('Product Slug') }}</label>
@@ -305,7 +331,7 @@
                                                     <span class="text-danger">{{ $message }}</span>
                                                 @enderror
                                             </div>
-                                       
+
                                             <div class="input__group mb-25">
                                                 <label for="exampleInputEmail1">{{ __('Description') }}</label>
                                                 <textarea name="fr_description" id="summernote4" class="form-control">{!! $product->fr_Description !!}</textarea>
@@ -340,7 +366,7 @@
         "use strict";
         $(document).ready(function() {
             $("#summernote").summernote({
-                placeholder: 'Description',
+                placeholder: '{{ __('Description') }}',
                 height: 300
             });
             $('.dropdown-toggle').dropdown();
@@ -348,21 +374,21 @@
 
         $(document).ready(function() {
             $("#summernote2").summernote({
-                placeholder: 'Shipping Return',
+                placeholder: '{{ __('Shipping Return') }}',
                 height: 300
             });
             $('.dropdown-toggle').dropdown();
         });
         $(document).ready(function() {
             $("#summernote3").summernote({
-                placeholder: 'Additional Information',
+                placeholder: '{{ __('Additional Information') }}',
                 height: 300
             });
             $('.dropdown-toggle').dropdown();
         });
         $(document).ready(function() {
             $("#summernote4").summernote({
-                placeholder: 'Description',
+                placeholder: '{{ __('Description') }}',
                 height: 300
             });
             $('.dropdown-toggle').dropdown();
@@ -370,56 +396,64 @@
 
         $(document).ready(function() {
             $("#summernote5").summernote({
-                placeholder: 'Shipping Return',
+                placeholder: '{{ __('Shipping Return') }}',
                 height: 300
             });
             $('.dropdown-toggle').dropdown();
         });
         $(document).ready(function() {
             $("#summernote6").summernote({
-                placeholder: 'Additional Information',
+                placeholder: '{{ __('Additional Information') }}',
                 height: 300
             });
             $('.dropdown-toggle').dropdown();
         });
     </script>
 
-<script>
-    $(document).ready(function() {
-        let sizeCounter = 0;
 
-        // Function to create a new size row
-        function createSizeRow(sizeId = null, price = null, weight = null) {
-            sizeCounter++;
-            const sizeRow = `
-         <div class="row mb-3" id="size-row-${sizeCounter}">
-            <div class="col-md-5">
-                <label for="size-${sizeCounter}">الخيار:</label>
-                <select class="form-control" name="size[]" id="size-${sizeCounter}">
-                    @foreach ($sizes as $item)
-                        <option value="{{ $item->id }}" ${sizeId === {{ $item->id }} ? 'selected' : ''}>{{ $item->Size_ar }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label for="price-${sizeCounter}">السعر:</label>
-                <input type="text" class="form-control" id="price-${sizeCounter}" name="size_price[]" placeholder="السعر" value="${price || ''}">
-            </div>
-            <div class="col-md-3">
-                <label for="weight-${sizeCounter}">الوزن (بالغرام):</label>
-                <input type="text" class="form-control" required id="weight-${sizeCounter}" name="size_weight[]" placeholder="الوزن (بالغرام)" value="${weight || ''}">
-            </div>
-            <div class="col-md-1">
-                <label class="d-block">&nbsp;</label>
+    <script>
+        "use strict";
+        const isSynced = {{ ($product->synced_from_smartlife || !empty($product->smartlife_id)) ? 'true' : 'false' }};
+        
+
+        $(document).ready(function() {
+            let sizeCounter = 0;
+            // Function to create a new size row
+            function createSizeRow(sizeId = null, price = null, weight = null) {
+                sizeCounter++;
+                const disabledAttr = isSynced ? 'disabled' : '';
+                const removeBtn = isSynced ? '' : `
                 <button type="button" class="btn btn-danger remove-size-row" data-row-id="size-row-${sizeCounter}">
                     <i class="fa fa-times"></i>
-                </button>
+                </button>`;
+                
+                const sizeRow = `
+             <div class="row mb-3" id="size-row-${sizeCounter}">
+                <div class="col-md-5">
+                    <label for="size-${sizeCounter}">الخيار:</label>
+                    <select class="form-control" name="size[]" id="size-${sizeCounter}" ${disabledAttr}>
+                        @foreach ($sizes as $item)
+                            <option value="{{ $item->id }}" ${sizeId === {{ $item->id }} ? 'selected' : ''}>{{ $item->Size_ar }}</option>
+                        @endforeach
+                    </select>
+                    ${isSynced ? `<input type="hidden" name="size[]" value="${sizeId}">` : ''} 
+                </div>
+                <div class="col-md-5">
+                    <label for="price-${sizeCounter}">السعر:</label>
+                    <input type="text" class="form-control" id="price-${sizeCounter}" name="size_price[]" placeholder="السعر" value="${price || ''}" ${disabledAttr}>
+                    ${isSynced ? `<input type="hidden" name="size_price[]" value="${price || ''}">` : ''}
+                </div>
+                <div class="col-md-1">
+                    <label class="d-block">&nbsp;</label>
+                    ${removeBtn}
+                </div>
             </div>
-        </div>
-            `;
-
-            $('#size-container').append(sizeRow);
-        }
+                `;
+    
+                $('#size-container').append(sizeRow);
+            }
+            
+            // ...
 
 
              // Pre-populate existing sizes
@@ -445,66 +479,12 @@
     });
 </script>
 
-<script>
-   $(document).ready(function () {
-    let weightCounter = 0;
-
-    // Function to create a new weight row
-    function createWeightRow(weightId = null, price = null, weight = null) {
-        weightCounter++;
-        const weightRow = `
-            <div class="row mb-3" id="weight-row-${weightCounter}">
-                <div class="col-md-3">
-                    <label for="weight-${weightCounter}">الوزن (بالغرام):</label>
-                    <input type="text" id="weight-${weightCounter}" class="form-control" required name="weight_amount[]" placeholder="الوزن" value="${weight || ''}">
-                </div>
-                <div class="col-md-3">
-                    <label for="price-${weightCounter}">السعر:</label>
-                    <input type="text" class="form-control" required name="weight_price[]" id="price-${weightCounter}" placeholder="السعر" value="${price || ''}">
-                </div>
-                    ${weightCounter > 1 ? `
-                <div class="col-md-1">
-                    <button type="button" class="btn btn-danger remove-weight-row" data-row-id="weight-row-${weightCounter}">
-                        <i class="fa fa-times"></i>
-                    </button>
-                </div>
-                ` : ''}
-             
-            </div>
-        `;
-        $('#weight-container').append(weightRow);
-    }
-
-
-         // Pre-populate existing sizes
-         @foreach ($product->weights as $weight)
-         createWeightRow({{ $weight->id }}, '{{ $weight->price }}', '{{ $weight->weight }}');
-        @endforeach
-
-         // Add initial size row if no existing sizes
-         if (!{{ $product->weights->count() }}) {
-            createWeightRow();
-        }
-
-    // Add event listener for the "Add Weight" button
-    $('#add-weight-btn').click(function () {
-        createWeightRow();
-    });
-
-    // Add event listener for removing weight rows
-    $(document).on('click', '.remove-weight-row', function () {
-        const rowId = $(this).data('row-id');
-        $(`#${rowId}`).remove();
-    });
-});
-    </script>
-
 
 
 <script>
         $(document).ready(function () {
-                var categoryId = $('#en_category_name').data('category-id'); 
-                var currentSubcategoryId = $('#subcategory_id').data('subcategory-id'); 
+                var categoryId = $('#en_category_name').data('category-id');
+                var currentSubcategoryId = $('#subcategory_id').data('subcategory-id');
                 if (categoryId) {
                     $.ajax({
                         url: '{{ route("admin.subcategory.all") }}',
@@ -530,7 +510,7 @@
         $(document).ready(function () {
             $('#en_category_name').change(function () {
                 var categoryId = $(this).val();
-                var currentSubcategoryId = $('#subcategory_id').data('subcategory-id'); 
+                var currentSubcategoryId = $('#subcategory_id').data('subcategory-id');
 
                 if (categoryId) {
                     $.ajax({

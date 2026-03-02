@@ -11,6 +11,8 @@ use App\Models\Admin\ProductTag;
 use App\Models\Admin\Size;
 use App\Models\SeoSetting;
 use Illuminate\Http\Request;
+use App\Models\ProductReview;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
@@ -45,6 +47,74 @@ class ProductController extends Controller
             $data['description'] = $products->en_Product_Nam;
             $data['keywords'] = $products->en_Product_Nam;
             return view('front.pages.product.single_product', $data);
+        }
+        return redirect()->back()->with('error', __('Product Not Found!'));
+    }
+
+    /**
+     * New design product details page (keeps old data logic but uses new blade)
+     * Accessible via route: product/single-new/{slug}
+     */
+    public function singleProductNewDesign($slug)
+    {
+        $product = Product::where('en_Product_Slug', $slug)->with('category')->where('status', 1)->firstOrFail();
+        if (!empty($product)) {
+            $cat_id = $product->category?->id;
+
+            // Build a related-products query that prefers same category,
+            // but also includes products with similar names as a fallback.
+            $nameSource = $product->en_Product_Name ?? $product->fr_Product_Name ?? '';
+            $words = preg_split('/\s+/', strip_tags($nameSource));
+            // keep meaningful words (length > 2) and limit to first 3 keywords
+            $keywords = array_slice(array_values(array_filter($words, function ($w) {
+                return mb_strlen(trim($w)) > 2;
+            })), 0, 3);
+
+            $relatedQuery = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')
+                ->where('status', 1)
+                ->where('id', '!=', $product->id)
+                ->where(function ($q) use ($cat_id, $keywords) {
+                    // include same-category products when category is available
+                    if (!empty($cat_id)) {
+                        $q->where('Category_Id', $cat_id);
+                    }
+
+                    // also include products that match any of the name keywords
+                    if (!empty($keywords)) {
+                        $q->orWhere(function ($q2) use ($keywords) {
+                            foreach ($keywords as $kw) {
+                                $kw = trim($kw);
+                                if ($kw === '') continue;
+                                $q2->orWhere('en_Product_Name', 'LIKE', "%{$kw}%")
+                                   ->orWhere('fr_Product_Name', 'LIKE', "%{$kw}%");
+                            }
+                        });
+                    }
+                });
+
+            $related = $relatedQuery->latest()->take(5)->get();
+
+            $products = Product::where('id', $product->id)
+                ->with([
+                    'brand',
+                    'category',
+                    'colors',
+                    'sizes',
+                    'additions' => function ($query) {
+                        $query->where('status', 1);
+                    },
+                    'product_tags',
+                    'product_reviews',
+                    'product_reviews.user'
+                ])
+                ->latest()
+                ->first();
+
+            $data['product'] = $products;
+            $data['related'] = $related;
+            $data['title'] = $products->en_Product_Name;
+
+            return view('front.pages.product_newdesign', $data);
         }
         return redirect()->back()->with('error', __('Product Not Found!'));
     }
@@ -239,6 +309,34 @@ class ProductController extends Controller
             }
         }
         return view('front.pages.product.filter_leftsidebar', compact('filters'));
+    }
+
+    /**
+     * Store a product review submitted from the product page.
+     * Route: POST product/{product}/review -> name: product.review.store
+     */
+    public function storeReview(Request $request, $productId)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', __('Please login to submit a review.'));
+        }
+
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:2000',
+            'product_id' => 'required|integer'
+        ]);
+
+        $product = Product::findOrFail($productId);
+
+        ProductReview::create([
+            'rating' => $request->input('rating', 5),
+            'feedback' => $request->input('comment', ''),
+            'product_id' => $product->id,
+            'user_id' => Auth::id(),
+        ]);
+
+        return redirect()->back()->with('success', __('Thank you for your review.'));
     }
 
     public function CategoryWiseProduct($id = null)

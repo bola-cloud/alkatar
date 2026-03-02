@@ -28,23 +28,77 @@
                     <div class="user-profile-right-part">
                         <div class="user-profile-content-box my-order-page-box track-my-order-page-box">
 
-                            <div class="d-flex justify-content-between align-items-center text-black mb-5">
-                                <h2 class="user-profile-content-title">{{ __('Track My Order') }}</h2>
-                            </div>
+                            <div class="order-tracking-card p-4">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h3 class="mb-1">{{ __('Order ID') }}: <span class="fw-bold">{{ $order->Order_Number ?? $order->id }}</span></h3>
+                                        <div class="small text-muted">{{ __('Order date') }}: {{ date('M d, Y', strtotime($order->created_at)) }}</div>
+                                    </div>
+                                    <div class="d-flex gap-2 align-items-center">
+                                        <a href="{{ route('checkout.invoice', [$order->id]) }}" class="btn btn-outline-secondary btn-sm">{{ __('Invoice') }}</a>
+                                        <a href="javascript:void(0)" class="btn btn-warning btn-sm text-white">{{ __('Track order') }}</a>
+                                    </div>
+                                </div>
 
-                            @if ($order->Order_Status == ORDER_PENDING || $order->Order_Status == ORDER_PROCESSING)
-                                @include('front.layouts.include.tracking.processing')
-                            @elseif($order->Order_Status == ORDER_SHIPPED)
-                                @include('front.layouts.include.tracking.shipped')
-                            @elseif($order->Order_Status == ORDER_DELIVERED)
-                                @include('front.layouts.include.tracking.delivered')
-                            @elseif($order->Order_Status == ORDER_CANCELLED)
-                                @include('front.layouts.include.tracking.canceled')
-                            @elseif($order->Order_Status == ORDER_RETURN)
-                                @include('front.layouts.include.tracking.returned')
-                            @elseif($order->Order_Status == ORDER_DELIVERED_FAILED)
-                                @include('front.layouts.include.tracking.delivery_failed')
-                            @endif
+                                {{-- Timeline --}}
+                                @php
+                                    $status = intval($order->Order_Status ?? 0);
+                                @endphp
+                                <div class="order-timeline mb-4">
+                                    <div class="timeline-bar">
+                                        <div class="timeline-progress" style="width: @if($status >= ORDER_DELIVERED) 100% @elseif($status >= ORDER_SHIPPED) 66% @elseif($status >= ORDER_PROCESSING) 33% @else 0% @endif"></div>
+                                    </div>
+                                    <div class="timeline-steps d-flex justify-content-between mt-3">
+                                        <div class="text-center step @if($status >= ORDER_PENDING) active @endif">
+                                            <div class="step-dot"></div>
+                                            <div class="step-title">{{ __('Order Confirmed') }}</div>
+                                            <div class="step-date small text-muted">{{ $order->created_at ? date('D, j M Y', strtotime($order->created_at)) : '' }}</div>
+                                        </div>
+                                        <div class="text-center step @if($status >= ORDER_SHIPPED) active @endif">
+                                            <div class="step-dot"></div>
+                                            <div class="step-title">{{ __('Shipped') }}</div>
+                                            <div class="step-date small text-muted">@if($order->Delivery_At) {{ date('D, j M Y', strtotime($order->Delivery_At)) }} @endif</div>
+                                        </div>
+                                        <div class="text-center step @if($status == ORDER_DELIVERED) active @endif">
+                                            <div class="step-dot"></div>
+                                            <div class="step-title">{{ __('Delivered') }}</div>
+                                            <div class="step-date small text-muted">@if($order->Delivery_At && $status==ORDER_DELIVERED) {{ date('D, j M Y', strtotime($order->Delivery_At)) }} @endif</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Items list similar to design --}}
+                                <div class="order-items-list">
+                                    @foreach ($order->order_details as $od)
+                                        <div class="order-item d-flex align-items-start py-3 border-bottom">
+                                            <div class="me-3 item-thumb">
+                                                <img src="{{ asset(ProductImage() . $od->product->Primary_Image) }}" alt="" style="width:72px;height:72px;object-fit:cover;border-radius:8px;">
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-bold">{{ langConverter($od->product->en_Product_Name, $od->product->fr_Product_Name) }}</div>
+                                                <div class="small text-muted">{{ $od->product->Brand ?? '' }}</div>
+                                                <div class="small text-muted">{{ $od->product->category->name ?? '' }}</div>
+                                                <div class="small text-muted">{{ $od->Quantity }} {{ __('items') }}</div>
+                                            </div>
+                                            <div class="text-end">
+                                                <div class="fw-semibold">{{ currencyConverter($od->Price) }}</div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                {{-- Delivery info box --}}
+                                <div class="delivery-info mt-4 p-3 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="small text-muted">{{ __('Delivery info') }}</div>
+                                        <div class="fw-bold">{{ $order->shipping_name ?? ($order->user->name ?? '') }}</div>
+                                        <div class="small text-muted">{{ $order->shipping_phone ?? ($order->user->phone ?? '') }}</div>
+                                    </div>
+                                    <div>
+                                        <a href="tel:{{ $order->shipping_phone ?? ($order->user->phone ?? '') }}" class="btn btn-success btn-sm text-white">{{ __('Call') }}</a>
+                                    </div>
+                                </div>
+                            </div>
 
                             <div class="order-table mt-5">
                                 <div class="table-responsive">
@@ -203,4 +257,21 @@
         @endforeach
     @endif
     <!-- Write Review Modal End -->
+@push('post_css')
+<style>
+    .order-tracking-card{ border:2px dashed #ced9ce; border-radius:12px; background:#fff }
+    .order-tracking-card .fw-bold{ color:#23332b }
+    .timeline-bar{ height:6px; background:#e9e9e9; border-radius:6px; overflow:hidden }
+    .timeline-progress{ height:100%; background:#ff8a00; width:0; transition:width .3s }
+    .timeline-steps .step{ width:33%; }
+    .timeline-steps .step .step-dot{ width:14px; height:14px; border-radius:50%; background:#e9e9e9; margin:0 auto 8px }
+    .timeline-steps .step.active .step-dot{ background:#ff8a00 }
+    .timeline-steps .step .step-title{ font-weight:600; color:#f08a00 }
+    .order-item .item-thumb img{ border-radius:8px }
+    .delivery-info{ background:#f6f9f6; border-radius:8px }
+    .order-tracking-card .btn-warning{ background:#ff8a00; border-color:#ff8a00 }
+    @media (max-width:767px){ .timeline-steps .step .step-title { font-size:13px } }
+</style>
+@endpush
+
 @endsection

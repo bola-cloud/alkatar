@@ -1,38 +1,62 @@
-(function($) {
+(function ($) {
     "use strict";
-    $(document).ready(function () {
-        $('#BlogTable').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: $('#table-url').data("url"),
-            columns: [
-                {
-                    data: 'name',
-                    name: 'name'
-                },
-                {
-                    data: 'Number',
-                    name: 'Number'
-                },
-                {
-                    data: 'email',
-                    name: 'email'
-                },
-                {
-                    data: 'orders',
-                    name: 'orders',
-                    orderable: false
-                },
-                {
-                    data: 'registered_at',
-                    name: 'registered_at'
-                },
-                {
-                    data: 'action',
-                    name: 'action',
-                    orderable: false
-                }
-            ]
-        });
+    var table = $("#BlogTable").DataTable({
+        pageLength: 25,
+        serverSide: true,
+        processing: true,
+        language: {
+            processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> '
+        },
+        ajax: $('#table-url').data("url"),
+        columns: [
+            {
+                data: 'name',
+                name: 'name',
+                orderable: true,
+                searchable: true
+            },
+            {
+                data: 'Number',
+                name: 'Number',
+                orderable: true,
+                searchable: true
+            },
+            {
+                data: 'email',
+                name: 'email',
+                orderable: true,
+                searchable: true
+            },
+            {
+                data: 'is_subscribed',
+                name: 'is_subscribed',
+                orderable: false,
+                searchable: false
+            },
+            {
+                data: 'offer_types',
+                name: 'offer_types',
+                orderable: false,
+                searchable: false
+            },
+            {
+                data: 'orders',
+                name: 'orders',
+                orderable: false,
+                searchable: false
+            },
+            {
+                data: 'registered_at',
+                name: 'created_at',
+                orderable: true,
+                searchable: false
+            },
+            {
+                data: 'action',
+                name: 'action',
+                orderable: false,
+                searchable: false
+            }
+        ]
     });
-})(jQuery)
+})(jQuery);

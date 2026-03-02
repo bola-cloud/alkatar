@@ -24,7 +24,7 @@ class UserController extends Controller
                     $btn = '<div class="action__buttons">';
                     $btn = $btn . '<a href="' . route('admin.edit_admin', $data->id) . '" class="btn-action"><i class="fa-solid fa-pen-to-square"></i></a>';
                     if ($data->status == ACTIVE) {
-                        $btn = $btn . '<a href="' . route('admin.status_change',  encrypt($data->id)) . '" class="btn-action" title="Active"><i class="fas fa-toggle-on"></i></a>';
+                        $btn = $btn . '<a href="' . route('admin.status_change', encrypt($data->id)) . '" class="btn-action" title="Active"><i class="fas fa-toggle-on"></i></a>';
                     } else {
                         $btn = $btn . '<a href="' . route('admin.status_change', encrypt($data->id)) . '" class="btn-action" title="Block"><i class="fas fa-toggle-off"></i></a>';
                     }
@@ -81,7 +81,8 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users,email,' . $id,
             'password' => 'same:confirm-password',
-            'roles' => 'required'
+            'roles' => 'required',
+            'offer_types' => 'nullable|array'
         ]);
 
         $input = $request->all();
@@ -92,6 +93,12 @@ class UserController extends Controller
         }
 
         $user = User::find($id);
+        // Ensure offer_types is stored as array/JSON
+        if ($request->has('offer_types')) {
+            $input['offer_types'] = $request->input('offer_types');
+        } else {
+            $input['offer_types'] = [];
+        }
         $user->update($input);
         DB::table('model_has_roles')->where('model_id', $id)->delete();
 
@@ -104,7 +111,7 @@ class UserController extends Controller
     public function customerList(Request $request)
     {
         if ($request->ajax()) {
-            $data = User::where('is_admin', INACTIVE)->orderBy('created_at','desc');
+            $data = User::where('is_admin', INACTIVE)->orderBy('created_at', 'desc');
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('Number', function ($data) {
@@ -113,8 +120,21 @@ class UserController extends Controller
                 ->addColumn('orders', function ($data) {
                     return orderCountuser($data->id);
                 })
+                ->addColumn('offer_types', function ($data) {
+                    if (is_array($data->offer_types)) {
+                        return implode(', ', $data->offer_types);
+                    }
+                    return $data->offer_types ?? '';
+                })
                 ->addColumn("registered_at", function ($data) {
                     return $data->created_at->format('d M Y');
+                })
+                ->addColumn('is_subscribed', function ($data) {
+                    $hasActiveSub = \App\Models\UserSubscription::where('user_id', $data->id)
+                        ->where('status', 'active')
+                        ->where('end_at', '>', now())
+                        ->exists();
+                    return $hasActiveSub ? '<span class="badge bg-success">' . __('Yes') . '</span>' : '<span class="badge bg-secondary">' . __('No') . '</span>';
                 })
                 ->addColumn('action', function ($data) {
                     $btn = '<div class="action__buttons">';

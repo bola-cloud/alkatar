@@ -20,6 +20,9 @@
                             <li class="breadcrumb-item active" aria-current="page">{{__('Advertise')}}</li>
                         </ul>
                     </nav>
+                    <div class="ms-3">
+                        <a href="{{ route('admin.advertise.create') }}" class="btn btn-primary">{{ __('Add Advertise') }}</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -31,9 +34,9 @@
                     <table id="AdvertiseTable" class="row-border data-table-filter table-style">
                         <thead>
                         <tr>
-                            <th>{{ __('Image One')}}</th>
-                            <th>{{ __('Link for Image One')}}</th>
-                            {{-- <th>{{ __('Image Two')}}</th> --}}
+                            <th>{{ __('Image')}}</th>
+                            <th>{{ __('Title')}}</th>
+                            <th>{{ __('Subtitle')}}</th>
                             <th>{{ __('Action')}}</th>
                         </tr>
                         </thead>
@@ -48,5 +51,16 @@
     @push('post_scripts')
         <script src="{{asset('backend/js/admin/datatables/advertise.js')}}"></script>
         <!-- Page level custom scripts -->
+        <script>
+            (function($){
+                'use strict';
+                $(document).on('click', '.btn-action.delete, a.delete', function(e){
+                    if(!confirm('{{ __('Are you sure?') }}')){
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            })(jQuery);
+        </script>
     @endpush
 @endsection

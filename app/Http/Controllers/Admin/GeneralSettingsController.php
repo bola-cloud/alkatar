@@ -149,6 +149,7 @@ class GeneralSettingsController extends Controller
             if (isset($request->menu_thumb)) {
                 Setting::where('slug', 'menu_thumb')->update(['value' => fileUpload($request->menu_thumb, IMG_ADVERTISE_PATH)]);
             }
+            // Home-design images are managed in Home Page CMS (Advertise / Home Page settings)
             return redirect()->back()->with('success', __('Successfully Updated!'));
         } catch (\Exception $e) {
 

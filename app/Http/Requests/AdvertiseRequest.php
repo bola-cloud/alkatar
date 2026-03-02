@@ -24,8 +24,19 @@ class AdvertiseRequest extends FormRequest
     public function rules()
     {
         return [
-            'image_one'=>'required',
-            'image_two'=>'required',
+            'image_one' => 'nullable|image',
+            'image_two' => 'nullable|image',
+            'image' => 'nullable|image',
+            'en_title' => 'nullable|string|max:191',
+            'ar_title' => 'nullable|string|max:191',
+            'en_subtitle' => 'nullable|string',
+            'ar_subtitle' => 'nullable|string',
+            'en_small_description' => 'nullable|string',
+            'ar_small_description' => 'nullable|string',
+            'link' => 'nullable|url',
+            'display_order' => 'nullable|integer',
+            'status' => 'nullable|boolean',
+            'location' => 'nullable|string|max:100'
         ];
     }
 }

@@ -72,11 +72,11 @@
                     data: "Subtotal",
                     name: "Subtotal",
                 },
-                 {
+                {
                     data: "DeliveryCharge",
                     name: "DeliveryCharge",
                 },
-                 {
+                {
                     data: "GrandTotal",
                     name: "GrandTotal",
                 },
@@ -91,6 +91,15 @@
                 {
                     data: "Payment_Method",
                     name: "Payment_Method",
+                },
+                {
+                    data: "is_paid",
+                    name: "is_paid",
+                    render: function (data) {
+                        return data == 1
+                            ? '<span class="badge badge-success">Paid</span>'
+                            : '<span class="badge badge-danger">Unpaid</span>';
+                    }
                 },
                 // {
                 //     data: 'digital_goods',
@@ -107,23 +116,27 @@
                 },
             ],
             columnDefs: [
-                { width: "20px", targets: 1 },
-                { width: "70px", targets: 2 },
-                { width: "85px", targets: 3 },
-                { width: "70px", targets: 4 },
-                { width: "70px", targets: 5 },
-                { width: "100px", targets: 6 },
-                { width: "80px", targets: 7 },
-                { width: "80px", targets: 8 },
-                { width: "40px", targets: 9 },
-                { width: "80px", targets: 10 },
-                { width: "70px", targets: 11 },
-                { width: "60px", targets: 12 },
-                { width: "60px", targets: 13 },
-                { width: "60px", targets: 14 },
-    
-
+                { width: "40px", targets: 0 },   // Checkbox
+                { width: "20px", targets: 1 },   // SL
+                { width: "70px", targets: 2 },   // Id
+                { width: "85px", targets: 3 },   // Date
+                { width: "70px", targets: 4 },   // Time
+                { width: "70px", targets: 5 },   // User
+                { width: "100px", targets: 6 },  // Admin who created
+                { width: "80px", targets: 7 },   // Phone Number
+                { width: "80px", targets: 8 },   // City
+                { width: "70px", targets: 9 },   // Subtotal
+                { width: "80px", targets: 10 },  // Delivery Charge
+                { width: "80px", targets: 11 },  // Total Amount
+                { width: "60px", targets: 12 },  // Coupon Code
+                { width: "80px", targets: 13 },  // Order source
+                { width: "80px", targets: 14 },  // Payment Method
+                { width: "60px", targets: 15 },  // Is Paid
+                { width: "80px", targets: 16 },  // Status
+                { width: "120px", targets: 17 }, // Action
             ],
+            scrollX: true,
+            responsive: false,
         });
 
         // Select all checkbox functionality

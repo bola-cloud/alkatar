@@ -67,7 +67,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Asia/Muscat',
 
     /*
     |--------------------------------------------------------------------------
@@ -161,7 +161,7 @@ return [
         Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
-        
+
 
         /*
          * Package Service Providers...
@@ -183,7 +183,8 @@ return [
         Spatie\Permission\PermissionServiceProvider::class,
         Laravolt\Avatar\ServiceProvider::class,
         Tsakib360\ZaiInstaller\Providers\ZaiInstallerServiceProvider::class,
-        Mccarlosen\LaravelMpdf\LaravelMpdfServiceProvider::class
+        Mccarlosen\LaravelMpdf\LaravelMpdfServiceProvider::class,
+        SimpleSoftwareIO\QrCode\QrCodeServiceProvider::class,
 
     ],
 
@@ -244,8 +245,9 @@ return [
         'Alert' => RealRashid\SweetAlert\Facades\Alert::class,
         'Purifier' => Mews\Purifier\Facades\Purifier::class,
         'Socialite' => Laravel\Socialite\Facades\Socialite::class,
-        'Avatar'    => Laravolt\Avatar\Facade::class,
-        'PDF' => Mccarlosen\LaravelMpdf\Facades\LaravelMpdf::class
+        'Avatar' => Laravolt\Avatar\Facade::class,
+        'PDF' => Mccarlosen\LaravelMpdf\Facades\LaravelMpdf::class,
+        'QrCode' => SimpleSoftwareIO\QrCode\Facades\QrCode::class,
     ],
 
 ];

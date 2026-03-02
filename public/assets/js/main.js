@@ -10,7 +10,7 @@
     } else {
       $('#sticky').removeClass('stick');
     }
-  }); 
+  });
 
     /*-------------------------------------------
     Mobile Menu
@@ -45,7 +45,7 @@
       easingType: 'linear',
       scrollSpeed: 500,
       animation: 'fade'
-    }); 
+    });
 
     /*-------------------------------------------
     hero-slider active
@@ -441,7 +441,7 @@
     $(".lang-list li").each(function(){
         $(this).on("click", function(){
             var logoSrc = $(this).children(".flag").children("img").attr("src");
-            var flagText = $(this).children("a").text() + '<span><i class="fas fa-angle-down"></i></span>'; 
+            var flagText = $(this).children("a").text() + '<span><i class="fas fa-angle-down"></i></span>';
             $(".lang-switcher > .flag img").attr("src", logoSrc);
             $(".lang-switcher > a").html(flagText);
         });
@@ -458,7 +458,7 @@
     $(".currency-list li").each(function(){
         $(this).on("click", function(){
             var logoSrc = $(this).children(".flag").children("i").attr("class");
-            var flagText = $(this).children("a").text() + '<span><i class="fas fa-angle-down"></i></span>'; 
+            var flagText = $(this).children("a").text() + '<span><i class="fas fa-angle-down"></i></span>';
             $(".currency-switcher > .flag i").attr("class", logoSrc);
             $(".currency-switcher > a").html(flagText);
         });
@@ -522,7 +522,7 @@
       }
       $button.parent().find("input").val(newVal);
     });
-    
+
     /*----------------------------
     checkout payment method active
     ------------------------------*/

@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call(RolesTableSeeder::class);
         $this->call(SliderTableSeeder::class);
         $this->call(AdvertiseTableSeeder::class);
+        $this->call(HeroAdvertiseSeeder::class);
         $this->call(GeneralSettingsTableSeeder::class);
         $this->call(BlogTableSeeder::class);
         $this->call(TagTableSeeder::class);
@@ -34,6 +35,10 @@ class DatabaseSeeder extends Seeder
         $this->call(CompanyStoryTableSeeder::class);
         $this->call(TestimonialTableSeeder::class);
         $this->call(HomepageTableSeeder::class);
+        // homepage content previously seeded via HomepageContentSeeder; prefer settings-based seeder
+        // keep the old seeder for backwards compatibility but also seed settings
+        $this->call(HomepageContentSeeder::class);
+        $this->call(SettingsHomepageSeeder::class);
         $this->call(AboutUsPageTableSeeder::class);
         $this->call(SocialLinkTableSeeder::class);
         $this->call(FooterTableSeeder::class);

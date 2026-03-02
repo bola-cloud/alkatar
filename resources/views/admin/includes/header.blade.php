@@ -47,7 +47,11 @@
                         <ul class="header__menu">
                             <li>
                                 <a href="#" class="btn btn-dropdown user-profile" data-bs-toggle="dropdown">
-                                    <img src="{{!is_null(Auth::user()->image) ? asset(AdminProfilePicture().Auth::user()->image) : Avatar::create(Auth::user()->name)->toBase64()}}" alt="{{__('icon')}}">
+                                    @if(Auth::check())
+                                        <img src="{{ Auth::user()->image ? asset(AdminProfilePicture() . Auth::user()->image) : Avatar::create(Auth::user()->name)->toBase64() }}" alt="{{ __('icon') }}">
+                                    @else
+                                        <img src="{{ Avatar::create('Admin')->toBase64() }}" alt="{{ __('icon') }}">
+                                    @endif
                                 </a>
                                 <ul class="dropdown-menu">
                                     <li>

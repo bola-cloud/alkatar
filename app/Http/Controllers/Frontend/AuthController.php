@@ -29,29 +29,40 @@ class AuthController extends Controller
             }
         }
         $seo = SeoSetting::where('slug', 'sign-in')->first();
-        $data['title'] = $seo->title;
-        $data['description'] = $seo->description;
-        $data['keywords'] = $seo->keywords;
-        return view('front.auth.sign_in', $data);
+        $data['title'] = $seo ? $seo->title : 'Sign In';
+        $data['description'] = $seo ? $seo->description : '';
+        $data['keywords'] = $seo ? $seo->keywords : '';
+        // Return new-design sign in view
+        return view('front.auth.newdesign_signin', $data);
     }
     public function userSignInPost(Request $request)
     {
-        $request->validate([
-            'phone_number' => 'required',
-            'password' => 'required',
-        ]);
+        // Unified login logic for Email or Phone
+        $rules = [
+            'login_id' => 'required',
+            'password' => 'required'
+        ];
+        $request->validate($rules);
 
+        $login_id = $request->input('login_id');
+        $is_email = filter_var($login_id, FILTER_VALIDATE_EMAIL);
 
-        $user = User::where('Number', $request->phone_number)->where('is_admin', 0)->first(); //check user
-
-
+        if ($is_email) {
+            $user = User::where('email', $login_id)->where('is_admin', 0)->first();
+        } else {
+            $user = User::where('Number', $login_id)->where('is_admin', 0)->first();
+        }
 
         if ($user) {
             if ($user->status == INACTIVE) {
                 return redirect()->route('front')->with('error', __('User is blocked by admin.'));
             }
             if (Hash::check($request->password, $user->password)) {
-                if (Auth::attempt(['Number' => $request->phone_number, 'password' => $request->password])) {
+                // Determine credential key for Auth::attempt
+                $credentials = $is_email ? ['email' => $login_id] : ['Number' => $login_id];
+                $credentials['password'] = $request->password;
+
+                if (Auth::attempt($credentials)) {
                     if (Auth::user()->is_admin == 0) {
                         return redirect()->route('front');
                     } else {
@@ -68,12 +79,12 @@ class AuthController extends Controller
     public function userSignUp()
     {
 
-        return redirect()->route('login');
+        // Return the new-design registration view
         $seo = SeoSetting::where('slug', 'sign-up')->first();
-        $data['title'] = $seo->title;
-        $data['description'] = $seo->description;
-        $data['keywords'] = $seo->keywords;
-        return view('front.auth.sign_up', $data);
+        $data['title'] = $seo ? $seo->title : 'Sign Up';
+        $data['description'] = $seo ? $seo->description : '';
+        $data['keywords'] = $seo ? $seo->keywords : '';
+        return view('front.auth.newdesign_register', $data);
     }
 
     public function loginModal(Request $request)
@@ -105,9 +116,42 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'Number' => $request->phone,
             'password' => Hash::make($request->confirm_password),
         ]);
+
         if ($user) {
+            // Create customer in SmartLife ERP
+            if (config('smartlife.sync_enabled')) {
+                try {
+                    $smartLifeService = new \App\Services\SmartLifeErpService();
+                    $customerPhone = $request->Number ?? $request->phone ?? '';
+
+                    $customerResult = $smartLifeService->createCustomer($user->name, $customerPhone);
+
+                    if ($customerResult && isset($customerResult['success']) && $customerResult['success'] === true) {
+                        $user->smartlife_customer_id = $customerResult['id'];
+                        $user->save();
+
+                        \Illuminate\Support\Facades\Log::info('SmartLife customer created during registration', [
+                            'user_id' => $user->id,
+                            'smartlife_customer_id' => $customerResult['id']
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Failed to create SmartLife customer during registration', [
+                        'user_id' => $user->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
+            // Log the user in immediately after successful registration
+            try {
+                Auth::login($user);
+            } catch (\Exception $e) {
+                // If login fails for any reason, continue but don't block the flow
+            }
             return redirect()->route('front')->with('success', __('Sign Up Successfully !'));
         } else {
             return redirect()->route('user.sign.up')->with('success', __('Wrong Credential !'));
@@ -146,7 +190,7 @@ class AuthController extends Controller
         $data['title'] = $seo->title;
         $data['description'] = $seo->description;
         $data['keywords'] = $seo->keywords;
-        return view('front.auth.forget_password', $data);
+        return view('front.auth.newdesign_forget_password', $data);
     }
     public function userForgetPasswordPost(Request $request)
     {
@@ -176,7 +220,7 @@ class AuthController extends Controller
         $data['description'] = $seo->description;
         $data['keywords'] = $seo->keywords;
         $data['token'] = $token;
-        return view('front.auth.show_reset_form', $data);
+        return view('front.auth.newdesign_reset_password', $data);
     }
     public function submitResetPasswordForm(Request $request)
     {

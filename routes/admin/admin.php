@@ -47,8 +47,9 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SitemapController;
 use App\Http\Controllers\Admin\AIController;
 use App\Http\Controllers\Admin\Reports\OrdersReportController;
+use App\Http\Controllers\Admin\ProductReviewController;
 
-Route::get('/admin/login', [AuthController::class, 'login'])->name('admin.login')->middleware('guest');
+Route::get('/admin/login', [AuthController::class, 'login'])->name('admin.login')->middleware('guest:admin');
 Route::post('/admin/login', [AuthController::class, 'LoginDashboard'])->name('login.post');
 
 Route::group(['prefix' => 'subscribe'], function () {
@@ -59,7 +60,8 @@ Route::group(['prefix' => 'subscribe'], function () {
     ;
 });
 
-Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin'], 'as' => 'admin.'], function () {
+// Use auth:admin so admin routes validate the admin guard, not the default web guard
+Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'is_admin'], 'as' => 'admin.'], function () {
 
     // Reports
     Route::group(['prefix' => 'reports'], function () {
@@ -95,6 +97,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin'], 'as' =>
         Route::get('', [AdvertiseController::class, 'advertise'])->name('advertise')->middleware(['permission:advertise-list|advertise-create|advertise-edit|advertise-delete']);
         Route::get('/create', [AdvertiseController::class, 'advertiseCreate'])->name('advertise.create')->middleware(['permission:advertise-create']);
         Route::post('/create', [AdvertiseController::class, 'advertiseStore'])->name('advertise.store')->middleware(['permission:advertise-create', 'isDemo']);
+        // Bulk upload endpoint for AJAX multi-file uploads from homepage edit
+        Route::post('/bulk-store', [AdvertiseController::class, 'advertiseBulkStore'])->name('advertise.bulk_store')->middleware(['permission:advertise-create']);
         Route::get('/edit/{id}', [AdvertiseController::class, 'advertiseEdit'])->name('advertise.edit')->middleware(['permission:advertise-edit']);
         Route::post('/update', [AdvertiseController::class, 'advertiseUpdate'])->name('advertise.update')->middleware(['permission:advertise-edit', 'isDemo']);
         Route::get('/delete/{id}', [AdvertiseController::class, 'advertiseDelete'])->name('advertise.delete')->middleware(['permission:advertise-delete', 'isDemo']);
@@ -179,6 +183,10 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin'], 'as' =>
     Route::group(['prefix' => 'product'], function () {
         Route::get('', [ProductController::class, 'product'])->name('product')->middleware(['permission:product-list|product-create|product-edit|product-delete']);
         Route::get('/create', [ProductController::class, 'productCreate'])->name('product.create')->middleware(['permission:product-create']);
+        Route::post('/create', [ProductController::class, 'productStore'])->name('product.store')->middleware(['permission:product-create', 'isDemo']);
+        // Sync Route
+        Route::get('/sync-smartlife', [ProductController::class, 'syncSmartLife'])->name('product.sync')->middleware(['permission:product-create', 'isDemo']);
+        Route::get('/stock-breakdown/{id}', [ProductController::class, 'stockBreakdown'])->name('product.stock_breakdown')->middleware(['permission:product-list']);
         Route::get('/physical/create', [ProductController::class, 'physicalProductCreate'])->name('physical.product.create')->middleware(['permission:product-create']);
         Route::get('/addition', [AdditionController::class, 'index'])->name('physical.product.addition.index');
         Route::get('/addition/create', [AdditionController::class, 'create'])->name('physical.product.addition.create');
@@ -190,12 +198,17 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin'], 'as' =>
         Route::get('/digital/create', [ProductController::class, 'digitalProductCreate'])->name('digital.product.create')->middleware(['permission:product-create']);
         Route::get('/license/create', [ProductController::class, 'licenseProductCreate'])->name('license.product.create')->middleware(['permission:product-create']);
         Route::get('/affiliate/create', [ProductController::class, 'affiliateProductCreate'])->name('affiliate.product.create')->middleware(['permission:product-create']);
-        Route::post('/create', [ProductController::class, 'productStore'])->name('product.store')->middleware(['permission:product-create', 'isDemo']);
         Route::get('/edit/{product_type}/{id}', [ProductController::class, 'productEdit'])->name('product.edit')->middleware(['permission:product-edit']);
         Route::post('/update', [ProductController::class, 'productUpdate'])->name('product.update')->middleware(['permission:product-edit', 'isDemo']);
         Route::get('/active/{id}', [ProductController::class, 'productActive'])->name('product.active')->middleware(['permission:product-edit', 'isDemo']);
         Route::get('/inactive/{d}', [ProductController::class, 'productInactive'])->name('product.inactive')->middleware(['permission:product-edit', 'isDemo']);
         Route::get('/delete/{id}', [ProductController::class, 'productDelete'])->name('product.delete')->middleware(['permission:product-delete', 'isDemo']);
+        // Bulk Actions
+        Route::post('/bulk-active', [ProductController::class, 'bulkActive'])->name('product.bulk-active')->middleware(['permission:product-edit', 'isDemo']);
+        // product reviews management
+        Route::get('/reviews', [ProductReviewController::class, 'index'])->name('product.reviews')->middleware(['permission:product-list']);
+        Route::get('/review/toggle/{id}', [ProductReviewController::class, 'toggle'])->name('product.review.toggle')->middleware(['permission:product-edit', 'isDemo']);
+        Route::get('/review/delete/{id}', [ProductReviewController::class, 'destroy'])->name('product.review.delete')->middleware(['permission:product-delete', 'isDemo']);
     });
 
     Route::group(['prefix' => 'product-color'], function () {
@@ -240,6 +253,16 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin'], 'as' =>
         Route::get('', [CustomerServiceController::class, 'customerService'])->name('customer.services')->middleware(['permission:crm-list|crm-create|crm-edit|crm-delete']);
         Route::get('/edit/{id}', [CustomerServiceController::class, 'customerServiceEdit'])->name('customer.services.edit')->middleware(['permission:crm-edit']);
         Route::post('/update', [CustomerServiceController::class, 'customerServiceUpdate'])->name('customer.services.update')->middleware(['permission:crm-edit', 'isDemo']);
+    });
+
+    Route::group(['prefix' => 'subscriptions'], function () {
+        Route::get('', [\App\Http\Controllers\Admin\SubscriptionController::class, 'index'])->name('subscriptions')->middleware(['permission:subscription-list|subscription-create|subscription-edit|subscription-delete']);
+        Route::get('/create', [\App\Http\Controllers\Admin\SubscriptionController::class, 'create'])->name('subscriptions.create')->middleware(['permission:subscription-create']);
+        Route::post('/create', [\App\Http\Controllers\Admin\SubscriptionController::class, 'store'])->name('subscriptions.store')->middleware(['permission:subscription-create', 'isDemo']);
+        Route::get('/edit/{subscription}', [\App\Http\Controllers\Admin\SubscriptionController::class, 'edit'])->name('subscriptions.edit')->middleware(['permission:subscription-edit']);
+        Route::post('/update/{subscription}', [\App\Http\Controllers\Admin\SubscriptionController::class, 'update'])->name('subscriptions.update')->middleware(['permission:subscription-edit', 'isDemo']);
+        Route::get('/delete/{subscription}', [\App\Http\Controllers\Admin\SubscriptionController::class, 'destroy'])->name('subscriptions.delete')->middleware(['permission:subscription-delete', 'isDemo']);
+        Route::get('/users/{subscription}', [\App\Http\Controllers\Admin\SubscriptionController::class, 'users'])->name('subscriptions.users')->middleware(['permission:subscription-edit']);
     });
 
     Route::group(['prefix' => 'company-story'], function () {
@@ -393,9 +416,12 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin'], 'as' =>
     Route::post('/country-tax-update/{id}', [EcommerceController::class, 'countryTaxUpdate'])->name('country_tax_update')->middleware(['permission:tax-edit', 'isDemo']);
 
     //Delivery Charge
-    Route::get('/delivery-charge-list', [EcommerceController::class, 'countryDCList'])->name('country_dc_list')->middleware(['permission:delivery-charge-list|delivery-charge-create|delivery-charge-edit|delivery-charge-delete']);
-    Route::post('/delivery-charge-store', [EcommerceController::class, 'countryDCStore'])->name('country_dc_store')->middleware(['permission:delivery-charge-create', 'isDemo']);
-    Route::post('/delivery-charge-update/{id}', [EcommerceController::class, 'countryDCUpdate'])->name('country_dc_update')->middleware(['permission:delivery-charge-edit', 'isDemo']);
+    Route::get('/delivery-charge-list', [EcommerceController::class, 'countryDCList'])->name('country_dc_list');
+    Route::post('/delivery-charge-store', [EcommerceController::class, 'countryDCStore'])->name('country_dc_store');
+    Route::post('/delivery-charge-update/{id}', [EcommerceController::class, 'countryDCUpdate'])->name('country_dc_update');
+    // New route for managing areas of a specific city
+    Route::get('/delivery-charge/city/{city_id}/areas', [EcommerceController::class, 'cityAreas'])->name('city_areas');
+    Route::post('/delivery-charge/city/areas/update', [EcommerceController::class, 'updateCityAreaCharges'])->name('city_areas_update')->middleware(['permission:delivery-charge-create', 'isDemo']);
 
     //SEO Management
     Route::get('/manage-seo/{slug}', [SeoController::class, 'manageSeo'])->name('manage_seo')->middleware(['permission:cms-create|cms-edit']);
@@ -427,6 +453,16 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'is_admin'], 'as' =>
 
     Route::get('/payment-gateway', [PaymentGatewayController::class, 'index'])->name('payment_gateway_list')->middleware(['permission:payment-gateway-list|payment-gateway-create|payment-gateway-edit|payment-gateway-delete']);
     Route::post('/payment-gateway-update/{slug}', [PaymentGatewayController::class, 'paymentGatewayUpdate'])->name('payment_gateway_update')->middleware(['permission:payment-gateway-edit', 'isDemo']);
+
+    // Delivery Man Management
+    Route::group(['prefix' => 'delivery-man'], function () {
+        Route::get('', [\App\Http\Controllers\Admin\DeliveryManController::class, 'index'])->name('delivery_man');
+        Route::get('/create', [\App\Http\Controllers\Admin\DeliveryManController::class, 'create'])->name('delivery_man.create');
+        Route::post('/store', [\App\Http\Controllers\Admin\DeliveryManController::class, 'store'])->name('delivery_man.store');
+        Route::get('/edit/{id}', [\App\Http\Controllers\Admin\DeliveryManController::class, 'edit'])->name('delivery_man.edit');
+        Route::post('/update/{id}', [\App\Http\Controllers\Admin\DeliveryManController::class, 'update'])->name('delivery_man.update');
+        Route::get('/delete/{id}', [\App\Http\Controllers\Admin\DeliveryManController::class, 'delete'])->name('delivery_man.delete');
+    });
 });
 
 // Route::group(['middleware' => ['auth:admin', 'permission'], 'prefix' => 'admin'], function () {

@@ -1,0 +1,682 @@
+[
+    {
+        "state": "Muscat",
+        "city": "Muscat",
+        "area": "Muscat"
+    },
+    {
+        "state": "Muscat",
+        "city": "Muscat",
+        "area": "Sidab"
+    },
+    {
+        "state": "Muscat",
+        "city": "Muscat",
+        "area": "Al Bustan"
+    },
+    {
+        "state": "Muscat",
+        "city": "Muscat",
+        "area": "Qantab"
+    },
+    {
+        "state": "Muscat",
+        "city": "Muscat",
+        "area": "Riyam"
+    },
+    {
+        "state": "Muscat",
+        "city": "Muscat",
+        "area": "Kalbuh"
+    },
+    {
+        "state": "Muscat",
+        "city": "Muscat",
+        "area": "Yeti"
+    },
+    {
+        "state": "Muscat",
+        "city": "Muscat",
+        "area": "Al Jissah"
+    },
+    {
+        "state": "Muscat",
+        "city": "Muscat",
+        "area": "Al Khairan"
+    },
+    {
+        "state": "Muscat",
+        "city": "Muscat",
+        "area": "As Sifah"
+    },
+    {
+        "state": "Muscat",
+        "city": "Muscat",
+        "area": "Haramel"
+    },
+    {
+        "state": "Muscat",
+        "city": "Al Seeb",
+        "area": "Al Mawaleh"
+    },
+    {
+        "state": "Muscat",
+        "city": "Al Seeb",
+        "area": "Al Seeb"
+    },
+    {
+        "state": "Muscat",
+        "city": "Al Seeb",
+        "area": "Al Hail South"
+    },
+    {
+        "state": "Muscat",
+        "city": "Al Seeb",
+        "area": "Al Hail North"
+    },
+    {
+        "state": "Muscat",
+        "city": "Al Seeb",
+        "area": "Al Maabela"
+    },
+    {
+        "state": "Muscat",
+        "city": "Al Seeb",
+        "area": "Al Rusayl Industrial"
+    },
+    {
+        "state": "Muscat",
+        "city": "Al Seeb",
+        "area": "Al Khoudh"
+    },
+    {
+        "state": "Muscat",
+        "city": "Muttrah",
+        "area": "Ruwi"
+    },
+    {
+        "state": "Muscat",
+        "city": "Muttrah",
+        "area": "Wadi Adi"
+    },
+    {
+        "state": "Muscat",
+        "city": "Muttrah",
+        "area": "Darseit"
+    },
+    {
+        "state": "Muscat",
+        "city": "Muttrah",
+        "area": "Jibroo"
+    },
+    {
+        "state": "Muscat",
+        "city": "Muttrah",
+        "area": "Mina Al Fahal"
+    },
+    {
+        "state": "Muscat",
+        "city": "Muttrah",
+        "area": "Al Wadi Al Kabir"
+    },
+    {
+        "state": "Muscat",
+        "city": "Muttrah",
+        "area": "Muttrah"
+    },
+    {
+        "state": "Muscat",
+        "city": "Muttrah",
+        "area": "Al Hamriyah"
+    },
+    {
+        "state": "Muscat",
+        "city": "Baushar",
+        "area": "Qurum"
+    },
+    {
+        "state": "Muscat",
+        "city": "Baushar",
+        "area": "Wattaya"
+    },
+    {
+        "state": "Muscat",
+        "city": "Baushar",
+        "area": "Madinat Al Sultan Qaboos"
+    },
+    {
+        "state": "Muscat",
+        "city": "Baushar",
+        "area": "Baushar"
+    },
+    {
+        "state": "Muscat",
+        "city": "Baushar",
+        "area": "Al Ghubra"
+    },
+    {
+        "state": "Muscat",
+        "city": "Baushar",
+        "area": "Athaiba (Azaiba)"
+    },
+    {
+        "state": "Muscat",
+        "city": "Baushar",
+        "area": "Ghala"
+    },
+    {
+        "state": "Muscat",
+        "city": "Baushar",
+        "area": "Al Ansab"
+    },
+    {
+        "state": "Muscat",
+        "city": "Baushar",
+        "area": "Al Khuwair"
+    },
+    {
+        "state": "Muscat",
+        "city": "Al Amerat",
+        "area": "Al Amerat"
+    },
+    {
+        "state": "Muscat",
+        "city": "Quriyat",
+        "area": "Qurayat"
+    },
+    {
+        "state": "Dhofar",
+        "city": "Salalah",
+        "area": "Teetam"
+    },
+    {
+        "state": "Dhofar",
+        "city": "Salalah",
+        "area": "Salalah"
+    },
+    {
+        "state": "Dhofar",
+        "city": "Salalah",
+        "area": "Quirun Hairatti"
+    },
+    {
+        "state": "Dhofar",
+        "city": "Salalah",
+        "area": "Al Dahareez"
+    },
+    {
+        "state": "Dhofar",
+        "city": "Salalah",
+        "area": "Al Saadah"
+    },
+    {
+        "state": "Dhofar",
+        "city": "Salalah",
+        "area": "Al Hafa"
+    },
+    {
+        "state": "Dhofar",
+        "city": "Salalah",
+        "area": "Al Awqadain"
+    },
+    {
+        "state": "Dhofar",
+        "city": "Mirbat",
+        "area": "Mirbat"
+    },
+    {
+        "state": "Dhofar",
+        "city": "Mirbat",
+        "area": "Tawi Atair"
+    },
+    {
+        "state": "Dhofar",
+        "city": "Taqah",
+        "area": "Taqa"
+    },
+    {
+        "state": "Dhofar",
+        "city": "Taqah",
+        "area": "Madinat Al Haq"
+    },
+    {
+        "state": "Dhofar",
+        "city": "Rakhyut",
+        "area": "Rakhyout"
+    },
+    {
+        "state": "Dhofar",
+        "city": "Al Mazyunah",
+        "area": "Thamrait"
+    },
+    {
+        "state": "Dhofar",
+        "city": "Dhalkut",
+        "area": "Dhalkut"
+    },
+    {
+        "state": "Dhofar",
+        "city": "Maqshin",
+        "area": "Maqshan"
+    },
+    {
+        "state": "Dhofar",
+        "city": "Sadah",
+        "area": "Sadah"
+    },
+    {
+        "state": "Musandam",
+        "city": "Khasab",
+        "area": "Khasab"
+    },
+    {
+        "state": "Musandam",
+        "city": "Bukha",
+        "area": "Bakha"
+    },
+    {
+        "state": "Musandam",
+        "city": "Dibba Al-Baya",
+        "area": null
+    },
+    {
+        "state": "Musandam",
+        "city": "Madha",
+        "area": "Madha"
+    },
+    {
+        "state": "Musandam",
+        "city": "Dibba",
+        "area": "Dibba"
+    },
+    {
+        "state": "Al Buraimi",
+        "city": "Al Buraimi",
+        "area": "Al Buraimi"
+    },
+    {
+        "state": "Al Buraimi",
+        "city": "Mahda",
+        "area": "Mahda"
+    },
+    {
+        "state": "Al Buraimi",
+        "city": "Al Sinaiyah",
+        "area": null
+    },
+    {
+        "state": "Al Buraimi",
+        "city": "As Sunainah",
+        "area": "As Sunainah"
+    },
+    {
+        "state": "Ad Dakhiliyah",
+        "city": "Nizwa",
+        "area": null
+    },
+    {
+        "state": "Ad Dakhiliyah",
+        "city": "Bahla",
+        "area": null
+    },
+    {
+        "state": "Ad Dakhiliyah",
+        "city": "Samail",
+        "area": null
+    },
+    {
+        "state": "Ad Dakhiliyah",
+        "city": "Adam",
+        "area": null
+    },
+    {
+        "state": "Al Batinah North",
+        "city": "Sohar",
+        "area": "Sohar"
+    },
+    {
+        "state": "Al Batinah North",
+        "city": "Sohar",
+        "area": "Al Turayf"
+    },
+    {
+        "state": "Al Batinah North",
+        "city": "Sohar",
+        "area": "Falaj Al Qabail"
+    },
+    {
+        "state": "Al Batinah North",
+        "city": "Saham",
+        "area": "Saham"
+    },
+    {
+        "state": "Al Batinah North",
+        "city": "Liwa",
+        "area": "Liwa"
+    },
+    {
+        "state": "Al Batinah North",
+        "city": "Shinas",
+        "area": "Shinas"
+    },
+    {
+        "state": "Al Batinah North",
+        "city": "Al Khaboora",
+        "area": "Al Khaboura"
+    },
+    {
+        "state": "Al Batinah South",
+        "city": "Rustaq",
+        "area": "Al Rustaq"
+    },
+    {
+        "state": "Al Batinah South",
+        "city": "Rustaq",
+        "area": "Burj Ar Raddah"
+    },
+    {
+        "state": "Al Batinah South",
+        "city": "Barka",
+        "area": "Barka"
+    },
+    {
+        "state": "Al Batinah South",
+        "city": "Barka",
+        "area": "Al Rumais"
+    },
+    {
+        "state": "Al Batinah South",
+        "city": "Al Musanaa",
+        "area": "Widam Al Sahil"
+    },
+    {
+        "state": "Al Batinah South",
+        "city": "Al Musanaa",
+        "area": "Al Musanaah"
+    },
+    {
+        "state": "Al Batinah South",
+        "city": "Al Musanaa",
+        "area": "Al Mulladah"
+    },
+    {
+        "state": "Al Batinah South",
+        "city": "Nakhal",
+        "area": "Nakhal"
+    },
+    {
+        "state": "Al Batinah South",
+        "city": "Nakhal",
+        "area": "Wadi Al Maawil"
+    },
+    {
+        "state": "Al Batinah South",
+        "city": "Al Suwaiq",
+        "area": "Al Suwaiq"
+    },
+    {
+        "state": "Al Batinah South",
+        "city": "Al Suwaiq",
+        "area": "Al Bidaya"
+    },
+    {
+        "state": "Al Batinah South",
+        "city": "Al Awabi",
+        "area": "Al Awabi"
+    },
+    {
+        "state": "Ash Sharqiyah North",
+        "city": "Ibra",
+        "area": null
+    },
+    {
+        "state": "Ash Sharqiyah North",
+        "city": "Bidiyah",
+        "area": null
+    },
+    {
+        "state": "Ash Sharqiyah North",
+        "city": "Al Mudhaibi",
+        "area": null
+    },
+    {
+        "state": "Ash Sharqiyah North",
+        "city": "Dima Wa at Taiyyin",
+        "area": null
+    },
+    {
+        "state": "Ash Sharqiyah South",
+        "city": "Sur",
+        "area": null
+    },
+    {
+        "state": "Ash Sharqiyah South",
+        "city": "Jalan Bani Bu Ali",
+        "area": null
+    },
+    {
+        "state": "Ash Sharqiyah South",
+        "city": "Al Kamil Wal Wafi",
+        "area": null
+    },
+    {
+        "state": "Ash Sharqiyah South",
+        "city": "Masirah",
+        "area": null
+    },
+    {
+        "state": "Ad Dhahirah",
+        "city": "Ibri",
+        "area": null
+    },
+    {
+        "state": "Ad Dhahirah",
+        "city": "Yanqul",
+        "area": null
+    },
+    {
+        "state": "Ad Dhahirah",
+        "city": "Dhank",
+        "area": null
+    },
+    {
+        "state": "Al Wusta",
+        "city": "Haima",
+        "area": "Haima"
+    },
+    {
+        "state": "Al Wusta",
+        "city": "Duqm",
+        "area": "Duqm"
+    },
+    {
+        "state": "Al Wusta",
+        "city": "Mahout",
+        "area": null
+    },
+    {
+        "state": "Al Wusta",
+        "city": "Al Jazir",
+        "area": "Al Jazir"
+    },
+    {
+        "state": "Al Sharqiya North",
+        "city": "Ibra",
+        "area": "Ibra"
+    },
+    {
+        "state": "Al Sharqiya North",
+        "city": "Ibra",
+        "area": "Al Mudhairib"
+    },
+    {
+        "state": "Al Sharqiya North",
+        "city": "Ibra",
+        "area": "Al Qabil"
+    },
+    {
+        "state": "Al Sharqiya North",
+        "city": "Wadi bani khalid",
+        "area": "Wadi Bani Khalid"
+    },
+    {
+        "state": "Al Sharqiya North",
+        "city": "Al Mudhaibi",
+        "area": "Sinaw"
+    },
+    {
+        "state": "Al Sharqiya North",
+        "city": "Al Mudhaibi",
+        "area": "Al Mudhaibi"
+    },
+    {
+        "state": "Al Sharqiya North",
+        "city": "Al Mudhaibi",
+        "area": "Samad Al Shan"
+    },
+    {
+        "state": "Al Sharqiya North",
+        "city": "Bidiya",
+        "area": "Bidiyah"
+    },
+    {
+        "state": "Al Sharqiya North",
+        "city": "Al Ashkharah",
+        "area": "Al Ashkharah"
+    },
+    {
+        "state": "Al Sharqiya North",
+        "city": "Dima Wattayeen",
+        "area": "Dima Wattayeen"
+    },
+    {
+        "state": "Al Sharqiya South",
+        "city": "Sur",
+        "area": "Sur"
+    },
+    {
+        "state": "Al Sharqiya South",
+        "city": "Al Kamil Wal Wafi",
+        "area": "Al Kamil Wal Wafi"
+    },
+    {
+        "state": "Al Sharqiya South",
+        "city": "Masirah",
+        "area": "Masirah"
+    },
+    {
+        "state": "Al Sharqiya South",
+        "city": "Jaalan Bani Bu Hassan",
+        "area": "Jaalan Bani Bu Hassan"
+    },
+    {
+        "state": "Al Sharqiya South",
+        "city": "Jaalan Bani Bu Ali",
+        "area": "Jaalan Bani Bu Ali"
+    },
+    {
+        "state": "Al Dhahirah",
+        "city": "Yanqul",
+        "area": "Yanqul"
+    },
+    {
+        "state": "Al Dhahirah",
+        "city": "Ibri",
+        "area": "Hujayrmat"
+    },
+    {
+        "state": "Al Dhahirah",
+        "city": "Ibri",
+        "area": "Al Araqi"
+    },
+    {
+        "state": "Al Dhahirah",
+        "city": "Ibri",
+        "area": "Ibri"
+    },
+    {
+        "state": "Al Dhahirah",
+        "city": "Ibri",
+        "area": "Al Akhdar"
+    },
+    {
+        "state": "Al Dhahirah",
+        "city": "Dhank",
+        "area": "Dhank"
+    },
+    {
+        "state": "Al Dakhiliyah",
+        "city": "Bidbid",
+        "area": "Bidbid"
+    },
+    {
+        "state": "Al Dakhiliyah",
+        "city": "Bidbid",
+        "area": "Fanja"
+    },
+    {
+        "state": "Al Dakhiliyah",
+        "city": "Nizwa",
+        "area": "Nizwa"
+    },
+    {
+        "state": "Al Dakhiliyah",
+        "city": "Nizwa",
+        "area": "Saiq"
+    },
+    {
+        "state": "Al Dakhiliyah",
+        "city": "Nizwa",
+        "area": "Al Ghubrah"
+    },
+    {
+        "state": "Al Dakhiliyah",
+        "city": "Nizwa",
+        "area": "Tanuf"
+    },
+    {
+        "state": "Al Dakhiliyah",
+        "city": "Nizwa",
+        "area": "Birkat Al Mouz"
+    },
+    {
+        "state": "Al Dakhiliyah",
+        "city": "Nizwa",
+        "area": "Al Jabal Al Akhdhar"
+    },
+    {
+        "state": "Al Dakhiliyah",
+        "city": "Bahla",
+        "area": "Bahla"
+    },
+    {
+        "state": "Al Dakhiliyah",
+        "city": "Izki",
+        "area": "Izki"
+    },
+    {
+        "state": "Al Dakhiliyah",
+        "city": "Samail",
+        "area": "Lizgh"
+    },
+    {
+        "state": "Al Dakhiliyah",
+        "city": "Samail",
+        "area": "Samail"
+    },
+    {
+        "state": "Al Dakhiliyah",
+        "city": "Al Hamra",
+        "area": "Al Hamra"
+    },
+    {
+        "state": "Al Dakhiliyah",
+        "city": "Adam",
+        "area": "Adam"
+    },
+    {
+        "state": "Al Dakhiliyah",
+        "city": "Manah",
+        "area": "Manah"
+    }
+]

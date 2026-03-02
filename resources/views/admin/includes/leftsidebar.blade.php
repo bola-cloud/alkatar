@@ -59,16 +59,18 @@
                 </a>
             </li>
         @endcan
-        @can('category-list')
-            <li class="{{ isset($submenu) && $submenu == 'subcategory' ? 'mm-active' : '' }}">
-                <a href="{{ route('admin.subcategory') }}">
-                    <i class="fa fa-circle"></i>
-                    <span>{{ __('Subcategory') }}</span>
-                </a>
-            </li>
-        @endcan
+        {{-- @can('category-list')
+        <li class="{{ isset($submenu) && $submenu == 'subcategory' ? 'mm-active' : '' }}">
+            <a href="{{ route('admin.subcategory') }}">
+                <i class="fa fa-circle"></i>
+                <span>{{ __('Subcategory') }}</span>
+            </a>
+        </li>
+        @endcan --}}
         {{-- @canany(['category-list'])
         <li class="{{ isset($menu) && $menu == 'catbad' ? 'mm-active' : '' }}">
+
+
             <a class="has-arrow" href="#">
                 <i class="fas fa-list"></i>
                 <span>{{ __('Category and Brand') }}</span>
@@ -101,16 +103,23 @@
                     <span>{{ __('Products') }}</span>
                 </a>
                 <ul>
-                    <li class="{{ isset($submenu) && $submenu == 'product' ? 'mm-active' : '' }}">
+                    {{-- <li class="{{ isset($submenu) && $submenu == 'product' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.physical.product.create') }}">
                             <i class="fa fa-circle"></i>
                             <span>{{ __('Add Product') }}</span>
                         </a>
-                    </li>
+                    </li> --}}
                     <li class="{{ isset($submenu) && $submenu == 'product_list' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.product') }}">
                             <i class="fa fa-circle"></i>
                             <span>{{ __('Product List') }}</span>
+                        </a>
+                    </li>
+
+                    <li class="{{ isset($submenu) && $submenu == 'product_reviews' ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.product.reviews') }}">
+                            <i class="fa fa-circle"></i>
+                            <span>{{ __('Product Reviews') }}</span>
                         </a>
                     </li>
 
@@ -127,39 +136,39 @@
                             <span>{{ __('Product Color') }}</span>
                         </a>
                     </li> --}}
-                    <li class="{{ isset($submenu) && $submenu == 'size' ? 'mm-active' : '' }}">
+                    {{-- <li class="{{ isset($submenu) && $submenu == 'size' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.product.size') }}">
                             <i class="fa fa-circle"></i>
                             <span>{{ __('Product Size') }}</span>
                         </a>
-                    </li>
+                    </li> --}}
                 </ul>
             </li>
         @endcanany
 
-        @canany(['product-list'])
-            <li class="{{ isset($menu) && $menu == 'products' ? 'mm-active' : '' }}">
-                <a class="has-arrow" href="#">
-                    <i class="fab fa-product-hunt"></i>
-                    <span>{{ __('Additions') }}</span>
-                </a>
-                <ul>
-                    <li class="{{ isset($submenu) && $submenu == 'add_addition' ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.physical.product.addition.create') }}">
-                            <i class="fa fa-circle"></i>
-                            <span>{{ __('Add Additions') }}</span>
-                        </a>
-                    </li>
+        {{-- @canany(['product-list'])
+        <li class="{{ isset($menu) && $menu == 'products' ? 'mm-active' : '' }}">
+            <a class="has-arrow" href="#">
+                <i class="fab fa-product-hunt"></i>
+                <span>{{ __('Additions') }}</span>
+            </a>
+            <ul>
+                <li class="{{ isset($submenu) && $submenu == 'add_addition' ? 'mm-active' : '' }}">
+                    <a href="{{ route('admin.physical.product.addition.create') }}">
+                        <i class="fa fa-circle"></i>
+                        <span>{{ __('Add Additions') }}</span>
+                    </a>
+                </li>
 
-                    <li class="{{ isset($submenu) && $submenu == 'addition_list' ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.physical.product.addition.index') }}">
-                            <i class="fa fa-circle"></i>
-                            <span>{{ __('Additions List') }}</span>
-                        </a>
-                    </li>
-                </ul>
-            </li>
-        @endcanany
+                <li class="{{ isset($submenu) && $submenu == 'addition_list' ? 'mm-active' : '' }}">
+                    <a href="{{ route('admin.physical.product.addition.index') }}">
+                        <i class="fa fa-circle"></i>
+                        <span>{{ __('Additions List') }}</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        @endcanany --}}
 
         @canany(['order-list'])
             <li class="{{ isset($menu) && $menu == 'shipment' ? 'mm-active' : '' }}">
@@ -282,7 +291,14 @@
             </li>
         @endcanany
 
-
+        @canany(['subscription-list'])
+            <li class="{{ isset($menu) && $menu == 'subscriptions' ? 'mm-active' : '' }}">
+                <a href="{{ route('admin.subscriptions') }}">
+                    <i class="fas fa-box-open"></i>
+                    <span>{{ __('Subscriptions') }}</span>
+                </a>
+            </li>
+        @endcanany
 
         @canany(['advertise-list'])
             <li class="{{ isset($menu) && $menu == 'advertise' ? 'mm-active' : '' }}">
@@ -360,6 +376,28 @@
                 </ul>
             </li>
         @endcanany
+        @canany(['user-list'])
+            <li class="{{ isset($menu) && $menu == 'delivery_man' ? 'mm-active' : '' }}">
+                <a class="has-arrow" href="#">
+                    <i class="fas fa-truck"></i>
+                    <span>{{ __('Delivery Men') }}</span>
+                </a>
+                <ul>
+                    <li class="{{ isset($submenu) && $submenu == 'delivery_man_list' ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.delivery_man') }}">
+                            <i class="fa fa-circle"></i>
+                            <span>{{ __('Delivery Men List') }}</span>
+                        </a>
+                    </li>
+                    <li class="{{ isset($submenu) && $submenu == 'delivery_man_create' ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.delivery_man.create') }}">
+                            <i class="fa fa-circle"></i>
+                            <span>{{ __('Add Delivery Man') }}</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        @endcanany
         @canany(['cms-list'])
             <li class="{{ isset($menu) && $menu == 'site_content' ? 'mm-active' : '' }}">
                 <a class="has-arrow" href="#">
@@ -374,7 +412,17 @@
                         </a>
                     </li>
                     <li class="{{ isset($submenu) && $submenu == 'content_home' ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.home.page.site.content') }}">
+                        @php
+                            // Prefer linking directly to the edit blade for the first homepage section (if present),
+                            // otherwise fall back to the index listing route.
+                            try {
+                                $firstSection = \App\Models\Admin\SiteContent\HomepageSection::orderBy('display_order')->first();
+                            } catch (\Exception $e) {
+                                $firstSection = null;
+                            }
+                            $homeLink = $firstSection ? route('admin.home.page.site.content.edit', $firstSection->id) : route('admin.home.page.site.content');
+                        @endphp
+                        <a href="{{ $homeLink }}">
                             <i class="fa fa-circle"></i>
                             <span>{{ __('Home Page') }}</span>
                         </a>
@@ -398,11 +446,11 @@
                         </a>
                     </li> --}}
                     <!-- <li class="{{ isset($submenu) && $submenu == 'testimonial' ? 'mm-active' : '' }}">
-                                        <a href="{{ route('admin.testimonial') }}">
-                                            <i class="fa fa-circle"></i>
-                                            <span>{{ __('Testimonial') }}</span>
-                                        </a>
-                                    </li> -->
+                                            <a href="{{ route('admin.testimonial') }}">
+                                                <i class="fa fa-circle"></i>
+                                                <span>{{ __('Testimonial') }}</span>
+                                            </a>
+                                        </li> -->
                     <li class="{{ isset($submenu) && $submenu == 'languages' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.language_list') }}">
                             <i class="fa fa-circle"></i>
@@ -449,7 +497,7 @@
                 </li>
             </ul>
         </li> --}}
-
+        <!--
         <li class="{{ isset($menu) && $menu == 'slider_banner' ? 'mm-active' : '' }}">
             <a class="has-arrow" href="#">
                 <i class="fas fa-list-ol"></i>
@@ -471,7 +519,7 @@
                         ({{ __('Home two') }})</a>
                 </li> --}}
             </ul>
-        </li>
+        </li> -->
         @canany(['cms-create', 'cms-edit'])
             <li class="{{ isset($menu) && $menu == 'seo' ? 'mm-active' : '' }}">
                 <a class="has-arrow" href="#">
@@ -497,12 +545,12 @@
                             <span>{{ __('Contact') }}</span>
                         </a>
                     </li>
-                    <li class="{{ isset($submenu) && $submenu == 'blog' ? 'mm-active' : '' }}">
+                    {{-- <li class="{{ isset($submenu) && $submenu == 'blog' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.manage_seo', 'blog') }}">
                             <i class="fa fa-circle"></i>
                             <span>{{ __('Blog') }}</span>
                         </a>
-                    </li>
+                    </li> --}}
                     <li class="{{ isset($submenu) && $submenu == 'all-products' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.manage_seo', 'all-products') }}">
                             <i class="fa fa-circle"></i>
@@ -527,12 +575,12 @@
                             <span>{{ __('Wishlist') }}</span>
                         </a>
                     </li>
-                    <li class="{{ isset($submenu) && $submenu == 'compare' ? 'mm-active' : '' }}">
+                    {{-- <li class="{{ isset($submenu) && $submenu == 'compare' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.manage_seo', 'compare') }}">
                             <i class="fa fa-circle"></i>
                             <span>{{ __('Compare') }}</span>
                         </a>
-                    </li>
+                    </li> --}}
                     <li class="{{ isset($submenu) && $submenu == 'sign-in' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.manage_seo', 'sign-in') }}">
                             <i class="fa fa-circle"></i>
@@ -545,7 +593,7 @@
                             <span>{{ __('Sign Up') }}</span>
                         </a>
                     </li>
-                    <li class="{{ isset($submenu) && $submenu == 'forget-password' ? 'mm-active' : '' }}">
+                    {{-- <li class="{{ isset($submenu) && $submenu == 'forget-password' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.manage_seo', 'forget-password') }}">
                             <i class="fa fa-circle"></i>
                             <span>{{ __('Forget Password') }}</span>
@@ -556,7 +604,7 @@
                             <i class="fa fa-circle"></i>
                             <span>{{ __('Reset Password') }}</span>
                         </a>
-                    </li>
+                    </li> --}}
                 </ul>
             </li>
         @endcanany
@@ -581,11 +629,11 @@
                         </a>
                     </li>
                     <!-- <li class="{{ isset($submenu) && $submenu == 'return_policy' ? 'mm-active' : '' }}">
-                                        <a href="{{ route('admin.refund_policy') }}">
-                                            <i class="fa fa-circle"></i>
-                                            <span>{{ __('Refund Policy') }}</span>
-                                        </a>
-                                    </li> -->
+                                            <a href="{{ route('admin.refund_policy') }}">
+                                                <i class="fa fa-circle"></i>
+                                                <span>{{ __('Refund Policy') }}</span>
+                                            </a>
+                                        </li> -->
                     <li class="{{ isset($submenu) && $submenu == 'shipping_return' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.shipping_return') }}">
                             <i class="fa fa-circle"></i>
@@ -599,11 +647,11 @@
                         </a>
                     </li>
                     <!-- <li class="{{ isset($submenu) && $submenu == 'company_story' ? 'mm-active' : '' }}">
-                                        <a href="{{ route('admin.company.story') }}">
-                                            <i class="fa fa-circle"></i>
-                                            <span>{{ __('Company Story') }}</span>
-                                        </a>
-                                    </li> -->
+                                            <a href="{{ route('admin.company.story') }}">
+                                                <i class="fa fa-circle"></i>
+                                                <span>{{ __('Company Story') }}</span>
+                                            </a>
+                                        </li> -->
                 </ul>
             </li>
         @endcanany

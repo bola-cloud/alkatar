@@ -15,6 +15,11 @@ class ProductReview extends Model
         'feedback',
         'product_id',
         'user_id',
+        'is_visible',
+    ];
+
+    protected $casts = [
+        'is_visible' => 'boolean',
     ];
 
     public function product()

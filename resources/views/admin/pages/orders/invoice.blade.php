@@ -240,7 +240,20 @@
 
         <div class="invoice-footer">
             <p><strong>الملاحظات:</strong></p>
+        </div>
 
+        <div style="text-align: center; margin-top: 20px;">
+            @php
+                $billingAddress = $order->billing_address;
+                $phoneNumber = is_array($billingAddress) ? ($billingAddress['phone_number'] ?? 'N/A') : ($order->user->Number ?? 'N/A');
+                $qrData = "Order:" . $order->Order_Number . " | Phone:" . $phoneNumber;
+
+                $qrCodeString = (string) QrCode::size(100)->generate($qrData);
+                $svgStart = strpos($qrCodeString, '<svg');
+                $cleanQrCode = ($svgStart !== false) ? substr($qrCodeString, $svgStart) : $qrCodeString;
+            @endphp
+            {!! $cleanQrCode !!}
+            <p style="margin-top: 5px; font-size: 10px;">{{ $order->Order_Number }}</p>
         </div>
     </div>
 </body>

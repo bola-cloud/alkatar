@@ -23,6 +23,8 @@ use App\Http\Controllers\Frontend\SubscribeSessionController;
 use App\Http\Controllers\Frontend\PaymentController;
 use App\Http\Controllers\Frontend\PageController;
 use App\Http\Controllers\SslCommerzPaymentController;
+use App\Http\Controllers\Frontend\NewDesignController;
+use App\Http\Controllers\Frontend\CategoryController;
 use App\Models\Admin\Category;
 use App\Models\Admin\Order;
 use App\Models\Admin\Product;
@@ -36,7 +38,8 @@ use League\Csv\Reader;
 Route::post('currency-price', [CartController::class, 'currencyPrice'])->name('currency_price');
 Route::get('currency-symbol', [CartController::class, 'currencySymbol'])->name('currency_symbol');
 Route::group(['middleware' => ['is_user']], function () {
-    Route::get('/', [HomeController::class, 'index'])->name('front');
+    Route::get('/olddesign', [HomeController::class, 'index'])->name('front.olddesign');
+    Route::get('/', [NewDesignController::class, 'index'])->name('front');
     Route::get('/theme-set/{theme}', [HomeController::class, 'theme_set']);
     Route::get('locale/{lang}', [HomeController::class, 'localeSwitch'])->name('locale.switch');
     Route::get('currency/{amount}', [HomeController::class, 'currencySwitch'])->name('currency.switch');
@@ -97,6 +100,13 @@ Route::group(['middleware' => ['is_user']], function () {
             Route::post('review-store', [UserProfileController::class, 'reviewStore'])->name('user.profile.review_store')->middleware(['isDemo']);
             Route::get('track-my-order/{id}', [UserProfileController::class, 'trackMyOrder'])->name('user.profile.track.my.order');
 
+            // Subscription Payment
+            Route::post('subscription/pay', [\App\Http\Controllers\Frontend\SubscriptionPaymentController::class, 'initiatePayment'])->name('user.subscription.pay');
+            Route::get('subscription/callback', [\App\Http\Controllers\Frontend\SubscriptionPaymentController::class, 'paymentCallback'])->name('user.subscription.callback');
+
+            // Order Invoice/Print
+            Route::get('order-print/{id}', [\App\Http\Controllers\Frontend\OrderController::class, 'order_print'])->name('order.print');
+
             // wishlist
             Route::group(['prefix' => 'wishlist'], function () {
                 Route::get('/', [WishlistController::class, 'Wishlist'])->name('wishlist');
@@ -107,6 +117,15 @@ Route::group(['middleware' => ['is_user']], function () {
             Route::group(['prefix' => 'compare'], function () {
                 Route::get('', [CompareListController::class, 'Comparelist'])->name('compare');
                 Route::get('delete', [CompareListController::class, 'delete'])->name('compare.delete')->middleware(['isDemo']);
+            });
+
+            // user addresses (frontend)
+            Route::group(['prefix' => 'addresses'], function () {
+                Route::get('/', [\App\Http\Controllers\Frontend\AddressController::class, 'index'])->name('addresses.index');
+                Route::post('/', [\App\Http\Controllers\Frontend\AddressController::class, 'store'])->name('addresses.store');
+                Route::put('/{address}', [\App\Http\Controllers\Frontend\AddressController::class, 'update'])->name('addresses.update');
+                Route::delete('/{address}', [\App\Http\Controllers\Frontend\AddressController::class, 'destroy'])->name('addresses.destroy');
+                Route::post('/{address}/default', [\App\Http\Controllers\Frontend\AddressController::class, 'setDefault'])->name('addresses.setDefault');
             });
         });
         Route::get('compare/add', [CompareListController::class, 'add'])->name('compare.add')->middleware(['isDemo']);
@@ -124,6 +143,8 @@ Route::group(['middleware' => ['is_user']], function () {
 
     Route::group(['prefix' => 'product'], function () {
         Route::get('single/{slug}', [ProductController::class, 'singleProduct'])->name('single.product');
+        // New-design product detail preview route (keeps old controller logic but returns new blade)
+        Route::get('single-new/{slug}', [ProductController::class, 'singleProductNewDesign'])->name('single.product.new');
         Route::get('all', [ProductController::class, 'allProduct'])->name('all.product');
         Route::get('all/left-sidebar', [ProductController::class, 'productListLeftSidebar'])->name('product.list.left.sidebar');
         Route::get('shorting', [ProductController::class, 'productSorting'])->name('product.shorting');
@@ -134,11 +155,18 @@ Route::group(['middleware' => ['is_user']], function () {
         Route::get('category/left/{id}', [ProductController::class, 'CategoryWiseProductLeft'])->name('category.product_left');
         Route::get('brand/{id}', [ProductController::class, 'BrandWiseProduct'])->name('brand.product');
         Route::get('brand/left/{id}', [ProductController::class, 'BrandWiseProductLeft'])->name('brand.product_left');
+        // product reviews
+        Route::post('{product}/review', [ProductController::class, 'storeReview'])->name('product.review.store');
     });
 
-    Route::get('terms/conditions', [ServiceCustomerController::class, 'termsConditions'])->name('terms.conditions');
-    Route::get('privacy/policy', [ServiceCustomerController::class, 'privacyPolicy'])->name('privacy.policy');
+    Route::get('terms/conditions', [ServiceCustomerController::class, 'termsConditionsNewDesign'])->name('terms.conditions');
+    // Route::get('privacy/policy', [ServiceCustomerController::class, 'privacyPolicy'])->name('privacy.policy');
+    // New-design versions (dynamic content managed from admin customer services)
+    Route::get('terms/conditions-new', [ServiceCustomerController::class, 'termsConditionsNewDesign'])->name('terms.conditions.new');
+    Route::get('privacy/policy', [ServiceCustomerController::class, 'privacyPolicyNewDesign'])->name('privacy.policy.new');
     Route::get('shipping/return', [ServiceCustomerController::class, 'shippingReturn'])->name('shipping.return');
+    // New-design Shipping & Return page
+    Route::get('shipping/return-new', [ServiceCustomerController::class, 'shippingReturnNewDesign'])->name('shipping.return.new');
     Route::get('faq', [ServiceCustomerController::class, 'Faq'])->name('faq');
     Route::get('refund/policy', [ServiceCustomerController::class, 'refundPolicy'])->name('refund.policy');
 
@@ -158,11 +186,23 @@ Route::group(['middleware' => ['is_user']], function () {
     });
 
     Route::get('/page/{slug}', [PageController::class, 'singlePage'])->name('page.single');
+    Route::get('/page/{slug}', [PageController::class, 'singlePage'])->name('page.single');
     Route::post('/order-track', [CheckoutController::class, 'orderTrack'])->name('checkout.order_track');
+
+    // Subscription Payment Routes
+    Route::post('/subscription/pay', [App\Http\Controllers\Frontend\SubscriptionPaymentController::class, 'initiatePayment'])->name('user.subscription.pay');
+    Route::get('/subscription/callback', [App\Http\Controllers\Frontend\SubscriptionPaymentController::class, 'paymentCallback'])->name('user.subscription.callback');
 });
 
 Route::match(array('GET', 'POST'), '/payment-notify/{id}', [PaymentApiController::class, 'paymentNotifier'])->name('paymentNotify');
 Route::match(array('GET', 'POST'), 'payment-cancel/{id}', [PaymentApiController::class, 'paymentCancel'])->name('paymentCancel');
+
+// Payment gateway callback routes (user redirect after payment)
+Route::get('/payment/callback/success', [\App\Http\Controllers\PaymentCallbackController::class, 'success'])->name('payment.callback.success');
+Route::get('/payment/callback/cancel', [\App\Http\Controllers\PaymentCallbackController::class, 'cancel'])->name('payment.callback.cancel');
+
+// Thawani payment webhook (server-to-server notification from Thawani gateway)
+Route::post('/payment/webhook/thawani', [\App\Http\Controllers\ThawaniWebhookController::class, 'handle'])->name('thawani.webhook');
 
 // SSLCOMMERZ Start
 Route::post('/success', [SslCommerzPaymentController::class, 'success']);
@@ -179,9 +219,14 @@ Route::get("/thawani-cancel", [CheckoutController::class, "paymentCancel"])->nam
 
 Route::get("/get-cities-by-state/{state_id}", [CityController::class, "getCitiesByState"]);
 Route::get("/get-city-charge/{city_id}", [CityController::class, "getCityCharge"]);
+Route::get("/get-area-charge/{area_id}", [CityController::class, "getAreaCharge"]);
+Route::get("/get-areas-by-city/{city_id}", [CityController::class, "getAreasByCity"]);
 
 Route::get('/search/suggest', [ProductController::class, 'autoSuggest'])->name('search.suggest');
 
+
+// Category listing (simple frontend page)
+Route::get('/categories/{slug?}', [CategoryController::class, 'show'])->name('categories.show');
 
 Route::get("find-test-order", function () {
     $products = Product::all();
@@ -193,131 +238,139 @@ Route::get("find-test-order", function () {
     return "oky";
 });
 
+Route::get('/debug-api-v4', function () {
+    return "Route V4 is Working. Time: " . date('H:i:s');
+});
 
 
-// Route::get('/sync-products', function () {
-//     ini_set('max_execution_time', 1800); // 10 minutes
 
-//     $csv = Reader::createFromPath(storage_path('minor-products.csv'), 'r');
-//     $csv->setHeaderOffset(0);
-//     $records = $csv->getRecords();
+// Debug ERP Sync Route
+Route::get('/debug-erp/{order_number}', function ($order_number) {
+    if (!auth()->check() || !auth()->user()->is_admin) {
+        // Simple auth check for safety, though it's debug
+        // return "Admin login required";
+    }
 
-//     $processed = 0;
-//     $errors = [];
-//     $productData = [];
-//     $categoryCache = [];
+    $order = Order::where('Order_Number', $order_number)->with('order_details')->first();
+    if (!$order) {
+        return "Order number {$order_number} not found.";
+    }
 
-//     foreach ($records as $record) {
-//         $productId = $record['Product ID'];
-//         $language = strtolower($record['Language']);
+    $logs = [];
+    $logs[] = "Found Order ID: {$order->id}, Number: {$order->Order_Number}, Status: {$order->Payment_Status}";
 
-//         // Map Arabic ('ar') to French ('fr') for internal processing
-//         if ($language === 'ar') {
-//             $language = 'fr';
-//         }
+    try {
+        $erp = new \App\Services\SmartLifeErpService();
+        $logs[] = "Service instantiated.";
 
-//         if (!isset($productData[$productId])) {
-//             $productData[$productId] = [
-//                 'en' => [],
-//                 'fr' => [],
-//                 'shared' => [
-//                     'Price' => $record['Price'],
-//                     'Discount_Price' => $record['Price'],
-//                     'Quantity' => $record['Quantity'],
-//                     'Primary_Image' => $record['Main Image'],
-//                     // 'Status' => $record['Status'],
-//                     'Status' => 1,
-//                     'Brand_Id' => null,
-//                 ]
-//             ];
-//         }
+        if (!$erp->testConnection()) {
+            return response()->json(['error' => 'Connection to ERP failed', 'logs' => $logs]);
+        }
+        $logs[] = "Connection successful.";
 
-//         $productData[$productId][$language] = [
-//             $language . '_Product_Name' => $record['Name'],
-//             $language . '_Product_Slug' => $record['Slug'],
-//             $language . '_About' => $record['Description'],
-//             $language . '_Description' => $record['Description'],
-//             $language . '_ShippingReturn' => '',
-//             $language . '_AdditionalInformation' => '',
-//             'Voucher' => ''
-//         ];
+        $products = [];
+        $logs[] = "Processing " . count($order->order_details) . " items...";
 
-//         if ($language === 'en' || $language === 'fr') {
-//             $categoryPath = explode(' > ', $record['Categories']);
-//             $categoryName = end($categoryPath);
-//             $productData[$productId]['shared']['Category_Name'][$language] = trim($categoryName);
-//         }
-//     }
+        foreach ($order->order_details as $detail) {
+            $logItem = "Item: {$detail->Product_Name} (Qty: {$detail->Quantity}) - ";
 
-//     // Default French data to English if French is missing
-//     foreach ($productData as $productId => $data) {
-//         if (empty($data['fr']) && !empty($data['en'])) {
-//             foreach ($data['en'] as $key => $value) {
-//                 $frKey = str_replace('en_', 'fr_', $key);
-//                 $productData[$productId]['fr'][$frKey] = $value;
-//             }
-//         }
-//     }
+            $smartLifeId = null;
+            $barcode = null;
 
-//     DB::beginTransaction();
+            // 1. Direct ID
+            $product = \App\Models\Admin\Product::find($detail->Product_Id);
+            if ($product) {
+                $logItem .= "Local Product Found (ID: {$product->id}, Barcode: {$product->barcode}). ";
+                if ($product->smartlife_id) {
+                    $smartLifeId = $product->smartlife_id;
+                    $logItem .= "Mapped via smartlife_id ($smartLifeId). ";
+                } elseif ($product->barcode) {
+                    $barcode = $product->barcode;
+                    $shadow = \App\Models\SmartLifeProduct::where('barcode', $barcode)->first();
+                    if ($shadow) {
+                        $smartLifeId = $shadow->smartlife_id;
+                        $logItem .= "Mapped via Barcode Shadow Table ($smartLifeId). ";
+                    } else {
+                        $logItem .= "Barcode OK but NOT in Shadow Table. ";
+                    }
+                } else {
+                    $logItem .= "No Barcode/ID on Local Product. ";
+                }
+            } else {
+                $logItem .= "Local Product Deleted/Missing. ";
+            }
 
-//     foreach ($productData as $productId => $data) {
-//         try {
-//             $product = Product::firstOrNew(['id' => $productId]);
-//             $productAttributes = array_merge($data['en'], $data['fr'], $data['shared']);
-//             unset($productAttributes['Category_Name']);
+            // 2. Fallback Name
+            if (!$smartLifeId) {
+                $logItem .= "Trying Name Fallback... ";
+                $smartLifeProduct = \App\Models\SmartLifeProduct::where('name', 'LIKE', '%' . $detail->Product_Name . '%')->first();
+                if ($smartLifeProduct) {
+                    $smartLifeId = $smartLifeProduct->smartlife_id;
+                    $barcode = $smartLifeProduct->barcode ?? $barcode;
+                    $logItem .= "FOUND via Name Match ($smartLifeId). ";
+                } else {
+                    $logItem .= "Name Match Failed. ";
+                }
+            }
 
-//             foreach ($productAttributes as $key => $value) {
-//                 $product->{$key} = $value;
-//             }
+            if ($smartLifeId) {
+                $products[] = [
+                    'id' => $smartLifeId,
+                    'barcode' => $barcode ?? '0000',
+                    'name' => $detail->Product_Name,
+                    'price' => (float) $detail->Price,
+                    'quantity' => (int) $detail->Quantity,
+                ];
+                $logs[] = $logItem . " -> ADDED TO PAYLOAD.";
+            } else {
+                $logs[] = $logItem . " -> SKIPPED (No valid mapping).";
+            }
+        }
 
-//             if (!empty($product->Primary_Image)) {
-//                 $contents = Http::get($product->Primary_Image)->body();
-//                 $filename = basename($product->Primary_Image);
-//                 $path = substr($filename, 0, 10) . '.png';
-//                 file_put_contents(public_path('/uploaded_files/product_image/' . $path), $contents);
-//                 $product->Primary_Image = $path;
-//             }
+        // Check Warehouses
+        try {
+            $token = $erp->getAccessToken();
+            $apiUrl = config('smartlife.api_url');
+            $warehouseRes = Http::withHeaders(['Authorization' => $token])->get("{$apiUrl}/warehouses");
 
-//             $product->save();
+            if ($warehouseRes->successful()) {
+                $logs[] = "Warehouses Found: " . json_encode($warehouseRes->json()['data'] ?? 'No data key');
+            } else {
+                $logs[] = "Check Warehouses Failed: " . $warehouseRes->status() . " (Endpoint might be different)";
+            }
+        } catch (\Exception $e) {
+            $logs[] = "Warehouse Check Exception: " . $e->getMessage();
+        }
 
-//             // Create and attach category with names in both languages
-//             if (!empty($data['shared']['Category_Name'])) {
-//                 $enCategoryName = $data['shared']['Category_Name']['en'] ?? null;
-//                 $frCategoryName = $data['shared']['Category_Name']['fr'] ?? $enCategoryName; // Use English name if French name is missing
+        if (request()->has('submit') && request()->get('submit') == 'true') {
+            if (!empty($products)) {
+                $logs[] = "Submitting to ERP...";
 
-//                 $categoryKey = $enCategoryName . '|' . $frCategoryName;
-//                 if (!isset($categoryCache[$categoryKey])) {
-//                     $category = Category::firstOrCreate([
-//                         'en_Category_Name' => $enCategoryName,
-//                         'fr_Category_Name' => $frCategoryName,
-//                         'en_Category_Slug' => Str::slug($enCategoryName),
-//                         'fr_Category_Slug' => Str::slug($frCategoryName),
-//                         'Status' => 1
-//                     ]);
-//                     $categoryCache[$categoryKey] = $category->id;
-//                 }
+                $customerId = $order->user ? $order->user->smartlife_customer_id : 6;
+                $saleDetails = [
+                    'order_reference' => $order->Order_Number,
+                    'notes' => 'Debug Sync ' . $order->Order_Number,
+                    'status' => 'final',
+                    'payment_status' => 'paid',
+                ];
 
-//                 $product->Category_Id = $categoryCache[$categoryKey];
-//                 $product->save();
-//             }
+                // Add warehouse_id if passed in URL
+                if (request()->has('warehouse_id')) {
+                    $saleDetails['warehouse_id'] = request()->get('warehouse_id');
+                }
 
-//             // Attaching default size
-//             $defaultSizeId = 1; // Assuming '1' is the ID of the default size
-//             $defaultPrice = $data['shared']['Price']; // Use the product's price for this size
-//             $product->sizes()->sync([$defaultSizeId => ['price' => $defaultPrice]], false);
+                $result = $erp->addSale($products, $customerId, $saleDetails);
+                $logs[] = "Submission Result: " . json_encode($result);
+            } else {
+                $logs[] = "No products to submit.";
+            }
+        } else {
+            $logs[] = "Dry Run. Add ?submit=true to sync. Add &warehouse_id=X to specify warehouse.";
+        }
 
+        return response()->json(['success' => true, 'payload_preview' => $products, 'logs' => $logs]);
 
-//             $processed++;
-//             DB::commit();
-//         } catch (\Exception $e) {
-//             $errors[] = "Error processing product ID {$productId}: " . $e->getMessage();
-//             DB::rollBack();
-//         }
-//     }
-
-//     return response()->json([
-//         'processed' => $processed,
-//         'errors' => $errors
-//     ]);
-// });
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+    }
+});

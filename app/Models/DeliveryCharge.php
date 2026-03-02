@@ -16,6 +16,7 @@ class DeliveryCharge extends Model
         'status',
         'city_id',
         'state_id',
+        'area_id',
     ];
 
     public function city()
@@ -26,5 +27,10 @@ class DeliveryCharge extends Model
     public function state()
     {
         return $this->belongsTo(State::class);
+    }
+
+    public function area()
+    {
+        return $this->belongsTo(Area::class);
     }
 }

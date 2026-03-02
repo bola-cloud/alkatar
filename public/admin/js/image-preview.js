@@ -86,6 +86,90 @@
         }
         reader.readAsDataURL(src.files[0]);
     });
+    $('.putImage8').on('change', function () {
+        var src = this;
+        var target = document.getElementById('target8');
+        target.style.width = '240px';
+        target.style.height = '160px';
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            $('#target8').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(src.files[0]);
+    });
+    $('.putImage9').on('change', function () {
+        var src = this;
+        var target = document.getElementById('target9');
+        target.style.width = '120px';
+        target.style.height = '80px';
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            $('#target9').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(src.files[0]);
+    });
+    $('.putImage10').on('change', function () {
+        var src = this;
+        var target = document.getElementById('target10');
+        target.style.width = '120px';
+        target.style.height = '80px';
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            $('#target10').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(src.files[0]);
+    });
+    $('.putImage11').on('change', function () {
+        var src = this;
+        var target = document.getElementById('target11');
+        target.style.width = '120px';
+        target.style.height = '80px';
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            $('#target11').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(src.files[0]);
+    });
+    $('.putImage12').on('change', function () {
+        var src = this;
+        var target = document.getElementById('target12');
+        target.style.width = '120px';
+        target.style.height = '80px';
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            $('#target12').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(src.files[0]);
+    });
+    $('.putImage13').on('change', function () {
+        var src = this;
+        var target = document.getElementById('target13');
+        target.style.width = '120px';
+        target.style.height = '80px';
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            $('#target13').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(src.files[0]);
+    });
+    $('.putImage14').on('change', function () {
+        var src = this;
+        var target = document.getElementById('target14');
+        target.style.width = '120px';
+        target.style.height = '80px';
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            $('#target14').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(src.files[0]);
+    });
 
     $(document).on('click', '.delete', function (event) {
         event.preventDefault();

@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use  \App\Http\Controllers\Api\{
+use \App\Http\Controllers\Api\{
     ProductController,
     CategoryController,
     Auth\AuthController,
@@ -57,6 +57,32 @@ Route::group(['middleware' => ['auth:sanctum', 'setLanguage']], function () {
 
 });
 
+
+// Delivery App Routes
+Route::group(['prefix' => 'delivery'], function () {
+    Route::post('auth/login', [\App\Http\Controllers\Api\DeliveryAuthController::class, 'login']);
+
+    Route::group(['middleware' => 'auth:sanctum'], function () {
+        Route::get('auth/user', [\App\Http\Controllers\Api\DeliveryAuthController::class, 'user']);
+        Route::post('auth/logout', [\App\Http\Controllers\Api\DeliveryAuthController::class, 'logout']);
+
+        Route::get('orders', [\App\Http\Controllers\Api\DeliveryOrderController::class, 'index']);
+        Route::get('my-orders', [\App\Http\Controllers\Api\DeliveryOrderController::class, 'myOrders']);
+        Route::post('pick-order', [\App\Http\Controllers\Api\DeliveryOrderController::class, 'pickOrder']);
+        Route::post('update-status', [\App\Http\Controllers\Api\DeliveryOrderController::class, 'updateStatus']);
+        Route::get('history', [\App\Http\Controllers\Api\DeliveryOrderController::class, 'history']);
+    });
+});
+
+// Printer App Routes
+Route::group(['prefix' => 'printer'], function () {
+    Route::post('login', [\App\Http\Controllers\Api\PrinterOrderController::class, 'login']);
+    Route::group(['middleware' => 'auth:sanctum'], function () {
+        Route::get('orders', [\App\Http\Controllers\Api\PrinterOrderController::class, 'index']);
+        Route::get('orders/{id}/print', [\App\Http\Controllers\Api\PrinterOrderController::class, 'print'])->name('printer.order.print');
+        Route::post('update-printed-status', [\App\Http\Controllers\Api\PrinterOrderController::class, 'updatePrintedStatus']);
+    });
+});
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

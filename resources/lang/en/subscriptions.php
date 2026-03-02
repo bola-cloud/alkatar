@@ -1,0 +1,33 @@
+<?php
+
+return [
+    'Subscriptions' => 'Subscriptions',
+    'Add Subscription' => 'Add Subscription',
+    'Create Subscription' => 'Create Subscription',
+    'Edit Subscription' => 'Edit Subscription',
+    'Price' => 'Price',
+    'Period Type' => 'Period Type',
+    'Period Value' => 'Period Value',
+    'Discount Percent' => 'Discount Percent',
+    'Max Discount Amount' => 'Max Discount Amount',
+    'Free Shipping' => 'Free Shipping',
+    'Tax Exempt' => 'Tax Exempt',
+    'Benefits' => 'Benefits',
+    'Status' => 'Status',
+    'Active' => 'Active',
+    'Inactive' => 'Inactive',
+    'Are you sure?' => 'Are you sure?',
+    'Days' => 'Days',
+    'Months' => 'Months',
+    'Years' => 'Years',
+    'Yes' => 'Yes',
+    'No' => 'No',
+    'Create' => 'Create',
+    'Update' => 'Update',
+    'Delete' => 'Delete',
+    'ID' => 'ID',
+    'Name' => 'Name',
+    'Period' => 'Period',
+    'Discount' => 'Discount',
+    'Action' => 'Action'
+];

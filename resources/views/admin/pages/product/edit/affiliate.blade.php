@@ -43,9 +43,13 @@
                                                 value="N/A">
                                             <div class="input__group mb-25">
                                                 <label for="en-product-name">{{ __('Product Name') }}</label>
-                                                <input type="text" class="form-control" id="en-product-name"
-                                                    name="en_product_name" value="{{ $product->en_Product_Name }}"
-                                                    placeholder="{{ __('Name') }}">
+                                                    <input type="text" class="form-control" id="en-product-name"
+                                                        name="en_product_name" value="{{ $product->en_Product_Name }}"
+                                                        placeholder="{{ __('Name') }}" @if($product->synced_from_smartlife || !empty($product->smartlife_id)) disabled @endif>
+                                                    @if($product->synced_from_smartlife || !empty($product->smartlife_id))
+                                                        <input type="hidden" name="en_product_name" value="{{ $product->en_Product_Name }}">
+                                                        <small class="text-muted">{{ __('This product is synced from SmartLife — name cannot be changed here.') }}</small>
+                                                    @endif
                                             </div>
                                             <div class="input__group mb-25">
                                                 <label for="en-product-slug">{{ __('Product Slug') }}</label>
@@ -108,8 +112,12 @@
 
                                             <div class="input__group mb-25">
                                                 <label for="price">{{ __('Price') }}</label>
-                                                <input type="text" class="form-control" id="price" name="price"
-                                                    value="{{ $product->Price }}">
+                                                    <input type="text" class="form-control" id="price" name="price"
+                                                        value="{{ $product->Price }}" @if($product->synced_from_smartlife || !empty($product->smartlife_id)) disabled @endif>
+                                                    @if($product->synced_from_smartlife || !empty($product->smartlife_id))
+                                                        <input type="hidden" name="price" value="{{ $product->Price }}">
+                                                    @endif
+                                                </div>
                                             </div>
                                             <div class="input__group mb-25">
                                                 <label
@@ -218,6 +226,16 @@
                                                         class="custom-control-input" id="customSwitch5">
                                                     <label class="custom-control-label"
                                                         for="customSwitch5">{{ __('New Arrival') }}</label>
+                                                </div>
+                                            </div>
+                                            <div class="input__group mb-25">
+                                                <div class="custom-control custom-switch">
+                                                    <input type="checkbox" value="1"
+                                                        {{ $product->Today_Special == 1 ? 'checked' : '' }}
+                                                        name="today_special" class="custom-control-input"
+                                                        id="customSwitchTodaySpecial">
+                                                    <label class="custom-control-label"
+                                                        for="customSwitchTodaySpecial">{{ __('Today Special') }}</label>
                                                 </div>
                                             </div>
                                             <div class="input__button">

@@ -33,6 +33,21 @@ class Order extends Model
         'Delivery_At',
         'txn',
         'order_source',
+        // Webhook payment support fields
+        'is_paid',
+        'pending_token',
+        'payment_session_id',
+        'smartlife_invoice_id',
+        'smartlife_synced_at',
+        'is_printed',
+    ];
+
+    protected $casts = [
+        'billing_address' => 'array',
+        'shipping_address' => 'array',
+        'Is_Order_Successful' => 'boolean',
+        'Is_Order_Completed' => 'boolean',
+        'Is_Free_Delivery' => 'boolean',
     ];
 
     public function order_details()
@@ -53,6 +68,11 @@ class Order extends Model
     public function coupon()
     {
         return $this->belongsTo(Coupon::class, 'Coupon_Id');
+    }
+
+    public function deliveryMan()
+    {
+        return $this->belongsTo(DeliveryMan::class, 'delivery_man_id');
     }
 
     public function billing()

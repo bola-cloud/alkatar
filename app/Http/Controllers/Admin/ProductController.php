@@ -22,61 +22,130 @@ class ProductController extends Controller
     public function product(Request $request)
     {
         if ($request->ajax()) {
-            $data = Product::query()->with('category', 'brand')->orderByDesc('id')->get();
+            // load sizes & weights so we can compute a fallback price when `Price` is empty
+            // Also eager load combo relationships
+            $data = Product::query()->with('category', 'brand', 'sizes', 'weights', 'comboItems', 'parentCombos')->orderByDesc('id')->get();
             return DataTables::of($data)
+                ->addColumn('select', function ($data) {
+                    return '<div class="form-check"><input type="checkbox" class="form-check-input product-select" value="' . $data->id . '"></div>';
+                })
                 ->addColumn('action', function ($data) {
-                    $btn = '<div class="action__buttons">';
+                    // SmartLife Integration: Products are synced from ERP - editing disabled
+                    $btn = '<div class="action__buttons" style="display: flex; gap: 8px; justify-content: start;">';
+
+                    // View + Edit buttons
+                    // For SmartLife products, show "Complete Data" instead of standard "Edit"
+                    $editTitle = $data->synced_from_smartlife ? __('Complete Data') : __('Edit');
+                    $editIcon = $data->synced_from_smartlife ? 'fa-file-signature' : 'fa-pen-to-square';
+                    $btnStyle = 'font-size: 1.1rem; padding: 6px 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);';
+
                     if ($data->type == PRODUCT_PHYSICAL) {
-                        $btn = $btn . '<a href="' . route('admin.product.edit', ['product_type' => 'physical', 'id' => $data->id]) . '" class="btn-action"><i class="fa-solid fa-pen-to-square"></i></a>';
+                        $btn = $btn . '<a href="' . route('admin.product.edit', ['product_type' => 'physical', 'id' => $data->id]) . '" class="btn-action" title="' . $editTitle . '" style="' . $btnStyle . '"><i class="fa-solid ' . $editIcon . '"></i></a>';
                     } elseif ($data->type == PRODUCT_DIGITAL) {
-                        $btn = $btn . '<a href="' . route('admin.product.edit', ['product_type' => 'digital', 'id' => $data->id]) . '" class="btn-action"><i class="fa-solid fa-pen-to-square"></i></a>';
+                        $btn = $btn . '<a href="' . route('admin.product.edit', ['product_type' => 'digital', 'id' => $data->id]) . '" class="btn-action" title="' . $editTitle . '" style="' . $btnStyle . '"><i class="fa-solid ' . $editIcon . '"></i></a>';
                     } elseif ($data->type == PRODUCT_LICENSE) {
-                        $btn = $btn . '<a href="' . route('admin.product.edit', ['product_type' => 'license', 'id' => $data->id]) . '" class="btn-action"><i class="fa-solid fa-pen-to-square"></i></a>';
+                        $btn = $btn . '<a href="' . route('admin.product.edit', ['product_type' => 'license', 'id' => $data->id]) . '" class="btn-action" title="' . $editTitle . '" style="' . $btnStyle . '"><i class="fa-solid ' . $editIcon . '"></i></a>';
                     } else {
-                        $btn = $btn . '<a href="' . route('admin.product.edit', ['product_type' => 'affiliate', 'id' => $data->id]) . '" class="btn-action"><i class="fa-solid fa-pen-to-square"></i></a>';
+                        $btn = $btn . '<a href="' . route('admin.product.edit', ['product_type' => 'affiliate', 'id' => $data->id]) . '" class="btn-action" title="' . $editTitle . '" style="' . $btnStyle . '"><i class="fa-solid ' . $editIcon . '"></i></a>';
                     }
 
                     if ($data->Status == 1) {
-                        $btn = $btn . '<a href="' . route('admin.product.inactive', $data->id) . '" class="btn-action"><i class="fas fa-toggle-on"></i></a>';
+                        $btn = $btn . '<a href="' . route('admin.product.inactive', $data->id) . '" class="btn-action" style="' . $btnStyle . '"><i class="fas fa-toggle-on text-success"></i></a>';
                     } else {
-                        $btn = $btn . '<a href="' . route('admin.product.active', $data->id) . '" class="btn-action"><i class="fas fa-toggle-off"></i></a>';
+                        $btn = $btn . '<a href="' . route('admin.product.active', $data->id) . '" class="btn-action" style="' . $btnStyle . '"><i class="fas fa-toggle-off text-secondary"></i></a>';
                     }
-                    $btn = $btn . '<a href="' . route('admin.product.delete', $data->id) . '" class="btn-action delete"><i class="fas fa-trash-alt"></i></a>';
+
+                    if ($data->product_type == 'Combo' || $data->product_type == 'تجميعي') {
+                        $btn = $btn . '<button type="button" class="btn-action btn-stock-check" data-id="' . $data->id . '" title="' . __('Check Stock') . '" style="' . $btnStyle . '"><i class="fas fa-cubes text-info"></i></button>';
+                    }
+
                     $btn = $btn . '</div>';
                     return $btn;
                 })
                 ->editColumn('PrimaryImage', function ($data) {
                     $url = asset(ProductImage() . $data->Primary_Image);
-                    return '<img src=' . $url . ' border="0" width="50" class="img-rounded" align="center" />';
+                    return '<img src=' . $url . ' border="0" width="50" class="img-rounded" align="center" onerror="this.onerror=null;this.src=\'' . asset(ProductImage() . 'prod.png') . '\';" />';
                 })
                 ->editColumn('ProductName', function ($data) {
-                    return $data->fr_Product_Name;
+                    return $data->localized_name;
+                })
+                ->addColumn('Barcode', function ($data) {
+                    return $data->barcode;
                 })
                 ->editColumn('Category', function ($data) {
-                    return $data->category?->fr_Category_Name;
+                    return $data->category?->localized_name;
                 })
                 ->editColumn('subcategory', function ($data) {
-                    return $data->subcategory?->name_ar;
+                    return $data->subcategory?->localized_name;
                 })
-            
-                ->editColumn('Price', function ($data) {
-                    $dp = $data->Discount_Price;
-                    $p = $data->Price;
-                    if ($dp == $p) {
-                        $btn = '<span class="badge admin-new-price text-success">' . $dp . '</span>';
+                ->addColumn('Type', function ($data) {
+                    $html = '';
+                    if ($data->product_type == 'Combo' || $data->product_type == 'تجميعي') {
+                        $html .= '<span class="badge badge-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.4rem 0.8rem; font-size: 0.85rem;"><i class="fas fa-layer-group mr-1"></i>' . __('Combo') . '</span>';
+                        if ($data->comboItems->count() > 0) {
+                            $html .= '<div class="mt-2" style="background: #f8f9fa; padding: 0.4rem 0.6rem; border-radius: 4px; border-left: 3px solid #667eea;">';
+                            $html .= '<div class="small text-muted font-weight-bold mb-1">' . __('Components:') . '</div>';
+                            $html .= '<ul class="list-unstyled small mb-0">';
+                            foreach ($data->comboItems as $item) {
+                                $html .= '<li style="padding: 2px 0;"><i class="fas fa-cube text-info" style="font-size: 0.7rem;"></i> ' . $item->localized_name . ' <span class="badge badge-secondary badge-sm">×' . floatval($item->pivot->quantity) . '</span></li>';
+                            }
+                            $html .= '</ul></div>';
+                        }
                     } else {
-                        $btn = '<span class="badge admin-new-price text-success">' . $dp . '</span>';
-                        $btn = $btn . '<span class="badge admin-old-price text-danger">' . $p . '</span>';
+                        $html .= '<span class="badge badge-lg" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 0.4rem 0.8rem; font-size: 0.85rem;"><i class="fas fa-box mr-1"></i>' . __('Standard') . '</span>';
+                        if ($data->parentCombos->count() > 0) {
+                            $html .= '<div class="mt-2" style="background: #fff3cd; padding: 0.4rem 0.6rem; border-radius: 4px; border-left: 3px solid #ffc107;">';
+                            $html .= '<div class="small text-muted font-weight-bold mb-1">' . __('Part of Combo:') . '</div>';
+                            $html .= '<ul class="list-unstyled small mb-0">';
+                            foreach ($data->parentCombos as $combo) {
+                                $html .= '<li style="padding: 2px 0;"><i class="fas fa-arrow-up text-warning"></i> ' . $combo->localized_name . '</li>';
+                            }
+                            $html .= '</ul></div>';
+                        }
                     }
-                    return $btn;
+                    return $html;
+                })
+                ->editColumn('Price', function ($data) {
+                    // compute a sensible base price: use product Price, otherwise fall back to weights/sizes
+                    $basePrice = $data->Price ?? 0;
+                    if (empty($basePrice) || $basePrice == 0) {
+                        if (!empty($data->weights) && $data->weights->count()) {
+                            $basePrice = $data->weights->first()->price ?? 0;
+                        } elseif (!empty($data->sizes) && $data->sizes->count()) {
+                            $firstSize = $data->sizes->first();
+                            $basePrice = $firstSize?->pivot->price ?? 0;
+                        }
+                    }
+
+                    $dp = $data->Discount_Price ?? 0;
+                    $discount = $data->Discount ?? 0;
+
+                    // decide displayed price: discounted when applicable, otherwise base price
+                    $displayPrice = ($discount > 0 && $dp) ? $dp : $basePrice;
+
+                    if (empty($displayPrice) || $displayPrice == 0) {
+                        return '<span class="badge badge-secondary" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;"><i class="fas fa-minus"></i></span>';
+                    }
+
+                    // format prices using existing helper if available
+                    $formattedDisplay = function_exists('currencyConverter') ? currencyConverter($displayPrice) : number_format($displayPrice, 3);
+                    $formattedBase = function_exists('currencyConverter') ? currencyConverter($basePrice) : number_format($basePrice, 3);
+
+                    if ($discount > 0 && $dp && $basePrice && $basePrice != $displayPrice) {
+                        $btn = '<div class="d-flex flex-column align-items-start">';
+                        $btn .= '<span class="badge badge-success" style="padding: 0.4rem 0.7rem; font-size: 0.85rem; font-weight: 600;"><i class="fas fa-tag mr-1"></i>' . $formattedDisplay . '</span>';
+                        $btn .= '<span class="badge badge-danger mt-1" style="padding: 0.3rem 0.5rem; font-size: 0.75rem; text-decoration: line-through;">' . $formattedBase . '</span>';
+                        $btn .= '</div>';
+                        return $btn;
+                    }
+
+                    return '<span class="badge badge-success" style="padding: 0.4rem 0.7rem; font-size: 0.85rem; font-weight: 600;"><i class="fas fa-coins mr-1"></i>' . $formattedDisplay . '</span>';
                 })
                 ->editColumn('Status', function ($data) {
                     if ($data->Status == 1) {
-                        $active = "مفعل";
-                        return '<span class="status active">' . $active . '</span>';
+                        return '<span class="badge badge-pill" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-check-circle mr-1"></i>' . __('Active') . '</span>';
                     } else {
-                        $active = "غير مفعل";
-                        return '<span class="status blocked">' . $active . '</span>';
+                        return '<span class="badge badge-pill" style="background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-times-circle mr-1"></i>' . __('Inactive') . '</span>';
                     }
                 })
                 ->editColumn('type', function ($data) {
@@ -90,11 +159,13 @@ class ProductController extends Controller
                         return __('Affiliate');
                     }
                 })
-                ->rawColumns(['action', 'PrimaryImage', 'Category', 'Price', 'Status'])
+                ->rawColumns(['select', 'action', 'PrimaryImage', 'Category', 'Price', 'Status', 'Type'])
                 ->addIndexColumn()
                 ->make(true);
         }
         $data['title'] = __('Product List');
+        // Retrieve persistent last sync time
+        $data['lastSync'] = \App\Models\Setting::where('slug', 'last_smartlife_sync')->value('value');
         return view('admin.pages.product.index', $data);
     }
     public function productCreate()
@@ -156,6 +227,7 @@ class ProductController extends Controller
             'best_sale',
             'on_sale',
             'on_arrival',
+            'today_special',
             'digital_file',
             'digital_link',
             'license_name',
@@ -194,6 +266,20 @@ class ProductController extends Controller
         $data['best_sale'] = checkBoxValue($request->best_sale);
         $data['on_sale'] = checkBoxValue($request->on_sale);
         $data['on_arrival'] = checkBoxValue($request->on_arrival);
+        $data['today_special'] = checkBoxValue($request->today_special);
+
+        // Ensure text fields that have NOT NULL DB constraints are set to a non-null default
+        $data['en_description'] = $data['en_description'] ?? '';
+        $data['fr_description'] = $data['fr_description'] ?? '';
+        $data['en_about'] = $data['en_about'] ?? '';
+        $data['fr_about'] = $data['fr_about'] ?? '';
+        $data['en_shippingreturn'] = $data['en_shippingreturn'] ?? '';
+        $data['fr_shippingreturn'] = $data['fr_shippingreturn'] ?? '';
+        $data['en_additionalinformation'] = $data['en_additionalinformation'] ?? '';
+        $data['fr_additionalinformation'] = $data['fr_additionalinformation'] ?? '';
+        $data['price'] = $data['price'] ?? 0;
+        $data['discount_price'] = $data['discount_price'] ?? 0;
+        $data['discount'] = $data['discount'] ?? 0;
 
         if ($request->product_type == PRODUCT_PHYSICAL) {
             $create_product = $this->physicalProductAdd($data);
@@ -280,6 +366,7 @@ class ProductController extends Controller
             'Best_Selling' => $data['best_sale'],
             'On_Sale' => $data['on_sale'],
             'New_Arrival' => $data['on_arrival'],
+            'Today_Special' => $data['today_special'],
             'Voucher' => $this->generateRandomString(6),
             'points' => $data['points'] ?? 0,
             'subcategory_id' => $data['subcategory_id']
@@ -365,6 +452,7 @@ class ProductController extends Controller
             'Best_Selling' => $data['best_sale'],
             'On_Sale' => $data['on_sale'],
             'New_Arrival' => $data['on_arrival'],
+            'Today_Special' => $data['today_special'],
             'Voucher' => $this->generateRandomString(6),
             'digital_type' => $data['digital_type'],
             'digital_file' => $data['digital_file'],
@@ -429,6 +517,7 @@ class ProductController extends Controller
             'Best_Selling' => $data['best_sale'],
             'On_Sale' => $data['on_sale'],
             'New_Arrival' => $data['on_arrival'],
+            'Today_Special' => $data['today_special'],
             'Voucher' => $this->generateRandomString(6),
             'digital_type' => $data['digital_type'],
             'digital_file' => $data['digital_file'],
@@ -494,6 +583,7 @@ class ProductController extends Controller
             'Best_Selling' => $data['best_sale'],
             'On_Sale' => $data['on_sale'],
             'New_Arrival' => $data['on_arrival'],
+            'Today_Special' => $data['today_special'],
             'Voucher' => $this->generateRandomString(6),
             'affiliate_link' => $data['affiliate_link'],
             'type' => PRODUCT_AFFILIATE,
@@ -602,6 +692,13 @@ class ProductController extends Controller
             'license_key',
             'affiliate_link',
         ]);
+        // If product is synced from SmartLife, prevent changing SmartLife-controlled fields
+        if (!empty($product) && ($product->synced_from_smartlife || !empty($product->smartlife_id))) {
+            $data['price'] = $product->Price;
+            // keep SmartLife id and barcode unchanged
+            $data['smartlife_id'] = $product->smartlife_id;
+            $data['barcode'] = $product->barcode ?? null;
+        }
         if (!empty($request->primary_image)) {
             $data['primary_image'] = fileUpload($request['primary_image'], ProductImage());
         } else {
@@ -634,6 +731,7 @@ class ProductController extends Controller
         $data['best_sale'] = checkBoxValue($request->best_sale);
         $data['on_sale'] = checkBoxValue($request->on_sale);
         $data['on_arrival'] = checkBoxValue($request->on_arrival);
+        $data['today_special'] = checkBoxValue($request->today_special);
 
         if ($product->type == PRODUCT_PHYSICAL) {
             $update = $this->physicalProductUpdate($data, $product);
@@ -695,23 +793,23 @@ class ProductController extends Controller
             $frSlug = $data['fr_product_slug'];
         }
         $update = $product->update([
-            'en_Product_Name' => $data['en_product_name'],
+            'en_Product_Name' => ($data['en_product_name'] ?? null) === null ? $product->en_Product_Name : $data['en_product_name'],
             'en_Product_Slug' => $enSlug,
             'Brand_Id' => null,
-            'Category_Id' => $data['en_category_name'],
-            'Price' => $data['price'],
-            'Discount' => $data['discount'],
-            'Discount_Price' => $data['discount_price'],
-            'en_About' => $data['en_about'] ?? '',
-            'en_Description' => $data['en_description'],
-            'en_ShippingReturn' => $data['en_shippingreturn'] ?? "",
-            'en_AdditionalInformation' => $data['en_additionalinformation'] ?? "",
-            'fr_Product_Name' => $data['fr_product_name'],
+            'Category_Id' => $data['en_category_name'] ?? $product->Category_Id,
+            'Price' => ($data['price'] ?? null) === null ? $product->Price : $data['price'],
+            'Discount' => ($data['discount'] ?? null) === null ? $product->Discount : $data['discount'],
+            'Discount_Price' => ($data['discount_price'] ?? null) === null ? $product->Discount_Price : $data['discount_price'],
+            'en_About' => ($data['en_about'] ?? null) === null ? $product->en_About : $data['en_about'],
+            'en_Description' => ($data['en_description'] ?? null) === null ? $product->en_Description : $data['en_description'],
+            'en_ShippingReturn' => ($data['en_shippingreturn'] ?? null) === null ? $product->en_ShippingReturn : $data['en_shippingreturn'],
+            'en_AdditionalInformation' => ($data['en_additionalinformation'] ?? null) === null ? $product->en_AdditionalInformation : $data['en_additionalinformation'],
+            'fr_Product_Name' => ($data['fr_product_name'] ?? null) === null ? $product->fr_Product_Name : $data['fr_product_name'],
             'fr_Product_Slug' => $frSlug,
-            'fr_About' => $data['fr_about'] ?? '',
-            'fr_Description' => $data['fr_description'],
-            'fr_ShippingReturn' => $data['fr_shippingreturn'] ?? "",
-            'fr_AdditionalInformation' => $data['fr_additionalinformation'] ?? "",
+            'fr_About' => ($data['fr_about'] ?? null) === null ? $product->fr_About : $data['fr_about'],
+            'fr_Description' => ($data['fr_description'] ?? null) === null ? $product->fr_Description : $data['fr_description'],
+            'fr_ShippingReturn' => ($data['fr_shippingreturn'] ?? null) === null ? $product->fr_ShippingReturn : $data['fr_shippingreturn'],
+            'fr_AdditionalInformation' => ($data['fr_additionalinformation'] ?? null) === null ? $product->fr_AdditionalInformation : $data['fr_additionalinformation'],
             'Quantity' => $data['qty'],
             // 'ItemTag' => $data['item_teg'],
             'Primary_Image' => $data['primary_image'],
@@ -839,6 +937,7 @@ class ProductController extends Controller
             'Best_Selling' => $data['best_sale'],
             'On_Sale' => $data['on_sale'],
             'New_Arrival' => $data['on_arrival'],
+            'Today_Special' => $data['today_special'],
             'digital_file' => $data['digital_file'],
             'digital_link' => $data['digital_link'],
         ]);
@@ -892,6 +991,7 @@ class ProductController extends Controller
             'Best_Selling' => $data['best_sale'],
             'On_Sale' => $data['on_sale'],
             'New_Arrival' => $data['on_arrival'],
+            'Today_Special' => $data['today_special'],
             'digital_file' => $data['digital_file'],
             'digital_link' => $data['digital_link'],
             'license_name' => $data['license_name'],
@@ -944,6 +1044,7 @@ class ProductController extends Controller
             'Best_Selling' => $data['best_sale'],
             'On_Sale' => $data['on_sale'],
             'New_Arrival' => $data['on_arrival'],
+            'Today_Special' => $data['today_special'],
             'affiliate_link' => $data['affiliate_link'],
         ]);
         if (!empty($update)) {
@@ -989,5 +1090,67 @@ class ProductController extends Controller
             $randomString .= $characters[rand(0, $charactersLength - 1)];
         }
         return $randomString;
+    }
+
+    public function syncSmartLife()
+    {
+        try {
+            // Increase time limit and memory for large syncs
+            set_time_limit(0);
+            ini_set('memory_limit', '512M');
+
+            \Illuminate\Support\Facades\Artisan::call('smartlife:sync-products');
+
+            return redirect()->back()->with('success', __('Products synced successfully with SmartLife ERP!'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', __('Sync failed: ') . $e->getMessage());
+        }
+    }
+
+    public function stockBreakdown($id)
+    {
+        $product = Product::with('comboItems')->findOrFail($id);
+
+        if ($product->product_type !== 'Combo' && $product->product_type !== 'تجميعي') {
+            return response()->json(['error' => 'Not a combo product'], 400);
+        }
+
+        $components = [];
+        $maxStock = $product->virtual_stock;
+
+        foreach ($product->comboItems as $item) {
+            $requiredQty = $item->pivot->quantity > 0 ? $item->pivot->quantity : 1;
+            $itemVirtualStock = $item->virtual_stock;
+            $possibleCombinations = floor($itemVirtualStock / $requiredQty);
+
+            $components[] = [
+                'name' => $item->fr_Product_Name, // Or localize based on app locale
+                'current_stock' => $itemVirtualStock,
+                'required_per_combo' => $requiredQty,
+                'max_combinations' => $possibleCombinations
+            ];
+        }
+
+        return response()->json([
+            'product_name' => $product->fr_Product_Name,
+            'virtual_stock' => $maxStock,
+            'components' => $components
+        ]);
+    }
+
+    public function bulkActive(Request $request)
+    {
+        try {
+            $ids = $request->ids;
+            if (empty($ids) || !is_array($ids)) {
+                return response()->json(['success' => false, 'message' => __('No products selected')]);
+            }
+
+            Product::whereIn('id', $ids)->update(['Status' => 1]);
+
+            return response()->json(['success' => true, 'message' => __('Selected products activated successfully')]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
     }
 }

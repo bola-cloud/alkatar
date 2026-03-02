@@ -1,78 +1,85 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{$allsettings['app_title']}}</title>
+@extends('front.layouts.newdesign_auth_layout')
 
-    <!-- Favicon included -->
-    <link rel="shortcut icon" href="{{asset(IMG_FAVICON_PATH.'favicon.png')}}" type="image/x-icon">
+@section('title', ($allsettings['app_title'] ?? 'HiSpeed') . ' - Admin Login')
 
-    <!-- Apple touch icon included -->
-    <link rel="apple-touch-icon" href="{{asset(IMG_FAVICON_PATH.'favicon.png')}}">
+@section('content')
 
-    <!-- All CSS files included here -->
-    <link rel="stylesheet" href="{{asset('admin/css/all.min.css')}}">
-    <link rel="stylesheet" href="{{asset('admin/css/bootstrap.min.css')}}">
-    <link rel="stylesheet" href="{{asset('admin/styles/main.css')}}">
+<div class="macbook-pro">
+    <div class="container-fluid h-100">
+        <div class="row h-100">
+            <!-- Left Side - decorative large image/text -->
+            <div class="col-lg-6 col-md-12 left-section position-relative p-0 d-none d-lg-block">
+                <img class="rectangle img-fluid w-100 h-100" src="https://c.animaapp.com/mhxjwoj8jP8UI3/img/rectangle-222.png" alt="Background" />
+                <div class="group-2"></div>
+                <p class="hungry-check-out">
+                    <span class="text-wrapper-8">{{ __('Sign In To Your hi speed Account For') }}<br/>{{ __('More Offers And Exclusive points') }}</span>
+                </p>
+            </div>
 
-</head>
-
-<body>
-<!-- Login Content -->
-<div class="main-content__area bg-img">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-xl-6 col-lg-8 col-md-10">
-                <div class="authentication__item">
-                    <div class="authentication__item__logo">
-                        <a href="{{route('front')}}">
-                            <img src="{{asset(IMG_LOGO_PATH.$allsettings['main_logo'])}}" alt="icon">
-                        </a>
+            <!-- Right Side - Form -->
+            <div class="col-lg-6 col-md-12 right-section d-flex align-items-center">
+                <div class="content-container">
+                    <div class="header-section text-left mb-4">
+                        <h1 class="text-wrapper" style="font-size:28px;"><span style="color:#929f1a;">{{ __('Admin Sign In') }}</span> <small class="text-muted">{{ __('Admin Panel Access') }}</small></h1>
                     </div>
-                    <div class="authentication__item__title mb-30">
-                        <h2>{{__('Sign In')}}</h2>
-                    </div>
-                    <div class="authentication__item__content">
-                        <form action="{{ route('login.post') }}" method="post">
-                            @csrf
-                            <div class="input__group mb-25">
-                                <label>{{__('Email Address')}}</label>
-                                <div class="input-overlay">
-                                    <input type="text" name="email" id="email" value="{{ env('APP_DEMO') == true ? 'admin@gmail.com' : old('email') }}" placeholder="{{__('Enter email address')}}">
-                                    <div class="overlay">
-                                        <img src="{{asset('admin/images/icons/mail.svg')}}" alt="icon">
-                                    </div>
+
+                    @if(session('error'))
+                    <div class="alert alert-danger">{{ session('error') }}</div>
+                    @endif
+                    @if(session('success'))
+                    <div class="alert alert-success">{{ session('success') }}</div>
+                    @endif
+
+                    <form method="POST" action="{{ route('login.post') }}" class="signup-form">
+                        @csrf
+
+                        <div class="text-field mb-3">
+                            <label class="label" for="email">{{ __('Email Address') }}</label>
+                            <input type="email" id="email" name="email" value="{{ env('APP_DEMO') == true ? 'admin@gmail.com' : old('email') }}" class="form-control text-field-2 @error('email') is-invalid @enderror" required />
+                            @error('email') <div class="text-danger mt-1">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="text-field mb-3">
+                            <label class="label-2" for="password">{{ __('Password') }}</label>
+                            <div class="position-relative">
+                                <input type="password" id="password" name="password" value="{{ env('APP_DEMO') == true ? '123456' : '' }}" class="form-control text-field-2 @error('password') is-invalid @enderror" required />
+                                <div class="password-hide-see" onclick="togglePassword()">
+                                    <img class="img" src="https://c.animaapp.com/mhxjwoj8jP8UI3/img/icon.svg" alt="Toggle" />
+                                    <div class="text-wrapper-4">{{ __('Hide') }}</div>
                                 </div>
                             </div>
-                            <div class="input__group mb-20">
-                                <label>{{__('Password')}}</label>
-                                <div class="input-overlay">
-                                    <input type="password" name="password" id="pass" value="{{ env('APP_DEMO') == true ? '123456' : '' }}" placeholder="{{__('Enter password')}}">
-                                    <div class="overlay">
-                                        <img src="{{asset('admin/images/icons/lock.svg')}}" alt="icon">
-                                    </div>
-                                    <div class="password-visibility">
-                                        <img src="{{asset('admin/images/icons/eye.svg')}}" alt="icon">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="input__group mb-27">
-                                <button type="submit" class="btn btn-blue">{{__('Sign In')}}</button>
-                            </div>
-                        </form>
-                    </div>
+                            @error('password') <div class="text-danger mt-1">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="check-box mb-3">
+                            <input type="checkbox" id="remember" name="remember" style="width:18px;height:18px;margin-right:10px;" />
+                            <p class="i-want-to-receive">{{ __('Remember me') }}</p>
+                        </div>
+
+                        <div class="frame mb-3 text-center">
+                            <button type="submit" class="sign-UP-wrapper"> <div class="sign-UP">{{ __('Sign In') }}</div> </button>
+                        </div>
+
+                        <p class="do-you-have-an text-center mt-3">
+                            <span>{{ __('Forgot your password?') }} </span>
+                            @if (Route::has('password.request'))
+                                <a href="{{ route('password.request') }}" class="text-wrapper-7">{{ __('Reset') }}</a>
+                            @endif
+                        </p>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<!-- Login Content -->
-<script src="{{asset('admin/js/jquery-3.6.0.min.js')}}"></script>
-<script src="{{asset('admin/js/popper.min.js')}}"></script>
-<script src="{{asset('admin/js/bootstrap.min.js')}}"></script>
-<script src="{{asset('admin/js/custom/password-show.js')}}"></script>
+
+<script>
+    function togglePassword(){
+        var p = document.getElementById('password');
+        if(p.type === 'password'){ p.type = 'text'; } else { p.type = 'password'; }
+    }
+</script>
+
 @include('sweetalert::alert')
-</body>
-</html>
+
+@endsection

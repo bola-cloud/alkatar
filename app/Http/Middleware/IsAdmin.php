@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 
 class IsAdmin
@@ -17,7 +18,15 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next)
     {
-        if(auth()->user()->is_admin != 1){
+        // Prefer admin guard if available
+        $user = null;
+        if (Auth::guard('admin')->check()) {
+            $user = Auth::guard('admin')->user();
+        } elseif (Auth::check()) {
+            $user = Auth::user();
+        }
+
+        if (!$user || ($user->is_admin ?? 0) != 1) {
             return redirect()->route('front')->with('error', 'Only admin can visit there');
         }
         return $next($request);

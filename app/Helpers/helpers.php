@@ -36,8 +36,10 @@ use App\Models\Admin\SpecialOffer;
 if (!function_exists('fileUpload')) {
     function fileUpload($img, $path, $user_file_name = null, $width = null, $height = null, $defaultFileName = null)
     {
-        if (!file_exists($path)) {
-            mkdir($path, 0777, true);
+        // ensure target directory exists inside public path
+        $publicPathDir = public_path($path);
+        if (!file_exists($publicPathDir)) {
+            mkdir($publicPathDir, 0777, true);
         }
         if (isset($user_file_name) && $user_file_name != "" && file_exists($path . $user_file_name)) {
             unlink($path . $user_file_name);
@@ -45,7 +47,18 @@ if (!function_exists('fileUpload')) {
         // saving image in target path
         $imgName = $defaultFileName ? $defaultFileName . '.' . $img->getClientOriginalExtension() : uniqid() . time() . '.' . $img->getClientOriginalExtension();
         $imgPath = public_path($path . $imgName);
-        // making image
+        // If this is an SVG (or similar vector) file, skip GD/Image processing
+        $mime = $img->getClientMimeType();
+        $ext = strtolower($img->getClientOriginalExtension());
+        if (str_contains($mime, 'svg') || in_array($ext, ['svg', 'svgz'])) {
+            // move uploaded file as-is into the public folder
+            $moved = $img->move(public_path($path), $imgName);
+            if ($moved) {
+                return $imgName;
+            }
+            return false;
+        }
+        // making image for raster formats
         $makeImg = Image::make($img)->orientate();
         if ($width != null && $height != null && is_int($width) && is_int($height)) {
             $makeImg->fit($width, $height);
@@ -263,12 +276,27 @@ if (!function_exists('checkBoxValue')) {
 
 
 if (!function_exists('langConverter')) {
-    function langConverter($en, $fr)
+    /**
+     * Return localized string based on current app locale.
+     * Supports en, fr and ar. Backwards compatible when only en/fr provided.
+     * Usage: langConverter($en, $fr, $ar = null)
+     */
+    function langConverter($en, $fr = null, $ar = null)
     {
-        if (app()->getLocale() == 'en') {
+        $locale = app()->getLocale();
+        if ($locale == 'en') {
             return $en;
         }
-        return $fr;
+        if ($locale == 'fr') {
+            return $fr ?? $en;
+        }
+        if ($locale == 'ar') {
+            // Arabic content is stored in the legacy "fr" fields in many records.
+            // Prefer French field as the Arabic source first, then explicit Arabic, then English.
+            return $fr ?? $ar ?? $en;
+        }
+        // default fallback
+        return $en;
     }
 }
 
@@ -279,7 +307,8 @@ if (!function_exists('currency')) {
             return session()->get('currency');
         }
 
-        return 'USD';
+        // Default to Omani Rial (OMR)
+        return 'OMR';
     }
 }
 
@@ -287,13 +316,16 @@ if (!function_exists('currencyConverter')) {
     function currencyConverter($price)
     {
         $convert_price = $price;
-        if (session()->has('currency')) {
-            $currency = Currency::where('iso', 'omr')->first();
-            if (!empty($currency)) {
-                $convert_price = $price * $currency->convert_from_usd;
-                return format_price($convert_price);
+        // Use current currency (session or default) and convert from USD using conversion rate
+        try {
+            $curr = Currency::where('currency', currency())->first();
+            if (!empty($curr) && isset($curr->convert_from_usd)) {
+                $convert_price = $price * $curr->convert_from_usd;
             }
+        } catch (\Exception $e) {
+            // fallback: leave price as-is
         }
+
         return format_price($convert_price);
     }
 }
@@ -436,6 +468,15 @@ if (!function_exists('wishlistCount')) {
         return 0;
     }
 }
+if (!function_exists('isInWishlist')) {
+    function isInWishlist($product_id)
+    {
+        if (!auth()->check()) {
+            return false;
+        }
+        return Wishlist::where('User_Id', auth()->user()->id)->where('Product_Id', $product_id)->exists();
+    }
+}
 if (!function_exists('compareListCount')) {
     function compareListCount()
     {
@@ -520,13 +561,18 @@ if (!function_exists('hasShippingAddress')) {
 if (!function_exists('subtotal')) {
     function subtotal()
     {
+        // Compute raw numeric subtotal from cart contents to avoid formatting/rounding issues
         if (Cart::count() != 0) {
-            return Cart::subtotal();
-            if (\Cart::count() != 0) {
-                return \Cart::subtotal();
+            $total = 0.0;
+            foreach (Cart::content() as $item) {
+                // Each $item->price should be numeric (stored in DB). Multiply by qty (may be decimal for KG).
+                $price = floatval($item->price ?? 0);
+                $qty = floatval($item->qty ?? 0);
+                $total += $price * $qty;
             }
-            return 0;
+            return $total;
         }
+        return 0;
     }
 }
 
@@ -559,13 +605,44 @@ if (!function_exists('tax_rate')) {
 }
 
 if (!function_exists('delivery_charge')) {
-    function delivery_charge($city = null)
+    function delivery_charge($location = null, $type = null)
     {
         $dc = 0;
-        if ($city != null) {
-            $delivery_charge = DeliveryCharge::where('city_id', $city)->where('status', ACTIVE)->first();
+        if ($location != null) {
+
+            // 1. If type is explicitly 'area' (Priority)
+            if ($type === 'area' && is_numeric($location)) {
+                $delivery_charge = DeliveryCharge::where('area_id', $location)->where('status', ACTIVE)->first();
+                if (!is_null($delivery_charge)) {
+                    return $delivery_charge->charge;
+                }
+                // If not found in area, maybe fallback to city/state parent? 
+                // But for now, let's return 0 or rely on fallback logic if designed.
+                // Assuming explicit area check implies we want that specific charge.
+            }
+
+            // 2. Standard numeric checks (City -> State) - ONLY if type is NOT area (or if type is null/city/state)
+            if (is_numeric($location) && $type !== 'area') {
+                // Try city_id
+                $delivery_charge = DeliveryCharge::where('city_id', $location)->where('status', ACTIVE)->first();
+                if (!is_null($delivery_charge)) {
+                    return $delivery_charge->charge;
+                }
+
+                // Fallback to state-level charge
+                $delivery_charge = DeliveryCharge::where('state_id', $location)->where('status', ACTIVE)->first();
+                if (!is_null($delivery_charge)) {
+                    return $delivery_charge->charge;
+                }
+            }
+
+            // 3. String matching (Country)
+            $delivery_charge = DeliveryCharge::where(function ($q) use ($location) {
+                $q->where('country', $location)->orWhere('country', 'LIKE', "%$location%");
+            })->where('status', ACTIVE)->first();
+
             if (!is_null($delivery_charge)) {
-                $dc = $delivery_charge->charge;
+                return $delivery_charge->charge;
             }
         }
         return $dc;

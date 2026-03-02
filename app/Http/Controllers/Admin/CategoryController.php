@@ -19,16 +19,22 @@ class CategoryController extends Controller
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('action', function ($data) {
-                    $btn = '<div class="action__buttons">';
-                    $btn = $btn . '<a href="' . route('admin.category.edit', $data->id) . '" class="btn-action" title="Edit"><i class="fas fa-pen-to-square"></i></a>';
+                    $btn = '<div class="action__buttons" style="display: flex; gap: 8px; justify-content: start;">';
+
+                    // Logic to encourage completing translation if FR name is missing or same as EN
+                    $editTitle = (!$data->fr_Category_Name || $data->fr_Category_Name == $data->en_Category_Name) ? __('Complete Data') : __('Edit');
+                    $editIcon = (!$data->fr_Category_Name || $data->fr_Category_Name == $data->en_Category_Name) ? 'fa-file-signature' : 'fa-pen-to-square';
+                    $btnStyle = 'font-size: 1.1rem; padding: 6px 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);';
+
+                    $btn = $btn . '<a href="' . route('admin.category.edit', $data->id) . '" class="btn-action" title="' . $editTitle . '" style="' . $btnStyle . '"><i class="fas ' . $editIcon . '"></i></a>';
 
                     if ($data->Status == 1) {
-                        $btn = $btn . '<a href="' . route('admin.category.inactive', $data->id) . '" class="btn-action" title="Inactive"><i class="fas fa-toggle-on"></i></a>';
+                        $btn = $btn . '<a href="' . route('admin.category.inactive', $data->id) . '" class="btn-action" style="' . $btnStyle . '"><i class="fas fa-toggle-on text-success"></i></a>';
                     } else {
-                        $btn = $btn . '<a href="' . route('admin.category.active', $data->id) . '" class="btn-action" title="Active"><i class="fas fa-toggle-off"></i></a>';
+                        $btn = $btn . '<a href="' . route('admin.category.active', $data->id) . '" class="btn-action" style="' . $btnStyle . '"><i class="fas fa-toggle-off text-secondary"></i></a>';
                     }
 
-                    $btn = $btn . '<a href="' . route('admin.category.delete', $data->id) . '" class="btn-action delete" title="Delete"><i class="fas fa-trash-alt"></i></a>';
+                    $btn = $btn . '<a href="' . route('admin.category.delete', $data->id) . '" class="btn-action delete" title="Delete" style="' . $btnStyle . '"><i class="fas fa-trash-alt"></i></a>';
                     $btn = $btn . '</div>';
                     return $btn;
                 })
@@ -40,20 +46,28 @@ class CategoryController extends Controller
                 // })
                 ->editColumn('Status', function ($data) {
                     if ($data->Status == 1) {
-                        $active = "فعال";
-                        return '<span class="status active">' . $active . '</span>';
+                        return '<span class="badge badge-pill" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-check-circle mr-1"></i>' . __('Active') . '</span>';
                     } else {
-                        $active = "غير فعال";
-                        return '<span class="status blocked">' . $active . '</span>';
+                        return '<span class="badge badge-pill" style="background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-times-circle mr-1"></i>' . __('Inactive') . '</span>';
                     }
                 })
                 ->editColumn('Description', function ($data) {
                     return Str::limit($data->fr_Description, 10);
                 })
                 ->editColumn('Category_Icon', function ($data) {
-                    return '<img src=' . asset(CategoryImage() . $data->Category_Icon) . ' width="50" height="50" alt="Category Icon" />';
+                    return '<img src=' . asset(CategoryImage() . $data->Category_Icon) . ' width="50" height="50" alt="Category Icon" onerror="this.style.display=\'none\'" />';
                 })
-                ->rawColumns(['action', 'Category_Name', 'Category_Slug', 'Status', 'Description', 'Category_Icon'])
+                ->editColumn('show_on_home', function ($data) {
+                    if ($data->show_on_home == 1) {
+                        return '<span class="badge badge-pill badge-primary">' . __('Yes') . '</span>';
+                    } else {
+                        return '<span class="badge badge-pill badge-secondary">' . __('No') . '</span>';
+                    }
+                })
+                ->addColumn('order', function ($data) {
+                    return $data->order;
+                })
+                ->rawColumns(['action', 'Category_Name', 'Category_Slug', 'Status', 'Description', 'Category_Icon', 'show_on_home', 'order'])
                 ->make(true);
         }
         $data['title'] = __('Category List');
@@ -85,7 +99,8 @@ class CategoryController extends Controller
             'fr_Description' => $request->fr_description,
             'fr_Category_Slug' => $this->slugify($request->fr_category_name),
             'Category_Icon' => $icon_name,
-            'order'=> $request->order
+            'order' => $request->order,
+            'show_on_home' => $request->show_on_home ? 1 : 0
         ]);
         if ($category) {
             return redirect()->route('admin.category')->with('success', __('Successfully Stored !'));
@@ -102,7 +117,7 @@ class CategoryController extends Controller
     {
         $id = $request->id;
         $cat = Category::whereid($id)->first();
-        
+
 
         if ($request->icon) {
             // delete image
@@ -128,7 +143,8 @@ class CategoryController extends Controller
             'fr_Description' => is_null($request->fr_description) ? $cat->fr_Description : $request->fr_description,
             'fr_Category_Slug' => is_null($request->fr_category_name) ? $cat->fr_Category_Slug : $this->slugify($request->fr_category_name),
             'Category_Icon' => $icon_name,
-            'order'=> $request->order
+            'order' => $request->order,
+            'show_on_home' => $request->show_on_home ? 1 : 0
         ]);
         if ($update) {
             return redirect()->route('admin.category')->with('success', __('Successfully Updated!'));

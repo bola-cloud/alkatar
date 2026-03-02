@@ -15,7 +15,8 @@ class ContactUsController extends Controller
         $data['title'] = $seo->title;
         $data['description'] = $seo->description;
         $data['keywords'] = $seo->keywords;
-        return view('front.pages.contact.index', $data);
+        // prefer the newdesign contact page
+        return view('front.pages.contact.newdesign', $data);
     }
 
     public function contactUsStore(ContactUsRequest $request)

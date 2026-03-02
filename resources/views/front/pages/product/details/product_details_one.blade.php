@@ -108,6 +108,13 @@
                                     <h4 class="product-catagory">{{ langConverter($ppt->tag, $ppt->tag_ar) }}</h4>
                                 @endforeach
                             </div>
+                            @if($products->unit)
+                                <div class="mb-3">
+                                    <span class="badge bg-light text-dark border">
+                                        <i class="bi bi-box-seam me-1"></i> {{ $products->unit }}
+                                    </span>
+                                </div>
+                            @endif
                             <!-- This is server side code. User can not modify it. -->
                             <div class="flex items-center gap-4 font-bold">
                                 {{__("Reviews")}}
@@ -261,7 +268,7 @@
                                             data-id="{{ $products->id }}">{{ __('Buy Now') }}</a> -->
                                         <a href="javascript:void(0)" title="{{ __('Add To Cart') }}"
                                             class="add-cart addCart" data-product-id="{{ $products->id }}"
-                                            data-price="0" data-size-id="0">{{ __('Add To Cart')
+                                            data-price="0" data-size-id="0" data-unit="{{ $products->unit ?? '' }}">{{ __('Add To Cart')
                                             }}
                                             <i class="icon fas fa-plus-circle"></i></a>
                                     </div>

@@ -72,7 +72,31 @@ class HomeController extends Controller
     public function localeSwitch($locale)
     {
         $lang = Language::where('locale', $locale)->first();
-        session(['APP_LOCALE' => $locale, 'lang_dir' => $lang->direction]);
+
+        // Preserve the legacy DB locale (e.g. 'fr') in APP_LOCALE so existing code
+        // that expects the DB's locale continues to work. At the same time, set
+        // a separate session key `HTML_LANG` and `lang_dir` so the rendered HTML
+        // tag can use the true language code (e.g. 'ar') and correct text direction.
+        $dbLocale = $locale;
+        $dir = $lang->direction ?? 'ltr';
+
+        // If the language row is RTL, prefer rendering HTML as 'ar' (Arabic)
+        // while keeping DB locale unchanged so code still reads fr_ columns.
+        $htmlLang = $dbLocale;
+        if ($dir === 'rtl') {
+            $htmlLang = 'ar';
+        }
+
+        session([
+            'APP_LOCALE' => $dbLocale,
+            'HTML_LANG' => $htmlLang,
+            'lang_dir' => $dir,
+        ]);
+
+        // Keep the Laravel locale set to the DB locale to avoid breaking checks
+        // that still look for 'fr' in legacy installations.
+        App::setLocale($dbLocale);
+
         return redirect()->back();
     }
     public function currencySwitch($currency)
@@ -98,7 +122,7 @@ class HomeController extends Controller
 
         return view('admin.reports.delivery_charge', compact('reports'));
     }
-    
+
     public function exportDeliveryChargeReport(Request $request)
     {
         // Build the database query based on date filters (if provided)
@@ -110,21 +134,21 @@ class HomeController extends Controller
                 DB::raw('COUNT(*) as total_orders')
             )
             ->where("Payment_Status", '=', PAYMENT_SUCCESS);
-        
+
         // Apply date filters if they exist
         if ($request->has('start_date') && $request->start_date && $request->has('end_date') && $request->end_date) {
             $query->whereBetween('created_at', [$request->start_date . ' 00:00:00', $request->end_date . ' 23:59:59']);
         }
-            
+
         $reports = $query->groupBy('year', 'month')
             ->orderBy('year', 'desc')
             ->orderBy('month', 'desc')
             ->get();
-            
+
         // Create new spreadsheet object
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        
+
         // Set document properties
         $spreadsheet->getProperties()
             ->setCreator('Sharaa System')
@@ -134,7 +158,7 @@ class HomeController extends Controller
             ->setDescription(__('Delivery Charge Report generated from Sharaa System'))
             ->setKeywords('delivery charge report excel')
             ->setCategory('Reports');
-        
+
         // Add header styling
         $headerStyle = [
             'font' => [
@@ -154,36 +178,36 @@ class HomeController extends Controller
                 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
             ],
         ];
-        
+
         // Set header row
         $sheet->setCellValue('A1', __('Year'));
         $sheet->setCellValue('B1', __('Month'));
         $sheet->setCellValue('C1', __('Total Orders'));
         $sheet->setCellValue('D1', __('Total Delivery Charge'));
         $sheet->getStyle('A1:D1')->applyFromArray($headerStyle);
-        
+
         // Add data rows
         $row = 2;
         $totalOrders = 0;
         $totalDeliveryCharge = 0;
-        
+
         foreach ($reports as $report) {
             $sheet->setCellValue('A' . $row, $report->year);
             $sheet->setCellValue('B' . $row, date('F', mktime(0, 0, 0, $report->month, 1)));
             $sheet->setCellValue('C' . $row, $report->total_orders);
             $sheet->setCellValue('D' . $row, number_format($report->total_delivery_charge, 2));
-            
+
             $totalOrders += $report->total_orders;
             $totalDeliveryCharge += $report->total_delivery_charge;
             $row++;
         }
-        
+
         // Add total row
         $sheet->setCellValue('A' . $row, __('Grand Total:'));
         $sheet->mergeCells('A' . $row . ':B' . $row);
         $sheet->setCellValue('C' . $row, $totalOrders);
         $sheet->setCellValue('D' . $row, number_format($totalDeliveryCharge, 2));
-        
+
         // Style the total row
         $totalRowStyle = [
             'font' => [
@@ -200,23 +224,23 @@ class HomeController extends Controller
             ],
         ];
         $sheet->getStyle('A' . $row . ':D' . $row)->applyFromArray($totalRowStyle);
-        
+
         // Auto size columns
         foreach(range('A','D') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
-        
+
         // Set filename
         $fileName = 'delivery_charge_report_' . date('Y-m-d_H-i-s') . '.xlsx';
-        
+
         // Create writer and prepare response
         $writer = new Xlsx($spreadsheet);
-        
+
         // Redirect output to a client's web browser
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="' . $fileName . '"');
         header('Cache-Control: max-age=0');
-        
+
         // Save to output
         $writer->save('php://output');
         exit;

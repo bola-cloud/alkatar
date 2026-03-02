@@ -128,7 +128,7 @@
                                 <label for="billing_email"
                                     class="block text-lg lg:text-2xl font-medium text-gray-700">{{ __('Email Address (Optional)') }}</label>
                                 <input type="email"
-                                
+
                                     class="w-11/12 lg:w-full p-3 lg:p-4 border rounded h-14 lg:h-16 text-lg lg:text-xl"
                                     id="billing_email" name="billing_email" placeholder="{{ __('Email Address') }}"
                                     value="{{ isset($billing) ? $billing->Email ?? $billing->email : '' }}" /> --}}
@@ -159,6 +159,16 @@
                                             class="w-11/12 lg:w-full p-3 lg:p-4 border rounded h-14 !mb-0 lg:h-16 text-lg lg:text-xl"
                                             id="city" name="billing_city" required>
                                             <option value="">{{ __('City') }}</option>
+
+                                        </select>
+                                    </div>
+                                    <div class="relative w-full">
+                                        <label for="area"
+                                            class="block text-lg lg:text-2xl font-medium text-gray-700 mb-3">{{ __('Area') }}</label>
+                                        <select
+                                            class="w-11/12 lg:w-full p-3 lg:p-4 border rounded h-14 !mb-0 lg:h-16 text-lg lg:text-xl"
+                                            id="area" name="billing_area" required>
+                                            <option value="">{{ __('Area') }}</option>
 
                                         </select>
                                     </div>
@@ -330,7 +340,7 @@
                     <ul class="mt-10 lg:mt-20 space-y-2 text-2xl lg:text-3xl">
                         <li class="flex justify-between">
                             <span>{{ __('Subtotal') }}</span>
-                            <span id="subtotal">{{ currencyConverter(\Cart::subtotal()) }}</span>
+                            <span id="subtotal">{{ currencyConverter(subtotal()) }}</span>
                         </li>
 
 
@@ -351,9 +361,28 @@
                             <span>{{ __('Weight Handling Cost') }}</span>
                             <span id="weight-charge-curr">{{ currencyConverter($extraWeightFees) }}</span>
                         </li>
+                        @php
+                            $billingCountry = session('billing_address.country') ?? session('billing_address')['country'] ?? null;
+                            if (!$billingCountry) {
+                                // default to Oman if available
+                                try {
+                                    $oman = \App\Models\Country::where('name_en', 'Oman')->first();
+                                    $billingCountry = $oman ? ($oman->name_en ?? $oman->name) : null;
+                                } catch (\Exception $e) {
+                                    $billingCountry = null;
+                                }
+                            }
+                            $taxAmount = 0;
+                            if ($billingCountry) {
+                                $taxAmount = tax_amount(subtotal(), $billingCountry);
+                            }
+                            if (empty($taxAmount)) {
+                                $taxAmount = (subtotal() * (allsetting()['tax_percentage'] ?? 0)) / 100;
+                            }
+                        @endphp
                         <li class="flex justify-between">
                             <span>{{ __('VAT/Tax') }}</span>
-                            <span id="tax-show-curr">{{ currencyConverter(tax_amount(\Cart::subtotal())) }}</span>
+                            <span id="tax-show-curr">{{ currencyConverter($taxAmount) }}</span>
                         </li>
                         @if (!empty(Session::get('CouponAmount')))
                             <li class="flex justify-between">
@@ -361,13 +390,21 @@
                                 <span>{{ currencyConverter(Session::get('CouponAmount')) }}</span>
                             </li>
                         @endif
+                        <li class="flex justify-between d-none" id="wallet-used-li">
+                            <span class="text-primary-red font-bold">{{ __('(-) Wallet Used') }}</span>
+                            <span id="wallet-used-curr" class="text-primary-red font-bold"></span>
+                        </li>
+                        <li class="flex justify-between d-none" id="net-payable-li">
+                            <span class="font-bold">{{ __('Net Payable') }}</span>
+                            <span id="net-payable-curr" class="font-bold"></span>
+                        </li>
 
                     </ul>
                     <div class="mt-6 pt-4 border-t">
                         <h3 class="text-2xl lg:text-3xl font-bold flex justify-between">
                             <span>{{ __('Total Cost') }}</span>
                             <span id="total-cost-curr">
-                                {{ currencyConverter(\Cart::subtotal() + allsetting()['shipping_charge'] + tax_amount(\Cart::subtotal()) - Session::get('CouponAmount') + $extraWeightFees) }}
+                                {{ currencyConverter(subtotal() + allsetting()['shipping_charge'] + $taxAmount - Session::get('CouponAmount') + $extraWeightFees) }}
                             </span>
                         </h3>
                     </div>
@@ -395,7 +432,7 @@
             document.addEventListener("DOMContentLoaded", function() {
 
                 function getFinalNumber(countryCode, phoneNumberInput) {
-                    
+
                     let phoneNumber = phoneNumberInput.trim();
                     let code = countryCode.trim();
 
@@ -417,7 +454,7 @@
                 const phoneDiv2 = document.getElementById("phoneDiv2");
                 let code = '';
                 //phoneDiv2
-               
+
                 //billing_phone
 
 
@@ -427,20 +464,20 @@
                         console.log('0')
 
                         if (selectedOption.value) {
-                           
+
                             code = selectedOption.getAttribute("data-code");
                             var phoneNumber = getFinalNumber(code, selectedOption.getAttribute("data-number"));
 
-                        
+
                             nameInput.value = selectedOption.getAttribute("data-name");
                             phoneInput.value = phoneNumber;
                             phoneNormalInput.value = phoneNumber;
                             emailInput.value = selectedOption.getAttribute("data-email");
-                            
 
-                           
+
+
                             billingPhoneInput.value = phoneNumber;
-                        
+
                             nameInput.setAttribute("readonly", "readonly");
                             phoneInput.setAttribute("readonly", "readonly");
                             if (selectedOption.getAttribute("data-email"))
@@ -448,7 +485,7 @@
                             phoneDiv.style.display = "block";
                             phoneDiv2.style.display = "none";
                         } else {
-                           
+
                             nameInput.value = "";
                             phoneInput.value = "";
                             emailInput.value = "";
@@ -524,38 +561,84 @@
                                     $('#city').append('<option value="' + value.id +
                                         '" > ' + value.name_en + '</option > ');
                                 });
+                                // Reset Area
+                                $('#area').empty();
+                                $('#area').append('<option value="">---اختيار المنطقة ---</option>');
                             }
                         });
                     } else {
                         $('#city').empty();
                         $('#city').append('<option value="">---اختيار المدينة ---</option>');
+                        $('#area').empty();
+                        $('#area').append('<option value="">---اختيار المنطقة ---</option>');
                     }
                 });
-            });
 
-            $('#city').on('change', function() {
-                var cityId = $(this).val();
-                if (cityId) {
-                    $.ajax({
-                        url: '/get-city-charge/' + cityId,
-                        type: "GET",
-                        dataType: "json",
-                        success: function(data) {
-                            console.log("city change data", data);
-                            $('#delivery-charge-curr').text(data.formatted_charge);
-                            $('#total-cost-curr').text(data.total_cost);
-                            $('#subtotal').text(data.subtotal);
-                            if (data.is_offer) {
-                                $('#offer-Discount-li').removeClass('d-none');
-                                $('#total-After-offer-Discount-li').removeClass('d-none');
-                                $('#total-After-offer-Discount').text(data.subtotal_After_offer);
-                                $('#offer-Discount').text(data.offer_Discount);
-                                toastr.success("تم تطبيق العرض! لقد وفرت:" + data.offer_Discount);
+                $('#city').on('change', function() {
+                    var cityId = $(this).val();
+                    if (cityId) {
+                        $.ajax({
+                            url: '/get-areas-by-city/' + cityId,
+                            type: "GET",
+                            dataType: "json",
+                            success: function(data) {
+                                $('#area').empty();
+                                $('#area').append(
+                                    '<option value="">---اختيار المنطقة ---</option>');
+                                $.each(data, function(key, value) {
+                                    $('#area').append('<option value="' + value.id +
+                                        '" > ' + value.name_en + '</option > ');
+                                });
                             }
+                        });
+                    } else {
+                        $('#area').empty();
+                        $('#area').append('<option value="">---اختيار المنطقة ---</option>');
+                    }
+                });
 
-                        }
-                    });
-                }
+                $('#area').on('change', function() {
+                    var areaId = $(this).val();
+                    if (areaId) {
+                        $.ajax({
+                            url: '/get-area-charge/' + areaId,
+                            type: "GET",
+                            dataType: "json",
+                            success: function(data) {
+                                console.log("area change data", data);
+                                $('#delivery-charge-curr').text(data.formatted_charge);
+                                $('#total-cost-curr').text(data.total_cost);
+                                $('#subtotal').text(data.subtotal);
+                                $('#tax-show-curr').text(data.tax_show);
+
+                                // Wallet & Net Payable
+                                if (parseFloat(data.wallet_used.replace(/[^\d.-]/g, '')) > 0) {
+                                    $('#wallet-used-li').removeClass('d-none');
+                                    $('#wallet-used-curr').text(data.wallet_used);
+                                    
+                                    $('#net-payable-li').removeClass('d-none');
+                                    $('#net-payable-curr').text(data.net_payable);
+                                    
+                                    // Make Total Cost look like "Gross Total"
+                                    // $('#total-cost-curr').closest('h3').find('span:first').text("{{ __('Order Value') }}");
+                                } else {
+                                    $('#wallet-used-li').addClass('d-none');
+                                    $('#net-payable-li').addClass('d-none');
+                                }
+                                if (data.is_offer) {
+                                    $('#offer-Discount-li').removeClass('d-none');
+                                    $('#total-After-offer-Discount-li').removeClass('d-none');
+                                    $('#total-After-offer-Discount').text(data.subtotal_After_offer);
+                                    $('#offer-Discount').text(data.offer_Discount);
+                                    toastr.success("تم تطبيق العرض! لقد وفرت:" + data.offer_Discount);
+                                } else {
+                                     $('#offer-Discount-li').addClass('d-none');
+                                     $('#total-After-offer-Discount-li').addClass('d-none');
+                                }
+                            }
+                        });
+                    }
+                });
             });
         </script>
     @endpush

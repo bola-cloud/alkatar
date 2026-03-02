@@ -19,19 +19,37 @@ class CartController extends Controller
 {
     public function addToCart(Request $request)
     {
-        // dd($request->all());
-        // dd("request size", $request->selectedSize);
         if ($request->ajax()) {
-            $product = Product::with('colors', 'sizes', )
+            $product = Product::with('colors', 'sizes', 'comboItems')
                 ->where('id', $request->product_id)
                 ->first();
-            $cd = Cart::content();
-            $ta = 0;
+
+            if (!$product) {
+                return response()->json(['error' => 'Product not found'], 404);
+            }
+
+            // Check Virtual Stock Validation FIRST
+            $availableStock = $product->virtual_stock;
+            $currentCartQty = 0;
+            foreach (Cart::content() as $cItem) {
+                if ($cItem->id == $product->id) {
+                    $currentCartQty += $cItem->qty;
+                }
+            }
+
+            if (($currentCartQty + $request->quantity) > $availableStock) {
+                $msg = $availableStock <= 0 ? __('Out of stock') : __('Requested quantity not available. Max stock: ') . $availableStock;
+                return response()->json(['error' => $msg], 422);
+            }
+
+            // Check if exact same item (with same options) already in cart
             foreach (Cart::content() as $cart) {
-                if ($cart->id == $product->id && $request->selectedSize == $cart->selectedSize) {
+                if ($cart->id == $product->id && ($request->selectedSize == ($cart->options->selectedSize ?? null)) && ($request->weight_id == ($cart->options->selectedWeightId ?? null))) {
                     $qty = $cart->qty + $request->quantity;
                     Cart::update($cart->rowId, $qty);
 
+                    $cd = Cart::content();
+                    $ta = 0;
                     foreach ($cd as $item) {
                         $ta = $ta + $item->price * $item->qty;
                     }
@@ -45,15 +63,9 @@ class CartController extends Controller
             if (isset($request->additions)) {
                 $additions = DB::table('additions')->where('product_id', $request->product_id)->whereIn('id', $request->additions)->get();
             }
-            if ($color_id == 0) {
-                $color_id = null;
-            }
-            if ($size_id == 0) {
-                $size_id = null;
-            }
+
             $color_name = Color::where('id', $request->color_id)->first();
             $size_name = Size::where('id', $request->size_id)->first();
-            $product_price = $request->price;
 
             $selected_size = DB::table('size_product')->where('Product_Id', $request->product_id)->where('Size_Id', $request->size_id)->first();
             $selected_weight = WeightProduct::where('product_id', $request->product_id)->where('id', $request->weight_id)->first();
@@ -63,19 +75,18 @@ class CartController extends Controller
                 'name' => $product->en_Product_Name,
                 'qty' => $request->quantity,
                 'price' => $request->price,
-                'size' => $size_id == 0 ? $size_id : $size_name->Size,
-                'selectedSize' => $request->selectedSize ?? null,
-                'selectedWeight' => $selected_weight ?? null,
                 'weight' => $selected_size->weight ?? 0,
                 'options' =>
                     [
                         'name_ar' => $product->fr_Product_Name,
                         'additions' => $additions ?? [],
-                        'size' => $size_id == 0 ? $size_id : $size_name->Size,
-                        'size_ar' => $size_id == 0 ? $size_id : $size_name->Size_ar,
-                        'color' => $color_id == 0 ? $color_id : $color_name->ColorCode,
+                        'size' => ($size_id > 0 && $size_name) ? $size_name->Size : null,
+                        'size_ar' => ($size_id > 0 && $size_name) ? $size_name->Size_ar : null,
+                        'color' => ($color_id > 0 && $color_name) ? $color_name->ColorCode : null,
                         'image' => $product->Primary_Image,
                         'weight' => $selected_weight ?? null,
+                        'selectedSize' => $request->selectedSize ?? $request->size_id ?? null,
+                        'selectedWeightId' => $request->weight_id ?? null,
                         'slug' => $product->en_Product_Slug,
                         'discount_price' => $request->price,
                         'item_tag' => $product->ItemTag,
@@ -108,13 +119,13 @@ class CartController extends Controller
         $data['description'] = $seo->description;
         $data['keywords'] = $seo->keywords;
         $data['users'] = User::where(['is_admin' => 0, 'status' => 1])
-                    ->select('id', 'name', 'number')
-                    ->get();
+            ->select('id', 'name', 'number')
+            ->get();
 
         if ($content->count()) {
-            return view('front.pages.cart.cart_content', $data);
+            return view('front.pages.new-cart.cart-content', $data);
         }
-        return view('front.pages.cart.empty-cart', $data);
+        return view('front.pages.new-cart.cart-content', $data);
     }
     public function cartDelete(Request $request)
     {
@@ -132,7 +143,12 @@ class CartController extends Controller
             $ta = $ta + $item->price * $item->qty;
         }
         $tc = Cart::count();
-        return response()->json([$tc, $ta, $cd]);
+        return response()->json([
+            $tc,
+            $ta,
+            $cd,
+            'total_amount_formatted' => currencyConverter($ta)
+        ]);
     }
 
     public function cartDecrease(Request $request)
@@ -150,7 +166,15 @@ class CartController extends Controller
                     $ta = $ta + $item->price * $item->qty;
                 }
                 $tc = Cart::count();
-                return response()->json([$tc, $ta, $cd, $st]);
+
+                return response()->json([
+                    $tc,
+                    $ta,
+                    $cd,
+                    $st,
+                    'total_amount_formatted' => currencyConverter($ta),
+                    'subtotal_formatted' => currencyConverter($st)
+                ]);
             }
         }
     }
@@ -162,6 +186,14 @@ class CartController extends Controller
         $ta = 0;
         foreach (Cart::content() as $cart) {
             if ($cart->rowId == $id) {
+                // Check Stock Validation
+                $product = Product::with('comboItems')->find($cart->id); // optimize: eager load comboItems
+                $availableStock = $product->virtual_stock;
+
+                if (($cart->qty + 1) > $availableStock) {
+                    return response()->json(['error' => __('Max stock reached')], 422);
+                }
+
                 $qty = $cart->qty + 1;
                 $singleValue = Cart::update($cart->rowId, $qty);
                 $st = $singleValue->price * $singleValue->qty;
@@ -170,7 +202,15 @@ class CartController extends Controller
                     $ta = $ta + $item->price * $item->qty;
                 }
                 $tc = Cart::count();
-                return response()->json([$tc, $ta, $cd, $st]);
+
+                return response()->json([
+                    $tc,
+                    $ta,
+                    $cd,
+                    $st,
+                    'total_amount_formatted' => currencyConverter($ta),
+                    'subtotal_formatted' => currencyConverter($st)
+                ]);
             }
         }
     }

@@ -43,7 +43,7 @@ class offersController extends Controller
                 ->make(true);
         }
         $data['title'] = __('Offers');
-        $data['free_shipping'] = Setting::where('slug', 'free_shipping')->get()[0]['value'];
+        $data['free_shipping'] = Setting::where('slug', 'free_shipping')->value('value') ?? 0;
 
         return view('admin.pages.offers.index', $data);
     }

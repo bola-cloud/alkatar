@@ -28,14 +28,16 @@
                 <div class="customers__table">
                     <table id="BlogTable" class="row-border data-table-filter table-style">
                         <thead>
-                        <tr>
-                            <th>{{ __('Name')}}</th>
-                            <th>{{ __('Number')}}</th>
-                            <th>{{ __('Email')}}</th>
-                            <th>{{ __('Orders')}}</th>
-                            <th>{{__("Registered At")}}</th>
-                            <th>{{ __('Action')}}</th>
-                        </tr>
+                            <tr>
+                                <th>{{ __('Name')}}</th>
+                                <th>{{ __('Number')}}</th>
+                                <th>{{ __('Email')}}</th>
+                                <th>{{ __('Subscribed')}}</th>
+                                <th>{{ __('Offer Types')}}</th>
+                                <th>{{ __('Orders')}}</th>
+                                <th>{{__("Registered At")}}</th>
+                                <th>{{ __('Action')}}</th>
+                            </tr>
                         </thead>
                         <tbody>
                         </tbody>

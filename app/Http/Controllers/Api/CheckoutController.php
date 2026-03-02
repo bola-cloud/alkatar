@@ -38,12 +38,31 @@ class CheckoutController extends Controller
         $user_id = $user->id;
         Log::info('Checkout requested', ['request' => $validated]);
 
-//        try {
+        //        try {
         // Simulate cart items and calculate totals
         $subtotal = $this->calculateSubtotal($validated['cart_items']);
-        $tax = tax_amount($subtotal, $validated['billing_country']);
-        $tax = tax_amount($subtotal, $validated['billing_country']);
-        $shipping_charge = delivery_charge($validated['billing_city'] ?? $validated['billing_country']);
+        // Prefer per-country Tax table (admin) if available, otherwise fallback to global tax percentage
+        $country = $validated['billing_country'] ?? null;
+        $countryName = null;
+        if ($country) {
+            if (is_numeric($country)) {
+                $countryModel = \App\Models\Country::find($country);
+                if ($countryModel) {
+                    $countryName = $countryModel->name_en ?? $countryModel->name;
+                }
+            } else {
+                $countryName = $country;
+            }
+        }
+
+        $tax = 0;
+        if ($countryName) {
+            $taxModel = \App\Models\Tax::where('country', $countryName)->where('status', 'active')->first();
+            if ($taxModel) {
+                $tax = ($subtotal * $taxModel->percentage) / 100;
+            }
+        }
+        $shipping_charge = delivery_charge($validated['billing_city'] ?? $validated['billing_state'] ?? $validated['billing_country']);
         $weight_charge = $this->calculateExtraWeightFees($validated['cart_items']);
         $grandTotal = $subtotal + $shipping_charge + $weight_charge + $tax;
 
@@ -119,9 +138,6 @@ class CheckoutController extends Controller
             'Is_Order_Successful' => false,
             'Is_Order_Completed' => false,
             'Payment_Method' => '',
-            'Payment_Status' => PAYMENT_PENDING,
-            'Order_Status' => ORDER_PENDING,
-            'order_source' => $validated['order_source'],
         ]);
         if ($order) {
             foreach ($validated['cart_items'] as $item) {
@@ -165,12 +181,13 @@ class CheckoutController extends Controller
                     'Product_Name' => $productName,
                     'Image' => $product->Primary_Image,
                     'Price' => $price,
-//                    'Color' => $item['color'] ?? null,
+                    //                    'Color' => $item['color'] ?? null,
                     'Size' => $sizeWeight,
                     'Quantity' => $item['quantity'],
                     'Total_Price' => $price * $item['quantity'],
                 ]);
             }
+            event(new \App\Events\OrderCreated($order));
 
         }
         $phoneNumber = auth()->user()->Number;
@@ -263,8 +280,8 @@ class CheckoutController extends Controller
         // Make the API call to Thawani
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
-            'thawani-api-key' => env('THAWANI_TEST_SECRET_KEY')
-        ])->post(env('THAWANI_TEST_CHECKOUT_URL') . '/checkout/session', $paymentData);
+            'thawani-api-key' => config('services.thawani.secret_key')
+        ])->post(config('services.thawani.checkout_url') . '/checkout/session', $paymentData);
 
         Log::info('Thawani API session response', ['response' => $response->body()]);
 
@@ -281,14 +298,14 @@ class CheckoutController extends Controller
 
 
             // Redirect the user to the Thawani payment page
-            $paymentUrl = env('THAWANI_TEST_PAY_URL') . $sessionId . "?key=" . env('THAWANI_TEST_PUBLIC_KEY');
+            $paymentUrl = config('services.thawani.pay_url') . $sessionId . "?key=" . config('services.thawani.public_key');
             info("payment url", ['url' => $paymentUrl]);
             return response()->json(['url' => $paymentUrl]);
         } else {
             return response()->json(['error' => 'Failed to create payment session'], 500);
         }
 
-//        } catch (\Exception $e) {
+        //        } catch (\Exception $e) {
 //            Log::error('Error during checkout', ['error' => $e->getMessage()]);
 //            return response()->json(['error' => 'Something went wrong'], 500);
 //        }
@@ -479,16 +496,37 @@ class CheckoutController extends Controller
 
     public function subQtyProduct($product_id, $qty)
     {
-        $product = Product::whereId($product_id)->first();
-        $new_qty = $product->Quantity - $qty;
-        if ($new_qty < 1) {
-            $nn_qty = 0;
+        $product = Product::with('comboItems')->whereId($product_id)->first();
+
+        if (($product->product_type === 'Combo' || $product->product_type === 'تجميعي') && $product->comboItems->isNotEmpty()) {
+            $isSingleItemCombo = $product->comboItems->count() === 1;
+
+            foreach ($product->comboItems as $component) {
+                // Calculate deduction based on multiplier: (Quantity in Combo * Combo Qty Sold)
+                // This covers both 1:1 (where qty=1) and Packs (where qty>1)
+                $qtyToDeduct = $component->pivot->quantity * $qty;
+
+                $componentObj = Product::find($component->id);
+                if ($componentObj) {
+                    $new_comp_qty = $componentObj->Quantity - $qtyToDeduct;
+                    $nn_comp_qty = $new_comp_qty < 0 ? 0 : $new_comp_qty;
+
+                    $componentObj->update([
+                        'Quantity' => $nn_comp_qty,
+                    ]);
+                }
+            }
         } else {
-            $nn_qty = $new_qty;
+            $new_qty = $product->Quantity - $qty;
+            if ($new_qty < 1) {
+                $nn_qty = 0;
+            } else {
+                $nn_qty = $new_qty;
+            }
+            $product->update([
+                'Quantity' => $nn_qty,
+            ]);
         }
-        $product->update([
-            'Quantity' => $nn_qty,
-        ]);
     }
 
     public function sendOrderMail($id)
@@ -497,7 +535,7 @@ class CheckoutController extends Controller
             ->with('order_details', 'user', 'coupon', 'order_details.product', 'billing', 'shipping')
             ->find($id);
 
-        $order['billing_address'] = json_decode($order->billing_address, true);
+        $order['billing_address'] = $order->billing_address;
         try {
             Mail::to('Alsaraamills@gmail.com')->send(new OrderConfirmMail($order));
             return response()->json(['msg' => 'OK']);
@@ -516,7 +554,7 @@ class CheckoutController extends Controller
         Log::info('Payment order id accessed', ['order_id' => $orderNumber]);
         $order = Order::where('Order_Number', $orderNumber)->first();
         Log::info('Order status updated on success', ['order_id' => $order->Id]);
-        if(!$order)
+        if (!$order)
             return redirect()->to(url('/'));
 
         $order->update([
@@ -540,7 +578,7 @@ class CheckoutController extends Controller
         Log::info('WhatsApp API response', ['response' => $response->json()]);
 
         return redirect()->to(url('/'));
-//        return redirect()->to("/#/donations/paymentstatus/?payId={$order->Order_Number}");
+        //        return redirect()->to("/#/donations/paymentstatus/?payId={$order->Order_Number}");
 //        return redirect()->to($request->getHost());
         //        return redirect()->to($request->getHost() . "/services/paymentstatus/?payId={$order->Id}");
     }
@@ -550,7 +588,7 @@ class CheckoutController extends Controller
         $orderNumber = $request->get('order_number');
         $order = Order::where('Order_Number', $orderNumber)->first();
         Log::info('Payment failed', ['order_id' => $orderNumber]);
-        if(!$order)
+        if (!$order)
             return redirect()->to(url('/'));
 
         $order->update([
@@ -562,9 +600,9 @@ class CheckoutController extends Controller
         ]);
         Log::info('Order status updated on failure', ['order_id' => $order->Id]);
         return redirect()->to(url('/'));
-//        return redirect()->to($request->getHost()."/services/paymentstatus/?payId={$order->Id}");
+        //        return redirect()->to($request->getHost()."/services/paymentstatus/?payId={$order->Id}");
 
-//        return redirect()->to('https://zakat-website.netlify.app/aboutus/');
+        //        return redirect()->to('https://zakat-website.netlify.app/aboutus/');
 
     }
 

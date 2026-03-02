@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use App\Models\Country;
 use App\Models\State;
 use App\Models\City;
+use App\Models\DeliveryCharge;
 
 class OmanStatesSeeder extends Seeder
 {
@@ -128,6 +129,9 @@ class OmanStatesSeeder extends Seeder
             ],
         ];
 
+        // default charge assigned to each city (adjust as needed)
+        $defaultCharge = 0.0;
+
         foreach ($governorates as $governorateData) {
             $governorate = $oman->states()->create([
                 'name_en' => $governorateData['name_en'],
@@ -135,7 +139,19 @@ class OmanStatesSeeder extends Seeder
             ]);
 
             foreach ($governorateData['cities'] as $cityData) {
-                $governorate->cities()->create($cityData);
+                // create the city and capture instance
+                $city = $governorate->cities()->create($cityData);
+
+                // add a delivery charge record for this city if one doesn't already exist
+                if ($city && !DeliveryCharge::where('city_id', $city->id)->exists()) {
+                    // Match admin creation: only insert fields submitted by admin form
+                    DeliveryCharge::create([
+                        'country' => $oman->name_en,
+                        'charge' => $defaultCharge,
+                        'city_id' => $city->id,
+                        'state_id' => $governorate->id,
+                    ]);
+                }
             }
         }
     }

@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HiSpeed - Organic Food Store</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Left decorative image (moved into Special Offers section) -->
+  <!-- Header + Navbar wrapper (sticky) -->
+  <div class="navbar-header sticky-header bg-white border-bottom">
+    <div class="container-fluid px-4">
+      <div class="d-flex align-items-stretch">
+        <!-- Logo spanning both rows (left side) -->
+        <div class="logo-container d-flex align-items-center pe-4">
+          <a href="#" class="d-flex align-items-center">
+            <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/hi-speed--4-send---final--06-3.png" alt="HiSpeed Logo" class="logo-spanning">
+          </a>
+        </div>
+
+        <!-- Right content: header row + navbar row stacked -->
+        <div class="flex-grow-1">
+          <!-- Header top row: location + search + actions -->
+          <header class="header-top-row d-flex align-items-center py-2">
+            <div class="d-none d-md-flex align-items-center text-muted small me-auto">
+              <i class="bi bi-geo-alt me-2"></i>
+              <span>Store Location: Lincoln- 344, Illinois, Chicago, USA</span>
+            </div>
+            <div class="flex-grow-1 text-center mx-3">
+              <!-- Search in header -->
+              <form class="d-flex justify-content-center search-form-header">
+                <div class="input-group" style="max-width: 500px;">
+                  <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+                  <button class="btn btn-success" type="submit">
+                    <i class="bi bi-search"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <div class="dropdown">
+                <button class="btn btn-sm dropdown-toggle border-0" type="button" data-bs-toggle="dropdown">
+                  <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/vector-4.svg" alt="Flag" style="width: 20px;"> English
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#">English</a></li>
+                  <li><a class="dropdown-item" href="#">Spanish</a></li>
+                </ul>
+              </div>
+              <!-- Sign Up moved to navbar right side (desktop + mobile) -->
+            </div>
+          </header>
+
+          <!-- Navigation row: menu + icons -->
+          <nav class="navbar navbar-expand-lg navbar-light p-0">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+              <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                  <a class="nav-link active text-success fw-semibold" href="#">Home</a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Categories</a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#">Fruits</a></li>
+                    <li><a class="dropdown-item" href="#">Vegetables</a></li>
+                  </ul>
+                </li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Pages</a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#">About</a></li>
+                    <li><a class="dropdown-item" href="#">Contact</a></li>
+                  </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="#">FAQs</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">About Us</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Contact Us</a></li>
+              </ul>
+
+              <!-- Mobile search inside navbar collapse -->
+              <div class="d-lg-none me-3 mb-3">
+                <form class="d-flex search-form">
+                  <div class="input-group">
+                    <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-success" type="submit">
+                      <i class="bi bi-search"></i>
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <div class="d-flex align-items-center gap-3">
+                <a href="#" class="text-dark position-relative">
+                  <i class="bi bi-heart fs-5"></i>
+                  <span class="badge bg-warning position-absolute top-0 start-100 translate-middle">2</span>
+                </a>
+                <a href="#" class="text-dark position-relative">
+                  <i class="bi bi-bag fs-5"></i>
+                  <span class="badge bg-warning position-absolute top-0 start-100 translate-middle">2</span>
+                </a>
+                <a href="#" class="text-dark">
+                  <i class="bi bi-person fs-5"></i>
+                </a>
+                <!-- Sign Up button placed to the right of the navbar icons -->
+                <a href="#" class="ms-2">
+                  <button class="btn btn-success rounded-pill px-4">Sign Up <i class="bi bi-arrow-right ms-2"></i></button>
+                </a>
+              </div>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero Carousel -->
+  <section class="hero-section py-4">
+    <div class="container-fluid px-4">
+      <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+          <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+          <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+          <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+        </div>
+        <div class="carousel-inner rounded-3">
+          <div class="carousel-item active">
+            <div class="hero-banner d-flex align-items-center" style="background: linear-gradient(108deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%), url(https://c.animaapp.com/mhnmip5wa2i9Oh/img/bannar-big-2.png) center/cover;">
+              <div class="container">
+                <div class="row">
+                  <div class="col-lg-6">
+                    <h1 class="display-3 fw-bold text-white mb-4">Fresh & Healthy<br>Organic Food</h1>
+                    <div class="d-flex align-items-center mb-3">
+                      <div class="bg-success" style="width: 3px; height: 60px;"></div>
+                      <div class="ms-3">
+                        <p class="text-white mb-1">Sale up to <span class="badge bg-success fs-6">30% OFF</span></p>
+                        <p class="text-white-50 small mb-0">Free shipping on all your order.</p>
+                      </div>
+                    </div>
+                    <button class="btn btn-light btn-lg rounded-pill px-5 mt-3">
+                      Shop now <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="carousel-item">
+            <div class="hero-banner d-flex align-items-center" style="background: linear-gradient(108deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%), url(https://c.animaapp.com/mhnmip5wa2i9Oh/img/bannar-big-2.png) center/cover;">
+              <div class="container">
+                <div class="row">
+                  <div class="col-lg-6">
+                    <h1 class="display-3 fw-bold text-white mb-4">Fresh & Healthy<br>Organic Food</h1>
+                    <div class="d-flex align-items-center mb-3">
+                      <div class="bg-success" style="width: 3px; height: 60px;"></div>
+                      <div class="ms-3">
+                        <p class="text-white mb-1">Sale up to <span class="badge bg-success fs-6">30% OFF</span></p>
+                        <p class="text-white-50 small mb-0">Free shipping on all your order.</p>
+                      </div>
+                    </div>
+                    <button class="btn btn-light btn-lg rounded-pill px-5 mt-3">
+                      Shop now <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="carousel-item">
+            <div class="hero-banner d-flex align-items-center" style="background: linear-gradient(108deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%), url(https://c.animaapp.com/mhnmip5wa2i9Oh/img/bannar-big-2.png) center/cover;">
+              <div class="container">
+                <div class="row">
+                  <div class="col-lg-6">
+                    <h1 class="display-3 fw-bold text-white mb-4">Fresh & Healthy<br>Organic Food</h1>
+                    <div class="d-flex align-items-center mb-3">
+                      <div class="bg-success" style="width: 3px; height: 60px;"></div>
+                      <div class="ms-3">
+                        <p class="text-white mb-1">Sale up to <span class="badge bg-success fs-6">30% OFF</span></p>
+                        <p class="text-white-50 small mb-0">Free shipping on all your order.</p>
+                      </div>
+                    </div>
+                    <button class="btn btn-light btn-lg rounded-pill px-5 mt-3">
+                      Shop now <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features py-5">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+          <div class="feature-card d-flex align-items-center p-4 bg-white rounded shadow-sm">
+            <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/delivery-truck-1.svg" alt="Delivery" class="me-3" style="width: 45px;">
+            <div>
+              <h6 class="mb-1 fw-semibold">Fast delivery within 20 min</h6>
+              <p class="text-muted small mb-0">Free shipping on all your order</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="feature-card d-flex align-items-center p-4 bg-white rounded shadow-sm">
+            <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/headphones-1.svg" alt="Support" class="me-3" style="width: 45px;">
+            <div>
+              <h6 class="mb-1 fw-semibold">Customer Support 24/7</h6>
+              <p class="text-muted small mb-0">Instant access to Support</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="feature-card d-flex align-items-center p-4 bg-white rounded shadow-sm">
+            <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/shopping-bag.svg" alt="Payment" class="me-3" style="width: 45px;">
+            <div>
+              <h6 class="mb-1 fw-semibold">100% Secure Payment</h6>
+              <p class="text-muted small mb-0">We ensure your money is save</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="feature-card d-flex align-items-center p-4 bg-white rounded shadow-sm">
+            <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/package.svg" alt="Guarantee" class="me-3" style="width: 45px;">
+            <div>
+              <h6 class="mb-1 fw-semibold">Money-Back Guarantee</h6>
+              <p class="text-muted small mb-0">30 Days Money-Back Guarantee</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Today Special Offers -->
+  <section class="special-offers py-5 bg-light">
+    <!-- decorative artwork inside this section -->
+    <div class="left-decorative" aria-hidden="true"></div>
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold">Today <span class="text-success">Special</span> Offers</h2>
+        <p class="text-muted">Lorem Ipsum Is Simply Dummy Text Of The Printing And Typesetting Industry.</p>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+          <div class="product-card card border-0 shadow-sm h-100">
+            <div class="position-relative">
+              <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/image-3.svg" class="card-img-top p-3" alt="Product">
+              <button class="btn btn-light btn-sm rounded-circle position-absolute top-0 end-0 m-3">
+                <i class="bi bi-heart"></i>
+              </button>
+            </div>
+            <div class="card-body">
+              <h6 class="card-title">Green Capsicum</h6>
+              <div class="d-flex align-items-center mb-2">
+                <span class="text-warning">★★★★★</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="h5 mb-0">$14.99</span>
+                <button class="btn btn-success btn-sm rounded-pill">
+                  <i class="bi bi-bag me-1"></i> Add
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="product-card card border-0 shadow-sm h-100">
+            <div class="position-relative">
+              <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/image-3.svg" class="card-img-top p-3" alt="Product">
+              <button class="btn btn-light btn-sm rounded-circle position-absolute top-0 end-0 m-3">
+                <i class="bi bi-heart"></i>
+              </button>
+            </div>
+            <div class="card-body">
+              <h6 class="card-title">Green Capsicum</h6>
+              <div class="d-flex align-items-center mb-2">
+                <span class="text-warning">★★★★★</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="h5 mb-0">$14.99</span>
+                <button class="btn btn-success btn-sm rounded-pill">
+                  <i class="bi bi-bag me-1"></i> Add
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="product-card card border-0 shadow-sm h-100">
+            <div class="position-relative">
+              <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/image-3.svg" class="card-img-top p-3" alt="Product">
+              <button class="btn btn-light btn-sm rounded-circle position-absolute top-0 end-0 m-3">
+                <i class="bi bi-heart"></i>
+              </button>
+            </div>
+            <div class="card-body">
+              <h6 class="card-title">Green Capsicum</h6>
+              <div class="d-flex align-items-center mb-2">
+                <span class="text-warning">★★★★★</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="h5 mb-0">$14.99</span>
+                <button class="btn btn-success btn-sm rounded-pill">
+                  <i class="bi bi-bag me-1"></i> Add
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="product-card card border-0 shadow-sm h-100">
+            <div class="position-relative">
+              <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/image-3.svg" class="card-img-top p-3" alt="Product">
+              <button class="btn btn-light btn-sm rounded-circle position-absolute top-0 end-0 m-3">
+                <i class="bi bi-heart"></i>
+              </button>
+            </div>
+            <div class="card-body">
+              <h6 class="card-title">Green Capsicum</h6>
+              <div class="d-flex align-items-center mb-2">
+                <span class="text-warning">★★★★★</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="h5 mb-0">$14.99</span>
+                <button class="btn btn-success btn-sm rounded-pill">
+                  <i class="bi bi-bag me-1"></i> Add
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Best Seller Products -->
+  <section class="best-sellers py-5">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Best Seller Products</h2>
+        <a href="#" class="btn btn-link text-warning text-decoration-none">
+          View All <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+          <div class="product-card card border-0 shadow-sm h-100">
+            <div class="position-relative">
+              <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/image-3.svg" class="card-img-top p-3" alt="Product">
+              <button class="btn btn-light btn-sm rounded-circle position-absolute top-0 end-0 m-3">
+                <i class="bi bi-heart"></i>
+              </button>
+            </div>
+            <div class="card-body">
+              <h6 class="card-title">Green Capsicum</h6>
+              <div class="d-flex align-items-center mb-2">
+                <span class="text-warning">★★★★★</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="h5 mb-0">$14.99</span>
+                <button class="btn btn-success btn-sm rounded-pill">
+                  <i class="bi bi-bag me-1"></i> Add
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="product-card card border-0 shadow-sm h-100">
+            <div class="position-relative">
+              <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/image-3.svg" class="card-img-top p-3" alt="Product">
+              <button class="btn btn-light btn-sm rounded-circle position-absolute top-0 end-0 m-3">
+                <i class="bi bi-heart"></i>
+              </button>
+            </div>
+            <div class="card-body">
+              <h6 class="card-title">Green Capsicum</h6>
+              <div class="d-flex align-items-center mb-2">
+                <span class="text-warning">★★★★★</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="h5 mb-0">$14.99</span>
+                <button class="btn btn-success btn-sm rounded-pill">
+                  <i class="bi bi-bag me-1"></i> Add
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="product-card card border-0 shadow-sm h-100">
+            <div class="position-relative">
+              <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/image-3.svg" class="card-img-top p-3" alt="Product">
+              <button class="btn btn-light btn-sm rounded-circle position-absolute top-0 end-0 m-3">
+                <i class="bi bi-heart"></i>
+              </button>
+            </div>
+            <div class="card-body">
+              <h6 class="card-title">Green Capsicum</h6>
+              <div class="d-flex align-items-center mb-2">
+                <span class="text-warning">★★★★★</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="h5 mb-0">$14.99</span>
+                <button class="btn btn-success btn-sm rounded-pill">
+                  <i class="bi bi-bag me-1"></i> Add
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="product-card card border-0 shadow-sm h-100">
+            <div class="position-relative">
+              <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/image-3.svg" class="card-img-top p-3" alt="Product">
+              <button class="btn btn-light btn-sm rounded-circle position-absolute top-0 end-0 m-3">
+                <i class="bi bi-heart"></i>
+              </button>
+            </div>
+            <div class="card-body">
+              <h6 class="card-title">Green Capsicum</h6>
+              <div class="d-flex align-items-center mb-2">
+                <span class="text-warning">★★★★★</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="h5 mb-0">$14.99</span>
+                <button class="btn btn-success btn-sm rounded-pill">
+                  <i class="bi bi-bag me-1"></i> Add
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sale Banner -->
+  <section class="sale-banner py-5">
+    <div class="container-fluid px-4">
+      <div class="row align-items-center bg-warning rounded-3 p-5 best-deals" >
+        <!-- <div class="col-md-6">
+          <div class="d-flex align-items-center mb-4">
+            <div class="discount-badge bg-warning text-white rounded-circle d-flex flex-column align-items-center justify-content-center me-4" style="width: 120px; height: 120px;">
+              <span class="h2 fw-bold mb-0">56%</span>
+              <span class="small">OFF</span>
+            </div>
+            <div class="text-white">
+              <p class="small mb-1">BEST DEALS</p>
+              <h2 class="fw-bold mb-3">Sale of the Month</h2>
+              <div class="d-flex gap-3 mb-3">
+                <div class="text-center">
+                  <div class="h4 fw-bold mb-0">00</div>
+                  <small>DAYS</small>
+                </div>
+                <div class="h4">:</div>
+                <div class="text-center">
+                  <div class="h4 fw-bold mb-0">02</div>
+                  <small>HOURS</small>
+                </div>
+                <div class="h4">:</div>
+                <div class="text-center">
+                  <div class="h4 fw-bold mb-0">18</div>
+                  <small>MINS</small>
+                </div>
+                <div class="h4">:</div>
+                <div class="text-center">
+                  <div class="h4 fw-bold mb-0">46</div>
+                  <small>SECS</small>
+                </div>
+              </div>
+              <button class="btn btn-success rounded-pill px-4">
+                Shop Now <i class="bi bi-arrow-right ms-2"></i>
+              </button>
+            </div>
+          </div>
+        </div> -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Choose Us -->
+  <section class="why-choose-us py-5 bg-light">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-6 mb-4 mb-lg-0">
+          <img src="images/reviews.png" alt="Chef" class="img-fluid rounded">
+        </div>
+        <div class="col-lg-6">
+          <h2 class="fw-bold mb-4">100% Trusted<br>Organic Food Store</h2>
+          <div class="mb-4">
+            <div class="d-flex align-items-start mb-3">
+              <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/check.png" alt="Check" class="me-3" style="width: 30px;">
+              <div>
+                <h5 class="fw-semibold">Healthy & natural food for lovers of healthy food.</h5>
+                <p class="text-muted">Ut quis tempus erat. Phasellus euismod bibendum magna non tristique.</p>
+              </div>
+            </div>
+            <div class="d-flex align-items-start mb-3">
+              <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/check-1.png" alt="Check" class="me-3" style="width: 30px;">
+              <div>
+                <h5 class="fw-semibold">Every day fresh and quality products for you.</h5>
+                <p class="text-muted">Maecenas vehicula a justo quis laoreet. Sed in placerat nibh.</p>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-success rounded-pill px-4">
+            Shop Now <i class="bi bi-arrow-right ms-2"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="testimonials py-5">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <p class="text-success text-uppercase small mb-1">TESTIMONIAL</p>
+          <h2 class="fw-bold">What Our Customer Says</h2>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <i class="bi bi-quote text-success fs-1"></i>
+              <p class="card-text text-muted my-3">Pellentesque eu nibh eget mauris congue mattis mattis nec tellus. Phasellus imperdiet elit eu magna dictum.</p>
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                  <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/image.png" alt="Customer" class="rounded-circle me-3" style="width: 50px; height: 50px;">
+                  <div>
+                    <h6 class="mb-0">Robert Fox</h6>
+                    <small class="text-muted">Customer</small>
+                  </div>
+                </div>
+                <span class="text-warning">★★★★★</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <i class="bi bi-quote text-success fs-1"></i>
+              <p class="card-text text-muted my-3">Pellentesque eu nibh eget mauris congue mattis mattis nec tellus. Phasellus imperdiet elit eu magna dictum.</p>
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                  <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/image-1.png" alt="Customer" class="rounded-circle me-3" style="width: 50px; height: 50px;">
+                  <div>
+                    <h6 class="mb-0">Dianne Russell</h6>
+                    <small class="text-muted">Customer</small>
+                  </div>
+                </div>
+                <span class="text-warning">★★★★★</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <i class="bi bi-quote text-success fs-1"></i>
+              <p class="card-text text-muted my-3">Pellentesque eu nibh eget mauris congue mattis mattis nec tellus. Phasellus imperdiet elit eu magna dictum.</p>
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                  <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/image-2.png" alt="Customer" class="rounded-circle me-3" style="width: 50px; height: 50px;">
+                  <div>
+                    <h6 class="mb-0">Eleanor Pena</h6>
+                    <small class="text-muted">Customer</small>
+                  </div>
+                </div>
+                <span class="text-warning">★★★★★</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Company Logos -->
+  <section class="company-logos py-5 bg-light">
+    <div class="container">
+      <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/company-logo.svg" alt="Company Logos" class="img-fluid">
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <!-- Light top strip -->
+    <div class="footer-top" style="background:#EDF2EE;">
+      <div class="container d-flex align-items-center justify-content-between py-3">
+        <div>
+          <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/hi-speed--4-send---final--06-3.png" alt="Logo" style="height:106px">
+        </div>
+        <div class="d-flex gap-3">
+          <a class="d-flex align-items-center justify-content-center bg-success text-white rounded-circle" style="width:36px;height:36px"><i class="bi bi-facebook"></i></a>
+          <a class="d-flex align-items-center justify-content-center border rounded-circle" style="width:36px;height:36px"><i class="bi bi-twitter"></i></a>
+          <a class="d-flex align-items-center justify-content-center border rounded-circle" style="width:36px;height:36px"><i class="bi bi-pinterest"></i></a>
+          <a class="d-flex align-items-center justify-content-center border rounded-circle" style="width:36px;height:36px"><i class="bi bi-instagram"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Combine payments / copyright into the dark main footer container so they share same background and decorations -->
+    <!-- Move bottom row into footer-main's container -->
+    <div class="footer-main text-white" style="background:#002603 !important;">
+      <div class="container py-5">
+        <div class="row g-4 mb-5">
+          <div class="col-lg-4 col-md-6">
+
+            <h5 class="mb-3 fw-semibold mt-4"> About Hi Speed </h5>
+            <!-- <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/hi-speed--4-send---final--06-3.png" alt="Logo" class="mb-3" style="height: 60px;"> -->
+            <p class="text-muted mb-3">Morbi cursus porttitor enim lobortis molestie. Duis gravida turpis dui, eget bibendum magna congue nec.</p>
+            <!-- <div class="mb-3">
+              <p class="text-white mb-2"><i class="bi bi-telephone me-2"></i>(219) 555-0114</p>
+              <p class="text-muted mb-0">or</p>
+              <p class="text-white"><i class="bi bi-envelope me-2"></i>Proxy@gmail.com</p>
+            </div> -->
+          </div>
+          <div class="col-lg-2 col-md-6">
+            <h5 class="mb-3 fw-semibold">My Account</h5>
+            <ul class="list-unstyled">
+              <li class="mb-2"><a href="#" class="text-muted text-decoration-none hover-link">My Account</a></li>
+              <li class="mb-2"><a href="#" class="text-muted text-decoration-none hover-link">Order History</a></li>
+              <li class="mb-2"><a href="#" class="text-muted text-decoration-none hover-link">Shopping Cart</a></li>
+              <li class="mb-2"><a href="#" class="text-muted text-decoration-none hover-link">Wishlist</a></li>
+              <li class="mb-2"><a href="#" class="text-muted text-decoration-none hover-link">Settings</a></li>
+            </ul>
+          </div>
+          <div class="col-lg-2 col-md-6">
+            <h5 class="mb-3 fw-semibold">Helps</h5>
+            <ul class="list-unstyled">
+              <li class="mb-2"><a href="#" class="text-muted text-decoration-none hover-link">Contact</a></li>
+              <li class="mb-2"><a href="#" class="text-muted text-decoration-none hover-link">Faqs</a></li>
+              <li class="mb-2"><a href="#" class="text-muted text-decoration-none hover-link">Terms & Condition</a></li>
+              <li class="mb-2"><a href="#" class="text-muted text-decoration-none hover-link">Privacy Policy</a></li>
+            </ul>
+          </div>
+          <div class="col-lg-2 col-md-6">
+            <h5 class="mb-3 fw-semibold">Proxy</h5>
+            <ul class="list-unstyled">
+              <li class="mb-2"><a href="#" class="text-muted text-decoration-none hover-link">About</a></li>
+              <li class="mb-2"><a href="#" class="text-muted text-decoration-none hover-link">Shop</a></li>
+              <li class="mb-2"><a href="#" class="text-muted text-decoration-none hover-link">Product</a></li>
+              <li class="mb-2"><a href="#" class="text-muted text-decoration-none hover-link">Products Details</a></li>
+              <li class="mb-2"><a href="#" class="text-muted text-decoration-none hover-link">Track Order</a></li>
+            </ul>
+          </div>
+          <div class="col-lg-2 col-md-6">
+            <h5 class="mb-3 fw-semibold">Categories</h5>
+            <ul class="list-unstyled">
+              <li class="mb-2"><a href="#" class="text-muted text-decoration-none hover-link">Fruit & Vegetables</a></li>
+              <li class="mb-2"><a href="#" class="text-muted text-decoration-none hover-link">Meat & Fish</a></li>
+              <li class="mb-2"><a href="#" class="text-muted text-decoration-none hover-link">Bread & Bakery</a></li>
+              <li class="mb-2"><a href="#" class="text-muted text-decoration-none hover-link">Beauty & Health</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="border-top border-secondary py-3 mt-3">
+          <div class="row align-items-center">
+            <div class="col-md-4 d-none d-md-block"><!-- spacer to center the copyright on desktop --></div>
+            <div class="col-12 col-md-4 text-center mb-2 mb-md-0">
+              <p class="text-muted mb-0">HiSpeed © 2025. All Rights Reserved</p>
+            </div>
+            <div class="col-12">
+              <div class="d-flex justify-content-center justify-content-md-end align-items-center gap-3">
+                <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/applepay.svg" alt="Apple Pay" style="height: 32px;">
+                <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/visa-logo.svg" alt="Visa" style="height: 32px;">
+                <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/discover-1.png" alt="Discover" style="height: 32px;">
+                <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/mastercard-1.png" alt="Mastercard" style="height: 32px;">
+                <span class="text-muted ms-2">Secure Payment</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

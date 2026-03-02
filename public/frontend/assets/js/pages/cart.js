@@ -1,53 +1,117 @@
 (function ($) {
     "use strict";
-    $(document).on('click', '.qty_increment_cart', function () {
-        let id = ($(this).attr("data-id"));
-        let $this = $(this);
-        let quantity = $this.parent().find('.qty_value').val();
+
+    // Helper to format currency
+    function formatCurrency(amount) {
+        // You might want to fetch the symbol or use a global variable if available
+        // For now, assuming OMR or generic
+        return amount.toFixed(3) + " OMR";
+    }
+
+    // UPDATE QUANTITY
+    function updateCartQuantity(rowId, action, currentQty) {
+        let url = action === 'increase'
+            ? $('#CartIncrementFromSession').data('url')
+            : $('#CartDecrementFromSession').data('url');
+
         $.ajax({
             method: "GET",
-            url: $('#CartDecrementFromSession').data("url"),
+            url: url,
             data: {
-                id: id,
-                quantity: quantity,
+                id: rowId,
+                quantity: currentQty
             },
             success: function (data) {
+                // data[0] = count
+                // data[1] = total amount (float)
+                // data[2] = cart content object
+                // data['total_amount_formatted'] = formatted string
 
-                // let currsym = currencySymbol();
-                $('.totalCountItem').html(data[0]);
-                $('.totalAmount').html(currencyPrice(data[1]));
-                let Img = $('#productImgAsset').data('url');
-                let obj = data[2];
-                let bodyData = '';
-                let bodyArray = [];
-                let i = 1;
-                Object.keys(obj).forEach(function (key) {
-                    bodyData = '<div class="product-item cart-product-item"><div class="single-grid-product"><div class="product-top"><a href="single-product.html"><img class="product-thumbnal" src="' + Img + '/' + obj[key]['options']['image'] + '" alt="cart"></a></div><div class="product-info"><div class="product-name-part"><h3 class="product-name"><a class="product-link" href="single-product.html">' + obj[key]['name'] + '</a></h3><div class="cart-quantity input-group"><div class="increase-btn dec qtybutton btn qty_decrease" data-id="' + obj[key]['rowId'] + '">-</div><input class="qty-input cart-plus-minus-box qty_value" type="text" name="qtybutton" id="qty_value" value="' + obj[key]['qty'] + '" readonly /><div class="increase-btn inc qtybutton btn qty_increase" data-id="' + obj[key]['rowId'] + '">+</div></div><button class="cart-remove-btn deleteItem" data-id="' + obj[key]['rowId'] + '">Remove</button></div><div class="product-price"><span class="regular-price">' +  currencyPrice(obj[key]['weight'] * obj[key]['qty']) + '</span><span class="price">' +  currencyPrice(obj[key]['price'] * obj[key]['qty']) + '</span></div></div></div></div>';
-                    bodyArray.push(bodyData);
-                });
-                $("#bodyData").html(bodyArray);
-                let Toast = Swal.mixin({
+                // Update formatted totals
+                $('.totalCountItem').text(data[0]);
+                $('.totalAmount').text(data['total_amount_formatted']);
+                $('.cart-page-final-total').text(data['total_amount_formatted']); // Update Grand Total
+
+                // Update specific row details
+                let cartItems = data[2];
+                if (cartItems && cartItems[rowId]) {
+                    let item = cartItems[rowId];
+                    // Update input value
+                    $(`.qty_value[data-id="${rowId}"]`).val(item.qty); // If input has data-id
+                    // Or find input relative to button if logic differs
+
+                    // Update Item Subtotal
+                    if (data['subtotal_formatted']) {
+                        row.find('.SubTotalAmount').text(data['subtotal_formatted']);
+                    } else {
+                        // Fallback
+                        let itemSubtotal = item.qty * item.price;
+                        row.find('.SubTotalAmount').text(itemSubtotal.toFixed(3) + " OMR");
+                    }
+                }
+
+                // Toast Notification
+                const Toast = Swal.mixin({
                     toast: true,
                     position: 'bottom-end',
                     showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                    }
-                })
+                    timer: 1500,
+                    timerProgressBar: true
+                });
                 Toast.fire({
                     icon: 'success',
-                    title: 'Cart Quantity Decrement'
-                })
+                    title: 'Cart Updated'
+                });
+            },
+            error: function (xhr) {
+                console.error("Cart update failed", xhr);
+            }
+        });
+    }
 
+    // CLICK HANDLERS
+    $(document).on('click', '.qty_increase', function (e) {
+        e.preventDefault();
+        let rowId = $(this).data('id');
+        let input = $(this).siblings('.qty_value');
+        let currentQty = parseInt(input.val());
+        updateCartQuantity(rowId, 'increase', currentQty);
+    });
+
+    $(document).on('click', '.qty_decrease', function (e) {
+        e.preventDefault();
+        let rowId = $(this).data('id');
+        let input = $(this).siblings('.qty_value');
+        let currentQty = parseInt(input.val());
+
+        if (currentQty > 1) {
+            updateCartQuantity(rowId, 'decrease', currentQty);
+        }
+    });
+
+    // Handle Delete
+    $(document).on('click', '.deleteItemCart', function (e) {
+        e.preventDefault();
+        let rowId = $(this).data('id');
+        let url = $('#CartDeleteFromSession').data('url');
+        let $this = $(this);
+
+        $.ajax({
+            method: "GET",
+            url: url,
+            data: { id: rowId },
+            success: function (data) {
+                $this.closest('.card').remove(); // Remove row
+                $('.totalCountItem').text(data[0]);
+                $('.totalAmount').text(data['total_amount_formatted']);
+                $('.cart-page-final-total').text(data['total_amount_formatted']);
+
+                // If empty
+                if (data[0] == 0) {
+                    location.reload();
+                }
             }
         });
     });
-    $(document).ready(function () {
 
-
-
-    });
-})(jQuery)
+})(jQuery);

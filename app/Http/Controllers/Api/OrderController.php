@@ -16,7 +16,7 @@ class OrderController extends Controller
         $order = Order::query()
             ->with('order_details', 'user', 'coupon', 'order_details.product', 'billing', 'shipping')
             ->find($request->id);
-        $order['billing_address'] = json_decode($order->billing_address, true);
+        $order['billing_address'] = $order->billing_address;
 
 
         $currentLocale = app()->getLocale();

@@ -15,16 +15,16 @@ class UpdateUsersSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('users')
+        DB::table('admins')
             ->where('email', 'admin@gmail.com')
             ->update([
-                'password' => Hash::make('T9!vG4#rQ2zM8@xL'),
+                'password' => Hash::make('12345678'),
             ]);
 
-        DB::table('users')
-            ->where('email', 'dev@gmail.com')
-            ->update([
-                'password' => Hash::make('F7$pK1&wD6nZ3^hR'),
-            ]);
+        // DB::table('users')
+        //     ->where('email', 'dev@gmail.com')
+        //     ->update([
+        //         'password' => Hash::make('F7$pK1&wD6nZ3^hR'),
+        //     ]);
     }
 }

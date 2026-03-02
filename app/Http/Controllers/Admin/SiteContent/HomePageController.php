@@ -4,18 +4,24 @@ namespace App\Http\Controllers\Admin\SiteContent;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin\SiteContent\Homepage;
+use App\Models\Admin\SiteContent\HomepageSection;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use PhpParser\Node\Stmt\TryCatch;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\App as AppFacade;
 
 class HomePageController extends Controller
 {
     public function homePage(Request $request)
     {
         if ($request->ajax()) {
-            $data = Homepage::latest()->orderBy('id', 'DESC')->get();
+            // prefer homepage_sections if available
+            $data = HomepageSection::orderBy('display_order')->get();
+            if ($data->isEmpty()) {
+                $data = Homepage::latest()->orderBy('id', 'DESC')->get();
+            }
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('action', function ($data) {
@@ -25,16 +31,20 @@ class HomePageController extends Controller
                     return $btn;
                 })
                 ->editColumn('Location', function ($data) {
-                    return  '<span class="status active">' . $data->Location . '</span>';
+                    $loc = $data->Location ?? $data->section_key ?? '';
+                    return  '<span class="status active">' . $loc . '</span>';
                 })
                 ->editColumn('Title', function ($data) {
-                    return Str::limit($data->en_Title, 15);
+                    $title = $data->en_Title ?? data_get($data, 'content_en.title', '');
+                    return Str::limit($title, 15);
                 })
                 ->editColumn('Description_One', function ($data) {
-                    return Str::limit($data->en_Description_One, 15);
+                    $desc = $data->en_Description_One ?? data_get($data, 'content_en.lead', '');
+                    return Str::limit($desc, 15);
                 })
                 ->editColumn('Description_Two', function ($data) {
-                    return Str::limit($data->en_Description_Two, 15);
+                    $dtwo = $data->en_Description_Two ?? (is_array(data_get($data,'content_en.points')) ? implode('\n', data_get($data,'content_en.points')) : data_get($data,'content_en.points',''));
+                    return Str::limit($dtwo, 15);
                 })
                 ->rawColumns(['action', 'Description_One', 'Description_Two', 'Title', 'Location'])
                 ->make(true);
@@ -45,15 +55,94 @@ class HomePageController extends Controller
     public function homePageEdit($id)
     {
         $data['title'] = __('Edit Home Page Content');
-        $data['edit'] = Homepage::where('id', $id)->first();
+        $section = HomepageSection::find($id);
+        // pass all sections so the edit page can render each section as a separate card
+        try {
+            $data['sections'] = HomepageSection::orderBy('display_order')->get();
+        } catch (\Exception $e) {
+            $data['sections'] = collect();
+        }
+        if ($section) {
+            $data['edit'] = $section;
+            $data['is_section'] = true;
+        } else {
+            $data['edit'] = Homepage::where('id', $id)->first();
+            $data['is_section'] = false;
+        }
+        // Legacy mapping: when the UI display locale is Arabic we keep translations in the
+        // `fr` files for backward compatibility. Set the translator locale to `fr`
+        // so Blade `__()` calls use `resources/lang/fr.json` for this view.
+        $displayLocale = session('HTML_LANG', app()->getLocale() ?? 'en');
+        if ($displayLocale === 'ar') {
+            AppFacade::setLocale('fr');
+        }
         return view('admin.pages.site_content.home_page.edit', $data);
     }
     public function homePageUpdate(Request $request)
     {
         $id = $request->id;
+        $section = HomepageSection::find($id);
+        if ($section) {
+            // update section
+            if ($request->hasFile('image')) {
+                $image = fileUpload($request['image'], PromotionImage());
+                $section->image = $image;
+            }
+
+            // Special handling for features section (edit four features only)
+            if ($section->section_key === 'newdesign_features') {
+                $items_en = [];
+                $items_fr = [];
+                for ($i = 1; $i <= 4; $i++) {
+                    $items_en[] = [
+                        'title' => $request->input('en_feature_' . $i . '_title', ''),
+                        'desc' => $request->input('en_feature_' . $i . '_desc', ''),
+                        'icon' => $request->input('en_feature_' . $i . '_icon', ''),
+                    ];
+                    $items_fr[] = [
+                        'title' => $request->input('fr_feature_' . $i . '_title', ''),
+                        'desc' => $request->input('fr_feature_' . $i . '_desc', ''),
+                        'icon' => $request->input('fr_feature_' . $i . '_icon', ''),
+                    ];
+                }
+                $section->content_en = ['items' => $items_en];
+                $section->content_fr = ['items' => $items_fr];
+                $ok = $section->save();
+                if ($ok) {
+                    return redirect()->route('admin.home.page.site.content.edit', $section->id)->with('success', __('Successfully Updated !'));
+                }
+                return redirect()->route('admin.home.page.site.content.edit', $section->id)->with('error', __('Does not Updated !'));
+            }
+
+            // General section handling (title/lead/points/button)
+            $content_en = [
+                'title' => $request->en_title,
+                'lead' => $request->en_description_one,
+                'points' => preg_split('/\r?\n/', trim($request->en_description_two ?? '')),
+                'button' => ['text' => $request->en_button_text, 'url' => $request->en_button_url]
+            ];
+            $content_fr = [
+                'title' => $request->fr_title,
+                'lead' => $request->fr_description_one,
+                'points' => preg_split('/\r?\n/', trim($request->fr_description_two ?? '')),
+                'button' => ['text' => $request->fr_button_text, 'url' => $request->fr_button_url]
+            ];
+            $section->content_en = $content_en;
+            $section->content_fr = $content_fr;
+            $ok = $section->save();
+            if ($ok) {
+                return redirect()->route('admin.home.page.site.content.edit', $section->id)->with('success', __('Successfully Updated !'));
+            }
+            return redirect()->route('admin.home.page.site.content.edit', $section->id)->with('error', __('Does not Updated !'));
+        }
         $homepage = Homepage::where('id', $id)->first();
         if ($request->hasFile('image')) {
-            $image = fileUpload($request['image'], aboutUsPage());
+            // for about_us we use aboutUsPage(), for new-design hero prefer PromotionImage()
+            if ($request->location == 'about_us') {
+                $image = fileUpload($request['image'], aboutUsPage());
+            } else {
+                $image = fileUpload($request['image'], PromotionImage());
+            }
             $homepage->image = $image;
             $homepage->save();
         }
@@ -63,7 +152,29 @@ class HomePageController extends Controller
             'en_Description_Two' => $request->en_description_two,
             'fr_Title' => $request->fr_title,
             'fr_Description_One' => $request->fr_description_one,
-            'fr_Description_Two' => $request->fr_description_two
+            'fr_Description_Two' => $request->fr_description_two,
+            // optional CTA/button fields
+            'en_button_text' => $request->en_button_text,
+            'en_button_url' => $request->en_button_url,
+            'fr_button_text' => $request->fr_button_text,
+            'fr_button_url' => $request->fr_button_url,
+            // features fields (if present)
+            'en_feature_1_title' => $request->en_feature_1_title,
+            'en_feature_1_desc' => $request->en_feature_1_desc,
+            'en_feature_2_title' => $request->en_feature_2_title,
+            'en_feature_2_desc' => $request->en_feature_2_desc,
+            'en_feature_3_title' => $request->en_feature_3_title,
+            'en_feature_3_desc' => $request->en_feature_3_desc,
+            'en_feature_4_title' => $request->en_feature_4_title,
+            'en_feature_4_desc' => $request->en_feature_4_desc,
+            'fr_feature_1_title' => $request->fr_feature_1_title,
+            'fr_feature_1_desc' => $request->fr_feature_1_desc,
+            'fr_feature_2_title' => $request->fr_feature_2_title,
+            'fr_feature_2_desc' => $request->fr_feature_2_desc,
+            'fr_feature_3_title' => $request->fr_feature_3_title,
+            'fr_feature_3_desc' => $request->fr_feature_3_desc,
+            'fr_feature_4_title' => $request->fr_feature_4_title,
+            'fr_feature_4_desc' => $request->fr_feature_4_desc,
         ]);
         if ($general) {
             // (['image'=>'ddddd']);

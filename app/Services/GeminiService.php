@@ -32,7 +32,10 @@ class GeminiService
         $this->defaultLimit = (int) (env('AI_SQL_DEFAULT_LIMIT', 200));
 
         if (empty($this->model) || empty($this->key)) {
-            throw new \RuntimeException('Gemini model/key are not configured. Set services.gemini.model and services.gemini.key.');
+            // throw new \RuntimeException('Gemini model/key are not configured. Set services.gemini.model and services.gemini.key.');
+            \Illuminate\Support\Facades\Log::warning('Gemini model/key are not configured. AI features will not work.');
+            $this->model = 'dummy';
+            $this->key = 'dummy';
         }
     }
 

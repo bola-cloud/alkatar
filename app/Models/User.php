@@ -33,7 +33,8 @@ class User extends Authenticatable
         'About',
         'password',
         'is_admin',
-        'status'
+        'status',
+        'offer_types'
     ];
 
     /**
@@ -53,6 +54,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'offer_types' => 'array',
     ];
 
     protected static function boot()
@@ -62,6 +64,20 @@ class User extends Authenticatable
             $user->orders()->delete();
             $user->payments()->delete();
         });
+    }
+
+    public function getImageAttribute($value)
+    {
+        return isset($value) ? asset(IMG_PROFILE_PIC_PATH . $value) : null;
+    }
+
+    public function toArray()
+    {
+        $array = parent::toArray();
+        if (isset($array['image']) && !empty($array['image']) && strpos($array['image'], 'http') !== 0) {
+            $array['image'] = asset(IMG_PROFILE_PIC_PATH . $array['image']);
+        }
+        return $array;
     }
 
     public function billing()
@@ -77,5 +93,10 @@ class User extends Authenticatable
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function addresses()
+    {
+        return $this->hasMany(\App\Models\Address::class, 'user_id');
     }
 }

@@ -56,6 +56,15 @@
                                                     @endforeach
                                                 </select>
                                             </div>
+                                            <div class="input__group mb-25">
+                                                <label for="offer_types">{{ __('Offer Types')}}</label>
+                                                <select name="offer_types[]" id="offer_types" class="tag_one" multiple>
+                                                    @php $available = ['email' => 'Email', 'sms' => 'SMS', 'whatsapp' => 'WhatsApp']; @endphp
+                                                    @foreach ($available as $key => $label)
+                                                        <option value="{{ $key }}" {{ is_array($user->offer_types) && in_array($key, $user->offer_types) ? 'selected' : '' }}>{{ $label }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                             <div class="input__button">
                                                 <button type="submit" class="btn btn-blue">{{ __('Update')}}</button>
                                             </div>

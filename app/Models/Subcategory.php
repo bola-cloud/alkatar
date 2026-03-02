@@ -15,7 +15,7 @@ class Subcategory extends Model
 
     protected $fillable = ['name', 'name_ar', 'category_id', 'status'];
 
-    
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -24,5 +24,14 @@ class Subcategory extends Model
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function getLocalizedNameAttribute()
+    {
+        $locale = app()->getLocale();
+        if ($locale == 'en') {
+            return $this->name;
+        }
+        return $this->name_ar;
     }
 }

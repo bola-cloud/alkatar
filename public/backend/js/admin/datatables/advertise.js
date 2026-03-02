@@ -7,17 +7,19 @@
             ajax: $('#table-url').data("url"),
             columns: [
                 {
-                    data: 'Image_One',
-                    name: 'Image_One'
+                    data: 'image',
+                    name: 'image',
+                    orderable: false,
+                    searchable: false
                 },
                 {
-                    data: 'Link_One',
-                    name: 'Link_One'
+                    data: 'title',
+                    name: 'title'
                 },
-                // {
-                //     data: 'Image_Two',
-                //     name: 'Image_Two'
-                // },
+                {
+                    data: 'subtitle',
+                    name: 'subtitle'
+                },
                 {
                     data: 'action',
                     name: 'action',

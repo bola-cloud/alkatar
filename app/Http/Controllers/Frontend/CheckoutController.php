@@ -33,7 +33,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
-use Log;
+use Illuminate\Support\Facades\Log;
 use Razorpay\Api\Api;
 use Illuminate\Support\Facades\Http;
 use Exception;
@@ -42,12 +42,13 @@ use App\Mail\OrderConfirmMail;
 use Illuminate\Support\Str;
 use App\Models\Offer;
 use App\Models\User;
+use App\Jobs\SyncSmartLifeOrder;
 
 class CheckoutController extends Controller
 {
     // Free weight allowance in kilograms before extra weight fees apply
     const FREE_WEIGHT_LIMIT_KG = 25;
-    
+
     private $grand_total;
     private $discount;
     protected $paymentPlatformResolver;
@@ -83,6 +84,12 @@ class CheckoutController extends Controller
 
     public function checkoutPage()
     {
+        // Require login before showing the checkout page. Guests should not be able
+        // to open the checkout page (use guestCheckoutOrder if guest checkout is enabled).
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('toast_warning', __('Please login to proceed to checkout'));
+        }
+
         $check = Cart::count();
         if ($check) {
             $data['content'] = Cart::content();
@@ -96,8 +103,17 @@ class CheckoutController extends Controller
             $data['description'] = $seo->description;
             $data['keywords'] = $seo->keywords;
             $data['extraWeightFees'] = $this->calculateExtraWeightFees();
-            $oman_country_id = Country::where('name_en', 'Oman')->first()->id;
-            $data['states'] = State::where('country_id', $oman_country_id)->get();
+            // Find Oman country row if present. If missing, fall back to first country or null.
+            $oman = Country::where('name_en', 'Oman')->first();
+            if ($oman) {
+                $oman_country_id = $oman->id;
+            } else {
+                $firstCountry = Country::first();
+                $oman_country_id = $firstCountry ? $firstCountry->id : null;
+            }
+
+            // If we have a country id, load states; otherwise give an empty collection to avoid null access in views.
+            $data['states'] = $oman_country_id ? State::where('country_id', $oman_country_id)->get() : collect([]);
             $data['users'] = User::where(['is_admin' => 0, 'status' => 1])
                 // ->with('billing')
                 // ->select('id', 'name', 'number')
@@ -162,10 +178,10 @@ class CheckoutController extends Controller
                         }
                     }
                     session()->flash('success', ('تم اضافة منتج مجاني من العروض'));
-                    return view('front.pages.checkout.checkout', $data);
+                    return view('front.pages.checkout.checkout_newdesign', $data);
                 }
             }
-            return view('front.pages.checkout.checkout', $data);
+            return view('front.pages.checkout.checkout_newdesign', $data);
         } else {
             return redirect()->route('front')->with('toast_warning', 'Cart is Empty');
         }
@@ -180,6 +196,7 @@ class CheckoutController extends Controller
     }
     public function checkoutOrder(Request $request)
     {
+        Log::info('Checkout Request Data', ['data' => $request->all(), 'user_id' => Auth::id()]);
         $isLoggedIn = Auth::check();
         // $user_id = $isLoggedIn ? Auth::id() : null;
         $buy_for = null;
@@ -189,9 +206,9 @@ class CheckoutController extends Controller
             if (Auth::user() && Auth::user()->is_admin) {
                 $user_id = $request->user_id;
                 $buy_for = $request->user_id;
-                $admin_id =  Auth::id();
+                $admin_id = Auth::id();
             } else {
-                $user_id =  Auth::id();
+                $user_id = Auth::id();
             }
         } else {
             $user_id = null;
@@ -206,6 +223,8 @@ class CheckoutController extends Controller
             'billing_street_address' => 'nullable',
             'billing_zipcode' => 'required',
             'billing_country' => 'required',
+            'billing_city' => 'required',
+            'billing_area' => 'required',
             "billing_phone" => 'required|regex:/^\+?[0-9]{8,15}$/',
         ];
 
@@ -231,20 +250,79 @@ class CheckoutController extends Controller
             ];
         }
 
+        // Final Stock Validation
+        foreach (Cart::content() as $cItem) {
+            $product = Product::with('comboItems')->find($cItem->id);
+            if ($product) {
+                $available = $product->virtual_stock;
+                if ($cItem->qty > $available) {
+                    return redirect()->back()->with('toast_error', __('Stock exceeded for product: ') . $product->en_Product_Name . '. Available: ' . $available);
+                }
+            }
+        }
+
         $request->validate($validationRules, $validationMessages);
 
         try {
-            $subtotal = Cart::subtotal();
+            $subtotal = subtotal();
             $cartItems = Cart::content();
             if (Cart::countItems() == 0) {
                 return redirect()->route(route: 'front')->with('error', __('Cart is empty. Go to product page and cart something.'));
             }
-            $tax = tax_amount($subtotal, $request->billing_country);
-            $shipping_charge = delivery_charge($request->billing_city ?? $request->billing_country);
+            // Resolve billing country to a country name if an ID was provided so tax lookup succeeds
+            $countryParam = $request->billing_country;
+            $countryName = null;
+            if (is_numeric($countryParam)) {
+                $countryModel = Country::find($countryParam);
+                if ($countryModel) {
+                    $countryName = $countryModel->name_en ?? $countryModel->name;
+                }
+            } else {
+                $countryName = $countryParam;
+            }
+            // Prefer per-country tax from Tax table (admin Tax Settings). If not found, fall back to global setting.
+            $countryParam = $request->billing_country;
+            $countryName = null;
+            if (is_numeric($countryParam)) {
+                $countryModel = Country::find($countryParam);
+                if ($countryModel) {
+                    $countryName = $countryModel->name_en ?? $countryModel->name;
+                }
+            } else {
+                $countryName = $countryParam;
+            }
+
+            $tax = 0;
+            if ($countryName) {
+                $taxModel = \App\Models\Tax::where('country', $countryName)->where('status', 'active')->first();
+                if ($taxModel) {
+                    $tax = ($subtotal * $taxModel->percentage) / 100;
+                }
+            }
+
+            // Fallback: Use global tax if specific country tax not found/zero
+            $globalTaxPercentage = floatval(allsetting()['tax_percentage'] ?? 0);
+            if ($tax == 0 && $globalTaxPercentage > 0) {
+                $tax = ($subtotal * $globalTaxPercentage) / 100;
+            }
+            $shipping_charge = delivery_charge($request->billing_area ?? $request->billing_city ?? $request->billing_state ?? $request->billing_country, ($request->billing_area) ? 'area' : null);
             $weight_charge = $this->calculateExtraWeightFees();
             $shipping_charge += $weight_charge;
 
-            $free_shipping = Setting::where('slug', 'free_shipping')->get()[0]['value'];
+            // Log shipping calculation for debugging delivery charge issues
+            Log::info('Shipping calculation', [
+                'user_id' => Auth::id(),
+                'billing_city' => $request->billing_city ?? null,
+                'billing_area' => $request->billing_area ?? null,
+                'billing_state' => $request->billing_state ?? null,
+                'billing_country' => $request->billing_country ?? null,
+                'subtotal' => $subtotal,
+                'base_delivery_charge' => delivery_charge($request->billing_area ?? $request->billing_city ?? $request->billing_state ?? $request->billing_country, ($request->billing_area) ? 'area' : null),
+                'weight_charge' => $weight_charge,
+                'shipping_charge_total' => $shipping_charge,
+            ]);
+
+            $free_shipping = Setting::where('slug', 'free_shipping')->value('value') ?? 0;
 
             $free_shipping_offer = Offer::where('type', 'free_shipping_with_total_bill')
                 ->whereDate('start_date', '<=', now())
@@ -262,8 +340,7 @@ class CheckoutController extends Controller
             }
 
 
-            $this->grand_total = $subtotal + $shipping_charge;
-
+            // Determine any "total bill" offers first so $this->discount is known
             $offers = Offer::where('type', "total_bill_discount")->orderBy('minimum_total', 'desc')->get();
             foreach ($offers as $offer) {
                 if ($subtotal >= $offer->minimum_total) {
@@ -272,8 +349,68 @@ class CheckoutController extends Controller
                 }
             }
 
+            // Apply any percentage discount (offers/coupons) to subtotal
+            $discountAmount = 0;
+
+            if ($isLoggedIn && !$admin_id) {
+                $activeSubscription = \App\Models\UserSubscription::where('user_id', $user_id)
+                    ->where('status', 'active')
+                    ->whereDate('end_at', '>=', now())
+                    ->with('subscription')
+                    ->latest()
+                    ->first();
+
+                \Log::info('Checkout Subscription Check', [
+                    'user_id' => $user_id,
+                    'found' => $activeSubscription ? true : false,
+                    'sub_id' => $activeSubscription ? $activeSubscription->id : null,
+                    'status' => $activeSubscription ? $activeSubscription->status : 'N/A'
+                ]);
+
+                if ($activeSubscription && $activeSubscription->subscription) {
+                    if ($activeSubscription->subscription->discount_percent > 0) {
+                        $subscriptionDiscountPercent = $activeSubscription->subscription->discount_percent;
+                        $maxDiscountAmount = $activeSubscription->subscription->max_discount_amount ?? PHP_INT_MAX;
+
+                        $calculatedDiscount = ($subscriptionDiscountPercent / 100) * $subtotal;
+                        $subscriptionDiscount = min($calculatedDiscount, $maxDiscountAmount);
+                        $discountAmount += $subscriptionDiscount;
+
+                        session()->put('subscription_discount_percent', $subscriptionDiscountPercent);
+                        session()->put('subscription_discount_amount', $subscriptionDiscount);
+
+                        \Log::info("Subscription discount applied", [
+                            'user_id' => $user_id,
+                            'subscription_id' => $activeSubscription->subscription_id,
+                            'discount_percent' => $subscriptionDiscountPercent,
+                            'calculated_discount' => $calculatedDiscount,
+                            'max_discount' => $maxDiscountAmount,
+                            'applied_discount' => $subscriptionDiscount
+                        ]);
+                    }
+
+                    if ($activeSubscription->subscription->free_shipping) {
+                        $shipping_charge = 0;
+                        session()->put('free_shipping_applied', true);
+                        \Log::info("Free shipping applied from subscription", [
+                            'user_id' => $user_id,
+                            'subscription_id' => $activeSubscription->subscription_id,
+                        ]);
+                    }
+                }
+            }
+
+            if (!empty($this->discount) && is_numeric($this->discount) && $this->discount > 0) {
+                // $this->discount is treated as a percentage for offers
+                $discountAmount += ($this->discount / 100) * $subtotal;
+            }
+
+            // Include tax in grand total and subtract discounts; ensure shipping_charge included
+            $this->grand_total = $subtotal + $tax + $shipping_charge - $discountAmount;
+
 
             $shipping_city = City::find($request->billing_city);
+            $shipping_area = \App\Models\Area::find($request->billing_area);
             $shipping_state = State::find($request->billing_state);
 
             // Address handling
@@ -290,6 +427,7 @@ class CheckoutController extends Controller
                     'street' => $billing_create->Street,
                     'state' => $billing_create->State,
                     'city' => $billing_create->City,
+                    'area' => $request->billing_area,
                     'zipcode' => $billing_create->Zipcode,
                     'country' => $billing_create->Country,
                 ];
@@ -302,6 +440,7 @@ class CheckoutController extends Controller
                     'street' => $request->billing_street_address,
                     'state' => $request->billing_state,
                     'city' => $request->billing_city,
+                    'area' => $request->billing_area,
                     'zipcode' => $request->billing_zipcode,
                     'country' => $request->billing_country,
                 ];
@@ -312,6 +451,7 @@ class CheckoutController extends Controller
                     'street' => $request->shipping_street_address,
                     'state' => $request->shipping_state,
                     'city' => $request->shipping_city,
+                    'area' => $request->billing_area,
                     'zipcode' => $request->shipping_zipcode,
                     'country' => $request->shipping_country
                 ];
@@ -321,13 +461,18 @@ class CheckoutController extends Controller
             $billing_address['state_ar'] = $shipping_state->name_ar;
             $billing_address['city_en'] = $shipping_city->name_en;
             $billing_address['city_ar'] = $shipping_city->name_ar;
-            $billing_address['phone_number'] = $request->billing_phone;
+            $billing_address['area_en'] = $shipping_area->name_en ?? '';
+            $billing_address['area_ar'] = $shipping_area->name_ar ?? '';
+            $phoneNumber = $request->billing_phone ?? $request->phone_number;
+            $billing_address['phone_number'] = $phoneNumber;
 
             $shipping_address['state_en'] = $shipping_state->name_en;
             $shipping_address['state_ar'] = $shipping_state->name_ar;
             $shipping_address['city_en'] = $shipping_city->name_en;
             $shipping_address['city_ar'] = $shipping_city->name_ar;
-            $shipping_address['phone_number'] = $request->billing_phone;
+            $shipping_address['area_en'] = $shipping_area->name_en ?? '';
+            $shipping_address['area_ar'] = $shipping_area->name_ar ?? '';
+            $shipping_address['phone_number'] = $phoneNumber;
 
 
             Session::put('billing_address', $billing_address);
@@ -365,11 +510,45 @@ class CheckoutController extends Controller
             session()->put('order_number', $order_number);
             session()->put('shipping_charge', $shipping_charge);
             session()->put('subtotal', $subtotal);
+            // keep discount as percentage in session and also store computed discount amount
             session()->put('discount', $this->discount);
+            session()->put('discount_amount', $discountAmount ?? 0);
             session()->put('grand_total', $this->grand_total);
             session()->put('tax', $tax);
 
             // Payment processing
+            // Initialize wallet session (default 0)
+            session()->put('wallet_used', 0);
+            session()->put('wallet_remaining_balance', 0);
+
+            // Wallet Logic
+            $wallet_used = 0;
+            if ($isLoggedIn && is_null($admin_id)) {
+                $user = Auth::user();
+                $wallet_balance = $user->balance;
+
+                if ($wallet_balance > 0) {
+                    if ($wallet_balance >= $this->grand_total) {
+                        $wallet_used = $this->grand_total;
+                        $this->grand_total = 0; // Fully paid by wallet
+                    } else {
+                        $wallet_used = 0;
+                        // $this->grand_total remains full (no partial payment)
+                    }
+
+                    session()->put('wallet_used', $wallet_used);
+                    session()->put('wallet_remaining_balance', $wallet_balance - $wallet_used);
+
+                    // Update grand_total in session for payment gateways
+                    session()->put('grand_total', $this->grand_total);
+                }
+            }
+
+            // Check if fully paid by wallet
+            if ($wallet_used > 0 && $this->grand_total <= 0) {
+                return $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, 0, 'WALLET');
+            }
+
             switch ($request->payment) {
                 case 'creditcard':
                     session()->put('payment_method_name', STRIPE);
@@ -403,29 +582,37 @@ class CheckoutController extends Controller
                         ];
                     }
 
+                    if ($tax > 0) {
+                        $checkoutProduct[] = [
+                            'name' => 'Tax',
+                            'quantity' => 1,
+                            'unit_amount' => number_format($tax, 3) * 1000,
+                        ];
+                    }
+
                     $response = Http::withHeaders([
                         'Accept' => 'application/json',
                         'Content-Type' => 'application/json',
-                        'thawani-api-key' => env('THAWANI_TEST_SECRET_KEY'),
-                    ])->post(env('THAWANI_TEST_CHECKOUT_URL') . '/checkout/session', [
-                        'client_reference_id' => $order_number,
-                        'mode' => 'payment',
-                        'products' => $checkoutProduct,
-                        'success_url' => route('thawani.success', [
-                            'order_number' => $order_number,
-                        ]),
-                        'cancel_url' => route('thawani.cancel', [
-                            'order_number' => $order_number,
-                        ]),
-                        'metadata' => [
-                            'order_number' => $order_number,
-                            'shipping_charge' => $shipping_charge,
-                            'subtotal' => $subtotal,
-                            'discount' => $this->discount,
-                            'grand_total' => $this->grand_total,
-                            'tax' => $tax,
-                        ]
-                    ]);
+                        'thawani-api-key' => config('services.thawani.secret_key'),
+                    ])->post(config('services.thawani.checkout_url') . '/checkout/session', [
+                                'client_reference_id' => $order_number,
+                                'mode' => 'payment',
+                                'products' => $checkoutProduct,
+                                'success_url' => route('thawani.success', [
+                                    'order_number' => $order_number,
+                                ]),
+                                'cancel_url' => route('thawani.cancel', [
+                                    'order_number' => $order_number,
+                                ]),
+                                'metadata' => [
+                                    'order_number' => $order_number,
+                                    'shipping_charge' => $shipping_charge,
+                                    'subtotal' => $subtotal,
+                                    'discount' => $this->discount,
+                                    'grand_total' => $this->grand_total,
+                                    'tax' => $tax,
+                                ]
+                            ]);
 
 
                     if ($response->successful()) {
@@ -448,7 +635,7 @@ class CheckoutController extends Controller
                         // create payment
                         $this->paymentController->createPayment($paymentRequest);
 
-                        $paymentUrl = env('THAWANI_TEST_PAY_URL') . $paymentJsonData['data']['session_id'] . '?key=' . env("THAWANI_TEST_PUBLIC_KEY");
+                        $paymentUrl = config('services.thawani.pay_url') . $paymentJsonData['data']['session_id'] . '?key=' . config('services.thawani.public_key');
                         info("paymentUrl: ", [
                             'paymentUrl' => $paymentUrl,
                             'session_id' => $paymentJsonData['data']['session_id'],
@@ -456,7 +643,7 @@ class CheckoutController extends Controller
                             'user_id' => $user_id,
                             'admin_id' => $admin_id,
                         ]);
-                        $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, " ", null, $buy_for);
+                        $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, "THAWANI", "PENDING", $buy_for);
 
 
                         // if ($admin_id) {
@@ -502,15 +689,30 @@ class CheckoutController extends Controller
                     if ($request->bank_transaction_number != null) {
                         return $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, BANK_TRANSFER, $request->bank_transaction_number);
                     } else {
-                        return redirect()->back()->with('error', 'Bank Transaction Number is Required.');
+                        $modal = [
+                            'line1' => __('Ooops! Something went wrong.'),
+                            'line2' => __('Bank Transaction Number is Required.'),
+                            'action' => route('checkout')
+                        ];
+                        return redirect()->route('checkout')->with('order_error_modal', $modal);
                     }
 
                 default:
-                    return redirect()->back()->with('error', 'Payment method is required');
+                    $modal = [
+                        'line1' => __('Ooops! Something went wrong.'),
+                        'line2' => __('Payment method is required'),
+                        'action' => route('checkout')
+                    ];
+                    return redirect()->route('checkout')->with('order_error_modal', $modal);
             }
         } catch (\Exception $e) {
             info($e);
-            return redirect()->back()->with('error', 'Something went wrong');
+            $modal = [
+                'line1' => __('Ooops! Something went wrong.'),
+                'line2' => $e->getMessage() ?: __('Something went wrong'),
+                'action' => route('checkout')
+            ];
+            return redirect()->route('checkout')->with('order_error_modal', $modal);
         }
 
     }
@@ -559,9 +761,22 @@ class CheckoutController extends Controller
         Session::put('shipping_address', $shipping_addresss);
         Session::put('checkout_email', $request->billing_email);
 
-        $subtotal = Cart::subtotal();
-        $tax = tax_amount($subtotal, $request->billing_country);
-        $shipping_charge = delivery_charge($request->billing_country);
+        $subtotal = subtotal();
+        // Resolve billing country for guests as well (ID -> name) to calculate tax correctly
+        $guestCountryParam = $request->billing_country;
+        $guestCountryName = null;
+        if (is_numeric($guestCountryParam)) {
+            $guestCountryModel = Country::find($guestCountryParam);
+            if ($guestCountryModel) {
+                $guestCountryName = $guestCountryModel->name_en ?? $guestCountryModel->name;
+            }
+        } else {
+            $guestCountryName = $guestCountryParam;
+        }
+        // Use global tax percentage for guests as well
+        $globalTaxPercent = floatval(allsetting()['tax_percentage'] ?? 0);
+        $tax = $globalTaxPercent > 0 ? ($subtotal * $globalTaxPercent / 100) : 0;
+        $shipping_charge = delivery_charge($request->billing_area ?? $request->billing_city ?? $request->billing_state ?? $request->billing_country, ($request->billing_area) ? 'area' : null);
         $this->grand_total = $subtotal + $tax + $shipping_charge;
 
         do {
@@ -715,14 +930,25 @@ class CheckoutController extends Controller
         if ($order['success'] == true) {
             session()->forget('Coupon_Id');
             Cart::destroy();
-            return redirect()->route('checkout.thankyou_page')->with('success', 'Order successfully created!');
+            // Prepare modal data to show on home page
+            $modal = [
+                'line1' => __('THANK YOU FOR CHOSSINg Hi Speed'),
+                'line2' => __('YOUR ORDER WILL BE READY IN 60 MIN'),
+                'order_number' => $order['data']->Order_Number ?? session('order_number') ?? null,
+            ];
+            return redirect()->route('front')->with(['order_success_modal' => $modal, 'success' => 'Order successfully created!']);
         }
-        return redirect()->back()->with('error', 'Order not accepted');
+        $modal = [
+            'line1' => __('Ooops! Something went wrong.'),
+            'line2' => __('Order not accepted'),
+            'action' => route('checkout')
+        ];
+        return redirect()->route('checkout')->with('order_error_modal', $modal);
     }
 
     public function orderConfirmMail($order)
     {
-        $ship = json_decode($order->shipping_address, true);
+        $ship = $order->shipping_address;
         $data['userName'] = $ship['name'] ?? null;
         $data['userEmail'] = $ship['email'] ?? null;
         $data['order'] = $order;
@@ -739,7 +965,7 @@ class CheckoutController extends Controller
             ->with('order_details', 'user', 'coupon', 'order_details.product', 'billing', 'shipping')
             ->find($id);
 
-        $order['billing_address'] = json_decode($order->billing_address, true);
+        $order['billing_address'] = $order->billing_address;
         try {
             Mail::to('Alsaraamills@gmail.com')->send(new OrderConfirmMail($order));
             return response()->json(['msg' => 'OK']);
@@ -771,6 +997,20 @@ class CheckoutController extends Controller
             }
 
 
+
+            // Log computed amounts and addresses for debugging precision and delivery charge issues
+            Log::info('Order create values', [
+                'order_number' => $order_number,
+                'user_id' => $user_id,
+                'shipping_charge' => $shipping_charge,
+                'tax' => $tax,
+                'subtotal' => $subtotal,
+                'discount' => $discount,
+                'grand_total' => $grand_total,
+                'billing_address' => Session::get('billing_address'),
+                'shipping_address' => Session::get('shipping_address'),
+                'session_coupon_id' => Session::get('Coupon_Id'),
+            ]);
 
             $order = Order::create([
                 'Order_Number' => $order_number,
@@ -817,6 +1057,22 @@ class CheckoutController extends Controller
                         'Total_Price' => $item->price * $item->qty,
                     ]);
                 }
+                event(new \App\Events\OrderCreated($order));
+
+                // Deduct wallet balance if used
+                $wallet_used = session('wallet_used', 0);
+                if ($wallet_used > 0 && Auth::check() && is_null($admin_id)) {
+                    $user = Auth::user();
+                    if ($user) {
+                        $user->decrement('balance', $wallet_used);
+                        \Illuminate\Support\Facades\Log::info("Wallet used for Order #{$order_number}: {$wallet_used} OMR");
+                        // Update order with wallet usage
+                        $order->wallet_used = $wallet_used;
+                        $order->save();
+                    }
+                }
+
+                $data['data'] = $order;
                 $data['success'] = true;
             }
             // mail
@@ -826,24 +1082,50 @@ class CheckoutController extends Controller
 
             return $data;
         } catch (\Exception $e) {
-            info('dasd' . $e->getMessage());
-            $this->error($e->getMessage());
-            return $this->error($e->getMessage());
+            info('Order create exception: ' . $e->getMessage());
+            Log::error('Order create exception', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return ['success' => false, 'error' => $e->getMessage()];
         }
     }
 
     public function subQtyProduct($product_id, $qty)
     {
-        $product = Product::whereId($product_id)->first();
-        $new_qty = $product->Quantity - $qty;
-        if ($new_qty < 1) {
-            $nn_qty = 0;
+        $product = Product::with('comboItems')->whereId($product_id)->first();
+
+        if (($product->product_type === 'Combo' || $product->product_type === 'تجميعي') && $product->comboItems->isNotEmpty()) {
+            $isSingleItemCombo = $product->comboItems->count() === 1;
+
+            foreach ($product->comboItems as $component) {
+                // Calculate deduction based on multiplier: (Quantity in Combo * Combo Qty Sold)
+                // This covers both 1:1 (where qty=1) and Packs (where qty>1)
+                $qtyToDeduct = $component->pivot->quantity * $qty;
+
+                $componentObj = Product::find($component->id);
+                if ($componentObj) {
+                    $new_comp_qty = $componentObj->Quantity - $qtyToDeduct;
+                    $nn_comp_qty = $new_comp_qty < 0 ? 0 : $new_comp_qty;
+
+                    $componentObj->update([
+                        'Quantity' => $nn_comp_qty,
+                    ]);
+                }
+            }
+            // Logic for combo product itself - usually we don't deduct stock if it's virtual, 
+            // but if it has a stock tracking, we might. 
+            // Assuming for now combo stock is virtual/calculated so we don't touch its quantity column 
+            // unless we want to keep it in sync (which requires complex observer).
+            // Let's just deduct components as requested.
         } else {
-            $nn_qty = $new_qty;
+            $new_qty = $product->Quantity - $qty;
+            if ($new_qty < 1) {
+                $nn_qty = 0;
+            } else {
+                $nn_qty = $new_qty;
+            }
+            $product->update([
+                'Quantity' => $nn_qty,
+            ]);
         }
-        $product->update([
-            'Quantity' => $nn_qty,
-        ]);
     }
 
     public function redirectStripePage()
@@ -932,12 +1214,32 @@ class CheckoutController extends Controller
             'delivery_charge' => 0,
             'delivery_charge_curr' => 0,
         ];
-        $data['tax_rate'] = tax_rate($request->country);
-        $data['tax_amount'] = tax_amount(Cart::subtotal(), $request->country);
-        $data['tax_show'] = currencyConverter(tax_amount(Cart::subtotal(), $request->country));
-        $data['delivery_charge'] = delivery_charge($request->country);
-        $data['delivery_charge_curr'] = currencyConverter(delivery_charge($request->country));
-        $subtotal = Cart::subtotal();
+        // Determine country name to lookup tax by country (Tax.country stores country name)
+        $countryParam = $request->country;
+        $countryName = null;
+        if (is_numeric($countryParam)) {
+            $state = \App\Models\State::with('country')->find($countryParam);
+            if ($state && $state->country) {
+                $countryName = $state->country->name_en ?? $state->country->name;
+            }
+        } else {
+            $countryName = $countryParam;
+        }
+
+        // If we couldn't resolve a country name, fall back to the raw param
+        $countryForTax = $countryName ?: $countryParam;
+
+        $data['tax_rate'] = tax_rate($countryForTax);
+        // Use global tax percentage for AJAX tax calculation
+        $globalTaxPercent = floatval(allsetting()['tax_percentage'] ?? 0);
+        $data['tax_amount'] = $globalTaxPercent > 0 ? (subtotal() * $globalTaxPercent / 100) : 0;
+        $data['tax_show'] = currencyConverter($data['tax_amount']);
+
+        // On state change we do not want to provide a city-level delivery charge.
+        // Keep delivery charge at zero here so the client shows shipping=0 until a city is selected.
+        $data['delivery_charge'] = 0;
+        $data['delivery_charge_curr'] = currencyConverter(0);
+        $subtotal = subtotal();
         $free_shipping_offer = Offer::where('type', 'free_shipping_with_total_bill')
             ->whereDate('start_date', '<=', now())
             ->whereDate('end_date', '>=', now())
@@ -950,8 +1252,34 @@ class CheckoutController extends Controller
             $data['delivery_charge_curr'] = currencyConverter(0);
         }
 
-        $data['total_cost'] = Cart::subtotal() + delivery_charge($request->country) + tax_amount(Cart::subtotal(), $request->country) - Session::get('CouponAmount');
-        $data['total_cost_curr'] = currencyConverter(Cart::subtotal() + delivery_charge($request->country) + tax_amount(Cart::subtotal(), $request->country) - Session::get('CouponAmount'));
+        // IMPORTANT: Since we force delivery_charge to be 0 for display above (lines 1404),
+        // we MUST also use 0 for the Total calculation here.
+        // The actual delivery charge will be added later when the user selects a City/Area.
+        $deliveryCharge = 0;
+
+        $taxAmount = $data['tax_amount'];
+        $couponAmount = Session::get('CouponAmount');
+        $currentSubtotal = subtotal();
+
+        $data['total_cost'] = $currentSubtotal + $deliveryCharge + $taxAmount - $couponAmount;
+
+
+
+        $wallet_used = 0;
+        if (auth()->check() && !auth()->user()->is_admin) {
+            $balance = auth()->user()->balance;
+            if ($balance > 0) {
+                if ($balance >= $data['total_cost']) {
+                    $wallet_used = $data['total_cost'];
+                    $data['total_cost'] = 0;
+                } else {
+                    $wallet_used = 0;
+                    // $data['total_cost'] remains full
+                }
+            }
+        }
+        $data['wallet_used'] = currencyConverter($wallet_used);
+        $data['total_cost_curr'] = currencyConverter($data['total_cost']);
         $data['success'] = true;
         return $data;
     }
@@ -978,21 +1306,51 @@ class CheckoutController extends Controller
         $order->Payment_Method = THAWANI;
         $order->Payment_Status = PAYMENT_SUCCESS;
         $order->Order_Status = ORDER_PROCESSING;
-        
+        $order->is_paid = 1;
+
         $order->save();
+
+        // Two-Step Sync: Update the existing SmartLife invoice to "Paid"
+        if (config('smartlife.sync_enabled')) {
+            try {
+                $smartLifeService = new \App\Services\SmartLifeErpService();
+                $invoiceId = $smartLifeService->submitOrder($order);
+                if ($invoiceId && !$order->smartlife_invoice_id) {
+                    $order->smartlife_synced_at = now();
+                    $order->smartlife_invoice_id = $invoiceId;
+                    $order->save();
+                }
+                Log::info('SmartLife Sync via paymentSuccess (Updated to Paid)', ['order' => $order->Order_Number, 'erp_id' => $invoiceId]);
+            } catch (\Exception $e) {
+                Log::error('SmartLife update sync failed in paymentSuccess', ['error' => $e->getMessage()]);
+            }
+        }
+
+        // Clear cart so it doesn't stay at the top of the site
+        session()->forget('cart');
+        session()->forget('coupon');
+        session()->forget('wallet_used');
+
         $this->sendOrderMail($order->id);
-        info("phone from billing address", ['phone' => json_decode($order->billing_address)->phone_number]);
+        info("phone from billing address", ['phone' => $order->billing_address['phone_number'] ?? null]);
 
         $pdfUrl = route('order.print', ['id' => $order->id]);
+
         info("inside thawani success");
         $response = Http::asForm()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/success/payment', [
-            'phone_number' => json_decode($order->billing_address)->phone_number ?? '',
+            'phone_number' => $order->billing_address['phone_number'] ?? '',
             'booking_id' => $order->Order_Number,
             'pdf' => $pdfUrl,
         ]);
 
         Log::info('WhatsApp API response', ['response' => $response->json()]);
-        return redirect()->route('checkout.thankyou_page')->with('success', 'Order successfully created!');
+        // Show success modal on homepage
+        $modal = [
+            'line1' => __('THANK YOU FOR CHOSSINg Hi Speed'),
+            'line2' => __('YOUR ORDER WILL BE READY IN 60 MIN'),
+            'order_number' => $order->Order_Number ?? null,
+        ];
+        return redirect()->route('front')->with(['order_success_modal' => $modal, 'success' => 'Order successfully created!']);
     }
 
     public function paymentCancel(Request $request)

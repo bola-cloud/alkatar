@@ -1,4 +1,4 @@
-(function($) {
+(function ($) {
     "use strict";
     $(document).ready(function () {
         $('#CategoryTable').DataTable({
@@ -25,6 +25,14 @@
                 {
                     data: 'Status',
                     name: 'Status'
+                },
+                {
+                    data: 'order',
+                    name: 'order'
+                },
+                {
+                    data: 'show_on_home',
+                    name: 'show_on_home'
                 },
                 {
                     data: 'action',

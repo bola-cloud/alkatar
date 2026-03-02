@@ -68,7 +68,16 @@ class CustomerServiceController extends Controller
                     return $btn;
                 })
                 ->editColumn('answer', function ($data) {
-                    return Str::limit($data->answer, 100, '...');
+                    $htmlLocale = session('HTML_LANG', session('APP_LOCALE', app()->getLocale() ?? 'en'));
+                    $isAr = in_array($htmlLocale, ['ar']);
+                    $answer = $isAr ? ($data->answer_fr ?? $data->answer) : ($data->answer ?? $data->answer_fr);
+                    return Str::limit(strip_tags($answer), 100, '...');
+                })
+                ->editColumn('question', function ($data) {
+                    $htmlLocale = session('HTML_LANG', session('APP_LOCALE', app()->getLocale() ?? 'en'));
+                    $isAr = in_array($htmlLocale, ['ar']);
+                    $question = $isAr ? ($data->question_fr ?? $data->question) : ($data->question ?? $data->question_fr);
+                    return $question;
                 })
                 ->rawColumns(['action', 'answer'])
                 ->make(true);

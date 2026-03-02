@@ -29,6 +29,7 @@ class AboutUsPage extends Model
         'fr_Title_Two',
         'fr_Title_Three',
         'fr_Title_Four',
+        'fr_Title',
         'fr_Subtitle',
         'fr_Description_One',
         'fr_Description_Two',

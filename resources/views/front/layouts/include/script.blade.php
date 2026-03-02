@@ -1,6 +1,7 @@
 <!-- Js file  -->
 <script src="{{ asset('frontend/assets/js/jquery-3.6.0.min.js') }}"></script>
-<script src="{{ asset('frontend/assets/js/bootstrap.min.js') }}"></script>
+<!-- Use Bootstrap 5 bundle (includes Popper). Ensure version matches CSS used in head. -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ asset('frontend/assets/js/plugins.js') }}"></script>
 <script src="{{ asset('frontend/assets/js/owl.carousel.min.js') }}"></script>
 <script src="{{ asset('frontend/assets/js/main.js') }}"></script>
@@ -52,6 +53,54 @@
         @endforeach
     </script>
 @endif
+{{-- Diagnostic: log bootstrap script tags and detected version to console --}}
+{{-- <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        try {
+            var bsVersion = (window.bootstrap && window.bootstrap.Carousel && window.bootstrap.Carousel.VERSION) || (window.bootstrap && window.bootstrap.version) || 'unknown';
+            console.info('[diag] Bootstrap version detected:', bsVersion);
+            var bootstrapScriptTags = Array.from(document.querySelectorAll('script[src]')).filter(function(s){ return /bootstrap/i.test(s.src); });
+            console.info('[diag] Bootstrap script tags on page:', bootstrapScriptTags.map(function(s){ return s.src; }));
+            var indicators = document.querySelectorAll('[data-bs-slide-to]');
+            console.info('[diag] Carousel indicator buttons count:', indicators.length);
+        } catch (e) {
+            console.info('[diag] Bootstrap diagnostic error', e);
+        }
+    });
+</script> --}}
+<script>
+    // Fallback and diagnostics for carousel indicator clicks
+    document.addEventListener('DOMContentLoaded', function () {
+        try {
+            document.addEventListener('click', function (ev) {
+                var t = ev.target;
+                // find nearest indicator button
+                var btn = t.closest && t.closest('[data-bs-slide-to]');
+                if (!btn) return;
+                var idx = parseInt(btn.getAttribute('data-bs-slide-to'));
+                // console.info('[diag] indicator clicked, idx=', idx, ' target=', btn);
+                // Try to use Bootstrap's carousel instance if present
+                try {
+                    var carouselEl = document.querySelector(btn.getAttribute('data-bs-target') || btn.getAttribute('href'));
+                    if (carouselEl) {
+                        var inst = window.bootstrap && window.bootstrap.Carousel && window.bootstrap.Carousel.getOrCreateInstance
+                            ? window.bootstrap.Carousel.getOrCreateInstance(carouselEl)
+                            : null;
+                        if (inst && typeof inst.to === 'function') {
+                            inst.to(idx);
+                            ev.preventDefault();
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    // console.warn('[diag] error forcing carousel to slide', e);
+                }
+            }, true);
+        } catch (e) {
+            // console.info('[diag] Carousel fallback attach error', e);
+        }
+    });
+</script>
 {{-- @if (env('APP_DEMO') == true) --}}
     {{-- for sandbox sslcommerz --}}
     {{-- <script>

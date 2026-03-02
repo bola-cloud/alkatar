@@ -65,8 +65,7 @@
                                     <div class="price-wrap-left">
                                         <div class="single-price">
                                             <input type="number" class="form-control" id="minPrice" name="min_price"
-                                                placeholder="{{ currencySymbol()[currency()] }} {{ __('Min') }}"
-                                                min="1" />
+                                                placeholder="{{ currencySymbol()[currency()] }} {{ __('Min') }}" min="1" />
                                         </div>
                                         <div class="single-price">
                                             <input type="number" class="form-control" id="maxPrice" name="max_price"
@@ -86,8 +85,8 @@
                                     <div class="single-colors">
                                         <div class="colors-left">
                                             <input style="background: {{ $color->ColorCode }}"
-                                                class="form-check-input checkColor" type="checkbox"
-                                                id="{{ $color->ColorCode }}" value="{{ $color->Name }}">
+                                                class="form-check-input checkColor" type="checkbox" id="{{ $color->ColorCode }}"
+                                                value="{{ $color->Name }}">
                                             <label class="form-check-label"
                                                 for="{{ $color->ColorCode }}">{{ $color->Name }}</label>
                                         </div>
@@ -104,8 +103,7 @@
                                     <div class="single-size">
                                         <input class="form-check-input checkSize" type="checkbox" id="{{ $size->id }}"
                                             value="{{ $size->Size }}">
-                                        <label class="form-check-label"
-                                            for="{{ $size->id }}">{{ $size->Size }}</label>
+                                        <label class="form-check-label" for="{{ $size->id }}">{{ $size->Size }}</label>
                                     </div>
                                 @endforeach
                             </div>
@@ -119,8 +117,7 @@
                                         <div class="brand-left">
                                             <input class="form-check-input CheckBrand" type="checkbox"
                                                 value="{{ $brand->en_BrandName }}">
-                                            <label class="form-check-label"
-                                                for="Renuar">{{ $brand->en_BrandName }}</label>
+                                            <label class="form-check-label" for="Renuar">{{ $brand->en_BrandName }}</label>
                                         </div>
                                         <span class="brand-count">{{ productBrandCount($brand->id) }}</span>
                                     </div>
@@ -138,8 +135,7 @@
                                     <button class="sidebar-filter d-block d-lg-none" type="button"
                                         data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample"
                                         aria-controls="offcanvasExample">
-                                        {{ __('Filter') }} <img
-                                            src="{{ asset('frontend/assets/images/angle-down.svg') }}"
+                                        {{ __('Filter') }} <img src="{{ asset('frontend/assets/images/angle-down.svg') }}"
                                             alt="angle-down" />
                                     </button>
                                 </div>
@@ -197,8 +193,7 @@
                                                 @foreach ($product->product_tags as $ppt)
                                                     <h4 class="product-catagory">{{ $ppt->tag }}</h4>
                                                 @endforeach
-                                                <input type="hidden" name="quantity" value="1"
-                                                    id="product_quantity">
+                                                <input type="hidden" name="quantity" value="1" id="product_quantity">
                                                 <h3 class="product-name"><a class="product-link"
                                                         href="{{ route('single.product', $product->en_Product_Slug) }}">{{ langConverter($product->en_Product_Name, $product->fr_Product_Name) }}</a>
                                                 </h3>
@@ -206,17 +201,13 @@
                                                 {!! productReview($product->id) !!}
                                                 <div class="product-price">
                                                     @if ($product->Price == $product->Discount_Price)
-                                                        <span
-                                                            class="price">{{ currencyConverter($product->Price) }}</span>
+                                                        <span class="price">{{ currencyConverter($product->Price) }}</span>
                                                     @else
-                                                        <span
-                                                            class="regular-price">{{ currencyConverter($product->Price) }}</span>
-                                                        <span
-                                                            class="price">{{ currencyConverter($product->Discount_Price) }}</span>
+                                                        <span class="regular-price">{{ currencyConverter($product->Price) }}</span>
+                                                        <span class="price">{{ currencyConverter($product->Discount_Price) }}</span>
                                                     @endif
                                                 </div>
-                                                <input type="hidden" name="quantity" value="1"
-                                                    id="product_quantity">
+                                                <input type="hidden" name="quantity" value="1" id="product_quantity">
                                                 <a href="javascript:void(0)" title="{{ __('Add to cart') }}"
                                                     class="add-cart addCart"
                                                     data-id="{{ $product->id }}">{{ __('Add To Cart') }} <i
@@ -298,11 +289,9 @@
                         @foreach ($colors as $color)
                             <div class="single-colors">
                                 <div class="colors-left">
-                                    <input style="background: {{ $color->ColorCode }}"
-                                        class="form-check-input checkColorMobile" type="checkbox"
-                                        id="{{ $color->ColorCode }}" value="{{ $color->Name }}">
-                                    <label class="form-check-label"
-                                        for="{{ $color->ColorCode }}">{{ $color->Name }}</label>
+                                    <input style="background: {{ $color->ColorCode }}" class="form-check-input checkColorMobile"
+                                        type="checkbox" id="{{ $color->ColorCode }}" value="{{ $color->Name }}">
+                                    <label class="form-check-label" for="{{ $color->ColorCode }}">{{ $color->Name }}</label>
                                 </div>
                                 <span class="colors-count">{{ productColorCount($color->id) }}</span>
                             </div>

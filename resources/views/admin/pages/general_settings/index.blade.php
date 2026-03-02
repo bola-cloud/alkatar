@@ -63,9 +63,19 @@
                                                     value="{{ @$allsettings['email'] }}" required="">
                                             </div>
                                             <div class="input__group mb-25">
-                                                <label for="title">{{ __('Address') }}</label>
+                                                <label for="title">{{ __('Address (English)') }}</label>
+                                                <input type="text" class="form-control" id="address_en" name="address_en"
+                                                    value="{{ @$allsettings['address_en'] ?? @$allsettings['address'] }}">
+                                            </div>
+                                            <div class="input__group mb-25">
+                                                <label for="title">{{ __('Address (Arabic)') }}</label>
+                                                <input type="text" class="form-control" id="address_ar" name="address_ar"
+                                                    value="{{ @$allsettings['address_ar'] }}">
+                                            </div>
+                                            <div class="input__group mb-25">
+                                                <label for="title">{{ __('Legacy Address (fallback)') }}</label>
                                                 <input type="text" class="form-control" id="address" name="address"
-                                                    value="{{ @$allsettings['address'] }}" required="">
+                                                    value="{{ @$allsettings['address'] }}">
                                             </div>
                                             <div class="input__group mb-25">
                                                 <label for="title">{{ __('State') }}</label>
@@ -112,17 +122,22 @@
                                                     name="estimating_delivery"
                                                     value="{{ @$allsettings['estimating_delivery'] }}" required="">
                                             </div>
-                                            <div class="input__group mb-25">
+                                            {{-- <div class="input__group mb-25">
                                                 <label for="title">{{ __('Shipping Free') }}</label>
                                                 <input type="text" class="form-control" id="shipping_free_text"
                                                     name="shipping_free_text"
                                                     value="{{ @$allsettings['shipping_free_text'] }}">
-                                            </div>
+                                            </div> --}}
                                             <div class="input__group mb-25">
                                                 <label for="title">{{ __('Shipping Charge') }}</label>
                                                 <input type="number" class="form-control" id="shipping_charge"
                                                     name="shipping_charge" value="{{ @$allsettings['shipping_charge'] }}"
                                                     required="">
+                                            </div>
+                                            <div class="input__group mb-25">
+                                                <label for="printer_app_password">{{ __('Printer App Password') }}</label>
+                                                <input type="text" class="form-control" id="printer_app_password"
+                                                    name="printer_app_password" value="{{ @$allsettings['printer_app_password'] }}">
                                             </div>
                                             <div class="input__button">
                                                 <button type="submit" class="btn btn-blue">{{ __('Update') }}</button>
@@ -173,13 +188,14 @@
                                                 <img src="{{ asset(IMG_ADVERTISE_PATH . @$allsettings['popup_image']) }}"
                                                     id="target6" alt="{{ __('Image') }}" class="admin_image mt-3" />
                                             </div>
+                                            {{-- Home design images moved to Home Page settings (Advertise / Home Page CMS) --}}
                                             <div class="input__button">
                                                 <button type="submit" class="btn btn-blue">{{ __('Update') }}</button>
                                             </div>
                                         </form>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                {{-- <div class="col-md-6">
                                     <div class="form-vertical__item bg-style">
                                         <div class="item-top mb-30">
                                             <h2>{{ __('Newsletter') }}</h2>
@@ -218,7 +234,7 @@
                                             </div>
                                         </form>
                                     </div>
-                                </div>
+                                </div> --}}
                                 <div class="col-md-6">
                                     <div class="form-vertical__item bg-style">
                                         <div class="item-top mb-30">
@@ -251,7 +267,7 @@
                                         </form>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                {{-- <div class="col-md-6">
                                     <div class="form-vertical__item bg-style">
                                         <div class="item-top mb-30">
                                             <h2>{{ __('Social Login') }}</h2>
@@ -301,7 +317,7 @@
                                             </div>
                                         </form>
                                     </div>
-                                </div>
+                                </div> --}}
                                 <div class="col-md-6">
                                     <div class="form-vertical__item bg-style">
                                         <div class="item-top mb-30">
@@ -351,7 +367,7 @@
                                         </form>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                {{-- <div class="col-md-6">
                                     <div class="form-vertical__item bg-style">
                                         <div class="item-top mb-30">
                                             <h2>{{ __('Advertise') }}</h2>
@@ -377,7 +393,7 @@
                                             </div>
                                         </form>
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </div>

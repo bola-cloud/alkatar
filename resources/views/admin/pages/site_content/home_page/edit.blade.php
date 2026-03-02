@@ -27,143 +27,280 @@
                 <div class="gallery__content">
                     <div class="tab-content" id="nav-tabContent">
                         <div class="tab-pane fade show active" id="nav-one" role="tabpanel" aria-labelledby="nav-one-tab">
-                            <form enctype="multipart/form-data" method="POST"
-                                action="{{ route('admin.home.page.site.content.update') }}">
-                                @csrf
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-vertical__item bg-style">
-                                            <div class="item-top mb-30">
-                                                <h2>{{ langString('en', false) . ':' }}</h2>
-                                            </div>
-                                            <input type="hidden" value="{{ $edit->id }}" name="id">
-                                            <input type="hidden" value="{{ $edit->Location }}" name="location">
-                                            <div class="input__group mb-25">
-                                                <label for="exampleInputEmail1">{{ __('Title') }}</label>
-                                                <input type="text" class="form-control" id="en_title" name="en_title"
-                                                    required="" value="{{ $edit->en_Title }}">
-                                            </div>
+                            {{-- Render each homepage section as a separate card with its own update form --}}
+                            <div class="row g-3">
+                                @if(isset($sections) && $sections->count())
+                                    @foreach($sections as $sec)
+                                        @php
+                                            $secKey = $sec->section_key;
+                                            // hide internal prefix like 'newdesign' from headings shown to client
+                                            $displayTitle = preg_replace('/^newdesign[_\-]*/i', '', $secKey);
+                                            $content_en = (array) ($sec->content_en ?? []);
+                                            $content_fr = (array) ($sec->content_fr ?? []);
+                                        @endphp
+                                        <div class="col-md-6">
+                                            <div class="form-vertical__item bg-style">
+                                                <div class="item-top mb-20 d-flex justify-content-between align-items-center">
+                                                    <h4 class="m-0">{{ ucwords(str_replace('_',' ', $displayTitle)) }}</h4>
+                                                    <small class="text-muted">{{ $sec->status ? __('Active') : __('Inactive') }}</small>
+                                                </div>
+                                                <form enctype="multipart/form-data" method="POST" action="{{ route('admin.home.page.site.content.update') }}">
+                                                    @csrf
+                                                    <input type="hidden" name="id" value="{{ $sec->id }}">
+                                                    <input type="hidden" name="location" value="{{ $secKey }}">
 
-                                            <div class="input__group mb-25">
-                                                <label for="exampleInputEmail1">{{ __('Description One') }}</label>
-                                                <textarea name="en_description_one" id="summernote" class="form-control " required="">{{ $edit->en_Description_One }}</textarea>
-                                            </div>
-                                            @if ($edit->Location == 'about_us')
-                                                <div class="input__group mb-25">
-                                                    <label for="image">{{ __('Image') }}</label>
-                                                    <input type="file" class="form-control putImage1" name="image"
-                                                        id="image">
-                                                    <img class="admin_image"
-                                                        src="{{ asset(aboutUsPage() . $edit->image) }}" id="target1" />
-                                                </div>
-                                            @endif
-                                            @if ($edit->en_Description_Two)
-                                                <div class="input__group mb-25">
-                                                    <label for="exampleInputEmail1">{{ __('Description Two') }}</label>
-                                                    <textarea name="en_description_two" id="summernote2" class="form-control">{{ $edit->en_Description_Two }}</textarea>
-                                                </div>
-                                            @endif
-                                            @if ($edit->Location == 'products')
-                                                <div class="input__group mb-25">
-                                                    <label
-                                                        for="exampleInputEmail1">{{ __('Products Per Section') }}</label>
-                                                    <select name="home_products_page" id="home_products_page">
-                                                        <option value="4"
-                                                            {{ allsetting('home_products_page') == 4 ? 'selected' : '' }}>
-                                                            {{ __('4') }}</option>
-                                                        <option value="8"
-                                                            {{ allsetting('home_products_page') == 8 ? 'selected' : '' }}>
-                                                            {{ __('8') }}</option>
-                                                        <option value="12"
-                                                            {{ allsetting('home_products_page') == 12 ? 'selected' : '' }}>
-                                                            {{ __('12') }}</option>
-                                                    </select>
-                                                </div>
-                                            @endif
-                                            @if ($edit->Location == 'popular_products')
-                                                <div class="input__group mb-25">
-                                                    <label
-                                                        for="exampleInputEmail1">{{ __('Products Per Section') }}</label>
-                                                    <select name="home_trending_page" id="home_trending_page">
-                                                        <option value="4"
-                                                            {{ allsetting('home_products_page') == 4 ? 'selected' : '' }}>
-                                                            {{ __('4') }}</option>
-                                                        <option value="8"
-                                                            {{ allsetting('home_products_page') == 8 ? 'selected' : '' }}>
-                                                            {{ __('8') }}</option>
-                                                        <option value="12"
-                                                            {{ allsetting('home_trending_page') == 12 ? 'selected' : '' }}>
-                                                            {{ __('12') }}</option>
-                                                    </select>
-                                                </div>
-                                                <div class="input__group mb-25">
-                                                    <div class="custom-control custom-switch">
-                                                        <input type="checkbox" value="1" name="new_arrival"
-                                                            class="custom-control-input" id="new_arrival"
-                                                            {{ allsetting('new_arrival') == ACTIVE ? 'checked' : '' }}>
-                                                        <label class="custom-control-label" for="customSwitch1">New
-                                                            Arrival</label>
+                                                    @if($secKey === 'newdesign_features')
+                                                        {{-- Edit four features only --}}
+                                                        <div class="mb-2"><strong>{{ __('English') }}</strong></div>
+                                                        @for($i=1;$i<=4;$i++)
+                                                            @php $it = $content_en['items'][$i-1] ?? ['title'=>'','desc'=>'','icon'=>'']; @endphp
+                                                            <div class="input__group mb-2">
+                                                                <label>{{ __('Feature') }} #{{ $i }} - {{ __('Title') }}</label>
+                                                                <input type="text" class="form-control" name="en_feature_{{ $i }}_title" value="{{ old('en_feature_'.$i.'_title', $it['title'] ?? '') }}">
+                                                            </div>
+                                                            <div class="input__group mb-2">
+                                                                <label>{{ __('Feature') }} #{{ $i }} - {{ __('Description') }}</label>
+                                                                <input type="text" class="form-control" name="en_feature_{{ $i }}_desc" value="{{ old('en_feature_'.$i.'_desc', $it['desc'] ?? '') }}">
+                                                            </div>
+                                                        @endfor
+                                                        <hr>
+                                                        <div class="mb-2"><strong>{{ __('Arabic') }}</strong></div>
+                                                        @for($i=1;$i<=4;$i++)
+                                                            @php $itf = $content_fr['items'][$i-1] ?? ['title'=>'','desc'=>'','icon'=>'']; @endphp
+                                                            <div class="input__group mb-2">
+                                                                <label>{{ __('Feature') }} #{{ $i }} - {{ __('Title (AR)') }}</label>
+                                                                <input type="text" class="form-control" name="fr_feature_{{ $i }}_title" value="{{ old('fr_feature_'.$i.'_title', $itf['title'] ?? '') }}">
+                                                            </div>
+                                                            <div class="input__group mb-2">
+                                                                <label>{{ __('Feature') }} #{{ $i }} - {{ __('Description (AR)') }}</label>
+                                                                <input type="text" class="form-control" name="fr_feature_{{ $i }}_desc" value="{{ old('fr_feature_'.$i.'_desc', $itf['desc'] ?? '') }}">
+                                                            </div>
+                                                        @endfor
+
+                                                    @elseif($secKey === 'newdesign_sale_banner')
+                                                        <div class="input__group mb-2">
+                                                            <label>{{ __('Title') }}</label>
+                                                            <input type="text" class="form-control" name="en_title" value="{{ old('en_title', $content_en['title'] ?? '') }}">
+                                                        </div>
+                                                        <div class="input__group mb-2">
+                                                            <label>{{ __('Lead / Short Description') }}</label>
+                                                            <textarea class="form-control" name="en_description_one">{{ old('en_description_one', $content_en['lead'] ?? '') }}</textarea>
+                                                        </div>
+                                                        <div class="input__group mb-2">
+                                                            <label>{{ __('Button Text') }}</label>
+                                                            <input type="text" class="form-control" name="en_button_text" value="{{ old('en_button_text', data_get($content_en,'button.text','')) }}">
+                                                        </div>
+                                                        <div class="input__group mb-2">
+                                                            <label>{{ __('Button URL') }}</label>
+                                                            <input type="text" class="form-control" name="en_button_url" value="{{ old('en_button_url', data_get($content_en,'button.url','#')) }}">
+                                                        </div>
+                                                        <div class="input__group mb-2">
+                                                            <label>{{ __('Banner Image') }}</label>
+                                                            <input type="file" class="form-control" name="image">
+                                                            @php
+                                                                $bannerImg = null;
+                                                                if(!empty($sec->image)){
+                                                                    if (file_exists(public_path($sec->image))) {
+                                                                        $bannerImg = asset($sec->image);
+                                                                    } elseif (file_exists(public_path(PromotionImage() . $sec->image))) {
+                                                                        $bannerImg = asset(PromotionImage() . $sec->image);
+                                                                    } else {
+                                                                        $bannerImg = asset(PromotionImage() . $sec->image);
+                                                                    }
+                                                                }
+                                                            @endphp
+                                                            @if($bannerImg)
+                                                                <img src="{{ $bannerImg }}" style="max-height:80px; margin-top:8px; max-width:80px;" />
+                                                            @endif
+                                                        </div>
+
+                                                    @elseif($secKey === 'newdesign_why_choose')
+                                                        <div class="input__group mb-2">
+                                                            <label>{{ __('Title') }}</label>
+                                                            <input type="text" class="form-control" name="en_title" value="{{ old('en_title', $content_en['title'] ?? '') }}">
+                                                        </div>
+                                                        <div class="input__group mb-2">
+                                                            <label>{{ __('Lead / Paragraph') }}</label>
+                                                            <textarea class="form-control" name="en_description_one">{{ old('en_description_one', $content_en['lead'] ?? '') }}</textarea>
+                                                        </div>
+                                                        <div class="input__group mb-2">
+                                                            <label>{{ __('Points (one per line)') }}</label>
+                                                            <textarea class="form-control" name="en_description_two">{{ old('en_description_two', is_array($content_en['points'] ?? null) ? implode("\n", $content_en['points']) : ($content_en['points'] ?? '')) }}</textarea>
+                                                        </div>
+                                                        <div class="input__group mb-2">
+                                                            <label>{{ __('Image') }}</label>
+                                                            <input type="file" class="form-control" name="image">
+                                                            @php
+                                                                $whyImg = null;
+                                                                if(!empty($sec->image)){
+                                                                    if (file_exists(public_path($sec->image))) {
+                                                                        $whyImg = asset($sec->image);
+                                                                    } elseif (file_exists(public_path(PromotionImage() . $sec->image))) {
+                                                                        $whyImg = asset(PromotionImage() . $sec->image);
+                                                                    } else {
+                                                                        $whyImg = asset(PromotionImage() . $sec->image);
+                                                                    }
+                                                                }
+                                                            @endphp
+                                                            @if($whyImg)
+                                                                <img src="{{ $whyImg }}" style="max-height:80px; margin-top:8px;  max-width:80px;" />
+                                                            @endif
+                                                        </div>
+
+                                                        <hr>
+                                                        <div class="mb-2"><strong>{{ __('Arabic') }}</strong></div>
+                                                        <div class="input__group mb-2">
+                                                            <label>{{ __('Title (AR)') }}</label>
+                                                            <input type="text" class="form-control" name="fr_title" value="{{ old('fr_title', $content_fr['title'] ?? '') }}">
+                                                        </div>
+                                                        <div class="input__group mb-2">
+                                                            <label>{{ __('Lead / Paragraph (AR)') }}</label>
+                                                            <textarea class="form-control" name="fr_description_one">{{ old('fr_description_one', $content_fr['lead'] ?? '') }}</textarea>
+                                                        </div>
+                                                        <div class="input__group mb-2">
+                                                            <label>{{ __('Points (one per line) (AR)') }}</label>
+                                                            <textarea class="form-control" name="fr_description_two">{{ old('fr_description_two', is_array($content_fr['points'] ?? null) ? implode("\n", $content_fr['points']) : ($content_fr['points'] ?? '')) }}</textarea>
+                                                        </div>
+
+                                                    @elseif($secKey === 'newdesign_brands')
+                                                        <div class="input__group mb-2" id="brands-card-{{ $sec->id }}">
+                                                            <label>{{ __('Manage Brand Logos') }}</label>
+                                                            <div class="mb-2">
+                                                                {{-- Inline multiple uploader: select many files and upload without leaving page --}}
+                                                                <div id="brandUploadForm-{{ $sec->id }}" data-csrf="{{ csrf_token() }}">
+                                                                    <input type="file" name="images[]" id="brandImages-{{ $sec->id }}" class="form-control mb-2" multiple accept="image/*">
+                                                                    <div class="d-flex gap-2">
+                                                                        <button type="button" class="btn btn-primary" id="uploadBrandsBtn-{{ $sec->id }}">{{ __('Upload Selected') }}</button>
+                                                                        <button type="button" class="btn btn-secondary" id="clearBrandsBtn-{{ $sec->id }}">{{ __('Clear') }}</button>
+                                                                        <span id="brandUploadStatus-{{ $sec->id }}" class="ms-2 text-muted"></span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            @php
+                                                                $sectionModel = \App\Models\Admin\SiteContent\HomepageSection::where('section_key','newdesign_brands')->first();
+                                                                $brandImages = $sectionModel->content_en['images'] ?? [];
+                                                            @endphp
+                                                            <div class="d-flex gap-3 flex-wrap" id="brandsList-{{ $sec->id }}">
+                                                                @forelse($brandImages as $img)
+                                                                    @php
+                                                                        $imgPublic = file_exists(public_path($img)) ? asset($img) : (isset($img) ? asset(PromotionImage() . $img) : '');
+                                                                    @endphp
+                                                                    <div class="card p-2" style="width:140px;">
+                                                                        <div class="text-center">
+                                                                            @if($imgPublic)
+                                                                                <img src="{{ $imgPublic }}" alt="brand" style="max-height:48px; display:block; margin:auto;" />
+                                                                            @else
+                                                                                <div class="text-muted">{{ __('No image') }}</div>
+                                                                            @endif
+                                                                        </div>
+                                                                    </div>
+                                                                @empty
+                                                                    <div class="text-muted">{{ __('No brand images yet') }}</div>
+                                                                @endforelse
+                                                            </div>
+                                                        </div>
+                                                        <script>
+                                                            (function(){
+                                                                const uploadBtn = document.getElementById('uploadBrandsBtn-{{ $sec->id }}');
+                                                                const clearBtn = document.getElementById('clearBrandsBtn-{{ $sec->id }}');
+                                                                const fileInput = document.getElementById('brandImages-{{ $sec->id }}');
+                                                                const statusEl = document.getElementById('brandUploadStatus-{{ $sec->id }}');
+
+                                                                if(uploadBtn){
+                                                                    uploadBtn.addEventListener('click', async function(){
+                                                                        const files = fileInput.files;
+                                                                        if(!files || files.length === 0){
+                                                                            statusEl.textContent = '{{ __('No files selected') }}';
+                                                                            return;
+                                                                        }
+                                                                        statusEl.textContent = '{{ __('Uploading...') }}';
+                                                                        uploadBtn.disabled = true;
+
+                                                                        const url = "{{ route('admin.advertise.bulk_store') }}";
+                                                                        // Get CSRF token: prefer meta tag, fallback to the container data attribute
+                                                                        let csrf = null;
+                                                                        const meta = document.querySelector('meta[name="csrf-token"]');
+                                                                        if (meta) {
+                                                                            csrf = meta.getAttribute('content');
+                                                                        } else {
+                                                                            const container = document.getElementById('brandUploadForm-{{ $sec->id }}');
+                                                                            if (container && container.dataset && container.dataset.csrf) {
+                                                                                csrf = container.dataset.csrf;
+                                                                            }
+                                                                        }
+                                                                        if (!csrf) {
+                                                                            console.warn('CSRF token not found for brand uploader');
+                                                                        }
+
+                                                                        const fd = new FormData();
+                                                                        for(let i=0;i<files.length;i++){
+                                                                            fd.append('images[]', files[i]);
+                                                                        }
+                                                                        fd.append('location', 'company_logo');
+                                                                        fd.append('display_order', 0);
+                                                                        if (csrf) fd.append('_token', csrf);
+
+                                                                        const headers = { 'Accept': 'application/json' };
+                                                                        if (csrf) headers['X-CSRF-TOKEN'] = csrf;
+
+                                                                        try{
+                                                                            const resp = await fetch(url, { method: 'POST', body: fd, credentials: 'same-origin', headers });
+                                                                            let data = null;
+                                                                            try { data = await resp.json(); } catch(e) { /* ignore parse errors */ }
+                                                                            if(!resp.ok){
+                                                                                console.error('Upload error', resp.status, data);
+                                                                                if(data && data.errors){
+                                                                                    const messages = Object.values(data.errors).flat().join('; ');
+                                                                                    statusEl.textContent = messages;
+                                                                                } else if(data && data.message){
+                                                                                    statusEl.textContent = data.message;
+                                                                                } else {
+                                                                                    statusEl.textContent = '{{ __('Upload failed') }}';
+                                                                                }
+                                                                                uploadBtn.disabled = false;
+                                                                                return;
+                                                                            }
+                                                                            statusEl.textContent = '{{ __('Upload completed, reloading...') }}';
+                                                                            setTimeout(function(){ location.reload(); }, 700);
+                                                                        }catch(err){
+                                                                            console.error(err);
+                                                                            statusEl.textContent = '{{ __('Upload failed') }}';
+                                                                            uploadBtn.disabled = false;
+                                                                        }
+                                                                    });
+                                                                }
+                                                                if(clearBtn){
+                                                                    clearBtn.addEventListener('click', function(){ fileInput.value = ''; statusEl.textContent = ''; });
+                                                                }
+                                                            })();
+                                                        </script>
+
+                                                    @else
+                                                        {{-- Generic fields for unexpected sections --}}
+                                                        <div class="input__group mb-2">
+                                                            <label>{{ __('Title') }}</label>
+                                                            <input type="text" class="form-control" name="en_title" value="{{ old('en_title', $content_en['title'] ?? '') }}">
+                                                        </div>
+                                                        <div class="input__group mb-2">
+                                                            <label>{{ __('Lead / Paragraph') }}</label>
+                                                            <textarea class="form-control" name="en_description_one">{{ old('en_description_one', $content_en['lead'] ?? '') }}</textarea>
+                                                        </div>
+                                                    @endif
+
+                                                    <div class="input__button mt-3">
+                                                        <button type="submit" class="btn btn-blue">{{ __('Update') }}</button>
                                                     </div>
-                                                </div>
-                                                <div class="input__group mb-25">
-                                                    <div class="custom-control custom-switch">
-                                                        <input type="checkbox" value="1" name="best_selling"
-                                                            class="custom-control-input" id="best_selling"
-                                                            {{ allsetting('best_selling') == ACTIVE ? 'checked' : '' }}>
-                                                        <label class="custom-control-label" for="customSwitch1">Best
-                                                            Selling</label>
-                                                    </div>
-                                                </div>
-                                                <div class="input__group mb-25">
-                                                    <div class="custom-control custom-switch">
-                                                        <input type="checkbox" value="1" name="on_sale"
-                                                            class="custom-control-input" id="on_sale"
-                                                            {{ allsetting('on_sale') == ACTIVE ? 'checked' : '' }}>
-                                                        <label class="custom-control-label" for="customSwitch1">On
-                                                            Sale</label>
-                                                    </div>
-                                                </div>
-                                                <div class="input__group mb-25">
-                                                    <div class="custom-control custom-switch">
-                                                        <input type="checkbox" value="1" name="featured_items"
-                                                            class="custom-control-input" id="featured_items"
-                                                            {{ allsetting('featured_items') == ACTIVE ? 'checked' : '' }}>
-                                                        <label class="custom-control-label" for="customSwitch1">Featured
-                                                            Items</label>
-                                                    </div>
-                                                </div>
-                                            @endif
-                                            <div class="input__button">
-                                                <button type="submit" class="btn btn-blue">{{ __('Update') }}</button>
+                                                </form>
                                             </div>
                                         </div>
+                                    @endforeach
+                                @else
+                                    <div class="col-12">
+                                        <div class="alert alert-info">{{ __('No homepage sections found.') }}</div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-vertical__item bg-style">
-                                            <div class="item-top mb-30">
-                                                <h2>{{ langString('fr', false) . ':' }}</h2>
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <label for="exampleInputEmail1">{{ __('Title') }}</label>
-                                                <input type="text" class="form-control" id="fr_title"
-                                                    name="fr_title" required="" value="{{ $edit->fr_Title }}">
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <label for="exampleInputEmail1">{{ __('Description One') }}</label>
-                                                <textarea name="fr_description_one" id="summernote3" class="form-control" required="">{{ $edit->fr_Description_One }}</textarea>
-                                            </div>
+                                @endif
+                            </div>
 
-                                            @if ($edit->fr_Description_Two)
-                                                <div class="input__group mb-25">
-                                                    <label for="exampleInputEmail1">{{ __('Description Two') }}</label>
-                                                    <textarea name="fr_description_two" id="summernote4" class="form-control">{{ $edit->fr_Description_Two }}</textarea>
-                                                </div>
-                                            @endif
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
                         </div>
                     </div>
                 </div>
@@ -176,32 +313,17 @@
     <script>
         "use strict";
         $(document).ready(function() {
-            $("#summernote").summernote({
-                placeholder: 'Description',
-                height: 300
-            });
-            $('.dropdown-toggle').dropdown();
-        });
-
-        $(document).ready(function() {
-            $("#summernote2").summernote({
-                placeholder: 'Description',
-                height: 300
-            });
-            $('.dropdown-toggle').dropdown();
-        });
-        $(document).ready(function() {
-            $("#summernote3").summernote({
-                placeholder: 'Description',
-                height: 300
-            });
-            $('.dropdown-toggle').dropdown();
-        });
-        $(document).ready(function() {
-            $("#summernote4").summernote({
-                placeholder: 'Description',
-                height: 300
-            });
+            // initialize summernote for any editor IDs that may be present
+            if (typeof $.fn.summernote !== 'undefined') {
+                ["#summernote", "#summernote2", "#summernote3", "#summernote4"].forEach(function(id) {
+                    if ($(id).length) {
+                        $(id).summernote({
+                            placeholder: 'Description',
+                            height: 300
+                        });
+                    }
+                });
+            }
             $('.dropdown-toggle').dropdown();
         });
     </script>

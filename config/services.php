@@ -63,5 +63,11 @@ return [
         'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
         'redirect' => env('FACEBOOK_CALLBACK_URL'),
     ],
+    'thawani' => [
+        'secret_key' => env('THAWANI_TEST_SECRET_KEY'),
+        'public_key' => env('THAWANI_TEST_PUBLIC_KEY'),
+        'checkout_url' => env('THAWANI_TEST_CHECKOUT_URL'),
+        'pay_url' => env('THAWANI_TEST_PAY_URL'),
+    ],
 
 ];

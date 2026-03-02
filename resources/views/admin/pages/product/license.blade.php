@@ -221,6 +221,12 @@
                                                     <label class="custom-control-label" for="customSwitch5">{{__('New Arrival')}}</label>
                                                 </div>
                                             </div>
+                                            <div class="input__group mb-25">
+                                                <div class="custom-control custom-switch">
+                                                    <input type="checkbox" value="1" name="today_special" class="custom-control-input" id="customSwitchTodaySpecial">
+                                                    <label class="custom-control-label" for="customSwitchTodaySpecial">{{__('Today Special')}}</label>
+                                                </div>
+                                            </div>
                                             <div class="input__button">
                                                 <button type="submit" class="btn btn-blue">{{ __('Add')}}</button>
                                             </div>

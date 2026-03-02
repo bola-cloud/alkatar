@@ -85,8 +85,8 @@
                                     <div class="single-colors">
                                         <div class="colors-left">
                                             <input style="background: {{ $color->ColorCode }}"
-                                                class="form-check-input checkColor" type="checkbox"
-                                                id="{{ $color->ColorCode }}" value="{{ $color->Name }}">
+                                                class="form-check-input checkColor" type="checkbox" id="{{ $color->ColorCode }}"
+                                                value="{{ $color->Name }}">
                                             <label class="form-check-label"
                                                 for="{{ $color->ColorCode }}">{{ $color->Name }}</label>
                                         </div>
@@ -104,8 +104,7 @@
                                     <div class="single-size">
                                         <input class="form-check-input checkSize" type="checkbox" id="{{ $size->id }}"
                                             value="{{ $size->Size }}">
-                                        <label class="form-check-label"
-                                            for="{{ $size->id }}">{{ $size->Size }}</label>
+                                        <label class="form-check-label" for="{{ $size->id }}">{{ $size->Size }}</label>
                                     </div>
                                 @endforeach
                             </div>
@@ -119,8 +118,7 @@
                                         <div class="brand-left">
                                             <input class="form-check-input CheckBrand" type="checkbox"
                                                 value="{{ $brand->en_BrandName }}">
-                                            <label class="form-check-label"
-                                                for="Renuar">{{ $brand->en_BrandName }}</label>
+                                            <label class="form-check-label" for="Renuar">{{ $brand->en_BrandName }}</label>
                                         </div>
                                         <span class="brand-count">{{ productBrandCount($brand->id) }}</span>
                                     </div>
@@ -138,8 +136,7 @@
                                     <button class="sidebar-filter d-block d-lg-none" type="button"
                                         data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample"
                                         aria-controls="offcanvasExample">
-                                        {{ __('Filter') }} <img
-                                            src="{{ asset('frontend/assets/images/angle-down.svg') }}"
+                                        {{ __('Filter') }} <img src="{{ asset('frontend/assets/images/angle-down.svg') }}"
                                             alt="angle-down" />
                                     </button>
                                     <div class="list-grid-view">
@@ -148,8 +145,7 @@
                                                 src="{{ asset('frontend/assets/images/view-list.svg') }}"
                                                 alt="view-list" /></a>
                                         <a href="{{ route('all.product') }}" class="view-btn grid-view"><img
-                                                class="view-icon"
-                                                src="{{ asset('frontend/assets/images/view-grid.svg') }}"
+                                                class="view-icon" src="{{ asset('frontend/assets/images/view-grid.svg') }}"
                                                 alt="view-grid" /></a>
                                     </div>
                                 </div>
@@ -175,15 +171,13 @@
                                     <div class="product-left">
                                         <a href="{{ route('single.product', $product->en_Product_Slug) }}"><img
                                                 class="product-thumbnal"
-                                                src="{{ asset(ProductImage() . $product->Primary_Image) }}"
-                                                alt="product" /></a>
+                                                src="{{ asset(ProductImage() . $product->Primary_Image) }}" alt="product" /></a>
                                         <div class="product-flags">
                                             @if ($product->ItemTag)
                                                 <span class="product-flag sale">{{ $product->ItemTag }}</span>
                                             @endif
                                             @if ($product->Discount > 0)
-                                                <span
-                                                    class="product-flag discount">{{ __('-') }}{{ $product->Discount }}</span>
+                                                <span class="product-flag discount">{{ __('-') }}{{ $product->Discount }}</span>
                                             @endif
                                         </div>
                                     </div>
@@ -203,16 +197,14 @@
                                                 @if ($product->Price == $product->Discount_Price)
                                                     <span class="price">{{ currencyConverter($product->Price) }}</span>
                                                 @else
-                                                    <span
-                                                        class="regular-price">{{ currencyConverter($product->Price) }}</span>
-                                                    <span
-                                                        class="price">{{ currencyConverter($product->Discount_Price) }}</span>
+                                                    <span class="regular-price">{{ currencyConverter($product->Price) }}</span>
+                                                    <span class="price">{{ currencyConverter($product->Discount_Price) }}</span>
                                                 @endif
                                             </div>
-                                        </div> <input type="hidden" name="quantity" value="1"
-                                            id="product_quantity">
+                                        </div> <input type="hidden" name="quantity" value="1" id="product_quantity">
                                         <p class="prdouct-content">
-                                            {{ langConverter($product->en_About, $product->fr_About) }}</p>
+                                            {{ langConverter($product->en_About, $product->fr_About) }}
+                                        </p>
                                         <ul class="prdouct-btn-wrapper d-flex align-items-center">
                                             <li class="single-product-btn">
                                                 <a href="javascript:void(0)" title="{{ __('Add To Cart') }}"
@@ -306,11 +298,9 @@
                         @foreach ($colors as $color)
                             <div class="single-colors">
                                 <div class="colors-left">
-                                    <input style="background: {{ $color->ColorCode }}"
-                                        class="form-check-input checkColorMobile" type="checkbox"
-                                        id="{{ $color->ColorCode }}" value="{{ $color->Name }}">
-                                    <label class="form-check-label"
-                                        for="{{ $color->ColorCode }}">{{ $color->Name }}</label>
+                                    <input style="background: {{ $color->ColorCode }}" class="form-check-input checkColorMobile"
+                                        type="checkbox" id="{{ $color->ColorCode }}" value="{{ $color->Name }}">
+                                    <label class="form-check-label" for="{{ $color->ColorCode }}">{{ $color->Name }}</label>
                                 </div>
                                 <span class="colors-count">{{ productColorCount($color->id) }}</span>
                             </div>

@@ -28,12 +28,13 @@ class CouponController extends Controller
                     ->where('usage_count', '>', 0) // Ensure it's not overused
                     ->lockForUpdate() // Prevent race condition
                     ->first();
-                    
+
 
                 if ($couponDetails && $couponDetails->user && $user_id != $couponDetails->user_id) {
                     return redirect()->back()->with('error', __('Coupon does not exits !'));
                 }
-                $subtotal = Cart::subtotal();
+                // Use numeric subtotal helper to avoid formatted rounding
+                $subtotal = floatval(subtotal());
                 if (!empty($couponDetails)) {
                     if ($couponDetails->Status == 0) {
                         return redirect()->back()->with('error', __('Coupon Code is not Active !'));

@@ -135,9 +135,15 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <p><b>{{__('Question:')}}</b> {{$fq->question}}</p>
+                        @php
+                            $htmlLocale = session('HTML_LANG', session('APP_LOCALE', app()->getLocale() ?? 'en'));
+                            $isAr = in_array($htmlLocale, ['ar']);
+                            $viewQuestion = $isAr ? ($fq->question_fr ?? $fq->question) : ($fq->question ?? $fq->question_fr);
+                            $viewAnswer = $isAr ? ($fq->answer_fr ?? $fq->answer) : ($fq->answer ?? $fq->answer_fr);
+                        @endphp
+                        <p><b>{{__('Question:')}}</b> {!! $viewQuestion !!}</p>
                         <b>{{__('Answer')}}</b>
-                        <p>{!! clean($fq->answer) !!}</p>
+                        <p>{!! clean($viewAnswer) !!}</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">{{__('Close')}}</button>

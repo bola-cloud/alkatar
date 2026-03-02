@@ -4,11 +4,12 @@
 
 
 
-<div class="single-grid-product ms-1 md:ms-4" data-product-id="{{ $product->id }}">
+<div class="single-grid-product ms-1 md:ms-4 h-100 d-flex flex-column" data-product-id="{{ $product->id }}">
     <div class="product-top">
         <a href="{{ route('single.product', $product->en_Product_Slug) }}">
             <img class="product-thumbnal" src="{{ asset(ProductImage() . $product->Primary_Image) }}"
-                alt="{{ __('product') }}" />
+                alt="{{ __('product') }}" style="height:160px; object-fit:contain;"
+                onerror="this.onerror=null;this.src='{{ asset(ProductImage() . 'prod.png') }}';" />
         </a>
         <div class="product-flags">
             @foreach ($product->product_tags as $ppt)
@@ -25,20 +26,23 @@
                         class="icon flaticon-bar-chart"></i></a>
             </li> --}}
             <li class="single-product-btn">
-                <a class="product-btn MyWishList" data-id="{{ $product->id }}" title="{{ __('Add To Wishlist') }}"><i
-                        class="icon flaticon-like"></i></a>
+                <a class="product-btn MyWishList" data-id="{{ $product->id }}" title="{{ __('Add To Wishlist') }}">
+                    <i class="{{ isInWishlist($product->id) ? 'bi bi-heart-fill text-danger' : 'bi bi-heart' }}"></i>
+                </a>
             </li>
         </ul>
     </div>
 
-    <div class="product-info text-center">
+    <div class="product-info text-center d-flex flex-column flex-grow-1">
         {{-- @foreach ($product->product_tags as $ppt)
         <h4 class="product-catagory">{{ $ppt->tag }}</h4>
         @endforeach --}}
         <input type="hidden" name="quantity" value="1" id="product_quantity">
-        <h3 class="product-name"><a class="product-link"
-                href="{{ route('single.product', $product->en_Product_Slug) }}">{{
-    langConverter($product->en_Product_Name, $product->fr_Product_Name) }}</a></h3>
+        <h3 class="product-name"
+            style="min-height:3.2rem; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">
+            <a class="product-link"
+                href="{{ route('single.product', $product->en_Product_Slug) }}">{{ langConverter($product->en_Product_Name, $product->fr_Product_Name) }}</a>
+        </h3>
 
         @if($product->points > 0)
             <p class="product_points">{{ __("Win Points", ['points' => $product->points]) }}</p>
@@ -46,24 +50,26 @@
 
         <div class="product-price">
             @php
+                // Prefer product-level Price when set (old design behavior).
                 $finalPrice = 0;
-                $firstWeight = $product->weights->first();
-
-
-
-                if ($firstWeight) {
-                    $finalPrice = $firstWeight->price;
+                if (!empty($product->Price) && $product->Price > 0) {
+                    $finalPrice = $product->Price;
                 } else {
-                    $firstSize = $product->sizes->first();
-                    $finalPrice = $firstSize?->pivot->price;
+                    $firstWeight = $product->weights->first();
+                    if ($firstWeight) {
+                        $finalPrice = $firstWeight->price;
+                    } else {
+                        $firstSize = $product->sizes->first();
+                        $finalPrice = $firstSize?->pivot->price ?? 0;
+                    }
                 }
             @endphp
 
             @if ($product->Discount > 0)
-                <span class="price line-through !text-gray-400">{{ currencyConverter($finalPrice) }}</span>
-                <span class="price">
-                    {{currencyConverter($product->Discount_Price)}}
-                </span>
+                {{-- show discounted price first, then original struck-through to the right (matches home design) --}}
+                <span class="price" style="font-weight:600;">{{ currencyConverter($product->Discount_Price) }}</span>
+                <span class="price"
+                    style="margin-left:8px; text-decoration-line: line-through; text-decoration-color: #b5c61a; text-decoration-thickness: 2px; color: #6b6b6b;">{{ currencyConverter($finalPrice) }}</span>
             @else
                 <span class="price">{{ currencyConverter($finalPrice) }}</span>
             @endif
@@ -72,7 +78,8 @@
         {!! productReview($product->id) !!}
 
         @if(!$isInDetailsPage)
-            <a href="javascript:void(0)" title="{{ __('Add To Cart') }}" class="add-cart addCart"
+            <a href="javascript:void(0)" title="{{ __('Add To Cart') }}"
+                class="add-cart addCart mt-auto w-100 d-inline-flex justify-content-center align-items-center"
                 data-id="{{ $product->id }}" data-discount="{{$product->Discount_Price}}"
                 data-percenteng="{{ number_format($product->Discount, 0) }}" data-name="{{ $product->en_Product_Name }}"
                 data-sizes="{{ json_encode($product->sizes) }}" data-additions="{{json_encode($product->additions)}}"

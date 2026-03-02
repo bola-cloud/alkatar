@@ -33,7 +33,7 @@ class ProductResource extends JsonResource
                 'en_About' => $this->en_About,
                 'fr_About' => $this->fr_About,
                 'ItemTag' => $this->ItemTag,
-                'Quantity' => $this->Quantity,
+                'Quantity' => $this->virtual_stock,
                 'Sold' => $this->Sold,
                 'Image2' => $this->Image2,
                 'Image3' => $this->Image3,
@@ -62,7 +62,7 @@ class ProductResource extends JsonResource
                 'colors' => ColorResource::collection($this->whenLoaded('colors')),
                 'sizes' => SizeResource::collection($this->whenLoaded('sizes')),
                 'product_tags' => ProductTagResource::collection($this->whenLoaded('product_tags')),
-                'weights' =>  WeightProductResource::collection($this->whenLoaded('weights')),
+                'weights' => WeightProductResource::collection($this->whenLoaded('weights')),
                 'additions' => AdditionResource::collection($this->whenLoaded('additions')),
             ]);
         }

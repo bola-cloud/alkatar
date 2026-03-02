@@ -11,4 +11,13 @@ class City extends Model
 
     protected $fillable = ['name_en', 'name_ar', 'state_id'];
 
+    public function areas()
+    {
+        return $this->hasMany(Area::class);
+    }
+
+    public function state()
+    {
+        return $this->belongsTo(State::class);
+    }
 }

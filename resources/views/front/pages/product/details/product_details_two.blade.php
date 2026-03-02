@@ -110,6 +110,13 @@
                             <h3 class="product-name">
                                 {{ langConverter($products->en_Product_Name, $products->fr_Product_Name) }}</h3>
                             </h3>
+                            @if($products->unit)
+                                <div class="mb-3">
+                                    <span class="badge bg-light text-dark border">
+                                        <i class="bi bi-box-seam me-1"></i> {{ $products->unit }}
+                                    </span>
+                                </div>
+                            @endif
                             <p class="note-text">{!! langConverter($products->en_About, $products->fr_About) !!}
                             </p>
                             <div class="product-price">
@@ -159,7 +166,7 @@
                                     <div class="inc qtybutton btn">{{ __('+') }}</div>
                                 </div>
                                 <a href="javascript:void(0)" title="{{ __('Add To Cart') }}"
-                                    class="add-cart addCart" data-id="{{ $products->id }}">{{ __('Add To Cart') }}
+                                    class="add-cart addCart" data-id="{{ $products->id }}" data-unit="{{ $products->unit ?? '' }}">{{ __('Add To Cart') }}
                                     <i class="icon fas fa-plus-circle"></i></a>
                             </div>
                             <div class="product-bottom-button d-flex">
@@ -382,7 +389,7 @@
                                 <span class="price">{{ currencyConverter($product->Discount_Price) }}</span>
                             </div>
                             <a href="javascript:void(0)" title="{{ __('Add To Cart') }}" class="add-cart addCart"
-                                data-id="{{ $products->id }}">{{ __('Add To Cart') }} <i
+                                data-id="{{ $products->id }}" data-unit="{{ $product->unit ?? '' }}">{{ __('Add To Cart') }} <i
                                     class="icon fas fa-plus-circle"></i></a>
                         </div>
                     </div>

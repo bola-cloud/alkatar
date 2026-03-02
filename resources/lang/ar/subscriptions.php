@@ -1,0 +1,33 @@
+<?php
+
+return [
+    'Subscriptions' => 'الاشتراكات',
+    'Add Subscription' => 'إضافة اشتراك',
+    'Create Subscription' => 'إنشاء اشتراك',
+    'Edit Subscription' => 'تعديل الاشتراك',
+    'Price' => 'السعر',
+    'Period Type' => 'نوع الفترة',
+    'Period Value' => 'قيمة الفترة',
+    'Discount Percent' => 'نسبة الخصم',
+    'Max Discount Amount' => 'الحد الأقصى للخصم',
+    'Free Shipping' => 'شحن مجاني',
+    'Tax Exempt' => 'إعفاء من الضريبة',
+    'Benefits' => 'المزايا',
+    'Status' => 'الحالة',
+    'Active' => 'نشط',
+    'Inactive' => 'غير نشط',
+    'Are you sure?' => 'هل أنت متأكد؟',
+    'Days' => 'أيام',
+    'Months' => 'أشهر',
+    'Years' => 'سنوات',
+    'Yes' => 'نعم',
+    'No' => 'لا',
+    'Create' => 'إنشاء',
+    'Update' => 'تحديث',
+    'Delete' => 'حذف',
+    'ID' => 'المعرف',
+    'Name' => 'الاسم',
+    'Period' => 'الفترة',
+    'Discount' => 'الخصم',
+    'Action' => 'الإجراءات'
+];

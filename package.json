@@ -12,6 +12,8 @@
     "devDependencies": {
         "autoprefixer": "^10.4.18",
         "axios": "^0.21",
+        "laravel-echo": "^1.15",
+        "pusher-js": "^8.3",
         "flowbite": "^2.3.0",
         "laravel-mix": "^6.0.6",
         "lodash": "^4.17.19",

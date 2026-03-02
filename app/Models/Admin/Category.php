@@ -6,10 +6,11 @@ use App\Models\Subcategory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
 {
-  use HasFactory;
+  use HasFactory, SoftDeletes;
   protected $fillable = [
     'en_Category_Name',
     'en_Category_Slug',
@@ -19,7 +20,8 @@ class Category extends Model
     'fr_Category_Name',
     'fr_Category_Slug',
     'fr_Description',
-    "order"
+    "order",
+    "show_on_home"
   ];
   public function products()
   {
@@ -29,5 +31,23 @@ class Category extends Model
   public function subCategories(): HasMany
   {
     return $this->hasMany(Subcategory::class);
+  }
+
+  public function getLocalizedNameAttribute()
+  {
+    $locale = app()->getLocale();
+    if ($locale == 'en') {
+      return $this->en_Category_Name;
+    }
+    return $this->fr_Category_Name;
+  }
+
+  public function getLocalizedDescriptionAttribute()
+  {
+    $locale = app()->getLocale();
+    if ($locale == 'en') {
+      return $this->en_Description;
+    }
+    return $this->fr_Description;
   }
 }

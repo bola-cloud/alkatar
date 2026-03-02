@@ -23,7 +23,7 @@ class AboutUsPageController extends Controller
                     return $btn;
                 })
                 ->editColumn('Location', function ($data) {
-                    return  '<span class="status active">' . $data->Location . '</span>';
+                    return '<span class="status active">' . $data->Location . '</span>';
                 })
                 ->editColumn('Image', function ($data) {
                     if ($data->Image) {

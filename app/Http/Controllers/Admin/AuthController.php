@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -12,7 +13,8 @@ class AuthController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('guest')->except('logout');
+        // Use guest middleware for admin guard when applicable
+        $this->middleware('guest:admin')->except('logout');
     }
     public  function  login()
     {
@@ -20,30 +22,32 @@ class AuthController extends Controller
     }
     public  function LoginDashboard(Request $request)
     {
-        $user = User::where('email', $request->email)->where('is_admin', 1)->first();
-        if ($user) {
-            if ($user->status == INACTIVE) {
-                Auth::logout();
-                return  redirect()->route('login')->with('error', __('User is blocked by admin.'));
-            }
-            if (Hash::check($request->password, $user->password)) {
-                if (Auth::attempt(['email' => $request->email, 'password' => $request->password, 'is_admin' => 1])) {
-                    if (Auth::user()->is_admin == 1) {
-                        return redirect()->route('admin.dashboard');
-                    } else {
-                        Auth::logout();
-                        return redirect()->back()->with('error', __('Something went wrong!'));
-                    }
+        // Attempt to find admin in the admins table (Admin model)
+        $admin = Admin::where('email', $request->email)->first();
+
+        if ($admin) {
+            // Optional: if you have a status field for admins, check it here (uncomment if used)
+            // if (isset($admin->status) && $admin->status == INACTIVE) {
+            //     return redirect()->route('admin.login')->with('error', __('User is blocked by admin.'));
+            // }
+
+            // Verify password and attempt authentication using admin guard
+            if (Hash::check($request->password, $admin->password)) {
+                if (Auth::guard('admin')->attempt(['email' => $request->email, 'password' => $request->password])) {
+                    // Successful admin login
+                    return redirect()->route('admin.dashboard');
                 }
             }
         }
-        return  redirect()->route('login')->with('error', __('Wrong Credential'));
+
+        return redirect()->route('admin.login')->with('error', __('Wrong Credential'));
     }
     public function logout()
     {
-        if (Auth::check()) {
-            Auth::logout();
-            return redirect()->route('login');
+        // Logout from admin guard
+        if (Auth::guard('admin')->check()) {
+            Auth::guard('admin')->logout();
+            return redirect()->route('admin.login');
         }
         return redirect()->back()->with('error', __('Something went wrong!'));
     }
