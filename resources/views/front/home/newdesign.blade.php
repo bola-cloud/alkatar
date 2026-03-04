@@ -93,7 +93,7 @@
       </div>
       <div class="row">
         <div class="col-12">
-          @include('front.home.partials._category_carousel', ['categories' => $featuredCategories])
+          @include('front.home.partials._category_carousel', ['categories' => $allCategories])
         </div>
       </div>
     </div>

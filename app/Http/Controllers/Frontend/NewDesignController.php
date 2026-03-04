@@ -65,20 +65,23 @@ class NewDesignController extends Controller
             ->take(6)
             ->get();
 
-        // Featured Categories to show on home (marked by admin)
-        $featuredCategories = Category::where('Status', 1)
-            ->where('show_on_home', 1)
+        // All active categories for the "Browse Categories" carousel
+        $allCategories = Category::where('Status', 1)
             ->orderBy('order', 'asc')
             ->orderBy('id', 'desc')
             ->get();
-        \Log::info("Featured Categories Count: " . $featuredCategories->count());
 
-        // Manual lazy load products per category to avoid the total limit bug with take() inside with()
+        // Featured Categories to show as individual product sections (marked by admin)
+        $featuredCategories = $allCategories->where('show_on_home', 1);
+
+        \Log::info("Home: All active categories: " . $allCategories->count() . ", Featured: " . $featuredCategories->count());
+
+        // Manual lazy load products per featured category
         foreach ($featuredCategories as $cat) {
-            $products = $cat->products()->where('Status', 1)->with($relations)->take(12)->get();
-            $cat->setRelation('products', $products);
+            $catProducts = $cat->products()->where('Status', 1)->with($relations)->take(12)->get();
+            $cat->setRelation('products', $catProducts);
         }
 
-        return view('front.home.newdesign', compact('products', 'bestSellers', 'title', 'description', 'keywords', 'reviews', 'featuredCategories'));
+        return view('front.home.newdesign', compact('products', 'bestSellers', 'title', 'description', 'keywords', 'reviews', 'allCategories', 'featuredCategories'));
     }
 }
