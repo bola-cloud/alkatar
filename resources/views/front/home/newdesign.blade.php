@@ -82,6 +82,23 @@
   </section>
 
 
+  <!-- Categories Section -->
+  <section class="category-section py-5 bg-white border-bottom">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">{{ __('Browse Categories') }}</h2>
+        <a href="{{ Route::has('categories.show') ? route('categories.show') : url('/categories') }}" class="btn btn-link text-warning text-decoration-none p-0">
+          {{ __('View All') }} <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          @include('front.home.partials._category_carousel', ['categories' => $featuredCategories])
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Today Special Offers -->
   <section class="special-offers py-5 bg-light position-relative">
     <div class="left-decorative" aria-hidden="true"></div>
@@ -145,7 +162,7 @@
         <div class="container">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold">{{ $catName }}</h2>
-            <a href="{{ route('category.product', $featCat->id) }}" class="btn btn-link text-warning text-decoration-none">
+            <a href="{{ route('categories.show', ['slug' => $featCat->en_Category_Slug]) }}" class="btn btn-link text-warning text-decoration-none">
               {{ __('View All') }} <i class="bi bi-arrow-right"></i>
             </a>
           </div>

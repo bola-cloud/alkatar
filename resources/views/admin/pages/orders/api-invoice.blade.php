@@ -143,16 +143,18 @@
             <table width="100%" border="0px">
                 <tr>
                     <td style="text-align: right;">
-                        <p style="line-height: 1.5;"><strong>شركة مطاحن و تمور الشرع</strong></p>
-                        <p style="line-height: 1.5;">الهاتف: +968 94974726</p>
-                        <p style="line-height: 1.5;">alsaraamills@gmail.com</p>
-                        <p style="line-height: 1.5;">https://alsharashopping.com</p>
+                        <p style="line-height: 1.5;"><strong>{{ allsetting()['app_title'] ?? 'هاي سبيد' }}</strong></p>
+                        <p style="line-height: 1.5;">{{ __('Phone') }}: {{ allsetting()['call_us'] ?? '+968 94974726' }}
+                        </p>
+                        <p style="line-height: 1.5;">{{ allsetting()['email'] ?? 'alsaraamills@gmail.com' }}</p>
+                        <p style="line-height: 1.5;">{{ url('/') }}</p>
                     </td>
                     <td style="text-align: right;">
                         <p style="line-height: 1.5;">تاريخ الشراء: {{ date('d/m/Y', strtotime($order->created_at)) }}
                         </p>
                         <p style="line-height: 1.5;">وقت الشراء:
-                            {{ $order->created_at->timezone('Asia/Muscat')->format('h:i A') }}</p>
+                            {{ $order->created_at->timezone('Asia/Muscat')->format('h:i A') }}
+                        </p>
                         <p style="line-height: 1.5;">رقم الطلب: {{ $order->Order_Number }}</p>
                         <p style="line-height: 1.5;">طريقة الدفع: {{ $order->Payment_Method }}</p>
                         <p style="line-height: 1.5;">طريقة الشحن: مصاريف الشحن</p>
@@ -171,7 +173,8 @@
                         </p>
                         @if ($order->user)
                             <p style="line-height: 1.5;">رقم الهاتف:
-                                {{ $order->user->code . $order->user->Number ?? 'N/A' }}</p>
+                                {{ $order->user->code . $order->user->Number ?? 'N/A' }}
+                            </p>
                         @endif
                     </td>
                     <td style="text-align: right; vertical-align: top; padding: 10px; border: 1px solid #ddd;">

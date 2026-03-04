@@ -3,9 +3,10 @@
     <div class="mobile-menu-area">
         <div class="offcanvas-header flex justify-between">
             <a class="brand-logo" href="{{ route('front') }}"><img class="brand-image"
-            src="{{ asset(IMG_LOGO_PATH . $allsettings['main_logo']) }}"
-            alt="{{ $allsettings['app_title'] }}" /></a>
-            <button type="button" class="btn-close !text-black !text-5xl" data-bs-dismiss="offcanvas" aria-label="Close">x</button>
+                    src="{{ asset(IMG_LOGO_PATH . $allsettings['main_logo']) }}"
+                    alt="{{ $allsettings['app_title'] }}" /></a>
+            <button type="button" class="btn-close !text-black !text-5xl" data-bs-dismiss="offcanvas"
+                aria-label="Close">x</button>
         </div>
         <nav class="main-menu">
             <ul class="menu-list">
@@ -21,7 +22,7 @@
                             <ul class="sub-menu">
                                 @foreach (Category_Des_Icon()->take(8) as $submenu)
                                     <li class="sub-menu-item"><a class="sub-menu-link"
-                                            href="{{route('category.product', $submenu->id)}}">{{ langConverter($submenu->en_Category_Name, $submenu->fr_Category_Name) }}</a>
+                                            href="{{ route('categories.show', ['slug' => $submenu->en_Category_Slug]) }}">{{ langConverter($submenu->en_Category_Name, $submenu->fr_Category_Name) }}</a>
                                     </li>
                                 @endforeach
                             </ul>
@@ -48,7 +49,7 @@
                     @if (app()->getLocale() == 'en')
                         @if(getLanguage('en')->status == 1)
                             <span class="flag">
-                            <!-- <img src="{{ asset(IMG_LANGUAGE . 'en.png') }}" alt="united-states" /> -->
+                                <!-- <img src="{{ asset(IMG_LANGUAGE . 'en.png') }}" alt="united-states" /> -->
                             </span>
                             <a href="javascript:void(0)" class="lang">{{ getLanguage('en')->name }}
                                 @if(getLanguage('fr')->status == 1)
@@ -59,7 +60,7 @@
                     @elseif(app()->getLocale() == 'fr')
                         @if(getLanguage('fr')->status == 1)
                             <span class="flag">
-                            <!-- <img src="{{ asset(IMG_LANGUAGE . 'fr.png') }}" alt="oman" /> -->
+                                <!-- <img src="{{ asset(IMG_LANGUAGE . 'fr.png') }}" alt="oman" /> -->
                             </span>
                             <a href="javascript:void(0)" class="lang">{{ getLanguage('fr')->name }}
                                 @if(getLanguage('en')->status == 1)
@@ -73,8 +74,8 @@
                         @if (app()->getLocale() == 'en')
                             @if(getLanguage('fr')->status == 1)
                                 <li class="single-lang"><span class="flag">
-                                <!-- <img src="{{ asset(IMG_LANGUAGE . 'fr.png') }}" alt="oman"> -->
-                                </span><a class="lang-text"
+                                        <!-- <img src="{{ asset(IMG_LANGUAGE . 'fr.png') }}" alt="oman"> -->
+                                    </span><a class="lang-text"
                                         href="{{ route('locale.switch', 'fr') }}">{{ getLanguage('fr')->name }}</a>
                                 </li>
                             @endif
@@ -82,9 +83,9 @@
                             @if(getLanguage('en')->status == 1)
                                 <li class="single-lang">
                                     <span class="flag">
-                                <!-- <img src="{{ asset(IMG_LANGUAGE . 'en.png') }}" alt="united-states" /> -->
-                                </span>
-                                <a class="lang-text"
+                                        <!-- <img src="{{ asset(IMG_LANGUAGE . 'en.png') }}" alt="united-states" /> -->
+                                    </span>
+                                    <a class="lang-text"
                                         href="{{ route('locale.switch', 'en') }}">{{ getLanguage('en')->name }}</a>
                                 </li>
                             @endif

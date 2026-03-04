@@ -163,7 +163,8 @@ Route::group(['middleware' => ['is_user']], function () {
     // Route::get('privacy/policy', [ServiceCustomerController::class, 'privacyPolicy'])->name('privacy.policy');
     // New-design versions (dynamic content managed from admin customer services)
     Route::get('terms/conditions-new', [ServiceCustomerController::class, 'termsConditionsNewDesign'])->name('terms.conditions.new');
-    Route::get('privacy/policy', [ServiceCustomerController::class, 'privacyPolicyNewDesign'])->name('privacy.policy.new');
+    Route::get('privacy/policy', [ServiceCustomerController::class, 'privacyPolicyNewDesign'])->name('privacy.policy');
+    Route::get('privacy/policy-new', [ServiceCustomerController::class, 'privacyPolicyNewDesign'])->name('privacy.policy.new');
     Route::get('shipping/return', [ServiceCustomerController::class, 'shippingReturn'])->name('shipping.return');
     // New-design Shipping & Return page
     Route::get('shipping/return-new', [ServiceCustomerController::class, 'shippingReturnNewDesign'])->name('shipping.return.new');

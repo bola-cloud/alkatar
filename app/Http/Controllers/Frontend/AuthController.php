@@ -64,7 +64,7 @@ class AuthController extends Controller
 
                 if (Auth::attempt($credentials)) {
                     if (Auth::user()->is_admin == 0) {
-                        return redirect()->route('front');
+                        return redirect()->intended(route('front'));
                     } else {
                         Auth::logout();
                         return redirect()->back()->with('error', __('Something went wrong!'));
@@ -152,7 +152,7 @@ class AuthController extends Controller
             } catch (\Exception $e) {
                 // If login fails for any reason, continue but don't block the flow
             }
-            return redirect()->route('front')->with('success', __('Sign Up Successfully !'));
+            return redirect()->intended(route('front'))->with('success', __('Sign Up Successfully !'));
         } else {
             return redirect()->route('user.sign.up')->with('success', __('Wrong Credential !'));
         }
@@ -200,18 +200,22 @@ class AuthController extends Controller
 
         $token = Str::random(64);
 
+        // Delete old tokens for this email to prevent multiple valid links
+        DB::table('password_resets')->where('email', $request->email)->delete();
+
         DB::table('password_resets')->insert([
             'email' => $request->email,
             'token' => $token,
             'created_at' => Carbon::now()
         ]);
 
-        Mail::send('front.auth.mail_form', ['token' => $token], function ($message) use ($request) {
+        $appName = config('app.name', 'HiSpeed');
+        Mail::send('front.auth.mail_form', ['token' => $token], function ($message) use ($request, $appName) {
             $message->to($request->email);
-            $message->subject('Reset Password');
+            $message->subject($appName . ' - Password Reset Request');
         });
 
-        return back()->with('success', 'We have e-mailed your password reset link!');
+        return back()->with('success', __('We have e-mailed your password reset link!'));
     }
     public function userShowResetPasswordForm($token)
     {
@@ -238,17 +242,18 @@ class AuthController extends Controller
             ->first();
 
         if (!$updatePassword) {
-            return back()->withInput()->with('error', 'Invalid token!');
+            return back()->withInput()->with('error', __('The link is invalid or has expired.'));
         }
 
-        $user = User::where('email', $request->email)
+        $userUpdate = User::where('email', $request->email)
             ->update(['password' => Hash::make($request->password)]);
 
-        DB::table('password_resets')->where(['email' => $request->email])->delete();
-        if ($user) {
-            return redirect()->route('login')->with('success', 'Your password has been changed!');
+        if ($userUpdate) {
+            DB::table('password_resets')->where(['email' => $request->email])->delete();
+            return redirect()->route('login')->with('success', __('Success! Your password has been changed. You can now sign in.'));
         }
-        return redirect()->back()->with('error', 'Your password not changed!');
+
+        return redirect()->back()->with('error', __('Your password could not be changed. Please try again.'));
     }
 
     public function redirectToGoogle()
@@ -267,7 +272,7 @@ class AuthController extends Controller
                     return redirect()->route('front')->with('error', __('User is blocked by admin.'));
                 }
                 Auth::login($finduser);
-                return redirect()->route('front')->with('success', __('Login Successfully!'));
+                return redirect()->intended(route('front'))->with('success', __('Login Successfully!'));
             } else {
                 $newUser = User::create([
                     'name' => $user->name,
@@ -277,7 +282,7 @@ class AuthController extends Controller
                     'password' => Hash::make('123456')
                 ]);
                 Auth::login($newUser);
-                return redirect()->route('front')->with('success', __('Login Successfully!'));
+                return redirect()->intended(route('front'))->with('success', __('Login Successfully!'));
             }
         } catch (\Exception $e) {
             return redirect()->back()->with('error', __('Something went wrong!'));
@@ -301,7 +306,7 @@ class AuthController extends Controller
                     return redirect()->route('front')->with('error', __('User is blocked by admin.'));
                 }
                 Auth::login($finduser);
-                return redirect()->route('front')->with('success', __('Login Successfully!'));
+                return redirect()->intended(route('front'))->with('success', __('Login Successfully!'));
             } else {
                 $newUser = User::create([
                     'name' => $user->name,
@@ -311,7 +316,7 @@ class AuthController extends Controller
                     'password' => Hash::make('123456')
                 ]);
                 Auth::login($newUser);
-                return redirect()->route('front')->with('success', __('Login Successfully!'));
+                return redirect()->intended(route('front'))->with('success', __('Login Successfully!'));
             }
         } catch (\Exception $e) {
             return redirect()->back()->with('error', __('Something went wrong!'));
@@ -388,7 +393,7 @@ class AuthController extends Controller
 
             if ($user) {
                 Auth::login($user);
-                return redirect()->route('front')->with('success', 'Login Successfully');
+                return redirect()->intended(route('front'))->with('success', 'Login Successfully');
             } else {
                 $user = User::create([
                     'name' => $name,
@@ -400,7 +405,7 @@ class AuthController extends Controller
 
                 if ($user) {
                     Auth::login($user);
-                    return redirect()->route('front')->with('success', __('Sign Up Successfully !'));
+                    return redirect()->intended(route('front'))->with('success', __('Sign Up Successfully !'));
                 }
             }
         } else {

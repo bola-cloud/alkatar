@@ -60,8 +60,6 @@ class SubscriptionPaymentController extends Controller
             'subscription_id' => $subscription->id,
             'status' => 'pending', // Waiting for payment
             'order_reference' => $reference,
-            'start_at' => null,
-            'end_at' => null,
         ]);
 
         // Thawani Payload

@@ -122,10 +122,10 @@
 
         <div class="invoice-details">
             <div>
-                <p><strong>شركة مطاحن و تمور الشرع</strong></p>
-                <p>الهاتف: +968 94974726</p>
-                <p>alsaraamills@gmail.com</p>
-                <p>https://alsharashopping.com</p>
+                <p><strong>{{ allsetting()['app_title'] ?? 'هاي سبيد' }}</strong></p>
+                <p>{{ __('Phone') }}: {{ allsetting()['call_us'] ?? '+968 94974726' }}</p>
+                <p>{{ allsetting()['email'] ?? 'alsaraamills@gmail.com' }}</p>
+                <p>{{ url('/') }}</p>
             </div>
             <div>
                 <p>تاريخ الشراء: {{ date('d/m/Y', strtotime($order->created_at)) }}</p>

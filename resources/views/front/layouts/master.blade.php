@@ -194,7 +194,8 @@
 
     </div>
 
-    <a href="https://api.whatsapp.com/send?phone=96894974726" class="whats-float" target="_blank">
+    <a href="https://api.whatsapp.com/send?phone={{ allsetting()['call_us'] ?? '96894974726' }}" class="whats-float"
+        target="_blank">
         <i class="fa fa-whatsapp whats-my-float"></i>
     </a>
 

@@ -1093,3 +1093,128 @@ img.inline-block.max-w-full {
     font-size: 0.8rem !important;
   }
 }
+
+/* Premium Centered Toast - Glassmorphism */
+.premium-toast-glass {
+  backdrop-filter: blur(12px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+  background-color: rgba(255, 255, 255, 0.75) !important;
+  border: 1px solid rgba(209, 213, 219, 0.3) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15) !important;
+  padding: 1.5rem !important;
+  animation: premiumFadeScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+}
+
+[data-theme="dark"] .premium-toast-glass {
+  background-color: rgba(30, 41, 59, 0.7) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+
+.premium-toast-glass .swal2-title {
+  color: #334155 !important;
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="dark"] .premium-toast-glass .swal2-title {
+  color: #f8fafc !important;
+}
+
+.premium-toast-glass .swal2-timer-progress-bar {
+  background: var(--primary-color, #b5c61a) !important;
+  height: 4px !important;
+  border-radius: 0 0 20px 20px !important;
+}
+
+@keyframes premiumFadeScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Clean glassmorphism notification (no positioning hacks) */
+.swal2-popup.premium-toast-glass {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(12px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  padding: 1.5rem !important;
+  /* Removed !important animation that was blocking Swal2 hide logic */
+  animation: premiumFadeScale 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="dark"] .swal2-popup.premium-toast-glass {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #f8fafc !important;
+}
+
+.premium-toast-glass .swal2-title {
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  color: #1e293b !important;
+  margin-top: 0.5rem !important;
+}
+
+[data-theme="dark"] .premium-toast-glass .swal2-title {
+  color: #f1f5f9 !important;
+}
+
+/* Ensure progress bar matches brand */
+.premium-toast-glass .swal2-timer-progress-bar {
+  background: #a3c613 !important;
+  height: 4px !important;
+  border-radius: 0 0 20px 20px !important;
+}
+
+/* ===================================================
+   Custom Cart Toast Notification (replaces SweetAlert2)
+   =================================================== */
+#custom-cart-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.85);
+  opacity: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  min-width: 280px;
+  max-width: 90vw;
+  padding: 1rem 2.5rem 1rem 1.2rem;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: all;
+}
+
+[data-theme="dark"] #custom-cart-toast {
+  background: rgba(30, 41, 59, 0.88);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] #custom-cart-toast span[style*="color:#1e293b"] {
+  color: #f1f5f9 !important;
+}
+
+#custom-cart-toast-close:hover {
+  color: #ef4444 !important;
+}
+a.text-inherit.text-decoration-none{
+  color:black;
+}

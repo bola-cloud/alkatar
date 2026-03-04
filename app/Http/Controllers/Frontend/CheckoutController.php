@@ -87,7 +87,7 @@ class CheckoutController extends Controller
         // Require login before showing the checkout page. Guests should not be able
         // to open the checkout page (use guestCheckoutOrder if guest checkout is enabled).
         if (!Auth::check()) {
-            return redirect()->route('login')->with('toast_warning', __('Please login to proceed to checkout'));
+            return redirect()->guest(route('login'))->with('toast_warning', __('Please login to proceed to checkout'));
         }
 
         $check = Cart::count();

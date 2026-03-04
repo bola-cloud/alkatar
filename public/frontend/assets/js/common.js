@@ -28,14 +28,14 @@
 
                 const Toast = Swal.mixin({
                     toast: true,
-                    position: "bottom-end",
+                    position: "center",
                     showConfirmButton: false,
-                    timer: 3000,
+                    showCloseButton: true,
+                    timer: 5000,
                     timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener("mouseenter", Swal.stopTimer);
-                        toast.addEventListener("mouseleave", Swal.resumeTimer);
-                    },
+                    customClass: {
+                        popup: 'premium-toast-glass'
+                    }
                 });
 
                 if (data.status === 0) {
@@ -49,14 +49,14 @@
             error: function () {
                 const Toast = Swal.mixin({
                     toast: true,
-                    position: "bottom-end",
+                    position: "center",
                     showConfirmButton: false,
-                    timer: 3000,
+                    showCloseButton: true,
+                    timer: 5000,
                     timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener("mouseenter", Swal.stopTimer);
-                        toast.addEventListener("mouseleave", Swal.resumeTimer);
-                    },
+                    customClass: {
+                        popup: 'premium-toast-glass'
+                    }
                 });
                 Toast.fire({ icon: "error", title: "Something went wrong!" });
             }
@@ -75,41 +75,42 @@
                 if (data.status === 0) {
                     const Toast = Swal.mixin({
                         toast: true,
-                        position: "bottom-end",
+                        position: "center",
                         showConfirmButton: false,
-                        timer: 3000,
+                        showCloseButton: true,
+                        timer: 5000,
                         timerProgressBar: true,
-                        didOpen: (toast) => {
-                            toast.addEventListener("mouseenter", Swal.stopTimer);
-                            toast.addEventListener("mouseleave", Swal.resumeTimer);
-                        },
+                        customClass: {
+                            popup: 'premium-toast-glass'
+                        }
                     });
                     Toast.fire({ icon: "warning", title: data.message });
                 } else if (data.status === 1) {
                     $(".CompareCuntFromController").html(data.compare_count + " Items");
                     const Toast = Swal.mixin({
                         toast: true,
-                        position: "bottom-end",
+                        position: "center",
                         showConfirmButton: false,
-                        timer: 3000,
+                        showCloseButton: true,
+                        timer: 5000,
                         timerProgressBar: true,
-                        didOpen: (toast) => {
-                            toast.addEventListener("mouseenter", Swal.stopTimer);
-                            toast.addEventListener("mouseleave", Swal.resumeTimer);
-                        },
+                        customClass: {
+                            popup: 'premium-toast-glass'
+                        }
                     });
                     Toast.fire({ icon: "success", title: data.message });
                 } else {
                     const Toast = Swal.mixin({
-                        toast: true,
-                        position: "bottom-end",
+                        toast: false,
+                        position: "center",
+                        backdrop: false,
                         showConfirmButton: false,
-                        timer: 3000,
+                        showCloseButton: true,
+                        timer: 5000,
                         timerProgressBar: true,
-                        didOpen: (toast) => {
-                            toast.addEventListener("mouseenter", Swal.stopTimer);
-                            toast.addEventListener("mouseleave", Swal.resumeTimer);
-                        },
+                        customClass: {
+                            popup: 'premium-toast-glass'
+                        }
                     });
                     Toast.fire({ icon: "error", title: "Something went wrong!" });
                 }
@@ -153,22 +154,57 @@
             $(".totalAmount").html(window.currencyPrice(data[1]));
             window.recalcFinalTotal(data[1]);
 
-            const Toast = Swal.mixin({
-                toast: true,
-                position: "bottom-end",
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener("mouseenter", Swal.stopTimer);
-                    toast.addEventListener("mouseleave", Swal.resumeTimer);
-                },
+            // Remove any existing cart notification
+            var existing = document.getElementById('custom-cart-toast');
+            if (existing) existing.remove();
+
+            var title = (typeof localizedText !== 'undefined' && localizedText.productAddedToCart)
+                ? localizedText.productAddedToCart
+                : 'Product Added to Cart Successfully';
+
+            // Build the notification element
+            var toast = document.createElement('div');
+            toast.id = 'custom-cart-toast';
+            toast.innerHTML =
+                '<span id="custom-cart-toast-close" style="position:absolute;top:8px;right:12px;font-size:1.3rem;cursor:pointer;color:#64748b;line-height:1;z-index:2;">&times;</span>' +
+                '<span style="color:#16a34a;font-size:1.5rem;margin-right:10px;">&#10003;</span>' +
+                '<span style="font-weight:600;font-size:1rem;color:#1e293b;flex:1;">' + title + '</span>' +
+                '<div id="custom-cart-toast-bar" style="position:absolute;bottom:0;left:0;height:4px;width:100%;background:#a3c613;border-radius:0 0 16px 16px;transition:width 5s linear;"></div>';
+
+            document.body.appendChild(toast);
+
+            // Let the browser paint, then animate in and start bar countdown
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    toast.style.opacity = '1';
+                    toast.style.transform = 'translate(-50%, -50%) scale(1)';
+                    var bar = document.getElementById('custom-cart-toast-bar');
+                    if (bar) bar.style.width = '0%';
+                });
             });
-            Toast.fire({
-                icon: "success",
-                title: localizedText.productAddedToCart,
-                position: "top-end",
-            });
+
+            // Auto-close after 5s
+            var autoClose = setTimeout(function () {
+                closeToast(toast);
+            }, 5000);
+
+            // Close button
+            var closeBtn = document.getElementById('custom-cart-toast-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    clearTimeout(autoClose);
+                    closeToast(toast);
+                });
+            }
+
+            function closeToast(el) {
+                el.style.opacity = '0';
+                el.style.transform = 'translate(-50%, -50%) scale(0.85)';
+                setTimeout(function () {
+                    if (el && el.parentNode) el.parentNode.removeChild(el);
+                }, 350);
+            }
         }
 
         window.performAddToCart = performAddToCart;
@@ -759,14 +795,14 @@
                 $("#bodyData").html(bodyArray);
                 let Toast = Swal.mixin({
                     toast: true,
-                    position: "bottom-end",
+                    position: "center",
                     showConfirmButton: false,
-                    timer: 3000,
+                    showCloseButton: true,
+                    timer: 5000,
                     timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener("mouseenter", Swal.stopTimer);
-                        toast.addEventListener("mouseleave", Swal.resumeTimer);
-                    },
+                    customClass: {
+                        popup: 'premium-toast-glass'
+                    }
                 });
                 Toast.fire({
                     icon: "success",
