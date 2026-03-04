@@ -10,9 +10,8 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('user_subscriptions', function (Blueprint $table) {
-            $table->timestamp('start_at')->nullable()->change();
-        });
+        // Use raw SQL to avoid Doctrine DBAL 'Unknown column type "timestamp"' error
+        \Illuminate\Support\Facades\DB::statement('ALTER TABLE user_subscriptions MODIFY COLUMN start_at timestamp NULL');
     }
 
     /**
@@ -20,8 +19,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('user_subscriptions', function (Blueprint $table) {
-            $table->timestamp('start_at')->useCurrent()->change();
-        });
+        \Illuminate\Support\Facades\DB::statement('ALTER TABLE user_subscriptions MODIFY COLUMN start_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP');
     }
 };
