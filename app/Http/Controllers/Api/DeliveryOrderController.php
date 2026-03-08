@@ -67,8 +67,29 @@ class DeliveryOrderController extends Controller
             return response()->json(['success' => false, 'message' => __('Order already picked by another driver')], 400);
         }
 
-        // Assign to current user
-        $order->delivery_man_id = $request->user()->id;
+        // Get the authenticated user
+        $user = $request->user();
+        
+        // Ensure the authenticated user is actually a DeliveryMan model
+        // If not (e.g., if using a general user token), try to find the corresponding DeliveryMan record
+        $driverId = null;
+        if ($user instanceof \App\Models\Admin\DeliveryMan) {
+            $driverId = $user->id;
+        } else {
+            // Fallback: This handles cases where Sanctum might return a generic User model
+            // instead of the specified DeliveryMan model due to guard configuration issues
+            $driver = \App\Models\Admin\DeliveryMan::where('email', $user->email)
+                ->orWhere('phone', $user->Number)
+                ->first();
+            
+            if (!$driver) {
+                return response()->json(['success' => false, 'message' => __('You are not registered as a delivery man')], 403);
+            }
+            $driverId = $driver->id;
+        }
+
+        // Assign to the verified driver ID
+        $order->delivery_man_id = $driverId;
         $order->Order_Status = ORDER_SHIPPED; // Mark as "On the Way"
         $order->delivery_status = 'picked_up';
         $order->save();
@@ -87,9 +108,18 @@ class DeliveryOrderController extends Controller
             return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
         }
 
+        // Get the correct driver ID for verification
+        $user = $request->user();
+        $driverId = ($user instanceof \App\Models\Admin\DeliveryMan) ? $user->id : 
+                    (\App\Models\Admin\DeliveryMan::where('email', $user->email)->first()->id ?? null);
+
+        if (!$driverId) {
+            return response()->json(['success' => false, 'message' => __('Unauthorized')], 401);
+        }
+
         $order = Order::with(['order_details', 'user'])
             ->where('id', $request->order_id)
-            ->where('delivery_man_id', $request->user()->id)
+            ->where('delivery_man_id', $driverId)
             ->first();
 
         if (!$order) {
