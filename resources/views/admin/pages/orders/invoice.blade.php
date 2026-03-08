@@ -151,14 +151,11 @@
                 <div class="address-title">الفاتورة الى</div>
                 <p>اسم العميل: {{ $order->billing_address['name'] ?? 'N/A' }}</p>
                 <p>البريد الاكتروني: {{ $order->billing_address['email'] ?? 'N/A' }}</p>
-                @if ($order->user)
-                    <p>رقم الهاتف:
-                        <span dir="ltr" style="unicode-bidi: plaintext">
-                            {{ $formattedUserPhone }}
-                        </span>
-                    </p>
-                @endif
-
+                <p>رقم الهاتف: 
+                    <span dir="ltr" style="unicode-bidi: plaintext">
+                        {{ $order->billing_address['phone_number'] ?? ($order->user->Number ?? 'N/A') }}
+                    </span>
+                </p>
             </div>
             @php
                 $phone = $order->billing_address['phone_number'] ?? null;
@@ -246,7 +243,7 @@
             @php
                 $billingAddress = $order->billing_address;
                 $phoneNumber = is_array($billingAddress) ? ($billingAddress['phone_number'] ?? 'N/A') : ($order->user->Number ?? 'N/A');
-                $qrData = "Order:" . $order->Order_Number . " | Phone:" . $phoneNumber;
+                $qrData = "Order:" . $order->id . " | Phone:" . $phoneNumber;
 
                 $qrCodeString = (string) QrCode::size(100)->generate($qrData);
                 $svgStart = strpos($qrCodeString, '<svg');

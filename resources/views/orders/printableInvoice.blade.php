@@ -132,13 +132,21 @@
     </div>
     <article class="address-info">
         <address style="text-align:center;">
-            <p><strong>الاسم:</strong> {{ $order->billing_address['name'] ?? $order->user->name ?? '' }}</p>
-            <p><strong>الجوال:</strong>
-                {{ $order->billing_address['phone_number'] ?? $order->user->Number ?? '' }}</p>
-            <p><strong>العنوان:</strong>
-                {{ $order->billing_address['street_address'] ?? 'استلام من الفرع' }}</p>
-
-            {{-- Gift info skipped as it is not in the current model --}}
+            @php
+                $billing = $order->billing_address;
+                $phone = $billing['phone_number'] ?? ($order->user->Number ?? '');
+                $addressStr = implode(', ', array_filter([
+                    $billing['street'] ?? null,
+                    $billing['city_ar'] ?? null,
+                    $billing['state_ar'] ?? null
+                ]));
+                if (empty($addressStr)) {
+                    $addressStr = 'استلام من الفرع';
+                }
+            @endphp
+            <p><strong>الاسم:</strong> {{ $billing['name'] ?? ($order->user->name ?? '') }}</p>
+            <p><strong>الجوال:</strong> {{ $phone }}</p>
+            <p><strong>العنوان:</strong> {{ $addressStr }}</p>
         </address>
         <table class="meta" style="font-size: 70%; border-collapse: collapse; direction: rtl; width: 100%;">
             <tr>
@@ -204,7 +212,7 @@
         @php
             $billingAddress = $order->billing_address;
             $phoneNumber = is_array($billingAddress) ? ($billingAddress['phone_number'] ?? 'N/A') : ($order->user->Number ?? 'N/A');
-            $qrData = "Order:" . ($order->Order_Number ?? $order->id) . " | Phone:" . $phoneNumber;
+            $qrData = "Order:" . $order->id . " | Phone:" . $phoneNumber;
             
             $qrCodeString = (string) QrCode::size(120)->generate($qrData);
             $svgStart = strpos($qrCodeString, '<svg');

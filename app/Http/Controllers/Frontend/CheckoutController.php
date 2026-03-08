@@ -81,9 +81,13 @@ class CheckoutController extends Controller
         return $shippingFee;
     }
 
-
     public function checkoutPage()
     {
+        $min_order_amount = floatval(allsetting('min_order_amount') ?: 3.990);
+        if (subtotal() < $min_order_amount) {
+            return redirect()->route('cart.content')->with('toast_error', __('Minimum order amount is :amount OMR.', ['amount' => number_format($min_order_amount, 3)]));
+        }
+
         // Require login before showing the checkout page. Guests should not be able
         // to open the checkout page (use guestCheckoutOrder if guest checkout is enabled).
         if (!Auth::check()) {
@@ -262,6 +266,11 @@ class CheckoutController extends Controller
         }
 
         $request->validate($validationRules, $validationMessages);
+
+        $min_order_amount = floatval(allsetting('min_order_amount') ?: 3.990);
+        if (subtotal() < $min_order_amount) {
+            return redirect()->route('cart.content')->with('toast_error', __('Minimum order amount is :amount OMR.', ['amount' => number_format($min_order_amount, 3)]));
+        }
 
         try {
             $subtotal = subtotal();
@@ -643,7 +652,7 @@ class CheckoutController extends Controller
                             'user_id' => $user_id,
                             'admin_id' => $admin_id,
                         ]);
-                        $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, "THAWANI", "PENDING", $buy_for);
+                        $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, "THAWANI", "PENDING", $buy_for, false);
 
 
                         // if ($admin_id) {
@@ -852,7 +861,7 @@ class CheckoutController extends Controller
             $post_data['product_category'] = "Goods";
             $post_data['product_profile'] = "physical-goods";
 
-            $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, SSLCOMMERZ, $post_data['tran_id']);
+            $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, SSLCOMMERZ, $post_data['tran_id'], null, false);
 
             $sslc = new SslCommerzNotification();
             $payment_options = $sslc->makePayment($post_data, 'hosted');
@@ -923,10 +932,10 @@ class CheckoutController extends Controller
         return redirect()->back()->with('error', 'Payment cancelled!');
     }
 
-    public function orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $discount, $grand_total, $payment_method, $txn = null, $buy_for = null)
+    public function orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $discount, $grand_total, $payment_method, $txn = null, $buy_for = null, $shouldBroadcast = true)
     {
         $payment_status = $this->paymentStatus($payment_method);
-        $order = $this->orederCreate($order_number, $shipping_charge, $tax, $subtotal, $discount, $grand_total, $payment_method, $payment_status, $txn, $buy_for);
+        $order = $this->orederCreate($order_number, $shipping_charge, $tax, $subtotal, $discount, $grand_total, $payment_method, $payment_status, $txn, $buy_for, $shouldBroadcast);
         if ($order['success'] == true) {
             session()->forget('Coupon_Id');
             Cart::destroy();
@@ -982,7 +991,7 @@ class CheckoutController extends Controller
         return PAYMENT_PENDING;
     }
 
-    public function orederCreate($order_number, $shipping_charge, $tax, $subtotal, $discount, $grand_total, $payment_method, $payment_status, $txn = null, $buy_for = null)
+    public function orederCreate($order_number, $shipping_charge, $tax, $subtotal, $discount, $grand_total, $payment_method, $payment_status, $txn = null, $buy_for = null, $shouldBroadcast = true)
     {
         try {
             $data = ['success' => false, 'data' => []];
@@ -1057,7 +1066,9 @@ class CheckoutController extends Controller
                         'Total_Price' => $item->price * $item->qty,
                     ]);
                 }
-                event(new \App\Events\OrderCreated($order));
+                if ($shouldBroadcast) {
+                    event(new \App\Events\OrderCreated($order));
+                }
 
                 // Deduct wallet balance if used
                 $wallet_used = session('wallet_used', 0);
@@ -1309,6 +1320,7 @@ class CheckoutController extends Controller
         $order->is_paid = 1;
 
         $order->save();
+        event(new \App\Events\OrderCreated($order));
 
         // Two-Step Sync: Update the existing SmartLife invoice to "Paid"
         if (config('smartlife.sync_enabled')) {

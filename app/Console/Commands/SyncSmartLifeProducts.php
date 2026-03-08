@@ -51,7 +51,7 @@ class SyncSmartLifeProducts extends Command
             return 1;
         }
 
-        $this->info('Connection successful. Fetching products...');
+        $this->info('Connection successful. Fetching data...');
 
         $limit = $this->option('limit');
         $shadowOnly = $this->option('shadow-only');
@@ -62,6 +62,21 @@ class SyncSmartLifeProducts extends Command
         if (empty($products)) {
             $this->warn('No products retrieved from SmartLife ERP.');
             return 0;
+        }
+
+        // Step 0: Sync Categories first to ensure correct mapping
+        if (!$shadowOnly) {
+            $this->info('Syncing categories from API...');
+            $apiCategories = $service->getCategories();
+            if ($apiCategories) {
+                $catData = $apiCategories['data'] ?? $apiCategories;
+                if (is_array($catData)) {
+                    $this->syncCategoriesFromApi($catData);
+                }
+            }
+
+            $this->info('Syncing categories from product data...');
+            $this->syncCategoriesFromProducts($products);
         }
 
         $this->info('Retrieved ' . count($products) . ' products from SmartLife ERP.');
@@ -183,7 +198,8 @@ class SyncSmartLifeProducts extends Command
     {
         try {
             // Find or create product by smartlife_id or barcode
-            $product = Product::where('smartlife_id', $smartLifeProduct->smartlife_id)
+            $product = Product::withTrashed()
+                ->where('smartlife_id', $smartLifeProduct->smartlife_id)
                 ->orWhere('barcode', $smartLifeProduct->barcode)
                 ->first();
 
@@ -191,6 +207,9 @@ class SyncSmartLifeProducts extends Command
 
             if (!$product) {
                 $product = new Product();
+            } else if ($product->trashed()) {
+                $product->restore();
+                $isNew = false;
             }
 
             // Map SmartLife data to Product fields
@@ -198,14 +217,22 @@ class SyncSmartLifeProducts extends Command
             $product->barcode = $smartLifeProduct->barcode;
 
             // Product names (ERP name is usually Arabic)
+            $erpName = trim($smartLifeProduct->name ?? 'Unnamed Product');
+            
             // Always update Arabic name from SmartLife
-            $product->fr_Product_Name = $smartLifeProduct->name;
+            $product->fr_Product_Name = $erpName;
             // Only set English name if it is currently empty, allowing manual translations to persist
             if (empty($product->en_Product_Name)) {
-                $product->en_Product_Name = $smartLifeProduct->name;
+                $product->en_Product_Name = $erpName;
             }
 
-            // Auto-generate slugs will be handled by Sluggable trait
+            // Explicitly set slugs if they are empty
+            if (empty($product->en_Product_Slug)) {
+                $product->en_Product_Slug = Str::slug($product->en_Product_Name) ?: 'product-' . $smartLifeProduct->smartlife_id;
+            }
+            if (empty($product->fr_Product_Slug)) {
+                $product->fr_Product_Slug = Str::slug($product->fr_Product_Name) ?: 'product-ar-' . $smartLifeProduct->smartlife_id;
+            }
 
             // Pricing
             $product->Price = $smartLifeProduct->price;
@@ -230,11 +257,11 @@ class SyncSmartLifeProducts extends Command
 
                     if ($related) {
                         $qty = $related->Quantity;
-                        Log::info('Combo quantity synced from related product', [
-                            'combo_id' => $smartLifeProduct->smartlife_id,
-                            'related_id' => $related->id,
-                            'qty' => $qty
-                        ]);
+                        // Log::info('Combo quantity synced from related product', [
+                        //     'combo_id' => $smartLifeProduct->smartlife_id,
+                        //     'related_id' => $related->id,
+                        //     'qty' => $qty
+                        // ]);
                     }
                 }
             }
@@ -266,19 +293,24 @@ class SyncSmartLifeProducts extends Command
             $product->show_pos = $smartLifeProduct->show_pos;
             $product->synced_from_smartlife = true;
 
-            // Set description if not already set
-            if (!$product->en_Description) {
-                $product->en_Description = $smartLifeProduct->description ?? 'Synced from SmartLife ERP';
+            // Set description if not already set or empty
+            $desc = trim($smartLifeProduct->description ?? '');
+            if (empty($desc)) {
+                $desc = 'Synced from SmartLife ERP';
             }
-            if (!$product->fr_Description) {
-                $product->fr_Description = $product->en_Description;
+            
+            if (empty($product->en_Description)) {
+                $product->en_Description = $desc;
+            }
+            if (empty($product->fr_Description)) {
+                $product->fr_Description = $desc;
             }
 
-            // Set about if not already set
-            if (!$product->en_About) {
-                $product->en_About = Str::limit($smartLifeProduct->description ?? $smartLifeProduct->name, 150);
+            // Set about if not already set or empty
+            if (empty($product->en_About)) {
+                $product->en_About = Str::limit($desc, 150);
             }
-            if (!$product->fr_About) {
+            if (empty($product->fr_About)) {
                 $product->fr_About = $product->en_About;
             }
 
@@ -343,27 +375,44 @@ class SyncSmartLifeProducts extends Command
                 $product->Primary_Image = 'prod.png';
             }
 
-            // Map category: create or find by name and set Category_Id
-            if (!empty($smartLifeProduct->category)) {
+            // Map category: use smartlife_id for reliable mapping
+            if (!empty($smartLifeProduct->category_id) || !empty($smartLifeProduct->category)) {
                 try {
-                    $catName = trim($smartLifeProduct->category);
-                    if (!empty($catName)) {
-                        $category = \App\Models\Admin\Category::where('en_Category_Name', $catName)->first();
-                        if (!$category) {
-                            $category = \App\Models\Admin\Category::create([
-                                'en_Category_Name' => $catName,
-                                'en_Category_Slug' => Str::slug($catName),
-                                'fr_Category_Name' => $catName,
-                                'fr_Category_Slug' => Str::slug($catName),
-                                'Status' => 1
-                            ]);
-                        }
-                        if ($category) {
-                            $product->Category_Id = $category->id;
-                        }
+                    $catId = $smartLifeProduct->category_id;
+                    $catName = trim($smartLifeProduct->category ?? '');
+                    
+                    $category = null;
+                    if ($catId) {
+                        $category = \App\Models\Admin\Category::where('smartlife_id', $catId)->first();
+                    }
+                    
+                    if (!$category && !empty($catName)) {
+                        $category = \App\Models\Admin\Category::where('en_Category_Name', $catName)
+                            ->orWhere('fr_Category_Name', $catName)
+                            ->first();
+                    }
+
+                    if (!$category && !empty($catName)) {
+                        // Final fallback/creation
+                        $category = \App\Models\Admin\Category::create([
+                            'smartlife_id' => $catId,
+                            'en_Category_Name' => $catName,
+                            'en_Category_Slug' => Str::slug($catName),
+                            'fr_Category_Name' => $catName,
+                            'fr_Category_Slug' => Str::slug($catName),
+                            'Status' => 1
+                        ]);
+                    } elseif ($category && $catId && empty($category->smartlife_id)) {
+                        // Link existing category to smartlife_id
+                        $category->smartlife_id = $catId;
+                        $category->save();
+                    }
+                    
+                    if ($category) {
+                        $product->Category_Id = $category->id;
                     }
                 } catch (\Exception $e) {
-                    Log::error('Error mapping/creating category for SmartLife product', ['error' => $e->getMessage(), 'smartlife_id' => $smartLifeProduct->smartlife_id]);
+                    Log::error('Error mapping category for SmartLife product', ['error' => $e->getMessage(), 'smartlife_id' => $smartLifeProduct->smartlife_id]);
                 }
             }
 
@@ -377,11 +426,11 @@ class SyncSmartLifeProducts extends Command
                 $product->New_Arrival = 0;
                 $product->Today_Special = 0;
                 $product->On_Sale = 1;
-                $product->en_ShippingReturn = 'Standard shipping and return policy applies.';
-                $product->fr_ShippingReturn = $product->en_ShippingReturn;
-                $product->en_AdditionalInformation = 'Product synced from SmartLife ERP';
-                $product->fr_AdditionalInformation = $product->en_AdditionalInformation;
-                $product->Voucher = '';
+                $product->en_ShippingReturn = $product->en_ShippingReturn ?: 'Standard shipping and return policy applies.';
+                $product->fr_ShippingReturn = $product->fr_ShippingReturn ?: $product->en_ShippingReturn;
+                $product->en_AdditionalInformation = $product->en_AdditionalInformation ?: 'Product synced from SmartLife ERP';
+                $product->fr_AdditionalInformation = $product->fr_AdditionalInformation ?: $product->en_AdditionalInformation;
+                $product->Voucher = $product->Voucher ?: '0';
             }
 
             $product->save();
@@ -438,11 +487,11 @@ class SyncSmartLifeProducts extends Command
                 }
             }
 
-            Log::info('SmartLife product synced to main products table', [
-                'smartlife_id' => $smartLifeProduct->smartlife_id,
-                'product_id' => $product->id,
-                'action' => $isNew ? 'created' : 'updated'
-            ]);
+            // Log::info('SmartLife product synced to main products table', [
+            //     'smartlife_id' => $smartLifeProduct->smartlife_id,
+            //     'product_id' => $product->id,
+            //     'action' => $isNew ? 'created' : 'updated'
+            // ]);
 
             return ['success' => true, 'created' => $isNew];
 
@@ -597,6 +646,116 @@ class SyncSmartLifeProducts extends Command
         if (!empty($syncData)) {
             $parentProduct->comboItems()->sync($syncData);
             Log::info('Synced combo items', ['parent_id' => $parentProduct->id, 'count' => count($syncData)]);
+        }
+    }
+
+    /**
+     * Sync categories extracted from product data
+     */
+    private function syncCategoriesFromProducts(array $products)
+    {
+        try {
+            $categoriesByList = [];
+            foreach ($products as $p) {
+                if (!empty($p['category_id'])) {
+                    $id = $p['category_id'];
+                    $name = trim($p['category'] ?? '');
+                    if (!empty($name)) {
+                        $categoriesByList[$id] = $name;
+                    }
+                }
+            }
+
+            if (empty($categoriesByList)) {
+                $this->warn('No category data found in products.');
+                return;
+            }
+
+            foreach ($categoriesByList as $smartLifeId => $name) {
+                // Try to find category by smartlife_id
+                $category = \App\Models\Admin\Category::where('smartlife_id', $smartLifeId)->first();
+
+                if (!$category) {
+                    // Try to find by name (to map existing categories)
+                    $category = \App\Models\Admin\Category::where('en_Category_Name', $name)
+                        ->orWhere('fr_Category_Name', $name)
+                        ->first();
+                }
+
+                if (!$category) {
+                    $category = new \App\Models\Admin\Category();
+                    $category->en_Category_Name = $name;
+                    $category->fr_Category_Name = $name;
+                    $category->en_Category_Slug = Str::slug($name);
+                    $category->fr_Category_Slug = Str::slug($name);
+                    $category->Status = 1;
+                }
+
+                $category->smartlife_id = $smartLifeId;
+                
+                // If the name in ERP contains Arabic, set it to Arabic field
+                if (preg_match('/[\x{0600}-\x{06FF}]/u', $name)) {
+                    $category->fr_Category_Name = $name;
+                } else {
+                    $category->en_Category_Name = $name;
+                }
+
+                $category->save();
+            }
+
+            $this->info('Synced ' . count($categoriesByList) . ' unique categories from product data.');
+
+        } catch (\Exception $e) {
+            $this->error('Failed to sync categories from products: ' . $e->getMessage());
+            Log::error('SmartLife category extraction failed', ['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Sync categories directly from Taxonomy API endpoint
+     */
+    private function syncCategoriesFromApi(array $categories)
+    {
+        try {
+            foreach ($categories as $cat) {
+                $smartLifeId = $cat['id'] ?? null;
+                $name = trim($cat['name'] ?? '');
+
+                if (!$smartLifeId || empty($name)) continue;
+
+                $category = \App\Models\Admin\Category::where('smartlife_id', $smartLifeId)->first();
+
+                if (!$category) {
+                    $category = \App\Models\Admin\Category::where('en_Category_Name', $name)
+                        ->orWhere('fr_Category_Name', $name)
+                        ->first();
+                }
+
+                if (!$category) {
+                    $category = new \App\Models\Admin\Category();
+                    $category->en_Category_Name = $name;
+                    $category->fr_Category_Name = $name;
+                    $category->en_Category_Slug = Str::slug($name);
+                    $category->fr_Category_Slug = Str::slug($name);
+                    $category->Status = 1;
+                }
+
+                $category->smartlife_id = $smartLifeId;
+                
+                if (preg_match('/[\x{0600}-\x{06FF}]/u', $name)) {
+                    $category->fr_Category_Name = $name;
+                } else {
+                    $category->en_Category_Name = $name;
+                }
+
+                $category->save();
+            }
+
+            $this->info('Synced ' . count($categories) . ' categories from API.');
+
+        } catch (\Exception $e) {
+            $this->error('Failed to sync categories from API: ' . $e->getMessage());
+            Log::error('SmartLife category API extraction failed', ['error' => $e->getMessage()]);
         }
     }
 }

@@ -632,6 +632,30 @@
         var finalTotal = sub - coupon;
         if (finalTotal < 0) finalTotal = 0;
         $('.cart-page-final-total').html(window.currencyPrice(finalTotal));
+
+        // Refresh Checkout Status (Min Order Check)
+        let config = $('#minOrderData');
+        if (config.length > 0) {
+            let minAmount = parseFloat(config.data('amount'));
+            let checkoutUrl = config.data('checkout-url');
+            let errorMsg = config.data('msg');
+            let btn = $('#checkoutBtn');
+            let warning = $('#minOrderWarning');
+
+            if (sub < minAmount) {
+                warning.removeClass('d-none');
+                btn.addClass('disabled')
+                   .css('background', '#cccccc')
+                   .attr('href', 'javascript:void(0)')
+                   .attr('onclick', `toastr.error('${errorMsg}')`);
+            } else {
+                warning.addClass('d-none');
+                btn.removeClass('disabled')
+                   .css('background', '#b6bf21')
+                   .attr('href', checkoutUrl)
+                   .removeAttr('onclick');
+            }
+        }
     }
 
     window.currencySymbol = function () {

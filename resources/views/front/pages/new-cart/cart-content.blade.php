@@ -91,8 +91,8 @@
                                 @if(auth()->user() && auth()->user()->is_admin)
                                     <select id="user_id" name="user_id" class="form-control select2 ms-2" style="max-width:180px;">
                                         <option value="">{{ __('No User Coupon') }}</option>
-                                        @foreach($users ?? [] as $user)
-                                            <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->number }})</option>
+                                        @foreach($users ?? [] as $u)
+                                            <option value="{{ $u->id }}">{{ $u->name }} ({{ $u->number }})</option>
                                         @endforeach
                                     </select>
                                 @endif
@@ -109,6 +109,13 @@
                     <div class="p-4" style="border:2px solid #d8eec3;border-radius:10px;background:#fff;">
                         <h5 class="card-title" style="color:#ff9a00;font-weight:700;margin-bottom:8px;">{{ __('Order summary') }}</h5>
                         <hr style="border-top:1px solid #e6e6e6;margin:8px 0 16px 0;">
+
+                        {{-- Hidden data for JS --}}
+                        <div id="minOrderData" 
+                             data-amount="{{ floatval(allsetting('min_order_amount') ?: 3.990) }}"
+                             data-checkout-url="{{ route('checkout') }}"
+                             data-msg="{{ __('Minimum order amount is :amount OMR.', ['amount' => number_format(floatval(allsetting('min_order_amount') ?: 3.990), 3)]) }}"
+                             style="display:none;"></div>
 
                         <div class="d-flex justify-content-between mb-2">
                             <div class="text-muted" style="color:#6b7a6b;">{{ __('Subtotal:') }}</div>
@@ -136,7 +143,24 @@
                             <div class="fw-bold cart-page-final-total" style="color:#2f6b3a;font-size:18px;">{{ currencyConverter($all_total) }}</div>
                         </div>
 
-                        <a href="{{ route('checkout') }}" class="btn w-100" style="background:#b6bf21;color:#ffffff;border-radius:28px;padding:12px 20px;font-weight:600;">{{ __('Checkout') }}</a>
+                        @php
+                            $min_order_amount = floatval(allsetting('min_order_amount') ?: 3.990);
+                        @endphp
+
+                        <div id="minOrderWarning" class="alert alert-warning mb-3 {{ subtotal() < $min_order_amount ? '' : 'd-none' }}" style="font-size: 14px; border-radius: 10px;">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            {{ __('Minimum order amount is :amount OMR.', ['amount' => number_format($min_order_amount, 3)]) }}
+                            <br>
+                            <small>{{ __('Please add more items to proceed.') }}</small>
+                        </div>
+
+                        <a href="{{ subtotal() < $min_order_amount ? 'javascript:void(0)' : route('checkout') }}" 
+                           id="checkoutBtn"
+                           class="btn w-100 {{ subtotal() < $min_order_amount ? 'disabled' : '' }}" 
+                           style="background:{{ subtotal() < $min_order_amount ? '#cccccc' : '#b6bf21' }};color:#ffffff;border-radius:28px;padding:12px 20px;font-weight:600;"
+                           @if(subtotal() < $min_order_amount) onclick="toastr.error('{{ __('Minimum order amount is :amount OMR.', ['amount' => number_format($min_order_amount, 3)]) }}')" @endif>
+                           {{ __('Checkout') }}
+                        </a>
                     </div>
                 </div>
             </div>

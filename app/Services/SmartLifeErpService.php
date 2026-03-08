@@ -98,10 +98,10 @@ class SmartLifeErpService
                 $data = $response->json();
 
                 if (isset($data['success']) && $data['success'] === true) {
-                    Log::info('SmartLife ERP products fetched', [
-                        'total_count' => $data['total_count'] ?? 0,
-                        'fetched' => count($data['data'] ?? [])
-                    ]);
+                    // Log::info('SmartLife ERP products fetched', [
+                    //     'total_count' => $data['total_count'] ?? 0,
+                    //     'fetched' => count($data['data'] ?? [])
+                    // ]);
                     return $data;
                 }
 
@@ -117,6 +117,45 @@ class SmartLifeErpService
 
         } catch (Exception $e) {
             Log::error('SmartLife ERP get products exception', ['error' => $e->getMessage()]);
+            return null;
+        }
+    }
+
+    /**
+     * Get categories list from SmartLife ERP
+     *
+     * @return array|null
+     */
+    public function getCategories()
+    {
+        try {
+            $token = $this->getAccessToken();
+
+            if (!$token) {
+                Log::error('SmartLife ERP: Cannot get categories - no access token');
+                return null;
+            }
+
+            $response = Http::withHeaders([
+                'Authorization' => $token,
+            ])->get("{$this->apiUrl}/taxonomy", [
+                'type' => 'product'
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                // Log::info('SmartLife ERP categories response', ['data' => $data]);
+                return $data; 
+            }
+
+            Log::error('SmartLife ERP get categories request failed', [
+                'status' => $response->status(),
+                'body' => $response->body()
+            ]);
+            return null;
+
+        } catch (Exception $e) {
+            Log::error('SmartLife ERP get categories exception', ['error' => $e->getMessage()]);
             return null;
         }
     }

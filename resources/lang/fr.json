@@ -8,7 +8,6 @@
     "Sub-Categories": "الأقسام الفرعية",
     "subcategory": "القسم الفرعي",
     "Change Status:": "تغير الحالة",
-    "Total Amount": "المجموع الكلي",
     "User": "الزبون",
     "order source": "مصدر الطلب",
     "option": "الخيار",
@@ -19,7 +18,6 @@
     "wight": "الوزن",
     "Select": "اختر",
     "Number": "رقم الهاتف",
-    "End Date": "تاريخ الإنتهاء",
     "Start Date": "تاريخ البدء",
     "Track order": "تتبع الطلب",
     "Add Product option": "اضافة خيار",
@@ -272,6 +270,9 @@
     "Login": "\u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062f\u062e\u0648\u0644",
     "Remember Me": "\u062a\u0630\u0643\u0631\u0646\u0649",
     "Sign Up": "\u0627\u0634\u062a\u0631\u0627\u0643",
+    "Do you have an account?": "هل لديك حساب بالفعل؟",
+    "Minimum order amount is :amount OMR.": "الحد الأدنى للطلب هو :amount ريال عماني.",
+    "Please add more items to proceed.": "يرجى إضافة المزيد من العناصر للمتابعة.",
     "Dont have an account?": "\u0644\u064a\u0633 \u0644\u062f\u064a\u0643 \u062d\u0633\u0627\u0628\u061f",
     "Already have an account?": "\u0647\u0644 \u0644\u062f\u064a\u0643 \u062d\u0633\u0627\u0628\u061f",
     "Processing": "\u0645\u0639\u0627\u0644\u062c\u0629",
@@ -776,5 +777,6 @@
     "Icon Two": "الأيقونة الثانية",
     "Icon Three": "الأيقونة الثالثة",
     "Icon Four": "الأيقونة الرابعة",
-    "Image": "الصورة"
+    "Image": "الصورة",
+    "Minimum order amount is :amount OMR.": "الحد الأدنى للطلب هو :amount ريال عماني."
 }

@@ -151,7 +151,13 @@
   </section>
 
   {{-- Dynamic Featured Categories Sections --}}
-  @foreach($featuredCategories as $featCat)
+  @php
+    $allFeatured = $featuredCategories;
+    $mainFeatured = $allFeatured->slice(0, -1);
+    $lastFeatured = $allFeatured->last();
+  @endphp
+
+  @foreach($mainFeatured as $featCat)
     @php
       $catName = langConverter($featCat->en_Category_Name, $featCat->fr_Category_Name);
       $catSlug = $featCat->en_Category_Slug;
@@ -284,6 +290,35 @@
       </div>
     </div>
   </section>
+
+  {{-- The last featured category displayed between banners per Figma design --}}
+  @if($lastFeatured && $lastFeatured->products->count() > 0)
+    @php
+      $featCat = $lastFeatured;
+      $catName = langConverter($featCat->en_Category_Name, $featCat->fr_Category_Name);
+      $catSlug = $featCat->en_Category_Slug;
+      $catProducts = $featCat->products;
+    @endphp
+    <section class="featured-category-section py-5 second-featured-section">
+      <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="fw-bold">{{ $catName }}</h2>
+          <a href="{{ route('categories.show', ['slug' => $catSlug]) }}" class="btn btn-link text-warning text-decoration-none">
+            {{ __('View All') }} <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+
+        <div class="row">
+          <div class="col-12">
+            @include('front.home.partials._product_carousel', [
+              'products' => $catProducts, 
+              'carouselId' => 'catCarousel_' . $featCat->id
+            ])
+          </div>
+        </div>
+      </div>
+    </section>
+  @endif
 
   <!-- Why Choose Us -->
   <section class="why-choose-us py-5 bg-light">

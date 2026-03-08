@@ -12,6 +12,7 @@ class Category extends Model
 {
   use HasFactory, SoftDeletes;
   protected $fillable = [
+    'smartlife_id',
     'en_Category_Name',
     'en_Category_Slug',
     'Status',

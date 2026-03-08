@@ -187,7 +187,6 @@ class CheckoutController extends Controller
                     'Total_Price' => $price * $item['quantity'],
                 ]);
             }
-            event(new \App\Events\OrderCreated($order));
 
         }
         $phoneNumber = auth()->user()->Number;
@@ -565,6 +564,7 @@ class CheckoutController extends Controller
             'Payment_Status' => PAYMENT_SUCCESS,
             'Order_Status' => ORDER_PROCESSING
         ]);
+        event(new \App\Events\OrderCreated($order));
         $this->sendOrderMail($order->id);
         $pdfUrl = route('order.print', ['id' => $order->id]);
         $response = Http::asForm()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/success/payment', [
