@@ -126,25 +126,43 @@ class Order extends Model
     /**
      * Get clean billing address array, handling double-encoding.
      */
-    public function getBillingAddressDetailsAttribute()
+    public function getBillingAddressAttribute($value)
     {
-        $address = $this->billing_address;
-        if (is_string($address)) {
-            return json_decode($address, true);
+        $decoded = json_decode($value, true);
+        if (is_string($decoded)) {
+            $inner = json_decode($decoded, true);
+            return is_array($inner) ? $inner : $decoded;
         }
-        return $address;
+        return $decoded;
     }
 
     /**
      * Get clean shipping address array, handling double-encoding.
      */
+    public function getShippingAddressAttribute($value)
+    {
+        $decoded = json_decode($value, true);
+        if (is_string($decoded)) {
+            $inner = json_decode($decoded, true);
+            return is_array($inner) ? $inner : $decoded;
+        }
+        return $decoded;
+    }
+
+    /**
+     * Helper for backward compatibility or explicit details access.
+     */
+    public function getBillingAddressDetailsAttribute()
+    {
+        return $this->billing_address;
+    }
+
+    /**
+     * Helper for backward compatibility or explicit details access.
+     */
     public function getShippingAddressDetailsAttribute()
     {
-        $address = $this->shipping_address;
-        if (is_string($address)) {
-            return json_decode($address, true);
-        }
-        return $address;
+        return $this->shipping_address;
     }
 
     /**
