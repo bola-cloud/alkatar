@@ -40,10 +40,9 @@
       @endphp
 
       <div class="product-item card h-100 d-flex flex-column">
-        <div class="position-relative">
-          <a href="{{ route('single.product.new', $product->en_Product_Slug) }}">
-            <img src="{{ $imgUrl }}" loading="lazy" class="card-img-top p-3" alt="{{ $name }}"
-              style="height:160px; object-fit:contain;"
+        <div class="card-wrap position-relative">
+          <a href="{{ route('single.product.new', $product->en_Product_Slug) }}" class="card-image-link">
+            <img src="{{ $imgUrl }}" loading="lazy" class="card-category" alt="{{ $name }}"
               onerror="this.onerror=null;this.src='{{ asset('new-design/images/special-offer.png') }}';">
           </a>
 
@@ -132,8 +131,8 @@
     }
 
     .carousel-arrow {
-      top: 260px;
-      /* Aligned vertically with the unit (pc) badge area */
+      top: 280px;
+      /* Adjusted for 180px image height + padding */
       z-index: 20;
       width: 40px;
       height: 40px;
@@ -212,9 +211,11 @@
       -webkit-box-orient: vertical;
     }
 
-    .product-item .card-img-top {
-      height: 160px;
-      object-fit: contain;
+    .product-item .card-img-top,
+    .product-item .card-category {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain !important;
     }
   </style>
 
