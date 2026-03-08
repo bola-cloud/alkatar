@@ -122,4 +122,64 @@ class Order extends Model
             ],
         ];
     }
+
+    /**
+     * Get clean billing address array, handling double-encoding.
+     */
+    public function getBillingAddressDetailsAttribute()
+    {
+        $address = $this->billing_address;
+        if (is_string($address)) {
+            return json_decode($address, true);
+        }
+        return $address;
+    }
+
+    /**
+     * Get clean shipping address array, handling double-encoding.
+     */
+    public function getShippingAddressDetailsAttribute()
+    {
+        $address = $this->shipping_address;
+        if (is_string($address)) {
+            return json_decode($address, true);
+        }
+        return $address;
+    }
+
+    /**
+     * Get a formatted string of the billing address.
+     */
+    public function getFormattedBillingAddressAttribute()
+    {
+        $details = $this->billing_address_details;
+        if (!$details || !is_array($details)) {
+            return 'N/A';
+        }
+
+        return implode(', ', array_filter([
+            $details['street'] ?? null,
+            $details['area_ar'] ?? $details['area_en'] ?? null,
+            $details['city_ar'] ?? $details['city_en'] ?? null,
+            $details['state_ar'] ?? $details['state_en'] ?? null,
+        ]));
+    }
+
+    /**
+     * Get a formatted string of the shipping address.
+     */
+    public function getFormattedShippingAddressAttribute()
+    {
+        $details = $this->shipping_address_details;
+        if (!$details || !is_array($details)) {
+            return 'N/A';
+        }
+
+        return implode(', ', array_filter([
+            $details['street'] ?? null,
+            $details['area_ar'] ?? $details['area_en'] ?? null,
+            $details['city_ar'] ?? $details['city_en'] ?? null,
+            $details['state_ar'] ?? $details['state_en'] ?? null,
+        ]));
+    }
 }

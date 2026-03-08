@@ -75,6 +75,10 @@ class PrinterOrderController extends Controller
 
         $orders->getCollection()->transform(function ($order) {
             $order->print_url = route('printer.order.print', ['id' => $order->id]);
+            $order->billing_address_formatted = $order->formatted_billing_address;
+            $order->shipping_address_formatted = $order->formatted_shipping_address;
+            $order->billing_address_json = $order->billing_address_details;
+            $order->shipping_address_json = $order->shipping_address_details;
             return $order;
         });
 
