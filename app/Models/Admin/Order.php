@@ -124,6 +124,19 @@ class Order extends Model
     }
 
     /**
+     * Normalize phone number by removing non-digits and leading zeros/country codes
+     * for comparison purposes.
+     */
+    public static function normalizePhone($phone)
+    {
+        if (!$phone) return '';
+        // Remove all non-numeric characters
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+        // Take last 8 digits (standard length for numbers in Oman, excluding prefixes)
+        return substr($phone, -8);
+    }
+
+    /**
      * Get clean billing address array, handling double-encoding.
      */
     public function getBillingAddressAttribute($value)

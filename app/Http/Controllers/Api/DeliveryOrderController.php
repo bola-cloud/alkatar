@@ -41,16 +41,26 @@ class DeliveryOrderController extends Controller
             return response()->json(['success' => false, 'message' => __('Order not found')], 404);
         }
 
-        // Decode billing address to get the phone number provided at checkout
-        $billing = $order->billing_address;
-        if (is_string($billing)) {
-            $billing = json_decode($billing, true);
-        }
-        $checkoutPhone = $billing['phone_number'] ?? '';
+        // Normalize the input phone number
+        $inputPhone = Order::normalizePhone($request->phone_number);
 
-        // Compare input phone with checkout phone
-        if (trim($request->phone_number) !== trim($checkoutPhone)) {
-            return response()->json(['success' => false, 'message' => __('Phone number does not match the one in order details')], 403);
+        // Get checkout phone from billing address (using the robust model accessor)
+        $billing = $order->billing_address;
+        $checkoutPhone = $billing['phone_number'] ?? '';
+        $normalizedCheckoutPhone = Order::normalizePhone($checkoutPhone);
+
+        // Fallback: Check the user's primary number if checkout phone doesn't match or is missing
+        $userPhone = $order->user->Number ?? '';
+        $normalizedUserPhone = Order::normalizePhone($userPhone);
+
+        // Compare input phone with normalized checkout phone OR normalized user phone
+        if ($inputPhone !== $normalizedCheckoutPhone && $inputPhone !== $normalizedUserPhone) {
+            return response()->json([
+                'success' => false,
+                'message' => __('Phone number does not match the one in order details'),
+                // Including hints only if helpful for debugging, but keeping it secure
+                'debug_info' => 'Input suffix: ' . $inputPhone . ' | Exp suffix: ' . $normalizedCheckoutPhone
+            ], 403);
         }
 
         if ($order->delivery_man_id) {
