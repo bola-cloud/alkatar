@@ -2,8 +2,8 @@
     "use strict";
     let _token = $('meta[name="csrf-token"]').attr('content')
     $(document).ready(function () {
-        // Calculate tax immediately on page load
-        taxAmount($('#billing_country').val() || 'OM');
+        // Calculate tax immediately on page load - use 'Oman' (db name) instead of 'OM' code
+        taxAmount($('#billing_country').val() || 'Oman');
 
         $('#copy_address').on('click', function () {
             if ($('#copy_address').is(':checked')) {

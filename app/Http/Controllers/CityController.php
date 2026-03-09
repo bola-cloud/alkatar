@@ -140,13 +140,16 @@ class CityController extends Controller
         }
 
         $tax = 0;
+        $taxFound = false;
         if ($countryNameForTax) {
-            $taxModel = \App\Models\Tax::where('country', $countryNameForTax)->where('status', 'active')->first();
+            // Use ACTIVE constant (integer 1) for status check
+            $taxModel = \App\Models\Tax::where('country', $countryNameForTax)->where('status', ACTIVE)->first();
             if ($taxModel) {
                 $tax = ($subtotal * $taxModel->percentage) / 100;
+                $taxFound = true;
             }
         }
-        if ($tax == 0 && $globalTaxPercentage > 0) {
+        if (!$taxFound && $globalTaxPercentage > 0) {
             $tax = ($subtotal * $globalTaxPercentage) / 100;
         }
 
@@ -269,15 +272,18 @@ class CityController extends Controller
 
         // Prefer per-country Tax table (admin) if available, otherwise fallback to global tax percentage
         $tax = 0;
+        $taxFound = false;
         if ($countryNameForTax) {
-            $taxModel = \App\Models\Tax::where('country', $countryNameForTax)->where('status', 'active')->first();
+            // Use ACTIVE constant (integer 1) for status check
+            $taxModel = \App\Models\Tax::where('country', $countryNameForTax)->where('status', ACTIVE)->first();
             if ($taxModel) {
                 $tax = ($subtotal * $taxModel->percentage) / 100;
+                $taxFound = true;
             }
         }
 
-        // Fallback: Use global tax if specific country tax not found/zero
-        if ($tax == 0 && $globalTaxPercentage > 0) {
+        // Fallback: Use global tax ONLY if specific country tax not found
+        if (!$taxFound && $globalTaxPercentage > 0) {
             $tax = ($subtotal * $globalTaxPercentage) / 100;
         }
         $coupon = Session::get('CouponAmount', 0);
