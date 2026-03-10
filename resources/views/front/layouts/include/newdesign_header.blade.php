@@ -262,19 +262,6 @@
                     });
                   });
                 </script>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">{{ __('Pages') }}</a>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item"
-                      href="{{ route('privacy.policy.new') }}">{{ __('Privacy Policy', [], $displayLocale) }}</a></li>
-                  <li><a class="dropdown-item"
-                      href="{{ route('terms.conditions.new') }}">{{ __('Terms & Conditions', [], $displayLocale) }}</a>
-                  </li>
-                  <li><a class="dropdown-item"
-                      href="{{ route('shipping.return.new') }}">{{ __('Shipping & Return', [], $displayLocale) }}</a>
-                  </li>
-                </ul>
-              </li>
               <li class="nav-item"><a class="nav-link" href="{{ route('faq') }}">{{ __('FAQ', [], $displayLocale) }}</a>
               </li>
               <li class="nav-item"><a class="nav-link"
