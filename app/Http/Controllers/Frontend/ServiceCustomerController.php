@@ -65,7 +65,7 @@ class ServiceCustomerController extends Controller
    }
    public function refundPolicy(){
        $seo = SeoSetting::where('slug', 'refund-policy')->first();
-       $data['title'] = $seo->title ?? __('Return Policy');
+       $data['title'] = __('Return Policy');
        $data['description'] = $seo->description ?? '';
        $data['keywords'] = $seo->keywords ?? '';
        return view('front.pages.customer_services.return_policy_newdesign', $data);
