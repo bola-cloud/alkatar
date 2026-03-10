@@ -51,4 +51,13 @@ class Category extends Model
     }
     return $this->fr_Description;
   }
+
+  public function getLocalizedSlugAttribute()
+  {
+    $locale = app()->getLocale();
+    if ($locale == 'en') {
+      return $this->en_Category_Slug;
+    }
+    return $this->fr_Category_Slug;
+  }
 }

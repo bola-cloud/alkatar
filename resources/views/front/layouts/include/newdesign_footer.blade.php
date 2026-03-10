@@ -72,7 +72,12 @@
       <div class="row g-4 mb-5">
         <div class="col-lg-4 col-12 d-none d-lg-block">
           <h5 class="mb-3 fw-semibold mt-4">{{ __('About Hi Speed') }}</h5>
-          <p class="text-muted mb-3">{{ __('About Hi Speed Text') }}</p>
+          <p class="text-muted mb-3">
+            {{ langConverter(
+                isset($allsettings['footer_about_en']) && !empty($allsettings['footer_about_en']) ? $allsettings['footer_about_en'] : 'It is a leading e-commerce platform in Muscat, specializing in delivering fresh and traditional produce directly from the farm to your doorstep, with a focus on quality and modern packaging.',
+                isset($allsettings['footer_about_fr']) && !empty($allsettings['footer_about_fr']) ? $allsettings['footer_about_fr'] : 'هي منصة إلكترونية رائدة في مسقط، متخصصة في توفير المنتجات الطازجة والتقليدية من المزرعة إلى عتبة المنزل مباشرة، مع التركيز على الجودة والتغليف العصري.'
+            ) }}
+          </p>
         </div>
         <div class="col-lg-2 col-6">
           <h5 class="mb-3 fw-semibold">{{ __('My Account') }}</h5>
@@ -168,13 +173,13 @@
             @if($footerCats->isNotEmpty())
               @foreach($footerCats as $fc)
                 @php
-                  $slug = $fc->en_Category_Slug ?? $fc->en_slug ?? $fc->slug ?? null;
+                  $slug = $fc->localized_slug;
                   try {
                     $url = Route::has('categories.show') ? route('categories.show', $slug) : url('/categories');
                   } catch (\Throwable $e) {
                     $url = url('/categories');
                   }
-                  $label = $fc->en_Category_Name ?? $fc->name ?? $fc->title ?? 'Category';
+                  $label = $fc->localized_name;
                 @endphp
                 <li class="mb-2"><a href="{{ $url }}" class="text-muted text-decoration-none hover-link">{{ $label }}</a>
                 </li>
