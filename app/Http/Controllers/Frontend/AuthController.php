@@ -113,11 +113,14 @@ class AuthController extends Controller
     }
     public function userSignUpPost(UserAuthRequest $request)
     {
+        $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'Number' => $request->phone,
             'password' => Hash::make($request->confirm_password),
+            'code' => $otp, // Store OTP in code column
         ]);
 
         if ($user) {
@@ -146,15 +149,90 @@ class AuthController extends Controller
                 }
             }
 
-            // Log the user in immediately after successful registration
+            // Send OTP Email
             try {
-                Auth::login($user);
+                $appName = config('app.name', 'HiSpeed');
+                Mail::send('front.auth.otp_mail', ['otp' => $otp, 'user' => $user], function ($message) use ($user, $appName) {
+                    $message->to($user->email);
+                    $message->subject($appName . ' - Email Verification OTP');
+                });
             } catch (\Exception $e) {
-                // If login fails for any reason, continue but don't block the flow
+                \Illuminate\Support\Facades\Log::error('OTP Mail sending failed: ' . $e->getMessage());
             }
-            return redirect()->intended(route('front'))->with('success', __('Sign Up Successfully !'));
+
+            // Store email in session for verification page
+            session(['verify_email' => $user->email]);
+
+            return redirect()->route('user.verify.email')->with('success', __('Sign Up Successfully! Please verify your email with the OTP sent to you.'));
         } else {
-            return redirect()->route('user.sign.up')->with('success', __('Wrong Credential !'));
+            return redirect()->route('user.sign.up')->with('error', __('Something went wrong!'));
+        }
+    }
+
+    public function showVerifyEmail()
+    {
+        if (!session('verify_email')) {
+            return redirect()->route('login');
+        }
+        
+        $data['title'] = __('Verify Email');
+        $data['email'] = session('verify_email');
+        return view('front.auth.newdesign_verify_email', $data);
+    }
+
+    public function verifyEmailPost(Request $request)
+    {
+        $request->validate([
+            'otp' => 'required|digits:6',
+        ]);
+
+        $email = session('verify_email');
+        if (!$email) {
+            return redirect()->route('login');
+        }
+
+        $user = User::where('email', $email)->first();
+
+        if ($user && $user->code === $request->otp) {
+            $user->email_verified_at = Carbon::now();
+            $user->code = null; // Clear OTP
+            $user->save();
+
+            Auth::login($user);
+            session()->forget('verify_email');
+
+            return redirect()->route('front')->with('success', __('Email verified successfully!'));
+        }
+
+        return redirect()->back()->with('error', __('Invalid OTP. Please try again.'));
+    }
+
+    public function resendOtp()
+    {
+        $email = session('verify_email');
+        if (!$email) {
+            return redirect()->route('login');
+        }
+
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $user->code = $otp;
+        $user->save();
+
+        try {
+            $appName = config('app.name', 'HiSpeed');
+            Mail::send('front.auth.otp_mail', ['otp' => $otp, 'user' => $user], function ($message) use ($user, $appName) {
+                $message->to($user->email);
+                $message->subject($appName . ' - Email Verification OTP');
+            });
+            return redirect()->back()->with('success', __('OTP has been resent to your email.'));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('OTP Resend failed: ' . $e->getMessage());
+            return redirect()->back()->with('error', __('Failed to resend OTP. Please try again later.'));
         }
     }
     public function userLogout()
