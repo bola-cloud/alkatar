@@ -762,5 +762,13 @@
     "Thank you for registering. To complete your account setup, please use the following one-time password (OTP) to verify your email address:": "شكراً لتسجيلك. لإكمال إعداد حسابك، يرجى استخدام رمز الدخول لمرة واحدة (OTP) التالي لتأكيد بريدك الإلكتروني:",
     "This code will expire shortly. If you did not request this code, please ignore this email.": "سينتهي هذا الرمز قريبًا. إذا لم تطلب هذا الرمز، يرجى تجاهل هذا البريد الإلكتروني.",
     "Hello": "مرحباً",
-    "All rights reserved.": "جميع الحقوق محفوظة."
+    "All rights reserved.": "جميع الحقوق محفوظة.",
+    "Verify Your Account Via": "تحقق من حسابك عبر",
+    "Verify Your WhatsApp": "تحقق من الواتساب الخاص بك",
+    "Verify WhatsApp": "تحقق من الواتساب",
+    "WhatsApp": "واتساب",
+    "Account verified successfully!": "تم التحقق من الحساب بنجاح!",
+    "OTP has been resent.": "تمت إعادة إرسال رمز التحقق (OTP).",
+    "Code": "الكود",
+    "Verify Your Account": "تحقق من حسابك"
 }

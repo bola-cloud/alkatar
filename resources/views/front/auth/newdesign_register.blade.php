@@ -51,9 +51,40 @@
 
               <div class="text-field mb-3">
                 <label class="label" for="phone">{{ __('Mobile Number') }}</label>
-                <input type="text" id="phone" name="phone" value="{{ old('phone') }}"
-                  class="form-control text-field-2 @error('phone') is-invalid @enderror" required />
+                <div class="row g-2">
+                  <div class="col-4">
+                    <select name="country_code" class="form-control text-field-2 @error('country_code') is-invalid @enderror" required>
+                      <option value="968" {{ old('country_code') == '968' ? 'selected' : '' }}>OM (+968)</option>
+                      <option value="20" {{ old('country_code') == '20' ? 'selected' : '' }}>EG (+20)</option>
+                      <option value="966" {{ old('country_code') == '966' ? 'selected' : '' }}>SA (+966)</option>
+                      <option value="971" {{ old('country_code') == '971' ? 'selected' : '' }}>AE (+971)</option>
+                      <option value="974" {{ old('country_code') == '974' ? 'selected' : '' }}>QA (+974)</option>
+                      <option value="973" {{ old('country_code') == '973' ? 'selected' : '' }}>BH (+973)</option>
+                      <option value="965" {{ old('country_code') == '965' ? 'selected' : '' }}>KW (+965)</option>
+                    </select>
+                  </div>
+                  <div class="col-8">
+                    <input type="text" id="phone" name="phone" value="{{ old('phone') }}"
+                      class="form-control text-field-2 @error('phone') is-invalid @enderror" placeholder="71234567" required />
+                  </div>
+                </div>
+                @error('country_code') <div class="text-danger mt-1">{{ $message }}</div> @enderror
                 @error('phone') <div class="text-danger mt-1">{{ $message }}</div> @enderror
+              </div>
+
+              <div class="text-field mb-3">
+                <label class="label">{{ __('Verify Your Account Via') }}</label>
+                <div class="d-flex gap-4 mt-1">
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="verification_method" id="verify_email" value="email" {{ old('verification_method', 'email') == 'email' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="verify_email">{{ __('Email') }}</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="verification_method" id="verify_whatsapp" value="whatsapp" {{ old('verification_method') == 'whatsapp' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="verify_whatsapp">{{ __('WhatsApp') }}</label>
+                  </div>
+                </div>
+                @error('verification_method') <div class="text-danger mt-1">{{ $message }}</div> @enderror
               </div>
 
               <div class="text-field mb-3">

@@ -1,6 +1,6 @@
 @extends('front.layouts.newdesign_auth_layout')
 
-@section('title', __('Verify Your Email'))
+@section('title', $method == 'email' ? __('Verify Your Email') : __('Verify Your WhatsApp'))
 
 @section('content')
 
@@ -21,8 +21,8 @@
         <div class="col-lg-6 col-md-12 right-section d-flex align-items-center">
           <div class="content-container">
             <div class="header-section text-center mb-4">
-              <h1 class="text-wrapper" style="font-size:28px;">{{ __('Verify Email') }}</h1>
-              <p class="span">{{ __('Enter the 6-digit code sent to') }} <strong>{{ $email }}</strong></p>
+              <h1 class="text-wrapper" style="font-size:28px;">{{ $method == 'email' ? __('Verify Email') : __('Verify WhatsApp') }}</h1>
+              <p class="span">{{ __('Enter the 6-digit code sent to') }} <strong>{{ $target }}</strong></p>
             </div>
 
             @if(session('error'))

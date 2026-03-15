@@ -16,6 +16,15 @@ class UserAuthRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        if ($this->has('country_code') && $this->has('phone')) {
+            $this->merge([
+                'full_phone' => $this->country_code . $this->phone,
+            ]);
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -26,9 +35,12 @@ class UserAuthRequest extends FormRequest
         return [
             'name' => 'required',
             'email' => 'required|email|unique:users',
-            'phone' => 'required|numeric|unique:users,Number',
+            'phone' => 'required|numeric',
+            'full_phone' => 'nullable|unique:users,Number',
             'password' => 'required|min:5|max:12',
-            'confirm_password' => 'required|min:5|max:12|same:password'
+            'confirm_password' => 'required|min:5|max:12|same:password',
+            'country_code' => 'required',
+            'verification_method' => 'required|in:email,whatsapp'
         ];
     }
 }

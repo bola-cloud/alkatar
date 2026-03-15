@@ -114,11 +114,12 @@ class AuthController extends Controller
     public function userSignUpPost(UserAuthRequest $request)
     {
         $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $full_phone = $request->country_code . $request->phone;
         
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'Number' => $request->phone,
+            'Number' => $full_phone,
             'password' => Hash::make($request->confirm_password),
             'code' => $otp, // Store OTP in code column
         ]);
@@ -128,7 +129,7 @@ class AuthController extends Controller
             if (config('smartlife.sync_enabled')) {
                 try {
                     $smartLifeService = new \App\Services\SmartLifeErpService();
-                    $customerPhone = $request->Number ?? $request->phone ?? '';
+                    $customerPhone = $full_phone;
 
                     $customerResult = $smartLifeService->createCustomer($user->name, $customerPhone);
 
@@ -149,21 +150,42 @@ class AuthController extends Controller
                 }
             }
 
-            // Send OTP Email
-            try {
-                $appName = config('app.name', 'HiSpeed');
-                Mail::send('front.auth.otp_mail', ['otp' => $otp, 'user' => $user], function ($message) use ($user, $appName) {
-                    $message->to($user->email);
-                    $message->subject($appName . ' - Email Verification OTP');
-                });
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('OTP Mail sending failed: ' . $e->getMessage());
+            $method = $request->verification_method;
+            session(['verification_method' => $method]);
+
+            if ($method == 'email') {
+                // Send OTP Email
+                try {
+                    $appName = config('app.name', 'HiSpeed');
+                    Mail::send('front.auth.otp_mail', ['otp' => $otp, 'user' => $user], function ($message) use ($user, $appName) {
+                        $message->to($user->email);
+                        $message->subject($appName . ' - Email Verification OTP');
+                    });
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('OTP Mail sending failed: ' . $e->getMessage());
+                }
+                session(['verify_target' => $user->email]);
+            } else {
+                // Send OTP via WhatsApp
+                try {
+                    $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
+                        'phone_number' => $full_phone,
+                        'otp' => $otp
+                    ]);
+                    
+                    if (!$response->successful()) {
+                        \Illuminate\Support\Facades\Log::error('WhatsApp OTP sending failed', [
+                            'status' => $response->status(),
+                            'body' => $response->body()
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('WhatsApp OTP sending exception: ' . $e->getMessage());
+                }
+                session(['verify_target' => $full_phone]);
             }
 
-            // Store email in session for verification page
-            session(['verify_email' => $user->email]);
-
-            return redirect()->route('user.verify.email')->with('success', __('Sign Up Successfully! Please verify your email with the OTP sent to you.'));
+            return redirect()->route('user.verify.email')->with('success', __('Sign Up Successfully! Please verify your account with the OTP sent to you.'));
         } else {
             return redirect()->route('user.sign.up')->with('error', __('Something went wrong!'));
         }
@@ -171,12 +193,13 @@ class AuthController extends Controller
 
     public function showVerifyEmail()
     {
-        if (!session('verify_email')) {
+        if (!session('verify_target')) {
             return redirect()->route('login');
         }
         
-        $data['title'] = __('Verify Email');
-        $data['email'] = session('verify_email');
+        $data['title'] = __('Verify Your Account');
+        $data['target'] = session('verify_target');
+        $data['method'] = session('verification_method');
         return view('front.auth.newdesign_verify_email', $data);
     }
 
@@ -186,12 +209,18 @@ class AuthController extends Controller
             'otp' => 'required|digits:6',
         ]);
 
-        $email = session('verify_email');
-        if (!$email) {
+        $target = session('verify_target');
+        $method = session('verification_method');
+        
+        if (!$target) {
             return redirect()->route('login');
         }
 
-        $user = User::where('email', $email)->first();
+        if ($method == 'email') {
+            $user = User::where('email', $target)->first();
+        } else {
+            $user = User::where('Number', $target)->first();
+        }
 
         if ($user && $user->code === $request->otp) {
             $user->email_verified_at = Carbon::now();
@@ -199,9 +228,9 @@ class AuthController extends Controller
             $user->save();
 
             Auth::login($user);
-            session()->forget('verify_email');
+            session()->forget(['verify_target', 'verification_method']);
 
-            return redirect()->route('front')->with('success', __('Email verified successfully!'));
+            return redirect()->route('front')->with('success', __('Account verified successfully!'));
         }
 
         return redirect()->back()->with('error', __('Invalid OTP. Please try again.'));
@@ -209,12 +238,19 @@ class AuthController extends Controller
 
     public function resendOtp()
     {
-        $email = session('verify_email');
-        if (!$email) {
+        $target = session('verify_target');
+        $method = session('verification_method');
+        
+        if (!$target) {
             return redirect()->route('login');
         }
 
-        $user = User::where('email', $email)->first();
+        if ($method == 'email') {
+            $user = User::where('email', $target)->first();
+        } else {
+            $user = User::where('Number', $target)->first();
+        }
+
         if (!$user) {
             return redirect()->route('login');
         }
@@ -225,11 +261,18 @@ class AuthController extends Controller
 
         try {
             $appName = config('app.name', 'HiSpeed');
-            Mail::send('front.auth.otp_mail', ['otp' => $otp, 'user' => $user], function ($message) use ($user, $appName) {
-                $message->to($user->email);
-                $message->subject($appName . ' - Email Verification OTP');
-            });
-            return redirect()->back()->with('success', __('OTP has been resent to your email.'));
+            if ($method == 'email') {
+                Mail::send('front.auth.otp_mail', ['otp' => $otp, 'user' => $user], function ($message) use ($user, $appName) {
+                    $message->to($user->email);
+                    $message->subject($appName . ' - Email Verification OTP');
+                });
+            } else {
+                Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
+                    'phone_number' => $target,
+                    'otp' => $otp
+                ]);
+            }
+            return redirect()->back()->with('success', __('OTP has been resent.'));
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('OTP Resend failed: ' . $e->getMessage());
             return redirect()->back()->with('error', __('Failed to resend OTP. Please try again later.'));
