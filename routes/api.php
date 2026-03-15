@@ -84,6 +84,19 @@ Route::group(['prefix' => 'printer'], function () {
     });
 });
 
+// WhatsApp Store Routes
+Route::group(['prefix' => 'whatsapp'], function () {
+    Route::post('register', [\App\Http\Controllers\Api\Whatsapp\WhatsappStoreController::class, 'register']);
+    Route::post('login', [\App\Http\Controllers\Api\Whatsapp\WhatsappStoreController::class, 'login']);
+    Route::get('categories', [\App\Http\Controllers\Api\Whatsapp\WhatsappStoreController::class, 'getCategories']);
+    Route::get('products', [\App\Http\Controllers\Api\Whatsapp\WhatsappStoreController::class, 'getProducts']);
+    Route::get('shipping-locations', [\App\Http\Controllers\Api\Whatsapp\WhatsappStoreController::class, 'getShippingLocations']);
+    
+    Route::group(['middleware' => 'auth:sanctum'], function () {
+        Route::post('checkout', [\App\Http\Controllers\Api\Whatsapp\WhatsappStoreController::class, 'checkout']);
+    });
+});
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
