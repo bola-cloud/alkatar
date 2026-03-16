@@ -1,6 +1,6 @@
 @extends('front.layouts.newdesign_auth_layout')
 
-@section('title', 'Sign In')
+@section('title', __('Sign In'))
 
 @section('content')
 
@@ -10,10 +10,10 @@
         <!-- Left Side - decorative large image/text -->
         <div class="col-lg-6 col-md-12 left-section position-relative p-0 d-none d-lg-block">
           <img class="rectangle img-fluid w-100 h-100" src="https://c.animaapp.com/mhxjwoj8jP8UI3/img/rectangle-222.png"
-            alt="Background" />
+            alt="{{ __('Background') }}" />
           <div class="group-2"></div>
           <p class="hungry-check-out">
-            <span class="text-wrapper-8">Sign In To Your hi speed Account For<br />More Offers And Exclusive points</span>
+            <span class="text-wrapper-8">{{ __('Sign In To Your hi speed Account For') }}<br />{{ __('More Offers And Exclusive points') }}</span>
           </p>
         </div>
 
@@ -21,8 +21,7 @@
         <div class="col-lg-6 col-md-12 right-section d-flex align-items-center">
           <div class="content-container">
             <div class="header-section text-left mb-4">
-              <h1 class="text-wrapper" style="font-size:28px;"><span style="color:#929f1a;">Sign In</span> To Your hi
-                speed Account For More Offers And Exclusive points</h1>
+              <h1 class="text-wrapper" style="font-size:28px;"><span style="color:#929f1a;">{{ __('Sign In') }}</span> {{ __('To Your hi speed Account For More Offers And Exclusive points') }}</h1>
             </div>
 
             @if(session('error'))
@@ -49,7 +48,7 @@
                     class="form-control text-field-2 @error('password') is-invalid @enderror" required />
                   <div class="password-hide-see" onclick="togglePassword()">
                     <img class="img" src="https://c.animaapp.com/mhxjwoj8jP8UI3/img/icon.svg" alt="Toggle" />
-                    <div class="text-wrapper-4">Hide</div>
+                    <div class="text-wrapper-4">{{ __('Hide') }}</div>
                   </div>
                 </div>
                 @error('password') <div class="text-danger mt-1">{{ $message }}</div> @enderror
@@ -62,8 +61,7 @@
               <div class="check-box mb-3">
                 <input type="checkbox" id="terms" name="terms" checked
                   style="width:18px;height:18px;margin-right:10px;" />
-                <p class="i-want-to-receive">I agree to the Terms of Service and acknowledge you've read our Privacy
-                  Policy.</p>
+                <p class="i-want-to-receive">{{ __('I agree to the Terms of Service and acknowledge you\'ve read our Privacy Policy.') }}</p>
               </div>
 
               <div class="frame mb-3 text-center">
@@ -73,8 +71,8 @@
               </div>
 
               <p class="do-you-have-an text-center mt-3">
-                <span>Do not have an account? </span>
-                <a href="{{ route('user.sign.up') }}" class="text-wrapper-7"> sign up</a>
+                <span>{{ __('Do not have an account?') }} </span>
+                <a href="{{ route('user.sign.up') }}" class="text-wrapper-7"> {{ __('sign up') }}</a>
               </p>
             </form>
           </div>

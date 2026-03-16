@@ -1,6 +1,6 @@
 @extends('front.layouts.newdesign_auth_layout')
 
-@section('title', 'Register')
+@section('title', __('Register'))
 
 @section('content')
 
@@ -10,10 +10,10 @@
         <!-- Left Side - decorative image & text (keeps new design visuals) -->
         <div class="col-lg-6 col-md-12 left-section position-relative p-0 d-none d-lg-block">
           <img class="rectangle img-fluid w-100 h-100" src="https://c.animaapp.com/mhxjwoj8jP8UI3/img/rectangle-222.png"
-            alt="Background" />
+            alt="{{ __('Background') }}" />
           <div class="group-2"></div>
           <p class="hungry-check-out">
-            <span class="text-wrapper-8">Hungry? Check Out Fresh &amp; Healthy<br />Organic Food</span>
+            <span class="text-wrapper-8">{{ __('Hungry? Check Out Fresh & Healthy') }}<br />{{ __('Organic Food') }}</span>
           </p>
         </div>
 
@@ -21,8 +21,8 @@
         <div class="col-lg-6 col-md-12 right-section d-flex align-items-center">
           <div class="content-container">
             <div class="header-section text-center mb-4">
-              <h1 class="text-wrapper" style="font-size:28px;">Sign Up</h1>
-              <p class="span">Create an account to get exclusive offers</p>
+              <h1 class="text-wrapper" style="font-size:28px;">{{ __('Sign Up') }}</h1>
+              <p class="span">{{ __('Create an account to get exclusive offers') }}</p>
             </div>
 
             @if(session('error'))
@@ -32,7 +32,7 @@
               <div class="alert alert-success">{{ session('success') }}</div>
             @endif
 
-            <form method="POST" action="{{ route('user.sign.up.post') }}" class="signup-form">
+            <form method="POST" action="{{ route('user.sign.up.post') }}" class="signup-form" id="registration-form">
               @csrf
 
               <div class="text-field mb-3">
@@ -42,15 +42,21 @@
                 @error('name') <div class="text-danger mt-1">{{ $message }}</div> @enderror
               </div>
 
-              <div class="text-field mb-3">
-                <label class="label" for="email">{{ __('Email') }}</label>
+              <div class="text-field mb-3" id="email-container">
+                <label class="label" for="email">
+                    <span class="label-text">{{ __('Email') }}</span>
+                    <span class="optional-text text-muted" style="display:none;">({{ __('Optional') }})</span>
+                </label>
                 <input type="email" id="email" name="email" value="{{ old('email') }}"
                   class="form-control text-field-2 @error('email') is-invalid @enderror" required />
                 @error('email') <div class="text-danger mt-1">{{ $message }}</div> @enderror
               </div>
 
-              <div class="text-field mb-3">
-                <label class="label" for="phone">{{ __('Mobile Number') }}</label>
+              <div class="text-field mb-3" id="phone-container">
+                <label class="label" for="phone">
+                    <span class="label-text">{{ __('Mobile Number') }}</span>
+                    <span class="optional-text text-muted" style="display:none;">({{ __('Optional') }})</span>
+                </label>
                 <div class="row g-2">
                   <div class="col-4">
                     <select name="country_code" class="form-control text-field-2 @error('country_code') is-invalid @enderror" required>
@@ -76,11 +82,11 @@
                 <label class="label">{{ __('Verify Your Account Via') }}</label>
                 <div class="d-flex gap-4 mt-1">
                   <div class="form-check">
-                    <input class="form-check-input" type="radio" name="verification_method" id="verify_email" value="email" {{ old('verification_method', 'email') == 'email' ? 'checked' : '' }}>
+                    <input class="form-check-input verification-method" type="radio" name="verification_method" id="verify_email" value="email" {{ old('verification_method', 'email') == 'email' ? 'checked' : '' }}>
                     <label class="form-check-label" for="verify_email">{{ __('Email') }}</label>
                   </div>
                   <div class="form-check">
-                    <input class="form-check-input" type="radio" name="verification_method" id="verify_whatsapp" value="whatsapp" {{ old('verification_method') == 'whatsapp' ? 'checked' : '' }}>
+                    <input class="form-check-input verification-method" type="radio" name="verification_method" id="verify_whatsapp" value="whatsapp" {{ old('verification_method') == 'whatsapp' ? 'checked' : '' }}>
                     <label class="form-check-label" for="verify_whatsapp">{{ __('WhatsApp') }}</label>
                   </div>
                 </div>
@@ -108,8 +114,8 @@
               </div>
 
               <p class="do-you-have-an text-center mt-3">
-                <span class="text-wrapper-6">Do you have an account? </span>
-                <a href="{{ route('login') }}" class="text-wrapper-7">Sign in</a>
+                <span class="text-wrapper-6">{{ __('Do you have an account?') }} </span>
+                <a href="{{ route('login') }}" class="text-wrapper-7">{{ __('Sign in') }}</a>
               </p>
             </form>
           </div>
@@ -117,5 +123,43 @@
       </div>
     </div>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const emailInput = document.getElementById('email');
+        const phoneInput = document.getElementById('phone');
+        const countrySelect = document.querySelector('select[name="country_code"]');
+        const emailOptional = document.querySelector('#email-container .optional-text');
+        const phoneOptional = document.querySelector('#phone-container .optional-text');
+        const verificationMethods = document.querySelectorAll('.verification-method');
+
+        function updateRequirements() {
+            const selectedMethod = document.querySelector('.verification-method:checked').value;
+            
+            if (selectedMethod === 'email') {
+                emailInput.required = true;
+                emailOptional.style.display = 'none';
+                
+                phoneInput.required = false;
+                countrySelect.required = false;
+                phoneOptional.style.display = 'inline';
+            } else {
+                phoneInput.required = true;
+                countrySelect.required = true;
+                phoneOptional.style.display = 'none';
+                
+                emailInput.required = false;
+                emailOptional.style.display = 'inline';
+            }
+        }
+
+        verificationMethods.forEach(method => {
+            method.addEventListener('change', updateRequirements);
+        });
+
+        // Initialize on load
+        updateRequirements();
+    });
+  </script>
 
 @endsection

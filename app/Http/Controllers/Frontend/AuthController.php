@@ -114,7 +114,7 @@ class AuthController extends Controller
     public function userSignUpPost(UserAuthRequest $request)
     {
         $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-        $full_phone = $request->country_code . $request->phone;
+        $full_phone = ($request->country_code && $request->phone) ? $request->country_code . $request->phone : null;
         
         $user = User::create([
             'name' => $request->name,
@@ -129,18 +129,21 @@ class AuthController extends Controller
             if (config('smartlife.sync_enabled')) {
                 try {
                     $smartLifeService = new \App\Services\SmartLifeErpService();
+                    // Use phone if available, otherwise email for ERP identification if needed, or just phone
                     $customerPhone = $full_phone;
 
-                    $customerResult = $smartLifeService->createCustomer($user->name, $customerPhone);
+                    if ($customerPhone) {
+                        $customerResult = $smartLifeService->createCustomer($user->name, $customerPhone);
 
-                    if ($customerResult && isset($customerResult['success']) && $customerResult['success'] === true) {
-                        $user->smartlife_customer_id = $customerResult['id'];
-                        $user->save();
+                        if ($customerResult && isset($customerResult['success']) && $customerResult['success'] === true) {
+                            $user->smartlife_customer_id = $customerResult['id'];
+                            $user->save();
 
-                        \Illuminate\Support\Facades\Log::info('SmartLife customer created during registration', [
-                            'user_id' => $user->id,
-                            'smartlife_customer_id' => $customerResult['id']
-                        ]);
+                            \Illuminate\Support\Facades\Log::info('SmartLife customer created during registration', [
+                                'user_id' => $user->id,
+                                'smartlife_customer_id' => $customerResult['id']
+                            ]);
+                        }
                     }
                 } catch (\Exception $e) {
                     \Illuminate\Support\Facades\Log::error('Failed to create SmartLife customer during registration', [
@@ -153,7 +156,7 @@ class AuthController extends Controller
             $method = $request->verification_method;
             session(['verification_method' => $method]);
 
-            if ($method == 'email') {
+            if ($method == 'email' && $user->email) {
                 // Send OTP Email
                 try {
                     $appName = config('app.name', 'HiSpeed');
@@ -165,12 +168,13 @@ class AuthController extends Controller
                     \Illuminate\Support\Facades\Log::error('OTP Mail sending failed: ' . $e->getMessage());
                 }
                 session(['verify_target' => $user->email]);
-            } else {
+            } elseif ($method == 'whatsapp' && $full_phone) {
                 // Send OTP via WhatsApp
                 try {
                     $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
                         'phone_number' => $full_phone,
-                        'otp' => $otp
+                        'otp' => $otp,
+                        'language' => app()->getLocale()
                     ]);
                     
                     if (!$response->successful()) {
@@ -269,7 +273,8 @@ class AuthController extends Controller
             } else {
                 Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
                     'phone_number' => $target,
-                    'otp' => $otp
+                    'otp' => $otp,
+                    'language' => app()->getLocale()
                 ]);
             }
             return redirect()->back()->with('success', __('OTP has been resent.'));
@@ -464,9 +469,10 @@ class AuthController extends Controller
 
 
         // Send OTP via WhatsApp
-        $response = Http::asForm()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/send_otp', [
+        $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
             'phone_number' => $phone_without_plus,
-            'otp' => $otp
+            'otp' => $otp,
+            'language' => app()->getLocale()
         ]);
 
         if ($response->successful()) {

@@ -166,6 +166,7 @@ a {
   );
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
   z-index: 1;
   pointer-events: none;
@@ -186,6 +187,11 @@ a {
   cursor: pointer;
 }
 
+[dir="rtl"] .password-hide-see {
+  right: auto;
+  left: 15px;
+}
+
 .img {
   width: 19.13px;
   height: 19.13px;
@@ -199,6 +205,10 @@ a {
   text-align: right;
   letter-spacing: 0;
   line-height: normal;
+}
+
+[dir="rtl"] .text-wrapper-4 {
+  text-align: left;
 }
 
 .password-setup {

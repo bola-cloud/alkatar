@@ -1,6 +1,6 @@
 @extends('front.layouts.newdesign_auth_layout')
 
-@section('title', 'Reset Password')
+@section('title', __('Reset Password'))
 
 @section('content')
 
@@ -10,7 +10,7 @@
                 <!-- Left Side - decorative large image/text -->
                 <div class="col-lg-6 col-md-12 left-section position-relative p-0 d-none d-lg-block">
                     <img class="rectangle img-fluid w-100 h-100"
-                        src="https://c.animaapp.com/mhxjwoj8jP8UI3/img/rectangle-222.png" alt="Background" />
+                        src="https://c.animaapp.com/mhxjwoj8jP8UI3/img/rectangle-222.png" alt="{{ __('Background') }}" />
                     <div class="group-2"></div>
                     <p class="hungry-check-out">
                         <span
@@ -53,7 +53,7 @@
                                     <div class="password-hide-see" onclick="togglePassword('password')">
                                         <img class="img" src="https://c.animaapp.com/mhxjwoj8jP8UI3/img/icon.svg"
                                             alt="Toggle" />
-                                        <div class="text-wrapper-4">Hide</div>
+                                        <div class="text-wrapper-4">{{ __('Hide') }}</div>
                                     </div>
                                 </div>
                                 @error('password') <div class="text-danger mt-1">{{ $message }}</div> @enderror
@@ -67,7 +67,7 @@
                                     <div class="password-hide-see" onclick="togglePassword('password_confirmation')">
                                         <img class="img" src="https://c.animaapp.com/mhxjwoj8jP8UI3/img/icon.svg"
                                             alt="Toggle" />
-                                        <div class="text-wrapper-4">Hide</div>
+                                        <div class="text-wrapper-4">{{ __('Hide') }}</div>
                                     </div>
                                 </div>
                             </div>

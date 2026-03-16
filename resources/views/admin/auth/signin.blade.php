@@ -1,6 +1,6 @@
 @extends('front.layouts.newdesign_auth_layout')
 
-@section('title', ($allsettings['app_title'] ?? 'HiSpeed') . ' - Admin Login')
+@section('title', ($allsettings['app_title'] ?? 'HiSpeed') . ' - ' . __('Admin Login'))
 
 @section('content')
 
@@ -9,10 +9,10 @@
         <div class="row h-100">
             <!-- Left Side - decorative large image/text -->
             <div class="col-lg-6 col-md-12 left-section position-relative p-0 d-none d-lg-block">
-                <img class="rectangle img-fluid w-100 h-100" src="https://c.animaapp.com/mhxjwoj8jP8UI3/img/rectangle-222.png" alt="Background" />
+                <img class="rectangle img-fluid w-100 h-100" src="https://c.animaapp.com/mhxjwoj8jP8UI3/img/rectangle-222.png" alt="{{ __('Background') }}" />
                 <div class="group-2"></div>
                 <p class="hungry-check-out">
-                    <span class="text-wrapper-8">{{ __('Sign In To Your hi speed Account For') }}<br/>{{ __('More Offers And Exclusive points') }}</span>
+                    <span class="text-wrapper-8">{{ __('To Your hi speed Account For') }}<br/>{{ __('More Offers And Exclusive points') }}</span>
                 </p>
             </div>
 
@@ -44,7 +44,7 @@
                             <div class="position-relative">
                                 <input type="password" id="password" name="password" value="{{ env('APP_DEMO') == true ? '123456' : '' }}" class="form-control text-field-2 @error('password') is-invalid @enderror" required />
                                 <div class="password-hide-see" onclick="togglePassword()">
-                                    <img class="img" src="https://c.animaapp.com/mhxjwoj8jP8UI3/img/icon.svg" alt="Toggle" />
+                                    <img class="img" src="https://c.animaapp.com/mhxjwoj8jP8UI3/img/icon.svg" alt="{{ __('Toggle') }}" />
                                     <div class="text-wrapper-4">{{ __('Hide') }}</div>
                                 </div>
                             </div>
