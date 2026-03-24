@@ -34,13 +34,9 @@ class UserAuthRequest extends FormRequest
     {
         return [
             'name' => 'required',
-            'email' => 'required_if:verification_method,email|nullable|email|unique:users',
-            'phone' => 'required_if:verification_method,whatsapp|nullable|numeric',
+            'phone' => 'required|numeric',
             'full_phone' => 'nullable|unique:users,Number',
-            'password' => 'required|min:5|max:12',
-            'confirm_password' => 'required|min:5|max:12|same:password',
-            'country_code' => 'required_if:verification_method,whatsapp|nullable',
-            'verification_method' => 'required|in:email,whatsapp'
+            'country_code' => 'required|numeric',
         ];
     }
 }

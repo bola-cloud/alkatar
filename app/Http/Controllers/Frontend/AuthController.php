@@ -37,43 +37,53 @@ class AuthController extends Controller
     }
     public function userSignInPost(Request $request)
     {
-        // Unified login logic for Email or Phone
         $rules = [
-            'login_id' => 'required',
-            'password' => 'required'
+            'country_code' => 'required',
+            'phone' => 'required',
         ];
         $request->validate($rules);
 
-        $login_id = $request->input('login_id');
-        $is_email = filter_var($login_id, FILTER_VALIDATE_EMAIL);
-
-        if ($is_email) {
-            $user = User::where('email', $login_id)->where('is_admin', 0)->first();
-        } else {
-            $user = User::where('Number', $login_id)->where('is_admin', 0)->first();
-        }
+        $login_id = $request->input('country_code') . $request->input('phone');
+        
+        // Search for user by Number (Phone)
+        // Ensure the number is formatted correctly if needed, but assuming login_id is the full number
+        $user = User::where('Number', $login_id)->where('is_admin', 0)->first();
 
         if ($user) {
             if ($user->status == INACTIVE) {
                 return redirect()->route('front')->with('error', __('User is blocked by admin.'));
             }
-            if (Hash::check($request->password, $user->password)) {
-                // Determine credential key for Auth::attempt
-                $credentials = $is_email ? ['email' => $login_id] : ['Number' => $login_id];
-                $credentials['password'] = $request->password;
 
-                if (Auth::attempt($credentials)) {
-                    if (Auth::user()->is_admin == 0) {
-                        return redirect()->intended(route('front'));
-                    } else {
-                        Auth::logout();
-                        return redirect()->back()->with('error', __('Something went wrong!'));
-                    }
+            // Generate OTP
+            $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $user->code = $otp;
+            $user->save();
+
+            // Send OTP via WhatsApp
+            try {
+                $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
+                    'phone_number' => $user->Number,
+                    'otp' => $otp,
+                    'language' => app()->getLocale()
+                ]);
+                
+                if (!$response->successful()) {
+                    \Illuminate\Support\Facades\Log::error('WhatsApp Login OTP sending failed', [
+                        'status' => $response->status(),
+                        'body' => $response->body()
+                    ]);
                 }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('WhatsApp Login OTP sending exception: ' . $e->getMessage());
             }
+
+            session(['verify_target' => $user->Number]);
+            session(['verification_method' => 'whatsapp']);
+
+            return redirect()->route('user.verify.email')->with('success', __('Please verify your account with the OTP sent to your WhatsApp.'));
         }
 
-        return redirect()->back()->with('error', __('Credential Not Match'));
+        return redirect()->back()->with('error', __('Phone number not found. Please sign up.'));
     }
 
     public function userSignUp()
@@ -114,13 +124,11 @@ class AuthController extends Controller
     public function userSignUpPost(UserAuthRequest $request)
     {
         $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-        $full_phone = ($request->country_code && $request->phone) ? $request->country_code . $request->phone : null;
+        $full_phone = $request->country_code . $request->phone;
         
         $user = User::create([
             'name' => $request->name,
-            'email' => $request->email,
             'Number' => $full_phone,
-            'password' => Hash::make($request->confirm_password),
             'code' => $otp, // Store OTP in code column
         ]);
 
@@ -129,7 +137,6 @@ class AuthController extends Controller
             if (config('smartlife.sync_enabled')) {
                 try {
                     $smartLifeService = new \App\Services\SmartLifeErpService();
-                    // Use phone if available, otherwise email for ERP identification if needed, or just phone
                     $customerPhone = $full_phone;
 
                     if ($customerPhone) {
@@ -153,43 +160,28 @@ class AuthController extends Controller
                 }
             }
 
-            $method = $request->verification_method;
-            session(['verification_method' => $method]);
+            session(['verification_method' => 'whatsapp']);
+            session(['verify_target' => $full_phone]);
 
-            if ($method == 'email' && $user->email) {
-                // Send OTP Email
-                try {
-                    $appName = config('app.name', 'HiSpeed');
-                    Mail::send('front.auth.otp_mail', ['otp' => $otp, 'user' => $user], function ($message) use ($user, $appName) {
-                        $message->to($user->email);
-                        $message->subject($appName . ' - Email Verification OTP');
-                    });
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error('OTP Mail sending failed: ' . $e->getMessage());
-                }
-                session(['verify_target' => $user->email]);
-            } elseif ($method == 'whatsapp' && $full_phone) {
-                // Send OTP via WhatsApp
-                try {
-                    $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
-                        'phone_number' => $full_phone,
-                        'otp' => $otp,
-                        'language' => app()->getLocale()
+            // Send OTP via WhatsApp
+            try {
+                $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
+                    'phone_number' => $full_phone,
+                    'otp' => $otp,
+                    'language' => app()->getLocale()
+                ]);
+                
+                if (!$response->successful()) {
+                    \Illuminate\Support\Facades\Log::error('WhatsApp Registration OTP sending failed', [
+                        'status' => $response->status(),
+                        'body' => $response->body()
                     ]);
-                    
-                    if (!$response->successful()) {
-                        \Illuminate\Support\Facades\Log::error('WhatsApp OTP sending failed', [
-                            'status' => $response->status(),
-                            'body' => $response->body()
-                        ]);
-                    }
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error('WhatsApp OTP sending exception: ' . $e->getMessage());
                 }
-                session(['verify_target' => $full_phone]);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('WhatsApp Registration OTP sending exception: ' . $e->getMessage());
             }
 
-            return redirect()->route('user.verify.email')->with('success', __('Sign Up Successfully! Please verify your account with the OTP sent to you.'));
+            return redirect()->route('user.verify.email')->with('success', __('Sign Up Successfully! Please verify your account with the OTP sent to your WhatsApp.'));
         } else {
             return redirect()->route('user.sign.up')->with('error', __('Something went wrong!'));
         }

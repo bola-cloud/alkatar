@@ -34,28 +34,29 @@
             <form method="POST" action="{{ route('user.sign.in.post') }}" class="signup-form">
               @csrf
 
-              <div class="text-field mb-3">
-                <label class="label" for="login_id">{{ __('Email or Mobile Number') }}</label>
-                <input type="text" id="login_id" name="login_id" value="{{ old('login_id') }}"
-                  class="form-control text-field-2 @error('login_id') is-invalid @enderror" required />
-                @error('login_id') <div class="text-danger mt-1">{{ $message }}</div> @enderror
-              </div>
-
-              <div class="text-field mb-3">
-                <label class="label-2" for="password">{{ __('Password') }}</label>
-                <div class="position-relative">
-                  <input type="password" id="password" name="password"
-                    class="form-control text-field-2 @error('password') is-invalid @enderror" required />
-                  <div class="password-hide-see" onclick="togglePassword()">
-                    <img class="img" src="https://c.animaapp.com/mhxjwoj8jP8UI3/img/icon.svg" alt="Toggle" />
-                    <div class="text-wrapper-4">{{ __('Hide') }}</div>
+              <div class="text-field mb-3" id="phone-container">
+                <label class="label" for="phone">
+                    <span class="label-text">{{ __('Mobile Number') }}</span>
+                </label>
+                <div class="row g-2">
+                  <div class="col-4">
+                    <select name="country_code" class="form-control text-field-2 @error('country_code') is-invalid @enderror" required>
+                      <option value="968" {{ old('country_code', '968') == '968' ? 'selected' : '' }}>OM (+968)</option>
+                      <option value="20" {{ old('country_code') == '20' ? 'selected' : '' }}>EG (+20)</option>
+                      <option value="966" {{ old('country_code') == '966' ? 'selected' : '' }}>SA (+966)</option>
+                      <option value="971" {{ old('country_code') == '971' ? 'selected' : '' }}>AE (+971)</option>
+                      <option value="974" {{ old('country_code') == '974' ? 'selected' : '' }}>QA (+974)</option>
+                      <option value="973" {{ old('country_code') == '973' ? 'selected' : '' }}>BH (+973)</option>
+                      <option value="965" {{ old('country_code') == '965' ? 'selected' : '' }}>KW (+965)</option>
+                    </select>
+                  </div>
+                  <div class="col-8">
+                    <input type="text" id="phone" name="phone" value="{{ old('phone') }}"
+                      class="form-control text-field-2 @error('phone') is-invalid @enderror" placeholder="71234567" required />
                   </div>
                 </div>
-                @error('password') <div class="text-danger mt-1">{{ $message }}</div> @enderror
-                <div class="mt-2 text-end">
-                  <a href="{{ route('forget.password.get') }}" class="text-decoration-none"
-                    style="color: #929f1a; font-size: 14px;">{{ __('Forgot Password?') }}</a>
-                </div>
+                @error('country_code') <div class="text-danger mt-1">{{ $message }}</div> @enderror
+                @error('phone') <div class="text-danger mt-1">{{ $message }}</div> @enderror
               </div>
 
               <div class="check-box mb-3">

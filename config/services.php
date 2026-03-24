@@ -70,5 +70,9 @@ return [
         'pay_url' => env('THAWANI_TEST_PAY_URL'),
         'webhook_secret' => env('THAWANI_WEBHOOK_SECRET'),
     ],
+    'onesignal' => [
+        'app_id' => env('ONESIGNAL_APP_ID'),
+        'rest_api_key' => env('ONESIGNAL_REST_API_KEY'),
+    ],
 
 ];

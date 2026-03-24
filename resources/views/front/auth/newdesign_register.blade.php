@@ -42,25 +42,14 @@
                 @error('name') <div class="text-danger mt-1">{{ $message }}</div> @enderror
               </div>
 
-              <div class="text-field mb-3" id="email-container">
-                <label class="label" for="email">
-                    <span class="label-text">{{ __('Email') }}</span>
-                    <span class="optional-text text-muted" style="display:none;">({{ __('Optional') }})</span>
-                </label>
-                <input type="email" id="email" name="email" value="{{ old('email') }}"
-                  class="form-control text-field-2 @error('email') is-invalid @enderror" required />
-                @error('email') <div class="text-danger mt-1">{{ $message }}</div> @enderror
-              </div>
-
               <div class="text-field mb-3" id="phone-container">
                 <label class="label" for="phone">
                     <span class="label-text">{{ __('Mobile Number') }}</span>
-                    <span class="optional-text text-muted" style="display:none;">({{ __('Optional') }})</span>
                 </label>
                 <div class="row g-2">
                   <div class="col-4">
                     <select name="country_code" class="form-control text-field-2 @error('country_code') is-invalid @enderror" required>
-                      <option value="968" {{ old('country_code') == '968' ? 'selected' : '' }}>OM (+968)</option>
+                      <option value="968" {{ old('country_code', '968') == '968' ? 'selected' : '' }}>OM (+968)</option>
                       <option value="20" {{ old('country_code') == '20' ? 'selected' : '' }}>EG (+20)</option>
                       <option value="966" {{ old('country_code') == '966' ? 'selected' : '' }}>SA (+966)</option>
                       <option value="971" {{ old('country_code') == '971' ? 'selected' : '' }}>AE (+971)</option>
@@ -76,35 +65,7 @@
                 </div>
                 @error('country_code') <div class="text-danger mt-1">{{ $message }}</div> @enderror
                 @error('phone') <div class="text-danger mt-1">{{ $message }}</div> @enderror
-              </div>
-
-              <div class="text-field mb-3">
-                <label class="label">{{ __('Verify Your Account Via') }}</label>
-                <div class="d-flex gap-4 mt-1">
-                  <div class="form-check">
-                    <input class="form-check-input verification-method" type="radio" name="verification_method" id="verify_email" value="email" {{ old('verification_method', 'email') == 'email' ? 'checked' : '' }}>
-                    <label class="form-check-label" for="verify_email">{{ __('Email') }}</label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input verification-method" type="radio" name="verification_method" id="verify_whatsapp" value="whatsapp" {{ old('verification_method') == 'whatsapp' ? 'checked' : '' }}>
-                    <label class="form-check-label" for="verify_whatsapp">{{ __('WhatsApp') }}</label>
-                  </div>
-                </div>
-                @error('verification_method') <div class="text-danger mt-1">{{ $message }}</div> @enderror
-              </div>
-
-              <div class="text-field mb-3">
-                <label class="label-2" for="password">{{ __('Password') }}</label>
-                <input type="password" id="password" name="password"
-                  class="form-control text-field-2 @error('password') is-invalid @enderror" required />
-                @error('password') <div class="text-danger mt-1">{{ $message }}</div> @enderror
-              </div>
-
-              <div class="text-field mb-3">
-                <label class="label-2" for="confirm_password">{{ __('Confirm Password') }}</label>
-                <input type="password" id="confirm_password" name="confirm_password"
-                  class="form-control text-field-2 @error('confirm_password') is-invalid @enderror" required />
-                @error('confirm_password') <div class="text-danger mt-1">{{ $message }}</div> @enderror
+                @error('full_phone') <div class="text-danger mt-1">{{ $message }}</div> @enderror
               </div>
 
               <div class="frame mb-3 text-center">
@@ -123,43 +84,5 @@
       </div>
     </div>
   </div>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const emailInput = document.getElementById('email');
-        const phoneInput = document.getElementById('phone');
-        const countrySelect = document.querySelector('select[name="country_code"]');
-        const emailOptional = document.querySelector('#email-container .optional-text');
-        const phoneOptional = document.querySelector('#phone-container .optional-text');
-        const verificationMethods = document.querySelectorAll('.verification-method');
-
-        function updateRequirements() {
-            const selectedMethod = document.querySelector('.verification-method:checked').value;
-            
-            if (selectedMethod === 'email') {
-                emailInput.required = true;
-                emailOptional.style.display = 'none';
-                
-                phoneInput.required = false;
-                countrySelect.required = false;
-                phoneOptional.style.display = 'inline';
-            } else {
-                phoneInput.required = true;
-                countrySelect.required = true;
-                phoneOptional.style.display = 'none';
-                
-                emailInput.required = false;
-                emailOptional.style.display = 'inline';
-            }
-        }
-
-        verificationMethods.forEach(method => {
-            method.addEventListener('change', updateRequirements);
-        });
-
-        // Initialize on load
-        updateRequirements();
-    });
-  </script>
 
 @endsection
