@@ -90,6 +90,7 @@ Route::group(['prefix' => 'whatsapp'], function () {
     Route::post('login', [\App\Http\Controllers\Api\Whatsapp\WhatsappStoreController::class, 'login']);
     Route::get('categories', [\App\Http\Controllers\Api\Whatsapp\WhatsappStoreController::class, 'getCategories']);
     Route::get('products', [\App\Http\Controllers\Api\Whatsapp\WhatsappStoreController::class, 'getProducts']);
+    Route::get('products/{id}', [\App\Http\Controllers\Api\Whatsapp\WhatsappStoreController::class, 'getProductDetail']);
     Route::get('shipping-locations', [\App\Http\Controllers\Api\Whatsapp\WhatsappStoreController::class, 'getShippingLocations']);
     
     Route::group(['middleware' => 'auth:sanctum'], function () {

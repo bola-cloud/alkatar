@@ -126,6 +126,151 @@ class WhatsappStoreController extends Controller
     }
 
     /**
+     * Get a single product detail by ID (same data as product details page)
+     */
+    public function getProductDetail($id)
+    {
+        $product = Product::with([
+            'brand',
+            'category',
+            'colors',
+            'sizes',
+            'weights',
+            'additions' => function ($query) {
+                $query->where('status', 1);
+            },
+            'product_tags',
+            'product_reviews',
+            'product_reviews.user',
+            'comboItems',
+        ])->where('Status', 1)->find($id);
+
+        if (!$product) {
+            return response()->json(['message' => 'Product not found'], 404);
+        }
+
+        // Build related products (same category + name keyword matching)
+        $cat_id = $product->Category_Id;
+        $nameSource = $product->en_Product_Name ?? $product->fr_Product_Name ?? '';
+        $words = preg_split('/\s+/', strip_tags($nameSource));
+        $keywords = array_slice(array_values(array_filter($words, function ($w) {
+            return mb_strlen(trim($w)) > 2;
+        })), 0, 3);
+
+        $related = Product::with(['category', 'brand', 'weights', 'sizes'])
+            ->where('Status', 1)
+            ->where('id', '!=', $product->id)
+            ->where(function ($q) use ($cat_id, $keywords) {
+                if (!empty($cat_id)) {
+                    $q->where('Category_Id', $cat_id);
+                }
+                if (!empty($keywords)) {
+                    $q->orWhere(function ($q2) use ($keywords) {
+                        foreach ($keywords as $kw) {
+                            $kw = trim($kw);
+                            if ($kw === '') continue;
+                            $q2->orWhere('en_Product_Name', 'LIKE', "%{$kw}%")
+                               ->orWhere('fr_Product_Name', 'LIKE', "%{$kw}%");
+                        }
+                    });
+                }
+            })
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // Build full image list
+        $images = array_values(array_filter([
+            $product->resizeImage(),
+            $product->Image2 ? asset('images/product/' . $product->Image2) : null,
+            $product->Image3 ? asset('images/product/' . $product->Image3) : null,
+            $product->Image4 ? asset('images/product/' . $product->Image4) : null,
+            $product->Image5 ? asset('images/product/' . $product->Image5) : null,
+        ]));
+
+        // Calculate average rating
+        $reviews = $product->product_reviews ?? collect();
+        $avgRating = $reviews->count() > 0 ? round($reviews->avg('rating'), 1) : 0;
+
+        return response()->json([
+            'id' => $product->id,
+            'en_Product_Name' => $product->en_Product_Name,
+            'fr_Product_Name' => $product->fr_Product_Name,
+            'en_Product_Slug' => $product->en_Product_Slug,
+            'fr_Product_Slug' => $product->fr_Product_Slug,
+            'Price' => $product->Price,
+            'Discount_Price' => $product->Discount_Price,
+            'Discount' => $product->Discount,
+            'en_Description' => $product->en_Description,
+            'fr_Description' => $product->fr_Description,
+            'en_About' => $product->en_About,
+            'fr_About' => $product->fr_About,
+            'en_ShippingReturn' => $product->en_ShippingReturn,
+            'fr_ShippingReturn' => $product->fr_ShippingReturn,
+            'en_AdditionalInformation' => $product->en_AdditionalInformation,
+            'fr_AdditionalInformation' => $product->fr_AdditionalInformation,
+            'Quantity' => $product->virtual_stock,
+            'in_stock' => $product->virtual_stock > 0,
+            'images' => $images,
+            'category' => $product->category ? [
+                'id' => $product->category->id,
+                'en_Category_Name' => $product->category->en_Category_Name,
+                'fr_Category_Name' => $product->category->fr_Category_Name,
+            ] : null,
+            'brand' => $product->brand ? [
+                'id' => $product->brand->id,
+                'en_BrandName' => $product->brand->en_BrandName,
+                'fr_BrandName' => $product->brand->fr_BrandName,
+            ] : null,
+            'weights' => $product->weights->map(function ($w) {
+                return [
+                    'id' => $w->id,
+                    'weight' => $w->weight,
+                    'price' => $w->price,
+                ];
+            }),
+            'sizes' => $product->sizes->map(function ($s) {
+                return [
+                    'id' => $s->id,
+                    'Size' => $s->Size,
+                    'price' => $s->pivot->price ?? 0,
+                    'weight' => $s->pivot->weight ?? 0,
+                ];
+            }),
+            'additions' => $product->additions->map(function ($a) {
+                return [
+                    'id' => $a->id,
+                    'name' => $a->name,
+                    'name_ar' => $a->name_ar,
+                    'price' => $a->price,
+                    'icon' => $a->icon,
+                ];
+            }),
+            'colors' => $product->colors->map(function ($c) {
+                return [
+                    'id' => $c->id,
+                    'Name' => $c->Name,
+                    'Code' => $c->Code,
+                ];
+            }),
+            'reviews' => [
+                'average_rating' => $avgRating,
+                'total_count' => $reviews->count(),
+                'items' => $reviews->take(10)->map(function ($r) {
+                    return [
+                        'id' => $r->id,
+                        'rating' => $r->rating,
+                        'feedback' => $r->feedback,
+                        'user_name' => $r->user->name ?? 'Guest',
+                        'created_at' => $r->created_at?->toDateTimeString(),
+                    ];
+                }),
+            ],
+            'related_products' => ProductResource::collection($related),
+        ]);
+    }
+
+    /**
      * Get hierarchy of shipping locations with delivery charges
      */
     public function getShippingLocations()
