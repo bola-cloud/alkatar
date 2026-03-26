@@ -110,7 +110,6 @@
                 ['label' => __('Terms & Condition'), 'route' => (Route::has('terms.conditions.new') ? 'terms.conditions.new' : 'terms.conditions')],
                 ['label' => __('Privacy Policy'), 'route' => (Route::has('privacy.policy.new') ? 'privacy.policy.new' : 'privacy.policy')],
                 ['label' => __('Shipping & Return'), 'route' => (Route::has('shipping.return.new') ? 'shipping.return.new' : 'shipping.return')],
-                ['label' => __('Return Policy'), 'route' => 'refund.policy'],
               ];
             @endphp
             @foreach($helpLinks as $ln)
