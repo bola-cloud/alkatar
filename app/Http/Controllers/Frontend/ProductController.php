@@ -25,7 +25,7 @@ class ProductController extends Controller
             $data['similar_product'] = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('status', 1)
                 ->where('Category_Id', $cat_id)
                 ->where('id', '!=', $product->id)
-                ->latest()->take(5)->get();
+                ->orderBy('fr_Product_Name', 'asc')->take(5)->get();
 
             $products = Product::where('id', $product->id)
                 ->with([
@@ -40,7 +40,7 @@ class ProductController extends Controller
                     'product_reviews',
                     'product_reviews.user'
                 ])
-                ->latest()
+                ->orderBy('fr_Product_Name', 'asc')
                 ->first();
             $data['products'] = $products;
             $data['title'] = $products->en_Product_Name;
@@ -92,7 +92,7 @@ class ProductController extends Controller
                     }
                 });
 
-            $related = $relatedQuery->latest()->take(5)->get();
+            $related = $relatedQuery->orderBy('fr_Product_Name', 'asc')->take(5)->get();
 
             $products = Product::where('id', $product->id)
                 ->with([
@@ -107,7 +107,7 @@ class ProductController extends Controller
                     'product_reviews',
                     'product_reviews.user'
                 ])
-                ->latest()
+                ->orderBy('fr_Product_Name', 'asc')
                 ->first();
 
             $data['product'] = $products;
@@ -419,7 +419,7 @@ class ProductController extends Controller
                 $query->where('status', 1);
             },
             'product_tags'
-        ])->where('status', 1)->where('Category_Id', $id)->latest()->paginate(9);
+        ])->where('status', 1)->where('Category_Id', $id)->orderBy('fr_Product_Name', 'asc')->paginate(9);
         $data['products'] = $products;
         $seo = SeoSetting::where('slug', 'all-products')->first();
         $data['title'] = $seo->title;
@@ -494,7 +494,7 @@ class ProductController extends Controller
                 ->orWhere('fr_Product_Name', 'LIKE', "%{$search}%");
         });
 
-        $products = $products->latest()->paginate(9);
+        $products = $products->orderBy('fr_Product_Name', 'asc')->paginate(9);
         if (count($products) > 0) {
             return view('front.pages.product.search-result', compact('products', 'category', 'colors', 'sizes', 'brands'));
         }
