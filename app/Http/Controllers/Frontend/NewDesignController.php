@@ -78,7 +78,7 @@ class NewDesignController extends Controller
 
         // Manual lazy load products per featured category
         foreach ($featuredCategories as $cat) {
-            $catProducts = $cat->products()->where('Status', 1)->with($relations)->take(12)->get();
+            $catProducts = $cat->products()->where('Status', 1)->orderByRaw('fr_Product_Name COLLATE utf8mb4_unicode_ci ASC')->with($relations)->take(12)->get();
             $cat->setRelation('products', $catProducts);
         }
 

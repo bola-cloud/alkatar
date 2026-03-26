@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Frontend;
+use Illuminate\Support\Facades\Log;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -18,9 +19,10 @@ class CategoryController extends Controller
      */
     public function show(Request $request, $slug = null)
     {
+        Log::info('CategoryController@show hit with slug: ' . ($slug ?? 'null'));
         // If no slug provided, treat this as "All Categories" / "All Products" view
         if (is_null($slug) || in_array($slug, ['', 'all', 'all-products', 'categories'])) {
-            $products = Product::where('Status', 1)->paginate(12);
+            $products = Product::where('Status', 1)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->paginate(12);
             // Use the display locale (HTML_LANG) from session for UI translations so the
             // frontend shows the language selected by the user (e.g. 'ar') while
             // backend/service locale (APP_LOCALE) may remain for DB compatibility.
@@ -45,6 +47,7 @@ class CategoryController extends Controller
         if ($category) {
             $products = Product::where('Status', 1)
                 ->where('Category_Id', $category->id)
+                ->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')
                 ->paginate(12);
 
             // Determine title based on the display locale selected by the user (session HTML_LANG).
@@ -54,7 +57,7 @@ class CategoryController extends Controller
             $title = $category->{$dbPrefix . '_Category_Name'} ?? $category->en_Category_Name ?? $category->fr_Category_Name ?? ucfirst($searchName);
         } else {
             // Fallback: no matching category found — show generic product list
-            $products = Product::where('Status', 1)->paginate(12);
+            $products = Product::where('Status', 1)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->paginate(12);
             $title = ucfirst($searchName);
         }
 

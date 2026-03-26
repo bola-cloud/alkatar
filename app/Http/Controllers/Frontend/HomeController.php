@@ -46,9 +46,9 @@ class HomeController extends Controller
                 'product_tags'
             ])->where('Status', ACTIVE)->orderBy('fr_Product_Name', 'asc');
 
-            $data['featured_products'] = $all_products->clone()->where('Featured_Product', ACTIVE)->paginate(10);
-            $data['on_sales'] = $all_products->clone()->where('Discount', "!=", '0')->paginate(10);
-            $data['best_selling'] = $all_products->clone()->where('Best_Selling', ACTIVE)->paginate(10);
+            $data['featured_products'] = $all_products->clone()->where('Featured_Product', ACTIVE)->orderByRaw('fr_Product_Name COLLATE utf8mb4_unicode_ci ASC')->paginate(10);
+            $data['on_sales'] = $all_products->clone()->where('Discount', "!=", '0')->orderByRaw('fr_Product_Name COLLATE utf8mb4_unicode_ci ASC')->paginate(10);
+            $data['best_selling'] = $all_products->clone()->where('Best_Selling', ACTIVE)->orderByRaw('fr_Product_Name COLLATE utf8mb4_unicode_ci ASC')->paginate(10);
             $data['new_arrivals'] = $all_products->clone()->where('New_Arrival', ACTIVE)->latest()->paginate(10);
 
             $seo = SeoSetting::where('slug', 'home')->first();
