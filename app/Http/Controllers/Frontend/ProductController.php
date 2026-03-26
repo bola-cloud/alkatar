@@ -134,7 +134,7 @@ class ProductController extends Controller
                 $query->where('status', 1);
             },
             'product_tags'
-        ])->where('status', 1)->latest()->paginate(9);
+        ])->where('status', 1)->orderBy('fr_Product_Name', 'asc')->paginate(9);
         $data['products'] = $products;
         $seo = SeoSetting::where('slug', 'all-products')->first();
         $data['title'] = $seo->title;
@@ -161,7 +161,7 @@ class ProductController extends Controller
                 $query->where('status', 1);
             },
             'product_tags'
-        ])->where('status', 1)->latest()->paginate(9);
+        ])->where('status', 1)->orderBy('fr_Product_Name', 'asc')->paginate(9);
         $data['products'] = $products;
         $seo = SeoSetting::where('slug', 'all-products')->first();
         $data['title'] = $seo->title;
@@ -178,17 +178,17 @@ class ProductController extends Controller
         if ($request->ajax()) {
             $value = $request->filter;
             if ($value == 'Categories') {
-                $filters = Product::where('Category_Id', '!=', null)->get();
+                $filters = Product::where('Category_Id', '!=', null)->orderBy('fr_Product_Name', 'asc')->get();
                 if ($filters) {
                     return view('front.pages.product.filter_product', compact('filters'));
                 }
             } elseif ($value == 'Brands') {
-                $filters = Product::where('Brand_Id', '!=', null)->get();
+                $filters = Product::where('Brand_Id', '!=', null)->orderBy('fr_Product_Name', 'asc')->get();
                 if ($filters) {
                     return view('front.pages.product.filter_product', compact('filters'));
                 }
             } elseif ($value == 'Products') {
-                $filters = Product::get();
+                $filters = Product::orderBy('fr_Product_Name', 'asc')->get();
                 if ($filters) {
                     return view('front.pages.product.filter_product', compact('filters'));
                 }
@@ -209,7 +209,7 @@ class ProductController extends Controller
                     }
                 ])->whereHas('category', function ($query) use ($request) {
                     $query->whereIn('en_Category_Name', $request->checkCat);
-                })->get();
+                })->orderBy('fr_Product_Name', 'asc')->get();
             } elseif ($request->checkBrand) {
                 $filters = Product::where('status', 1)->with([
                     'brand',
@@ -218,7 +218,7 @@ class ProductController extends Controller
                     }
                 ])->whereHas('brand', function ($query) use ($request) {
                     $query->whereIn('en_BrandName', $request->checkBrand);
-                })->get();
+                })->orderBy('fr_Product_Name', 'asc')->get();
             } elseif ($request->checkColor) {
                 $filters = Product::where('status', 1)->with([
                     'colors',
@@ -227,7 +227,7 @@ class ProductController extends Controller
                     }
                 ])->whereHas('colors', function ($query) use ($request) {
                     $query->whereIn('Name', $request->checkColor);
-                })->get();
+                })->orderBy('fr_Product_Name', 'asc')->get();
             } elseif ($request->checkSize) {
                 $filters = Product::where('status', 1)->with([
                     'sizes',
@@ -236,11 +236,11 @@ class ProductController extends Controller
                     }
                 ])->whereHas('sizes', function ($query) use ($request) {
                     $query->whereIn('Size', $request->checkSize);
-                })->get();
+                })->orderBy('fr_Product_Name', 'asc')->get();
             } elseif ($request->search) {
-                $filters = Product::where('status', 1)->where('en_Product_Name', 'LIKE', "%{$request->search}%")->get();
+                $filters = Product::where('status', 1)->where('en_Product_Name', 'LIKE', "%{$request->search}%")->orderBy('fr_Product_Name', 'asc')->get();
             } elseif ($request->min && $request->max) {
-                $filters = Product::where('status', 1)->whereBetween('Discount_Price', [$request->min, $request->max])->get();
+                $filters = Product::where('status', 1)->whereBetween('Discount_Price', [$request->min, $request->max])->orderBy('fr_Product_Name', 'asc')->get();
             } elseif ($request->checkSubCat) {
                 $filters = Product::where('status', 1)->with([
                     'subcategory',
@@ -251,7 +251,7 @@ class ProductController extends Controller
                     $query->whereIn('id', $request->checkSubCat);
                 })->get();
             } else {
-                $filters = Product::where('status', 1)->get();
+                $filters = Product::where('status', 1)->orderBy('fr_Product_Name', 'asc')->get();
             }
         }
         return view('front.pages.product.filter_product', compact('filters'));
@@ -364,7 +364,7 @@ class ProductController extends Controller
             ])
                 ->where('status', 1)
                 ->where('Category_Id', $id)
-                ->latest()
+                ->orderBy('fr_Product_Name', 'asc')
                 ->paginate(10); // Changed from 9 to 10
             $data['category'] = $category;
         } else {
@@ -385,7 +385,7 @@ class ProductController extends Controller
                     $query->where('en_Product_Name', 'LIKE', "%{$search}%")
                         ->orWhere('fr_Product_Name', 'LIKE', "%{$search}%");
                 })
-                ->latest()
+                ->orderBy('fr_Product_Name', 'asc')
                 ->paginate(10); // Changed from 9 to 10
         }
 
@@ -438,7 +438,7 @@ class ProductController extends Controller
         $data['sizes'] = Size::with('products')->latest()->get();
         $data['category'] = Category::with('products')->where('en_Description', null)->orWhere('Category_Icon', null)->get();
         $data['brands'] = Brand::with('products')->get();
-        $products = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('status', 1)->where('Brand_Id', $id)->latest()->paginate(9);
+        $products = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('status', 1)->where('Brand_Id', $id)->orderBy('fr_Product_Name', 'asc')->paginate(9);
         $data['products'] = $products;
         $seo = SeoSetting::where('slug', 'all-products')->first();
         $data['title'] = $seo->title;
@@ -457,7 +457,7 @@ class ProductController extends Controller
         $data['sizes'] = Size::with('products')->latest()->get();
         $data['category'] = Category::with('products')->where('en_Description', null)->orWhere('Category_Icon', null)->get();
         $data['brands'] = Brand::with('products')->get();
-        $products = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('status', 1)->where('Brand_Id', $id)->latest()->paginate(9);
+        $products = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('status', 1)->where('Brand_Id', $id)->orderBy('fr_Product_Name', 'asc')->paginate(9);
         $data['products'] = $products;
         $seo = SeoSetting::where('slug', 'all-products')->first();
         $data['title'] = $seo->title;

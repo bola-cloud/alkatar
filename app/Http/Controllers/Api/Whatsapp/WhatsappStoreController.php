@@ -120,7 +120,7 @@ class WhatsappStoreController extends Controller
             });
         }
 
-        $products = $query->latest()->paginate($request->get('per_page', 20));
+        $products = $query->orderBy('fr_Product_Name', 'asc')->paginate($request->get('per_page', 20));
 
         return ProductResource::collection($products);
     }
