@@ -12,9 +12,9 @@ class ContactUsController extends Controller
     public function contactUs()
     {
         $seo = SeoSetting::where('slug', 'contact')->first();
-        $data['title'] = $seo->title;
-        $data['description'] = $seo->description;
-        $data['keywords'] = $seo->keywords;
+        $data['title'] = __('Contact Us');
+        $data['description'] = $seo->description ?? '';
+        $data['keywords'] = $seo->keywords ?? '';
         // prefer the newdesign contact page
         return view('front.pages.contact.newdesign', $data);
     }

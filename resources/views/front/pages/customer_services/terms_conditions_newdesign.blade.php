@@ -1,11 +1,11 @@
 @extends('front.layouts.new_design_layout')
-@section('title', isset($title) ? $title : __('Term & Conditions'))
+@section('title', isset($title) ? $title : __('Terms & Conditions'))
 @section('description', isset($description) ? $description : '')
 @section('keywords', isset($keywords) ? $keywords : '')
 @section('content')
 
     @php
-        $bannerTitle = $title ?? __('Term & Conditions');
+        $bannerTitle = $title ?? __('Terms & Conditions');
         $locale = session('HTML_LANG', session('APP_LOCALE', app()->getLocale() ?? 'en'));
         $isAr = in_array($locale, ['ar', 'fr']);
         $content = CutomerServiceContent('terms_conditions');
