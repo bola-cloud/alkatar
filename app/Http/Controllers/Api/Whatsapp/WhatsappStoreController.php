@@ -427,6 +427,9 @@ class WhatsappStoreController extends Controller
             }
 
             $price = $sizePrice + $weightPrice;
+            if ($price == 0) {
+                $price = $product->Price ?? 0;
+            }
             $additions = \App\Models\Admin\Addition::whereIn('id', $item['addition_ids'] ?? [])->get();
             $price += $additions->sum('price');
 
@@ -479,7 +482,11 @@ class WhatsappStoreController extends Controller
             $additions = \App\Models\Admin\Addition::whereIn('id', $item['addition_ids'] ?? [])->get();
             $additionPrice = $additions->sum('price');
 
-            $price = $sizePrice + $weightPrice + $additionPrice;
+            $basePrice = $sizePrice + $weightPrice;
+            if ($basePrice == 0) {
+                $basePrice = $product->Price ?? 0;
+            }
+            $price = $basePrice + $additionPrice;
             if ($product->Discount) {
                 $price -= ($product->Discount / 100) * $price;
             }

@@ -171,7 +171,11 @@ class CheckoutController extends Controller
                 $weightValue = $weight->weight ?? 0;
 
                 // Calculate the total price for the item
-                $price = $sizePrice + $weightPrice;
+                $basePrice = $sizePrice + $weightPrice;
+                if ($basePrice == 0) {
+                    $basePrice = $product->Price ?? 0;
+                }
+                $price = $basePrice;
 
                 // Calculate addition prices
                 $additions = Addition::whereIn('id', $item['addition_ids'] ?? [])->get();
@@ -345,7 +349,11 @@ class CheckoutController extends Controller
             $additionPrice = $additions->sum('price');
 
             // Calculate the total price for the item
-            $price = $sizePrice + $weightPrice + $additionPrice;
+            $basePrice = $sizePrice + $weightPrice;
+            if ($basePrice == 0) {
+                $basePrice = $product->Price ?? 0;
+            }
+            $price = $basePrice + $additionPrice;
 
             // Apply discount if available
             if ($product->Discount) {

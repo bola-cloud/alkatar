@@ -64,7 +64,7 @@ class AuthController extends Controller
                 $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
                     'phone_number' => $user->Number,
                     'otp' => $otp,
-                    'language' => app()->getLocale()
+                    'language' => app()->getLocale() == 'fr' ? 'ar' : app()->getLocale()
                 ]);
                 
                 if (!$response->successful()) {
@@ -168,7 +168,7 @@ class AuthController extends Controller
                 $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
                     'phone_number' => $full_phone,
                     'otp' => $otp,
-                    'language' => app()->getLocale()
+                    'language' => app()->getLocale() == 'fr' ? 'ar' : app()->getLocale()
                 ]);
                 
                 if (!$response->successful()) {
@@ -266,7 +266,7 @@ class AuthController extends Controller
                 Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
                     'phone_number' => $target,
                     'otp' => $otp,
-                    'language' => app()->getLocale()
+                    'language' => app()->getLocale() == 'fr' ? 'ar' : app()->getLocale()
                 ]);
             }
             return redirect()->back()->with('success', __('OTP has been resent.'));

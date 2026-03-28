@@ -31,7 +31,7 @@ class AuthController extends Controller
         $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
             'phone_number' => $phone_without_plus,
             'otp' => $otp,
-            'language' => app()->getLocale()
+            'language' => app()->getLocale() == 'fr' ? 'ar' : app()->getLocale()
         ]);
 
         if ($response->successful()) {
