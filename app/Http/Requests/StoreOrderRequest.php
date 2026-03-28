@@ -15,7 +15,7 @@ class StoreOrderRequest extends FormRequest
     {
         return [
             'billing_name' => 'required|string|max:255',
-            'Payment_Method' => 'required|string|in:Thawani,CreditCard,Paypal', // Add available payment methods
+            'Payment_Method' => 'required|string',
             'billing_email' => 'nullable|email|max:255',
             'order_source' => 'required|string|max:255|in:whatsapp,mobile,web',
             'billing_street_address' => 'nullable|string|max:255',
@@ -27,7 +27,7 @@ class StoreOrderRequest extends FormRequest
             'cart_items.*.product_id' => 'required|exists:products,id',
             'cart_items.*.quantity' => 'required|integer|min:1',
             'cart_items.*.size_id' => 'nullable|exists:sizes,id',
-            'cart_items.*.weight_id' => 'required|exists:weight_product,id',
+            'cart_items.*.weight_id' => 'nullable|exists:weight_product,id',
             'cart_items.*.addition_ids' => 'nullable|array',
             'cart_items.*.addition_ids.*' => 'exists:additions,id',
             'coupon_code' => 'nullable|string|exists:coupons,CouponCode',

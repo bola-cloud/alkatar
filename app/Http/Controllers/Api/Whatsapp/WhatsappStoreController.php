@@ -418,9 +418,13 @@ class WhatsappStoreController extends Controller
                 $sizeWeight = $size->pivot->weight ?? 0;
             }
 
-            $weight = \App\Models\WeightProduct::find($item['weight_id']);
-            $weightPrice = $weight->price ?? 0;
-            $weightValue = $weight->weight ?? 0;
+            $weightPrice = 0;
+            $weightValue = 0;
+            if (!empty($item['weight_id'])) {
+                $weight = \App\Models\WeightProduct::find($item['weight_id']);
+                $weightPrice = $weight->price ?? 0;
+                $weightValue = $weight->weight ?? 0;
+            }
 
             $price = $sizePrice + $weightPrice;
             $additions = \App\Models\Admin\Addition::whereIn('id', $item['addition_ids'] ?? [])->get();
@@ -452,7 +456,8 @@ class WhatsappStoreController extends Controller
         return response()->json([
             'message' => 'Order created successfully',
             'order_number' => $order_number,
-            'grand_total' => $grandTotal
+            'grand_total' => $order->Grand_Total,
+            'payment_method' => $validated['Payment_Method']
         ]);
     }
 
@@ -466,8 +471,11 @@ class WhatsappStoreController extends Controller
                 $size = $product->sizes()->where('size_product.Size_Id', $item['size_id'])->first();
                 $sizePrice = $size->pivot->price ?? 0;
             }
-            $weight = \App\Models\WeightProduct::find($item['weight_id']);
-            $weightPrice = $weight->price ?? 0;
+            $weightPrice = 0;
+            if (!empty($item['weight_id'])) {
+                $weight = \App\Models\WeightProduct::find($item['weight_id']);
+                $weightPrice = $weight->price ?? 0;
+            }
             $additions = \App\Models\Admin\Addition::whereIn('id', $item['addition_ids'] ?? [])->get();
             $additionPrice = $additions->sum('price');
 
@@ -490,8 +498,11 @@ class WhatsappStoreController extends Controller
                 $size = $product->sizes()->where('size_product.Size_Id', $item['size_id'])->first();
                 $sizeWeight = $size->pivot->weight ?? 0;
             }
-            $weight = \App\Models\WeightProduct::find($item['weight_id']);
-            $weightValue = $weight->weight ?? 0;
+            $weightValue = 0;
+            if (!empty($item['weight_id'])) {
+                $weight = \App\Models\WeightProduct::find($item['weight_id']);
+                $weightValue = $weight->weight ?? 0;
+            }
             $totalWeightGrams += ($sizeWeight + $weightValue) * $item['quantity'];
         }
 
@@ -522,9 +533,6 @@ class WhatsappStoreController extends Controller
 
     protected function generateThawaniSession($order, $user)
     {
-        // For simplicity, returning a mock URL or real one depends on keys
-        // We'll follow Api/CheckoutController logic
-        
         $paymentData = [
             'client_reference_id' => $order->Order_Number,
             'mode' => 'payment',
@@ -532,7 +540,7 @@ class WhatsappStoreController extends Controller
                 [
                     'name' => 'Order ' . $order->Order_Number,
                     'quantity' => 1,
-                    'unit_amount' => round($order->Grand_Total * 1000, 2),
+                    'unit_amount' => (int) round($order->Grand_Total * 1000), // Ensures an integer in baisa
                 ]
             ],
             'success_url' => route('api.thawani.success', ['order_number' => $order->Order_Number, 'phone_number' => $user->Number]),
@@ -540,16 +548,35 @@ class WhatsappStoreController extends Controller
         ];
 
         $response = \Illuminate\Support\Facades\Http::withHeaders([
+            'Content-Type' => 'application/json',
             'thawani-api-key' => config('services.thawani.secret_key')
         ])->post(config('services.thawani.checkout_url') . '/checkout/session', $paymentData);
 
         if ($response->successful()) {
-            $sessionId = $response['data']['session_id'];
-            $order->update(['session_id' => $sessionId]);
-            $paymentUrl = config('services.thawani.pay_url') . $sessionId . "?key=" . config('services.thawani.public_key');
-            return response()->json(['url' => $paymentUrl]);
+            $sessionId = $response['data']['session_id'] ?? null;
+            if ($sessionId) {
+                $order->update(['session_id' => $sessionId]);
+                
+                \App\Models\PaymentModel::create([
+                    'session_id' => $sessionId,
+                    'user_id' => $user->id,
+                    'order_number' => $order->Order_Number,
+                    'amount' => $order->Grand_Total,
+                    'status' => 'CREATED',
+                ]);
+
+                $paymentUrl = config('services.thawani.pay_url') . $sessionId . "?key=" . config('services.thawani.public_key');
+                return response()->json([
+                    'message' => 'Payment session created',
+                    'order_number' => $order->Order_Number,
+                    'grand_total' => $order->Grand_Total,
+                    'payment_method' => 'Thawani',
+                    'url' => $paymentUrl
+                ]);
+            }
         }
 
-        return response()->json(['error' => 'Payment gateway error'], 500);
+        \Illuminate\Support\Facades\Log::error('Thawani API Checkout Error', ['body' => $response->body(), 'status' => $response->status()]);
+        return response()->json(['error' => 'Payment gateway error', 'details' => $response->json() ?? $response->body()], 500);
     }
 }
