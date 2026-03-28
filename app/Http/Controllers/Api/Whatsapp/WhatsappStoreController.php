@@ -106,7 +106,8 @@ class WhatsappStoreController extends Controller
     public function getProducts(Request $request)
     {
         $query = Product::with(['category', 'brand', 'weights', 'sizes', 'additions'])
-            ->where('Status', 1);
+            ->where('Status', 1)
+            ->where('Quantity', '>', 0);
 
         if ($request->filled('category_id')) {
             $query->where('Category_Id', $request->category_id);
@@ -143,7 +144,7 @@ class WhatsappStoreController extends Controller
             'product_reviews',
             'product_reviews.user',
             'comboItems',
-        ])->where('Status', 1)->find($id);
+        ])->where('Status', 1)->where('Quantity', '>', 0)->find($id);
 
         if (!$product) {
             return response()->json(['message' => 'Product not found'], 404);
@@ -159,6 +160,7 @@ class WhatsappStoreController extends Controller
 
         $related = Product::with(['category', 'brand', 'weights', 'sizes'])
             ->where('Status', 1)
+            ->where('Quantity', '>', 0)
             ->where('id', '!=', $product->id)
             ->where(function ($q) use ($cat_id, $keywords) {
                 if (!empty($cat_id)) {

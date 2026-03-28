@@ -65,7 +65,7 @@ class AuthController extends Controller
                     'phone_number' => $user->Number,
                     'otp' => $otp,
                     'language' => app()->getLocale() == 'fr' ? 'ar' : app()->getLocale()
-                ]);
+                ]); 
                 
                 if (!$response->successful()) {
                     \Illuminate\Support\Facades\Log::error('WhatsApp Login OTP sending failed', [
