@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Exception;
 
 class SmartLifeErpService
@@ -422,11 +423,13 @@ class SmartLifeErpService
                 // Update existing invoice (Payment Success Step 2)
                 $saleId = $saleDetails['smartlife_invoice_id'];
                 $payload['sale_id'] = $saleId; // Important for PUT
+                $payload['_method'] = 'PUT'; // Method spoofing for better compatibility
 
-                Log::info('SmartLife ERP Updating Existing Invoice to Paid', ['sale_id' => $saleId]);
+                Log::info('SmartLife ERP Updating Existing Invoice to Paid (PUT)', ['sale_id' => $saleId]);
+                // Try POST with _method spoofing if direct PUT returned HTML before
                 $response = Http::withHeaders([
                     'Authorization' => $token,
-                ])->put("{$this->apiUrl}/sales/{$saleId}", $payload);
+                ])->post("{$this->apiUrl}/sales/{$saleId}", $payload);
             } else {
                 // Create new invoice (Checkout Step 1)
                 $response = Http::withHeaders([
@@ -516,17 +519,17 @@ class SmartLifeErpService
                 return null;
 
             $payload = [
-                'sale_id' => $saleId,
-                'sell_id' => $saleId, // Alias for some UltimatePOS versions
-                'transaction_id' => $saleId, // Alias for some UltimatePOS versions
+                'sale_id' => (string) $saleId,
+                'sell_id' => (string) $saleId,
+                'transaction_id' => (string) $saleId,
                 'amount' => (float) $amount,
-                'paid_by' => $paidBy, // Keep as passed (e.g. 'Cheque' or 'Cash')
-                'method' => strtolower($paidBy), // Common alias
-                'payment_status' => 'Paid', // Capitalized as it was reportedly working before
-                'status' => 'Paid', // Alias
+                'account_id' => $this->paymentAccountId, // Mandatory field in some Smarterp versions
+                'paid_by' => in_array(strtolower($paidBy), ['card', 'thawani', 'online']) ? 'Card' : 'Cash',
+                'method' => in_array(strtolower($paidBy), ['card', 'thawani', 'online']) ? 'card' : 'cash',
+                'payment_status' => 'Paid',
                 'note' => $note,
                 'cheque_no' => $chequeNo,
-                'paid_on' => now()->toDateTimeString(), // Clear timestamp
+                'paid_on' => now()->toDateTimeString(),
             ];
 
             Log::info('SmartLife ERP addPayment Payload', ['payload' => $payload]);
@@ -535,10 +538,18 @@ class SmartLifeErpService
                 'Authorization' => $token,
             ])->post("{$this->apiUrl}/sales/add_payment", $payload);
 
+            // Detailed response logging
+            Log::info('SmartLife ERP addPayment API Response', [
+                'status_code' => $response->status(),
+                'headers' => $response->header('Content-Type'),
+                'body' => $response->successful() ? $response->json() : Str::limit($response->body(), 500),
+            ]);
+
             if ($response->successful()) {
                 $data = $response->json();
-                Log::info('SmartLife ERP addPayment Response', ['response' => $data]);
-                return $data;
+                if (isset($data['success']) && $data['success'] === true) {
+                    return $data;
+                }
             }
 
             Log::error('SmartLife ERP addPayment request failed', [
