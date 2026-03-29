@@ -32,7 +32,7 @@
         .invoice-title {
             font-size: 20px;
             font-weight: bold;
-            text-align: left;
+            text-align: center;
         }
         .address-box {
             width: 48%;
@@ -79,7 +79,7 @@
         <!-- Header -->
         <table class="header-table">
             <tr>
-                <td>
+                <td class="text-right">
                     @php
                         $logoPath = public_path('uploaded_files/logo/' . allsetting()['main_logo']);
                     @endphp
@@ -87,6 +87,8 @@
                         <img src="{{ $logoPath }}" class="logo" alt="Logo">
                     @endif
                 </td>
+            </tr>
+            <tr>
                 <td class="invoice-title">الفاتورة</td>
             </tr>
         </table>

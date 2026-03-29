@@ -311,6 +311,14 @@ class WhatsappStoreController extends Controller
 
         // Calculate Totals
         $subtotal = $this->calculateSubtotal($validated['cart_items']);
+
+        // Enforce Minimum Order Amount
+        $min_order_amount = floatval(allsetting('min_order_amount') ?: 3.990);
+        if ($subtotal < $min_order_amount) {
+            return response()->json([
+                'message' => __('Minimum order amount is :amount OMR.', ['amount' => number_format($min_order_amount, 3)])
+            ], 422);
+        }
         
         $countryName = $validated['billing_country'];
         $tax = 0;
@@ -329,7 +337,14 @@ class WhatsappStoreController extends Controller
             }
         }
 
-        $shipping_charge = delivery_charge($validated['billing_city'] ?? $validated['billing_state'] ?? $validated['billing_country']);
+        // Refined shipping charge resolution: City > State > Country
+        $shipping_location = $validated['billing_city'] ?? $validated['billing_state'] ?? $validated['billing_country'];
+        $shipping_charge = delivery_charge($shipping_location);
+        
+        // If it still returns 0 and we have a city/state, try a more explicit fallback check
+        if ($shipping_charge == 0 && isset($validated['billing_city'])) {
+            $shipping_charge = delivery_charge($validated['billing_state'] ?? $validated['billing_country']);
+        }
         $weight_charge = $this->calculateExtraWeightFees($validated['cart_items']);
         $grandTotal = $subtotal + $shipping_charge + $weight_charge + $tax;
 
