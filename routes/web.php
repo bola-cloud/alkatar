@@ -84,8 +84,8 @@ Route::group(['middleware' => ['is_user']], function () {
         Route::get('logout', [AuthController::class, 'userLogout'])->name('user.logout');
         
         // Email verification
-        Route::get('verify-email', [AuthController::class, 'showVerifyEmail'])->name('user.verify.email');
-        Route::post('verify-email', [AuthController::class, 'verifyEmailPost'])->name('user.verify.email.post');
+        Route::get('verify-whatsapp', [AuthController::class, 'showVerifyEmail'])->name('user.verify.email');
+        Route::post('verify-whatsapp', [AuthController::class, 'verifyEmailPost'])->name('user.verify.email.post');
         Route::get('resend-otp', [AuthController::class, 'resendOtp'])->name('user.resend.otp');
 
         Route::post('change-password', [AuthController::class, 'userChangePassword'])->name('user.profile.change.password')->middleware(['isDemo']);
