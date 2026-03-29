@@ -1437,7 +1437,7 @@ class CheckoutController extends Controller
         info("inside thawani success");
         $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/success/payment', [
             'phone_number' => $order->billing_address['phone_number'] ?? '',
-            'booking_id' => $order->id,
+            'booking_id' => $order->Order_Number,
             'pdf' => $pdfUrl,
         ]);
 
