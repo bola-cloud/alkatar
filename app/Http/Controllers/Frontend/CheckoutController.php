@@ -1093,12 +1093,8 @@ class CheckoutController extends Controller
                         'Total_Price' => $item->price * $item->qty,
                     ]);
                 }
-                try {
-                    if ($shouldBroadcast) {
-                        event(new \App\Events\OrderCreated($order));
-                    }
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::warning('Web Checkout: Broadcast failure during order creation (ignoring to continue).', ['error' => $e->getMessage()]);
+                if ($shouldBroadcast) {
+                    event(new \App\Events\OrderCreated($order));
                 }
 
                 // Sync Order to Smart ERP immediately as UNPAID (Two-step sync approach)
@@ -1398,11 +1394,7 @@ class CheckoutController extends Controller
 
         $order->save();
 
-        try {
-            event(new \App\Events\OrderCreated($order));
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('paymentSuccess: Broadcast failure (ignoring).', ['error' => $e->getMessage()]);
-        }
+        event(new \App\Events\OrderCreated($order));
 
         // Two-Step Sync: Update the existing SmartLife invoice to "Paid"
         if (config('smartlife.sync_enabled')) {

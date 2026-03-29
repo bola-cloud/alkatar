@@ -624,11 +624,7 @@ class CheckoutController extends Controller
                 Log::error('SmartLife update sync failed in API success', ['error' => $e->getMessage()]);
             }
         }
-        try {
-            event(new \App\Events\OrderCreated($order));
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('API Checkout: Broadcast failure (ignoring).', ['error' => $e->getMessage()]);
-        }
+        event(new \App\Events\OrderCreated($order));
 
         try {
             $this->sendOrderMail($order->id);
