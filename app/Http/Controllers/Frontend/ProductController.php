@@ -18,11 +18,11 @@ class ProductController extends Controller
 {
     public function singleProduct($slug)
     {
-        $product = Product::where('en_Product_Slug', $slug)->with('category')->where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->firstOrFail();
+        $product = Product::where('en_Product_Slug', $slug)->with('category')->where('Status', 1)->where('Quantity', '>', 0)->firstOrFail();
         if (!empty($product)) {
             $cat_id = $product->category?->id;
 
-            $data['similar_product'] = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)
+            $data['similar_product'] = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('Status', 1)->where('Quantity', '>', 0)
                 ->where('Category_Id', $cat_id)
                 ->where('id', '!=', $product->id)
                 ->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->take(5)->get();
@@ -57,7 +57,7 @@ class ProductController extends Controller
      */
     public function singleProductNewDesign($slug)
     {
-        $product = Product::where('en_Product_Slug', $slug)->with('category')->where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->firstOrFail();
+        $product = Product::where('en_Product_Slug', $slug)->with('category')->where('Status', 1)->where('Quantity', '>', 0)->firstOrFail();
         if (!empty($product)) {
             $cat_id = $product->category?->id;
 
@@ -71,7 +71,7 @@ class ProductController extends Controller
             })), 0, 3);
 
             $relatedQuery = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')
-                ->where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)
+                ->where('Status', 1)->where('Quantity', '>', 0)
                 ->where('id', '!=', $product->id)
                 ->where(function ($q) use ($cat_id, $keywords) {
                     // include same-category products when category is available
@@ -134,7 +134,7 @@ class ProductController extends Controller
                 $query->where('status', 1);
             },
             'product_tags'
-        ])->where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->paginate(9);
+        ])->where('Status', 1)->where('Quantity', '>', 0)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->paginate(9);
         $data['products'] = $products;
         $seo = SeoSetting::where('slug', 'all-products')->first();
         $data['title'] = $seo->title;
@@ -161,7 +161,7 @@ class ProductController extends Controller
                 $query->where('status', 1);
             },
             'product_tags'
-        ])->where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->paginate(9);
+        ])->where('Status', 1)->where('Quantity', '>', 0)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->paginate(9);
         $data['products'] = $products;
         $seo = SeoSetting::where('slug', 'all-products')->first();
         $data['title'] = $seo->title;
@@ -178,17 +178,17 @@ class ProductController extends Controller
         if ($request->ajax()) {
             $value = $request->filter;
             if ($value == 'Categories') {
-                $filters = Product::where('Category_Id', '!=', null)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('Category_Id', '!=', null)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
                 if ($filters) {
                     return view('front.pages.product.filter_product', compact('filters'));
                 }
             } elseif ($value == 'Brands') {
-                $filters = Product::where('Brand_Id', '!=', null)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('Brand_Id', '!=', null)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
                 if ($filters) {
                     return view('front.pages.product.filter_product', compact('filters'));
                 }
             } elseif ($value == 'Products') {
-                $filters = Product::orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
                 if ($filters) {
                     return view('front.pages.product.filter_product', compact('filters'));
                 }
@@ -202,7 +202,7 @@ class ProductController extends Controller
 
         if ($request->ajax()) {
             if ($request->checkCat) {
-                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->with([
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->with([
                     'category',
                     'additions' => function ($query) {
                         $query->where('status', 1);
@@ -211,7 +211,7 @@ class ProductController extends Controller
                     $query->whereIn('en_Category_Name', $request->checkCat);
                 })->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
             } elseif ($request->checkBrand) {
-                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->with([
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->with([
                     'brand',
                     'additions' => function ($query) {
                         $query->where('status', 1);
@@ -220,7 +220,7 @@ class ProductController extends Controller
                     $query->whereIn('en_BrandName', $request->checkBrand);
                 })->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
             } elseif ($request->checkColor) {
-                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->with([
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->with([
                     'colors',
                     'additions' => function ($query) {
                         $query->where('status', 1);
@@ -229,7 +229,7 @@ class ProductController extends Controller
                     $query->whereIn('Name', $request->checkColor);
                 })->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
             } elseif ($request->checkSize) {
-                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->with([
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->with([
                     'sizes',
                     'additions' => function ($query) {
                         $query->where('status', 1);
@@ -238,11 +238,11 @@ class ProductController extends Controller
                     $query->whereIn('Size', $request->checkSize);
                 })->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
             } elseif ($request->search) {
-                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->where('en_Product_Name', 'LIKE', "%{$request->search}%")->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('en_Product_Name', 'LIKE', "%{$request->search}%")->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
             } elseif ($request->min && $request->max) {
-                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->whereBetween('Discount_Price', [$request->min, $request->max])->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->whereBetween('Discount_Price', [$request->min, $request->max])->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
             } elseif ($request->checkSubCat) {
-                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->with([
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->with([
                     'subcategory',
                     'additions' => function ($query) {
                         $query->where('status', 1);
@@ -251,7 +251,7 @@ class ProductController extends Controller
                     $query->whereIn('id', $request->checkSubCat);
                 })->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
             } else {
-                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
             }
         }
         return view('front.pages.product.filter_product', compact('filters'));
@@ -262,17 +262,17 @@ class ProductController extends Controller
         if ($request->ajax()) {
             $value = $request->filter;
             if ($value == 'Categories') {
-                $filters = Product::where('Category_Id', '!=', null)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('Category_Id', '!=', null)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
                 if ($filters) {
                     return view('front.pages.product.filter_product', compact('filters'));
                 }
             } elseif ($value == 'Brands') {
-                $filters = Product::where('Brand_Id', '!=', null)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('Brand_Id', '!=', null)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
                 if ($filters) {
                     return view('front.pages.product.filter_product', compact('filters'));
                 }
             } elseif ($value == 'Products') {
-                $filters = Product::orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
                 if ($filters) {
                     return view('front.pages.product.filter_leftsidebar', compact('filters'));
                 }
@@ -285,27 +285,27 @@ class ProductController extends Controller
     {
         if ($request->ajax()) {
             if ($request->checkCat) {
-                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->with('category')->whereHas('category', function ($query) use ($request) {
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->with('category')->whereHas('category', function ($query) use ($request) {
                     $query->whereIn('en_Category_Name', $request->checkCat);
                 })->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
             } elseif ($request->checkBrand) {
-                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->with('brand')->whereHas('brand', function ($query) use ($request) {
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->with('brand')->whereHas('brand', function ($query) use ($request) {
                     $query->whereIn('en_BrandName', $request->checkBrand);
                 })->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
             } elseif ($request->checkColor) {
-                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->with('colors')->whereHas('colors', function ($query) use ($request) {
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->with('colors')->whereHas('colors', function ($query) use ($request) {
                     $query->whereIn('Name', $request->checkColor);
                 })->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
             } elseif ($request->checkSize) {
-                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->with('sizes')->whereHas('sizes', function ($query) use ($request) {
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->with('sizes')->whereHas('sizes', function ($query) use ($request) {
                     $query->whereIn('Size', $request->checkSize);
                 })->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
             } elseif ($request->search) {
-                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->where('en_Product_Name', 'LIKE', "%{$request->search}%")->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('en_Product_Name', 'LIKE', "%{$request->search}%")->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
             } elseif ($request->min && $request->max) {
-                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->whereBetween('Discount_Price', [$request->min, $request->max])->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->whereBetween('Discount_Price', [$request->min, $request->max])->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
             } else {
-                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
+                $filters = Product::where('Status', 1)->where('Quantity', '>', 0)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->get();
             }
         }
         return view('front.pages.product.filter_leftsidebar', compact('filters'));
@@ -362,7 +362,7 @@ class ProductController extends Controller
                 },
                 'product_tags'
             ])
-                ->where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)
+                ->where('Status', 1)->where('Quantity', '>', 0)
                 ->where('Category_Id', $id)
                 ->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')
                 ->paginate(10); // Changed from 9 to 10
@@ -380,7 +380,7 @@ class ProductController extends Controller
                 },
                 'product_tags'
             ])
-                ->where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)
+                ->where('Status', 1)->where('Quantity', '>', 0)
                 ->where(function ($query) use ($search) {
                     $query->where('en_Product_Name', 'LIKE', "%{$search}%")
                         ->orWhere('fr_Product_Name', 'LIKE', "%{$search}%");
@@ -394,7 +394,7 @@ class ProductController extends Controller
 
         // dd($products->count());
 
-        if ($products->count() > 0) {
+        if ($products->total() > 0) {
             return view('front.pages.product.category_wise_product', $data);
         } else {
             return view('front.pages.product.empty-product', $data);
@@ -419,7 +419,7 @@ class ProductController extends Controller
                 $query->where('status', 1);
             },
             'product_tags'
-        ])->where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->where('Category_Id', $id)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->paginate(9);
+        ])->where('Status', 1)->where('Quantity', '>', 0)->where('Category_Id', $id)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->paginate(9);
         $data['products'] = $products;
         $seo = SeoSetting::where('slug', 'all-products')->first();
         $data['title'] = $seo->title;
@@ -438,7 +438,7 @@ class ProductController extends Controller
         $data['sizes'] = Size::with('products')->latest()->get();
         $data['category'] = Category::where('Status', 1)->get();
         $data['brands'] = Brand::with('products')->get();
-        $products = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->where('Brand_Id', $id)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->paginate(9);
+        $products = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('Status', 1)->where('Quantity', '>', 0)->where('Brand_Id', $id)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->paginate(9);
         $data['products'] = $products;
         $seo = SeoSetting::where('slug', 'all-products')->first();
         $data['title'] = $seo->title;
@@ -457,7 +457,7 @@ class ProductController extends Controller
         $data['sizes'] = Size::with('products')->latest()->get();
         $data['category'] = Category::where('Status', 1)->get();
         $data['brands'] = Brand::with('products')->get();
-        $products = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)->where('Brand_Id', $id)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->paginate(9);
+        $products = Product::with('brand', 'category', 'colors', 'sizes', 'product_tags')->where('Status', 1)->where('Quantity', '>', 0)->where('Brand_Id', $id)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->paginate(9);
         $data['products'] = $products;
         $seo = SeoSetting::where('slug', 'all-products')->first();
         $data['title'] = $seo->title;
@@ -487,7 +487,7 @@ class ProductController extends Controller
                 $query->where('status', 1);
             },
             'product_tags'
-        ])->where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0);
+        ])->where('Status', 1)->where('Quantity', '>', 0);
 
         $products = $products->where(function ($q) use ($search) {
             $q->where('en_Product_Name', 'LIKE', "%{$search}%")
@@ -508,7 +508,7 @@ class ProductController extends Controller
             $q->where('en_Product_Name', 'LIKE', "%{$query}%")
                 ->orWhere('fr_Product_Name', 'LIKE', "%{$query}%");
         })
-            ->where('Status', 1)->where('Quantity', '>', 0)->where('Quantity', '>', 0)
+            ->where('Status', 1)->where('Quantity', '>', 0)
             ->select('id', 'fr_Product_Name', 'en_Product_Name', 'en_Product_Slug')
             ->limit(5)
             ->get();

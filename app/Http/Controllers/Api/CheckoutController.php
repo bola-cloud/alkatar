@@ -131,6 +131,16 @@ class CheckoutController extends Controller
 
         $shipping_address['phone_number'] = $user->Number ?? '';
 
+        $payment_method = $validated['Payment_Method'] ?? '';
+        if ($payment_method == 'CashOnDelivery') {
+            $payment_method = 'COD';
+        }
+
+        $initial_status = ORDER_PENDING;
+        if (strtoupper($payment_method) == 'COD' || strtoupper($payment_method) == 'THAWANI') {
+            $initial_status = ORDER_PROCESSING;
+        }
+
 
         // Create order
         $order = Order::create([
@@ -146,9 +156,9 @@ class CheckoutController extends Controller
             'Coupon_Amount' => $discount,
             'Grand_Total' => $grandTotal,
             'Is_Free_Delivery' => false,
-            'Is_Order_Successful' => false,
             'Is_Order_Completed' => false,
-            'Payment_Method' => '',
+            'Payment_Method' => $payment_method,
+            'Order_Status' => $initial_status,
         ]);
         if ($order) {
             foreach ($validated['cart_items'] as $item) {
@@ -201,6 +211,21 @@ class CheckoutController extends Controller
                     'Quantity' => $item['quantity'],
                     'Total_Price' => $price * $item['quantity'],
                 ]);
+            }
+
+            // Sync Order to Smart ERP immediately as UNPAID (Two-step sync approach)
+            if (config('smartlife.sync_enabled')) {
+                try {
+                    $smartLifeService = app(\App\Services\SmartLifeErpService::class);
+                    $invoiceId = $smartLifeService->submitOrder($order);
+                    if ($invoiceId) {
+                        $order->smartlife_synced_at = now();
+                        $order->smartlife_invoice_id = $invoiceId;
+                        $order->save();
+                    }
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('SmartLife sync failed in API checkout', ['error' => $e->getMessage()]);
+                }
             }
 
         }
@@ -568,21 +593,36 @@ class CheckoutController extends Controller
         info($request->all());
         $orderNumber = $request->get('order_number');
         $phoneNumber = $request->get('phone_number');
-        Log::info('locak at request ', ['requesst' => $request->all()]);
-        Log::info('Payment order id accessed', ['order_id' => $orderNumber]);
+
         $order = Order::where('Order_Number', $orderNumber)->first();
-        Log::info('Order status updated on success', ['order_id' => $order->Id]);
-        if (!$order)
+        if (!$order) {
             return redirect()->to(url('/'));
+        }
 
         $order->update([
-            'order_status' => $response['data']['payment_status'] ?? $order->order_status,
+            'is_paid' => 1,
             'Is_Order_Successful' => true,
             'Is_Order_Completed' => true,
             'Payment_Method' => THAWANI,
             'Payment_Status' => PAYMENT_SUCCESS,
             'Order_Status' => ORDER_PROCESSING
         ]);
+
+        // Two-Step Sync: Update the existing SmartLife invoice to "Paid"
+        if (config('smartlife.sync_enabled')) {
+            try {
+                $smartLifeService = new \App\Services\SmartLifeErpService();
+                $invoiceId = $smartLifeService->submitOrder($order);
+                if ($invoiceId && !$order->smartlife_invoice_id) {
+                    $order->smartlife_synced_at = now();
+                    $order->smartlife_invoice_id = $invoiceId;
+                    $order->save();
+                }
+                Log::info('SmartLife Sync via API success (Updated to Paid)', ['order' => $order->Order_Number, 'erp_id' => $invoiceId]);
+            } catch (\Exception $e) {
+                Log::error('SmartLife update sync failed in API success', ['error' => $e->getMessage()]);
+            }
+        }
         event(new \App\Events\OrderCreated($order));
         $this->sendOrderMail($order->id);
         $pdfUrl = route('order.print', ['id' => $order->id]);

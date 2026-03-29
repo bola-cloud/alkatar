@@ -90,6 +90,12 @@ class PaymentController extends Controller
     public function orederCreate($order_number, $shipping_charge, $tax, $subtotal, $discount, $grand_total, $payment_method, $payment_status)
     {
         $data = ['success' => false , 'data' => []];
+
+        $initial_order_status = ORDER_PENDING;
+        if (strtoupper($payment_method) == 'COD' || strtoupper($payment_method) == 'THAWANI') {
+            $initial_order_status = ORDER_PROCESSING;
+        }
+
         $order=Order::create([
             'Order_Number'=>$order_number,
             'User_Id'=>Auth::id(),
@@ -106,7 +112,7 @@ class PaymentController extends Controller
             'Is_Order_Completed' => false,
             'Payment_Method' => $payment_method,
             'Payment_Status' => $payment_status,
-            'Order_Status' => ORDER_PENDING,
+            'Order_Status' => $initial_order_status,
         ]);
         if ($order){
             session()->put('Coupon_Id',null);

@@ -658,7 +658,7 @@ class SmartLifeErpService
             }
 
             $status = 'final'; // Use 'final' for completed sales
-            $paymentStatus = 'Paid';
+            $paymentStatus = 'due';
             $payments = [];
 
             Log::info('SmartLife Payment Status Check', [

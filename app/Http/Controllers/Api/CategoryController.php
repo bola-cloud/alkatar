@@ -13,7 +13,7 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::has('products')->where('Status',1)->latest()->get();
+        $categories = Category::where('Status', 1)->latest()->get();
         return CategoryResource::collection($categories);
     }
     public function getSubCategories($category_id)

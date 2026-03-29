@@ -1042,6 +1042,11 @@ class CheckoutController extends Controller
                 'session_coupon_id' => Session::get('Coupon_Id'),
             ]);
 
+            $initial_order_status = ORDER_PENDING;
+            if (strtoupper($payment_method) == 'COD' || strtoupper($payment_method) == 'THAWANI') {
+                $initial_order_status = ORDER_PROCESSING;
+            }
+
             $order = Order::create([
                 'Order_Number' => $order_number,
                 'User_Id' => $user_id, //Auth::check() ? Auth::id() : null,
@@ -1061,7 +1066,7 @@ class CheckoutController extends Controller
                 'Is_Order_Completed' => false,
                 'Payment_Method' => $payment_method,
                 'Payment_Status' => $payment_status,
-                'Order_Status' => ORDER_PENDING,
+                'Order_Status' => $initial_order_status,
                 'txn' => $txn != null ? $txn : randomString(8),
             ]);
 
@@ -1089,6 +1094,21 @@ class CheckoutController extends Controller
                 }
                 if ($shouldBroadcast) {
                     event(new \App\Events\OrderCreated($order));
+                }
+
+                // Sync Order to Smart ERP immediately as UNPAID (Two-step sync approach)
+                if (config('smartlife.sync_enabled')) {
+                    try {
+                        $smartLifeService = app(\App\Services\SmartLifeErpService::class);
+                        $invoiceId = $smartLifeService->submitOrder($order);
+                        if ($invoiceId) {
+                            $order->smartlife_synced_at = now();
+                            $order->smartlife_invoice_id = $invoiceId;
+                            $order->save();
+                        }
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error('SmartLife sync failed in Web Checkout (orederCreate)', ['error' => $e->getMessage()]);
+                    }
                 }
 
                 // Deduct wallet balance if used

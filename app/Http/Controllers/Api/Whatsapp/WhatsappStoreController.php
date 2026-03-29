@@ -387,6 +387,16 @@ class WhatsappStoreController extends Controller
             'phone_number' => $user->Number ?? '',
         ];
 
+        $payment_method = $validated['Payment_Method'];
+        if ($payment_method == 'CashOnDelivery') {
+            $payment_method = 'COD';
+        }
+
+        $initial_status = ORDER_PENDING;
+        if ($payment_method == 'COD' || $payment_method == 'Thawani') {
+            $initial_status = ORDER_PROCESSING;
+        }
+
         // Create Order
         $order = \App\Models\Admin\Order::create([
             'Order_Number' => $order_number,
@@ -403,8 +413,8 @@ class WhatsappStoreController extends Controller
             'Is_Free_Delivery' => false,
             'Is_Order_Successful' => false,
             'Is_Order_Completed' => false,
-            'Payment_Method' => $validated['Payment_Method'],
-            'order_status' => 'pending',
+            'Payment_Method' => $payment_method,
+            'Order_Status' => $initial_status,
             'order_source' => $validated['order_source'],
         ]);
 
@@ -453,16 +463,35 @@ class WhatsappStoreController extends Controller
             ]);
         }
 
+        // Sync Order to Smart ERP immediately as UNPAID (Two-step sync approach)
+        if (config('smartlife.sync_enabled')) {
+            try {
+                $smartLifeService = app(\App\Services\SmartLifeErpService::class);
+                $invoiceId = $smartLifeService->submitOrder($order);
+                if ($invoiceId) {
+                    $order->smartlife_synced_at = now();
+                    $order->smartlife_invoice_id = $invoiceId;
+                    $order->save();
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('SmartLife sync failed in WhatsApp checkout', ['error' => $e->getMessage()]);
+            }
+        }
+
         // Generate Thawani Session if needed
         if ($validated['Payment_Method'] == 'Thawani') {
             return $this->generateThawaniSession($order, $user);
         }
 
+        // For non-Thawani (e.g., COD), trigger Print App and Push Notifications
+        event(new \App\Events\OrderCreated($order));
+
         return response()->json([
             'message' => 'Order created successfully',
             'order_number' => $order_number,
             'grand_total' => $order->Grand_Total,
-            'payment_method' => $validated['Payment_Method']
+            'payment_method' => $validated['Payment_Method'],
+            'receipt_url' => route('order.print', ['id' => $order->id])
         ]);
     }
 

@@ -30,9 +30,10 @@ class ProductController extends Controller
             $categoryId = $request->get('sub_category');
             $query->where('subcategory_id', $categoryId);
         }
-        $all_products = $query->where('Status', 1)->orderBy('fr_Product_Name', 'asc')->paginate($request->get('per_page', 10));
+        $all_products = $query->where('Status', 1)->where('Quantity', '>', 0)->orderBy('fr_Product_Name', 'asc')->paginate($request->get('per_page', 10));
         return ProductResource::collection($all_products);
     }
+
     public function show($id)
     {
         $product = Product::where('Status', 1)->with([
@@ -45,12 +46,12 @@ class ProductController extends Controller
                 $query->where('status', 1);
             },
             'product_tags'
-        ])->findOrFail($id);
+        ])->where('Quantity', '>', 0)->findOrFail($id);
         return ProductResource::make($product);
     }
     public function productsWithDiscount()
     {
-        $products = Product::where('Status', 1)->withDiscount()->with([
+        $products = Product::where('Status', 1)->where('Quantity', '>', 0)->withDiscount()->with([
             'brand',
             'category',
             'colors',

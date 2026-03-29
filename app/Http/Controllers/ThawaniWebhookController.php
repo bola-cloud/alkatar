@@ -207,6 +207,7 @@ class ThawaniWebhookController extends Controller
                 'Payment_Status' => PAYMENT_SUCCESS,
                 'Is_Order_Successful' => true,
                 'payment_session_id' => $sessionId ?? $order->payment_session_id,
+                'Order_Status' => ORDER_PROCESSING,
             ]);
 
             // Decrement product stock

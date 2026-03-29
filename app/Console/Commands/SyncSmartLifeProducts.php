@@ -383,29 +383,37 @@ class SyncSmartLifeProducts extends Command
                     
                     $category = null;
                     if ($catId) {
-                        $category = \App\Models\Admin\Category::where('smartlife_id', $catId)->first();
+                        $category = \App\Models\Admin\Category::withTrashed()->where('smartlife_id', $catId)->first();
                     }
                     
                     if (!$category && !empty($catName)) {
-                        $category = \App\Models\Admin\Category::where('en_Category_Name', $catName)
+                        $category = \App\Models\Admin\Category::withTrashed()->where('en_Category_Name', $catName)
                             ->orWhere('fr_Category_Name', $catName)
                             ->first();
                     }
 
                     if (!$category && !empty($catName)) {
-                        // Final fallback/creation
+                        // Brand new category from ERP
                         $category = \App\Models\Admin\Category::create([
                             'smartlife_id' => $catId,
                             'en_Category_Name' => $catName,
-                            'en_Category_Slug' => Str::slug($catName),
+                            'en_Category_Slug' => \Illuminate\Support\Str::slug($catName),
                             'fr_Category_Name' => $catName,
-                            'fr_Category_Slug' => Str::slug($catName),
-                            'Status' => 1
+                            'fr_Category_Slug' => \Illuminate\Support\Str::slug($catName),
+                            'Status' => 0 // Start as Inactive for newly synced categories
                         ]);
-                    } elseif ($category && $catId && empty($category->smartlife_id)) {
-                        // Link existing category to smartlife_id
-                        $category->smartlife_id = $catId;
-                        $category->save();
+                    } elseif ($category) {
+                        if ($category->trashed()) {
+                            $category->restore();
+                            $category->Status = 0; // Set to Inactive if restored from trash
+                            $category->save();
+                        }
+                        
+                        if ($catId && empty($category->smartlife_id)) {
+                            // Link existing category to smartlife_id
+                            $category->smartlife_id = $catId;
+                            $category->save();
+                        }
                     }
                     
                     if ($category) {
@@ -672,12 +680,13 @@ class SyncSmartLifeProducts extends Command
             }
 
             foreach ($categoriesByList as $smartLifeId => $name) {
-                // Try to find category by smartlife_id
-                $category = \App\Models\Admin\Category::where('smartlife_id', $smartLifeId)->first();
+                // Try to find category by smartlife_id (including deleted ones)
+                $category = \App\Models\Admin\Category::withTrashed()->where('smartlife_id', $smartLifeId)->first();
+                $isNewOrRestored = false;
 
                 if (!$category) {
                     // Try to find by name (to map existing categories)
-                    $category = \App\Models\Admin\Category::where('en_Category_Name', $name)
+                    $category = \App\Models\Admin\Category::withTrashed()->where('en_Category_Name', $name)
                         ->orWhere('fr_Category_Name', $name)
                         ->first();
                 }
@@ -686,9 +695,14 @@ class SyncSmartLifeProducts extends Command
                     $category = new \App\Models\Admin\Category();
                     $category->en_Category_Name = $name;
                     $category->fr_Category_Name = $name;
-                    $category->en_Category_Slug = Str::slug($name);
-                    $category->fr_Category_Slug = Str::slug($name);
-                    $category->Status = 1;
+                    $category->en_Category_Slug = \Illuminate\Support\Str::slug($name);
+                    $category->fr_Category_Slug = \Illuminate\Support\Str::slug($name);
+                    $category->Status = 0; // Start as Inactive for newly synced categories
+                    $isNewOrRestored = true;
+                } elseif ($category->trashed()) {
+                    $category->restore();
+                    $category->Status = 0; // Restore as Inactive
+                    $isNewOrRestored = true;
                 }
 
                 $category->smartlife_id = $smartLifeId;
@@ -723,10 +737,10 @@ class SyncSmartLifeProducts extends Command
 
                 if (!$smartLifeId || empty($name)) continue;
 
-                $category = \App\Models\Admin\Category::where('smartlife_id', $smartLifeId)->first();
+                $category = \App\Models\Admin\Category::withTrashed()->where('smartlife_id', $smartLifeId)->first();
 
                 if (!$category) {
-                    $category = \App\Models\Admin\Category::where('en_Category_Name', $name)
+                    $category = \App\Models\Admin\Category::withTrashed()->where('en_Category_Name', $name)
                         ->orWhere('fr_Category_Name', $name)
                         ->first();
                 }
@@ -735,9 +749,12 @@ class SyncSmartLifeProducts extends Command
                     $category = new \App\Models\Admin\Category();
                     $category->en_Category_Name = $name;
                     $category->fr_Category_Name = $name;
-                    $category->en_Category_Slug = Str::slug($name);
-                    $category->fr_Category_Slug = Str::slug($name);
-                    $category->Status = 1;
+                    $category->en_Category_Slug = \Illuminate\Support\Str::slug($name);
+                    $category->fr_Category_Slug = \Illuminate\Support\Str::slug($name);
+                    $category->Status = 0; // New categories from sync start as Inactive
+                } elseif ($category->trashed()) {
+                    $category->restore();
+                    $category->Status = 0; // Restored categories from sync start as Inactive
                 }
 
                 $category->smartlife_id = $smartLifeId;
