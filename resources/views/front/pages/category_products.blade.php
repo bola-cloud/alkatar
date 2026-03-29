@@ -31,7 +31,7 @@
                                 <div class="card-wrap" style="background-color: #f8f9fa; min-height: 200px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                                     <a href="{{ route('single.product.new', $p->en_Product_Slug) }}" class="card-image-link w-100 h-100 d-flex align-items-center justify-content-center">
                                         @php
-                                            $imgSrc = asset('new-design/images/special-offer.png');
+                                            $imgSrc = asset(ProductImage() . 'prod.png');
                                             $pi = $p->Primary_Image ?? null;
                                             if ($pi) {
                                                 if (filter_var($pi, FILTER_VALIDATE_URL)) {
