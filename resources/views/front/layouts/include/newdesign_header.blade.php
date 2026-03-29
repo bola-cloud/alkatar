@@ -215,7 +215,7 @@
                       resultsBox.innerHTML = '';
                       items.forEach(function (it) {
                         // Priority based on current locale (fr_Product_Name is used for Arabic here)
-                        const name = (locale === 'ar') 
+                        const name = (locale === 'ar' || locale === 'fr') 
                           ? (it.fr_Product_Name || it.en_Product_Name || '')
                           : (it.en_Product_Name || it.fr_Product_Name || '');
                         

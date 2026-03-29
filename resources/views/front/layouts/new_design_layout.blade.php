@@ -126,8 +126,8 @@
       grams: @json(__('Grams')),
     };
 
-    // locale used by frontend JS
-    var locale = '{{ app()->getLocale() ?? config("app.locale") }}';
+    // locale used by frontend JS - matches global app logic (detecting AR/FR correctly)
+    var locale = '{{ session("HTML_LANG", session("APP_LOCALE", app()->getLocale() ?? "en")) }}';
 
     // Hide the submit button initially using plain JS so this runs before jQuery is loaded
     document.addEventListener('DOMContentLoaded', function () {
