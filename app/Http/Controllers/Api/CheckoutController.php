@@ -635,10 +635,10 @@ class CheckoutController extends Controller
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::warning('API Checkout: Email sending failure (ignoring).', ['error' => $e->getMessage()]);
         }
-        $pdfUrl = route('order.print', ['id' => $order->id]);
-        $response = Http::asForm()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/success/payment', [
+        $pdfUrl = route('api.whatsapp.invoice_pdf', ['id' => $order->id]);
+        $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/success/payment', [
             'phone_number' => $phoneNumber,
-            'booking_id' => $order->Order_Number,
+            'booking_id' => $order->id,
             'pdf' => $pdfUrl,
         ]);
 

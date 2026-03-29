@@ -1432,12 +1432,12 @@ class CheckoutController extends Controller
         }
         info("phone from billing address", ['phone' => $order->billing_address['phone_number'] ?? null]);
 
-        $pdfUrl = route('order.print', ['id' => $order->id]);
+        $pdfUrl = route('api.whatsapp.invoice_pdf', ['id' => $order->id]);
 
         info("inside thawani success");
-        $response = Http::asForm()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/success/payment', [
+        $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/success/payment', [
             'phone_number' => $order->billing_address['phone_number'] ?? '',
-            'booking_id' => $order->Order_Number,
+            'booking_id' => $order->id,
             'pdf' => $pdfUrl,
         ]);
 
