@@ -605,44 +605,59 @@ if (!function_exists('tax_rate')) {
 }
 
 if (!function_exists('delivery_charge')) {
+    /**
+     * Get delivery charge with hierarchical fallback (Area -> City -> State -> Country)
+     * If a specific level returns 0, it falls back to the parent level unless explicitly 0.
+     */
     function delivery_charge($location = null, $type = null)
     {
         $dc = 0;
         if ($location != null) {
-
             // 1. If type is explicitly 'area' (Priority)
             if ($type === 'area' && is_numeric($location)) {
-                $delivery_charge = DeliveryCharge::where('area_id', $location)->where('status', ACTIVE)->first();
-                if (!is_null($delivery_charge)) {
-                    return $delivery_charge->charge;
+                $item = DeliveryCharge::where('area_id', $location)->where('status', ACTIVE)->first();
+                if ($item && $item->charge > 0) {
+                    return $item->charge;
                 }
-                // If not found in area, maybe fallback to city/state parent? 
-                // But for now, let's return 0 or rely on fallback logic if designed.
-                // Assuming explicit area check implies we want that specific charge.
-            }
-
-            // 2. Standard numeric checks (City -> State) - ONLY if type is NOT area (or if type is null/city/state)
-            if (is_numeric($location) && $type !== 'area') {
-                // Try city_id
-                $delivery_charge = DeliveryCharge::where('city_id', $location)->where('status', ACTIVE)->first();
-                if (!is_null($delivery_charge)) {
-                    return $delivery_charge->charge;
-                }
-
-                // Fallback to state-level charge
-                $delivery_charge = DeliveryCharge::where('state_id', $location)->where('status', ACTIVE)->first();
-                if (!is_null($delivery_charge)) {
-                    return $delivery_charge->charge;
+                // Fallback: If area charge is 0 or not found, try its city
+                $area = \App\Models\Area::find($location);
+                if ($area) {
+                    $location = $area->city_id;
+                    $type = 'city';
                 }
             }
 
-            // 3. String matching (Country)
-            $delivery_charge = DeliveryCharge::where(function ($q) use ($location) {
+            // 2. City Check
+            if ($type === 'city' || (is_numeric($location) && is_null($type))) {
+                $item = DeliveryCharge::where('city_id', $location)->where('status', ACTIVE)->first();
+                if ($item && $item->charge > 0) {
+                    return $item->charge;
+                }
+                // Fallback: If city charge is 0 or not found, try its state
+                if (is_null($type)) {
+                    $city = \App\Models\City::find($location);
+                    if ($city) {
+                        $location = $city->state_id;
+                        $type = 'state';
+                    }
+                }
+            }
+
+            // 3. State Check
+            if ($type === 'state' || (is_numeric($location) && is_null($type))) {
+                $item = DeliveryCharge::where('state_id', $location)->whereNull('city_id')->where('status', ACTIVE)->first();
+                if ($item && $item->charge > 0) {
+                    return $item->charge;
+                }
+            }
+
+            // 4. String matching (Country/Name)
+            $item = DeliveryCharge::where(function ($q) use ($location) {
                 $q->where('country', $location)->orWhere('country', 'LIKE', "%$location%");
             })->where('status', ACTIVE)->first();
 
-            if (!is_null($delivery_charge)) {
-                return $delivery_charge->charge;
+            if ($item) {
+                return $item->charge;
             }
         }
         return $dc;

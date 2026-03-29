@@ -171,7 +171,10 @@ class EcommerceController extends Controller
 
     public function cityAreas($city_id)
     {
-        $city = \App\Models\City::findOrFail($city_id);
+        $city = \App\Models\City::find($city_id);
+        if (!$city) {
+            return redirect()->route('admin.country_dc_list')->with('error', __('City not found. it may have been deleted.'));
+        }
         // Get all areas for this city, and join with delivery_charges if exists
         // Or cleaner: Fetch all areas, and for each, fetch/show existing charge.
 

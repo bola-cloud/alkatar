@@ -338,12 +338,21 @@ class WhatsappStoreController extends Controller
         }
 
         // Refined shipping charge resolution: City > State > Country
-        $shipping_location = $validated['billing_city'] ?? $validated['billing_state'] ?? $validated['billing_country'];
-        $shipping_charge = delivery_charge($shipping_location);
+        // The improved delivery_charge helper now handles the fallback internally.
+        $city_id = $validated['billing_city'] ?? null;
+        $state_id = $validated['billing_state'] ?? null;
+        $country = $validated['billing_country'] ?? 'Oman';
+
+        $shipping_charge = delivery_charge($city_id, 'city');
         
-        // If it still returns 0 and we have a city/state, try a more explicit fallback check
-        if ($shipping_charge == 0 && isset($validated['billing_city'])) {
-            $shipping_charge = delivery_charge($validated['billing_state'] ?? $validated['billing_country']);
+        // If still zero, the helper didn't find a city charge or it was zero, so try state
+        if ($shipping_charge == 0) {
+            $shipping_charge = delivery_charge($state_id, 'state');
+        }
+
+        // If STILL zero, fallback to country name string match
+        if ($shipping_charge == 0) {
+            $shipping_charge = delivery_charge($country);
         }
         $weight_charge = $this->calculateExtraWeightFees($validated['cart_items']);
         $grandTotal = $subtotal + $shipping_charge + $weight_charge + $tax;
