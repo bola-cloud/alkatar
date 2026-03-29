@@ -31,11 +31,12 @@
                                 <div class="card-wrap" style="background-color: #f8f9fa; min-height: 200px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                                     <a href="{{ route('single.product.new', $p->en_Product_Slug) }}" class="card-image-link w-100 h-100 d-flex align-items-center justify-content-center">
                                         @php
-                                            $imgSrc = asset(ProductImage() . 'prod.png');
+                                            $imgSrc = asset('new-design/images/special-offer.png');
                                             $pi = $p->Primary_Image ?? null;
                                             if ($pi) {
                                                 if (filter_var($pi, FILTER_VALIDATE_URL)) {
-                                                    $imgSrc = $pi;
+                                                    // Force HTTPS for secure mobile browsing
+                                                    $imgSrc = str_replace('http://', 'https://', $pi);
                                                 } elseif (strpos($pi, 'uploaded_files/') === 0) {
                                                     $imgSrc = asset($pi);
                                                 } else {
@@ -46,7 +47,7 @@
                                         <img src="{{ $imgSrc }}"
                                             alt="{{ $isDisplayAr ? ($p->ar_Product_Name ?? $p->fr_Product_Name ?? $p->en_Product_Name ?? $p->name ?? __('Product')) : ($p->en_Product_Name ?? $p->ar_Product_Name ?? $p->fr_Product_Name ?? $p->name ?? __('Product')) }}"
                                             class="card-category" style="text-decoration: none !important; width: 100%; height: 200px; object-fit: contain;"
-                                            onerror="this.onerror=null;this.src='{{ asset(ProductImage() . 'prod.png') }}';">
+                                            onerror="this.onerror=null;this.src='{{ asset('new-design/images/special-offer.png') }}';">
                                     </a>
                                     <a href="javascript:void(0)" class="card-heart MyWishList" data-id="{{ $p->id }}"
                                         title="{{ __('Add To Wishlist') }}">

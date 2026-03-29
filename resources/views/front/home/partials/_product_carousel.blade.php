@@ -30,10 +30,11 @@
         // Displayed price: discounted price when discount applies, otherwise the base price
         $displayPrice = ($product->Discount > 0 && $product->Discount_Price) ? $product->Discount_Price : $basePrice;
         $img = $product->Primary_Image ?? null;
-        $imgUrl = asset(ProductImage() . 'prod.png');
+        $imgUrl = asset('new-design/images/special-offer.png');
         if ($img) {
           if (filter_var($img, FILTER_VALIDATE_URL)) {
-            $imgUrl = $img;
+            // Force HTTPS for secure mobile browsing
+            $imgUrl = str_replace('http://', 'https://', $img);
           } elseif (strpos($img, 'uploaded_files/') === 0) {
             $imgUrl = asset($img);
           } else {
@@ -46,9 +47,9 @@
       <div class="product-item card h-100 d-flex flex-column">
         <div class="card-wrap position-relative">
           <a href="{{ route('single.product.new', $product->en_Product_Slug) }}" class="card-image-link d-block" style="background-color: #f9f9f9; min-height: 180px;">
-            <img src="{{ $imgUrl }}" class="card-category" alt="{{ $name }}"
-              style="width: 100%; height: 180px; object-fit: contain;"
-              onerror="this.onerror=null;this.src='{{ asset(ProductImage() . 'prod.png') }}';">
+            <img src="{{ $imgUrl }}" class="card-img-top p-3" alt="{{ $name }}"
+              style="height: 160px; object-fit: contain;"
+              onerror="this.onerror=null;this.src='{{ asset('new-design/images/special-offer.png') }}';">
           </a>
 
           <a href="javascript:void(0)"
@@ -223,8 +224,7 @@
       display: block;
     }
 
-    .product-item .card-img-top,
-    .product-item .card-category {
+    .product-item .card-img-top {
       width: 100%;
       height: 100%;
       object-fit: contain !important;

@@ -55,7 +55,4 @@
     color: #fff;
     border-color: #9fc23a;
   }
-    .card-category{
-        width: -webkit-fill-available !important;
-    }
 </style>
