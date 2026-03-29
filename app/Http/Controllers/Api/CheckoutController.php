@@ -227,8 +227,18 @@ class CheckoutController extends Controller
                     \Illuminate\Support\Facades\Log::error('SmartLife sync failed in API checkout', ['error' => $e->getMessage()]);
                 }
             }
-
         }
+
+        // Trigger WhatsApp Notification and return for COD orders
+        if (strtoupper($payment_method) == 'COD') {
+            $this->sendOrderNotification($order->id);
+            return response()->json([
+                'success' => true,
+                'message' => 'Order created successfully (COD)',
+                'order_number' => $order_number
+            ]);
+        }
+
         $phoneNumber = auth()->user()->Number;
         // Initialize payment data for Thawani
         $paymentData = [
@@ -573,18 +583,37 @@ class CheckoutController extends Controller
         }
     }
 
-    public function sendOrderMail($id)
+    public function sendOrderNotification($id)
     {
         $order = Order::query()
             ->with('order_details', 'user', 'coupon', 'order_details.product', 'billing', 'shipping')
             ->find($id);
 
-        $order['billing_address'] = $order->billing_address;
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'Order not found']);
+        }
+
+        $pdfUrl = route('api.whatsapp.invoice_pdf', ['id' => $order->id]);
+        $phoneNumber = $order->billing_address['phone_number'] ?? $order->user->Number ?? '';
+
         try {
-            Mail::to('Alsaraamills@gmail.com')->send(new OrderConfirmMail($order));
-            return response()->json(['msg' => 'OK']);
+            // Trigger WhatsApp notification for all successful orders (Online/COD)
+            $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/success/payment', [
+                'phone_number' => $phoneNumber,
+                'booking_id' => $order->Order_Number,
+                'pdf' => $pdfUrl,
+            ]);
+
+            Log::info('WhatsApp Order Notification response (API)', [
+                'order' => $order->Order_Number,
+                'response' => $response->json(),
+                'phone' => $phoneNumber
+            ]);
+
+            return response()->json(['success' => true]);
         } catch (\Exception $ex) {
-            return response()->json(['msg' => "$ex"]);
+            Log::error('Error sending WhatsApp order notification in API: ' . $ex->getMessage());
+            return response()->json(['success' => false, 'message' => $ex->getMessage()]);
         }
     }
 
@@ -627,20 +656,10 @@ class CheckoutController extends Controller
         event(new \App\Events\OrderCreated($order));
 
         try {
-            $this->sendOrderMail($order->id);
+            $this->sendOrderNotification($order->id);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('API Checkout: Email sending failure (ignoring).', ['error' => $e->getMessage()]);
+            \Illuminate\Support\Facades\Log::warning('API Checkout: Notification failure (ignoring).', ['error' => $e->getMessage()]);
         }
-        $pdfUrl = route('api.whatsapp.invoice_pdf', ['id' => $order->id]);
-        $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/success/payment', [
-            'phone_number' => $phoneNumber,
-            'booking_id' => $order->Order_Number,
-            'pdf' => $pdfUrl,
-        ]);
-
-
-        // Log the response from the API call
-        Log::info('WhatsApp API response', ['response' => $response->json()]);
 
         return redirect()->to(url('/'));
         //        return redirect()->to("/#/donations/paymentstatus/?payId={$order->Order_Number}");

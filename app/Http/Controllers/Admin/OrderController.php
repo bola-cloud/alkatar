@@ -11,6 +11,7 @@ use App\Models\City;
 use App\Models\State;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Str;
 
@@ -220,15 +221,32 @@ class OrderController extends Controller
         if (is_null($request->Order_Status)) {
             return redirect()->back()->with('error', __('Status is required!'));
         }
-        $order = Order::whereId($id)->first();
+        $order = Order::whereId($id)->with('user')->first();
         if (!empty($order)) {
+            // Check if status is changed to DELIVERED and it is a COD order
+            if ($request->Order_Status == ORDER_DELIVERED && $order->Payment_Method == COD) {
+                $order->is_paid = 1;
+                $order->Payment_Status = PAYMENT_SUCCESS;
+                
+                // Sync to SmartLife ERP as PAID
+                if (config('smartlife.sync_enabled')) {
+                    try {
+                        $smartLifeService = new \App\Services\SmartLifeErpService();
+                        // This will trigger addPayment if invoice_id exists and status is paid
+                        $smartLifeService->submitOrder($order);
+                        Log::info('SmartLife Sync: COD order marked as Paid and synced on Delivery', ['order' => $order->Order_Number]);
+                    } catch (\Exception $e) {
+                        Log::error('SmartLife Sync failed during Admin COD Delivery update', ['error' => $e->getMessage()]);
+                    }
+                }
+            }
+
             $update = $order->update([
                 'Order_Status' => $request->Order_Status,
             ]);
 
             if (!empty($update)) {
-                // if ($order->order_source === 'whatsapp') {
-                $url = "https://alsharashoping.com";
+                $url = "https://hispeed.om";
                 if ($request->Order_Status == ORDER_DELIVERED)
                     $url = route('user.profile.track.my.order', ['id' => encrypt($order->id)]);
 
@@ -238,7 +256,8 @@ class OrderController extends Controller
                     $phoneNumber = $billingAddress->phone_number ?? '';
                 }
 
-                $response = Http::asJson()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/change_status', [
+                // Updated WhatsApp API: hispeed.om and numeric booking_id
+                $response = Http::asJson()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/change_status', [
                     'phone_number' => $phoneNumber,
                     'name' => $order->user->name ?? $billingAddress->name ?? '',
                     'booking_id' => $order->Order_Number,
@@ -247,9 +266,8 @@ class OrderController extends Controller
                 ]);
 
                 if ($response->failed()) {
-                    \Illuminate\Support\Facades\Log::error('WhatsApp API Validation Error: ' . $response->body());
+                    \Illuminate\Support\Facades\Log::error('WhatsApp Status Change API Error: ' . $response->body());
                 }
-                // }
 
                 $this->statusChangeEmail($order, $request->Order_Status);
                 return redirect()->back()->with('success', __('Status successfully changed!'));
@@ -385,7 +403,7 @@ class OrderController extends Controller
             }
 
             $pdfUrl = route('order.print', ['id' => $order->id]);
-            $response = Http::asForm()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/payment_pdf', [
+            $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/payment_pdf', [
                 'phone_number' => $phoneNumber,
                 'payment_url' => $paymentUrl,
                 'created_by' => $order->admin ? 'admin' : 'user',

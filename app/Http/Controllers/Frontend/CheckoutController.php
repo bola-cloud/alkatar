@@ -671,7 +671,7 @@ class CheckoutController extends Controller
                         //     }
 
                         //     $pdfUrl = route('order.print', ['id' => $order->id]);
-                        //     $response = Http::asForm()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/payment_pdf', [
+                        //     $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/payment_pdf', [
                         //         'phone_number' => $phoneNumber,
                         //         'payment_url' => $paymentUrl,
                         //         'created_by' =>  'admin',
@@ -990,18 +990,37 @@ class CheckoutController extends Controller
         // dispatch(new OrderConfirmMail($data))->onQueue('email-send');
     }
 
-    public function sendOrderMail($id)
+    public function sendOrderNotification($id)
     {
         $order = Order::query()
             ->with('order_details', 'user', 'coupon', 'order_details.product', 'billing', 'shipping')
             ->find($id);
 
-        $order['billing_address'] = $order->billing_address;
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'Order not found']);
+        }
+
+        $pdfUrl = route('api.whatsapp.invoice_pdf', ['id' => $order->id]);
+        $phoneNumber = $order->billing_address['phone_number'] ?? $order->user->Number ?? '';
+
         try {
-            Mail::to('Alsaraamills@gmail.com')->send(new OrderConfirmMail($order));
-            return response()->json(['msg' => 'OK']);
-        } catch (Exception $ex) {
-            return response()->json(['msg' => "$ex"]);
+            // Trigger WhatsApp notification for all successful orders (Online/COD)
+            $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/success/payment', [
+                'phone_number' => $phoneNumber,
+                'booking_id' => $order->Order_Number,
+                'pdf' => $pdfUrl,
+            ]);
+
+            Log::info('WhatsApp Order Notification response', [
+                'order' => $order->Order_Number,
+                'response' => $response->json(),
+                'phone' => $phoneNumber
+            ]);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $ex) {
+            Log::error('Error sending WhatsApp order notification: ' . $ex->getMessage());
+            return response()->json(['success' => false, 'message' => $ex->getMessage()]);
         }
     }
 
@@ -1128,10 +1147,8 @@ class CheckoutController extends Controller
                 $data['data'] = $order;
                 $data['success'] = true;
             }
-            // mail
-            // $this->orderConfirmMail($order);
-
-            // $this->sendOrderMail($order->id);
+            // WhatsApp notification for COD
+            $this->sendOrderNotification($order->id);
 
             return $data;
         } catch (\Exception $e) {
@@ -1418,22 +1435,10 @@ class CheckoutController extends Controller
         session()->forget('wallet_used');
 
         try {
-            $this->sendOrderMail($order->id);
+            $this->sendOrderNotification($order->id);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('paymentSuccess: Email sending failure (ignoring).', ['error' => $e->getMessage()]);
+            \Illuminate\Support\Facades\Log::warning('paymentSuccess: Notification failure (ignoring).', ['error' => $e->getMessage()]);
         }
-        info("phone from billing address", ['phone' => $order->billing_address['phone_number'] ?? null]);
-
-        $pdfUrl = route('api.whatsapp.invoice_pdf', ['id' => $order->id]);
-
-        info("inside thawani success");
-        $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/success/payment', [
-            'phone_number' => $order->billing_address['phone_number'] ?? '',
-            'booking_id' => $order->Order_Number,
-            'pdf' => $pdfUrl,
-        ]);
-
-        Log::info('WhatsApp API response', ['response' => $response->json()]);
         // Show success modal on homepage
         $modal = [
             'line1' => __('THANK YOU FOR CHOSSINg Hi Speed'),

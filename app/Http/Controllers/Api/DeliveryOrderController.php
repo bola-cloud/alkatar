@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Admin\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 
 class DeliveryOrderController extends Controller
@@ -132,12 +134,59 @@ class DeliveryOrderController extends Controller
             $order->Is_Order_Successful = 1;
             $order->delivery_status = 'delivered';
             $order->Delivery_At = now();
+
+            // Check if it is a COD order to mark as paid and sync ERP
+            if ($order->Payment_Method == COD) {
+                $order->is_paid = 1;
+                $order->Payment_Status = PAYMENT_SUCCESS;
+                
+                // Sync to SmartLife ERP as PAID
+                if (config('smartlife.sync_enabled')) {
+                    try {
+                        $smartLifeService = new \App\Services\SmartLifeErpService();
+                        $smartLifeService->submitOrder($order);
+                        Log::info('SmartLife Sync: COD order marked as Paid and synced by Delivery Man', ['order' => $order->Order_Number]);
+                    } catch (\Exception $e) {
+                        Log::error('SmartLife Sync failed during Delivery App COD update', ['error' => $e->getMessage()]);
+                    }
+                }
+            }
         } else {
             $order->Order_Status = ORDER_DELIVERED_FAILED;
             $order->delivery_status = 'failed';
         }
 
         $order->save();
+
+        // Send WhatsApp Status Notification
+        try {
+            $url = "https://hispeed.om";
+            if ($order->Order_Status == ORDER_DELIVERED) {
+                $url = route('user.profile.track.my.order', ['id' => encrypt($order->id)]);
+            }
+
+            $phoneNumber = $order->user->Number ?? null;
+            if (empty($phoneNumber)) {
+                $billingAddress = $order->billing_address;
+                $phoneNumber = $billingAddress->phone_number ?? '';
+            }
+
+            if ($phoneNumber) {
+                $response = Http::asJson()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/change_status', [
+                    'phone_number' => $phoneNumber,
+                    'name' => $order->user->name ?? $billingAddress->name ?? '',
+                    'booking_id' => $order->Order_Number, // Numeric ID
+                    'status' => $order->getStatusLang()[$order->Order_Status],
+                    'url' => $url,
+                ]);
+
+                if ($response->failed()) {
+                    Log::error('WhatsApp Status Change API Error (Delivery App): ' . $response->body());
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('WhatsApp notification failed in Delivery App', ['error' => $e->getMessage()]);
+        }
 
         return response()->json(['success' => true, 'message' => __('Order status updated'), 'data' => $order]);
     }

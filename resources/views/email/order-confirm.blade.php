@@ -179,6 +179,13 @@
             </table>
 
             <div class="invoice-footer">
+                @if(isset($order->invoice_url))
+                    <div style="text-align: center; margin: 20px 0;">
+                        <a href="{{ $order->invoice_url }}" style="background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                            تحميل الفاتورة الرسمية (PDF)
+                        </a>
+                    </div>
+                @endif
                 <p><strong>الملاحظات:</strong></p>
             </div>
         </div>
