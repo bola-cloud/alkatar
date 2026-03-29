@@ -674,7 +674,7 @@ class SmartLifeErpService
                 (defined('PAYMENT_SUCCESS') && $order->Payment_Status == PAYMENT_SUCCESS);
 
             if ($isPaid) {
-                $paymentStatus = 'paid';
+                $paymentStatus = 'Paid'; // Use capitalized 'Paid' for better ERP support
 
                 // Use the exact payment format provided by the SmartLife developer
                 // id 4 is typically for bank/card/thawani payment in their system
@@ -694,6 +694,25 @@ class SmartLifeErpService
                 'payment_status' => $paymentStatus,
                 'smartlife_invoice_id' => $order->smartlife_invoice_id,
             ];
+
+            // If the order is already synced to ERP and is now PAID, use addPayment specifically
+            if ($order->smartlife_invoice_id && $isPaid) {
+                Log::info("SmartLife Sync: Order {$order->Order_Number} already has invoice #{$order->smartlife_invoice_id}. Adding payment directly.");
+                $paymentResult = $this->addPayment(
+                    $order->smartlife_invoice_id,
+                    $order->Grand_Total,
+                    'Card', // or use $order->Payment_Method
+                    'Thawani Payment Successful'
+                );
+                
+                if ($paymentResult && isset($paymentResult['success']) && $paymentResult['success']) {
+                    Log::info("SmartLife Sync: Payment successfully added to invoice #{$order->smartlife_invoice_id}.");
+                    // If this was just a payment update, we might be done.
+                    // But let's let addSale run to update status to 'Paid'/'final' if possible.
+                } else {
+                    Log::warning("SmartLife Sync: Payment failed for invoice #{$order->smartlife_invoice_id}. Attempting redundant addSale update.");
+                }
+            }
 
             // Add payments array using plural key as requested
             if (!empty($payments)) {
