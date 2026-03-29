@@ -370,8 +370,8 @@ class SyncSmartLifeProducts extends Command
                 }
             }
 
-            // Ensure Primary_Image has a value for new products
-            if (empty($product->Primary_Image)) {
+            // Ensure Primary_Image has a value for products without an image from SmartLife
+            if (empty($product->Primary_Image) || $product->Primary_Image === 'none') {
                 $product->Primary_Image = 'prod.png';
             }
 

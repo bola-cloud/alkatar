@@ -41,8 +41,9 @@
 
       <div class="product-item card h-100 d-flex flex-column">
         <div class="card-wrap position-relative">
-          <a href="{{ route('single.product.new', $product->en_Product_Slug) }}" class="card-image-link">
+          <a href="{{ route('single.product.new', $product->en_Product_Slug) }}" class="card-image-link d-block" style="background-color: #f9f9f9; min-height: 180px;">
             <img src="{{ $imgUrl }}" loading="lazy" class="card-category" alt="{{ $name }}"
+              style="width: 100%; height: 180px; object-fit: contain;"
               onerror="this.onerror=null;this.src='{{ asset('new-design/images/special-offer.png') }}';">
           </a>
 
@@ -55,7 +56,9 @@
 
         <div class="card-body d-flex flex-column flex-grow-1 text-center">
           <h6 class="card-title mb-2">
-            {{ \Illuminate\Support\Str::limit($name, 40) }}
+            <a href="{{ route('single.product.new', $product->en_Product_Slug) }}" class="text-decoration-none text-dark">
+              {{ \Illuminate\Support\Str::limit($name, 40) }}
+            </a>
           </h6>
           <div class="product-unit mb-2">
             @if($product->unit)
@@ -211,11 +214,22 @@
       -webkit-box-orient: vertical;
     }
 
+    .product-item .card-title a {
+      color: inherit;
+      display: block;
+    }
+
     .product-item .card-img-top,
     .product-item .card-category {
-      max-width: 100%;
-      max-height: 100%;
+      width: 100%;
+      height: 100%;
       object-fit: contain !important;
+      display: block;
+    }
+
+    .card-wrap {
+      background-color: #f8f9fa;
+      overflow: hidden;
     }
   </style>
 

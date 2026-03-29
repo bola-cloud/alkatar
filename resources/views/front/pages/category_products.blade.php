@@ -28,8 +28,8 @@
                     @if(!empty($products) && count($products))
                         @foreach($products as $p)
                             <div class="product-card" dir="{{ $isDisplayAr ? 'rtl' : 'ltr' }}">
-                                <div class="card-wrap">
-                                    <a href="{{ route('single.product.new', $p->en_Product_Slug) }}" class="card-image-link">
+                                <div class="card-wrap" style="background-color: #f8f9fa; min-height: 200px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                    <a href="{{ route('single.product.new', $p->en_Product_Slug) }}" class="card-image-link w-100 h-100 d-flex align-items-center justify-content-center">
                                         {{-- image wrapper clickable to new product detail --}}
                                         @php
                                             $imgSrc = asset('new-design/images/special-offer.png');
@@ -53,7 +53,7 @@
                                         @endphp
                                         <img src="{{ $imgSrc }}"
                                             alt="{{ $isDisplayAr ? ($p->ar_Product_Name ?? $p->fr_Product_Name ?? $p->en_Product_Name ?? $p->name ?? __('Product')) : ($p->en_Product_Name ?? $p->ar_Product_Name ?? $p->fr_Product_Name ?? $p->name ?? __('Product')) }}"
-                                            class="card-category" style="text-decoration: none !important;"
+                                            class="card-category" style="text-decoration: none !important; width: 100%; height: 200px; object-fit: contain;"
                                             onerror="this.onerror=null;this.src='{{ asset(ProductImage() . 'prod.png') }}';">
                                     </a>
                                     <a href="javascript:void(0)" class="card-heart MyWishList" data-id="{{ $p->id }}"
