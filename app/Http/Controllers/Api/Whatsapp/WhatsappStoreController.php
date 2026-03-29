@@ -503,7 +503,11 @@ class WhatsappStoreController extends Controller
         }
 
         // For non-Thawani (e.g., COD), trigger Print App and Push Notifications
-        event(new \App\Events\OrderCreated($order));
+        try {
+            event(new \App\Events\OrderCreated($order));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('WhatsApp Checkout: Broadcast failure (ignoring).', ['error' => $e->getMessage()]);
+        }
 
         return response()->json([
             'message' => 'Order created successfully',

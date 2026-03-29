@@ -623,8 +623,17 @@ class CheckoutController extends Controller
                 Log::error('SmartLife update sync failed in API success', ['error' => $e->getMessage()]);
             }
         }
-        event(new \App\Events\OrderCreated($order));
-        $this->sendOrderMail($order->id);
+        try {
+            event(new \App\Events\OrderCreated($order));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('API Checkout: Broadcast failure (ignoring).', ['error' => $e->getMessage()]);
+        }
+
+        try {
+            $this->sendOrderMail($order->id);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('API Checkout: Email sending failure (ignoring).', ['error' => $e->getMessage()]);
+        }
         $pdfUrl = route('order.print', ['id' => $order->id]);
         $response = Http::asForm()->post('https://whatsapi.alsharashoping.com/api/v1/whatsapp/success/payment', [
             'phone_number' => $phoneNumber,

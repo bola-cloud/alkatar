@@ -1092,8 +1092,12 @@ class CheckoutController extends Controller
                         'Total_Price' => $item->price * $item->qty,
                     ]);
                 }
-                if ($shouldBroadcast) {
-                    event(new \App\Events\OrderCreated($order));
+                try {
+                    if ($shouldBroadcast) {
+                        event(new \App\Events\OrderCreated($order));
+                    }
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning('Web Checkout: Broadcast failure during order creation (ignoring to continue).', ['error' => $e->getMessage()]);
                 }
 
                 // Sync Order to Smart ERP immediately as UNPAID (Two-step sync approach)
@@ -1379,6 +1383,11 @@ class CheckoutController extends Controller
     {
         $data = $request->all();
         $order = Order::where('Order_Number', $data['order_number'])->first();
+        if (!$order) {
+            \Illuminate\Support\Facades\Log::error('paymentSuccess: Order not found.', ['order_number' => $data['order_number'] ?? 'N/A']);
+            return redirect()->route('front')->with('error', __('Order not found.'));
+        }
+
         $order->Is_Order_Successful = true;
         $order->Is_Order_Completed = true;
         $order->Payment_Method = THAWANI;
@@ -1387,7 +1396,12 @@ class CheckoutController extends Controller
         $order->is_paid = 1;
 
         $order->save();
-        event(new \App\Events\OrderCreated($order));
+
+        try {
+            event(new \App\Events\OrderCreated($order));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('paymentSuccess: Broadcast failure (ignoring).', ['error' => $e->getMessage()]);
+        }
 
         // Two-Step Sync: Update the existing SmartLife invoice to "Paid"
         if (config('smartlife.sync_enabled')) {
@@ -1410,7 +1424,11 @@ class CheckoutController extends Controller
         session()->forget('coupon');
         session()->forget('wallet_used');
 
-        $this->sendOrderMail($order->id);
+        try {
+            $this->sendOrderMail($order->id);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('paymentSuccess: Email sending failure (ignoring).', ['error' => $e->getMessage()]);
+        }
         info("phone from billing address", ['phone' => $order->billing_address['phone_number'] ?? null]);
 
         $pdfUrl = route('order.print', ['id' => $order->id]);
