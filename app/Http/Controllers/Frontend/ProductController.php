@@ -506,11 +506,10 @@ class ProductController extends Controller
         $query = $request->get('query');
         $suggestions = Product::where(function ($q) use ($query) {
             $q->where('en_Product_Name', 'LIKE', "%{$query}%")
-                ->orWhere('fr_Product_Name', 'LIKE', "%{$query}%")
-                ->orWhere('ar_Product_Name', 'LIKE', "%{$query}%");
+                ->orWhere('fr_Product_Name', 'LIKE', "%{$query}%");
         })
             ->where('Status', 1)->where('Quantity', '>', 0)
-            ->select('id', 'ar_Product_Name', 'fr_Product_Name', 'en_Product_Name', 'en_Product_Slug', 'Primary_Image')
+            ->select('id', 'fr_Product_Name', 'en_Product_Name', 'en_Product_Slug', 'Primary_Image')
             ->limit(5)
             ->get();
 

@@ -214,10 +214,10 @@
                       }
                       resultsBox.innerHTML = '';
                       items.forEach(function (it) {
-                        // Priority based on current locale
+                        // Priority based on current locale (fr_Product_Name is used for Arabic here)
                         const name = (locale === 'ar') 
-                          ? (it.ar_Product_Name || it.fr_Product_Name || it.en_Product_Name || '')
-                          : (it.en_Product_Name || it.fr_Product_Name || it.ar_Product_Name || '');
+                          ? (it.fr_Product_Name || it.en_Product_Name || '')
+                          : (it.en_Product_Name || it.fr_Product_Name || '');
                         
                         const slug = it.en_Product_Slug || '';
                         const itemEl = document.createElement('a');
