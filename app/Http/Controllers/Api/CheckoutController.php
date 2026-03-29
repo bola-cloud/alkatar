@@ -638,7 +638,7 @@ class CheckoutController extends Controller
         $pdfUrl = route('api.whatsapp.invoice_pdf', ['id' => $order->id]);
         $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/success/payment', [
             'phone_number' => $phoneNumber,
-            'booking_id' => $order->id,
+            'booking_id' => $order->Order_Number,
             'pdf' => $pdfUrl,
         ]);
 
