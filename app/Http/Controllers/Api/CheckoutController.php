@@ -229,8 +229,9 @@ class CheckoutController extends Controller
             }
         }
 
-        // Trigger WhatsApp Notification and return for COD orders
+        // Trigger OneSignal/Delivery Notification and return for COD orders
         if (strtoupper($payment_method) == 'COD') {
+            event(new \App\Events\OrderCreated($order));
             $this->sendOrderNotification($order->id);
             return response()->json([
                 'success' => true,
