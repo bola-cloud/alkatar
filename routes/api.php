@@ -94,7 +94,8 @@ Route::group(['prefix' => 'whatsapp'], function () {
     Route::get('shipping-locations', [\App\Http\Controllers\Api\Whatsapp\WhatsappStoreController::class, 'getShippingLocations']);
     
     // Public PDF link (secure via ID but accessible for bot)
-    Route::get('order-invoice-pdf/{id}', [\App\Http\Controllers\Api\Whatsapp\WhatsappStoreController::class, 'getOrderInvoicePdf'])->name('api.whatsapp.invoice_pdf');
+    Route::get('order-invoice/{id}/invoice.pdf', [\App\Http\Controllers\Api\Whatsapp\WhatsappStoreController::class, 'getOrderInvoicePdf'])->name('api.whatsapp.invoice_pdf');
+    // Also keep the old one for compatibility if needed, or just replace it.
 
     Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('checkout', [\App\Http\Controllers\Api\Whatsapp\WhatsappStoreController::class, 'checkout']);
