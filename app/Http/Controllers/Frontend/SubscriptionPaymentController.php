@@ -77,7 +77,7 @@ class SubscriptionPaymentController extends Controller
             'mode' => 'payment',
             'products' => [
                 [
-                    'name' => $subscription->name,
+                    'name' => preg_replace('/[^A-Za-z0-9\s\x{0600}-\x{06FF}]/u', '', $subscription->name),
                     'quantity' => 1,
                     'unit_amount' => $priceInBz,
                 ]

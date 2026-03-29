@@ -316,8 +316,9 @@ class OrderController extends Controller
         $checkoutProduct = [];
 
         foreach ($order->order_details as $item) {
+            $cleanName = preg_replace('/[^A-Za-z0-9\s\x{0600}-\x{06FF}]/u', '', $item->product->en_Product_Name);
             $checkoutProduct[] = [
-                'name' => Str::limit($item->product->en_Product_Name, 35),
+                'name' => Str::limit($cleanName, 35),
                 'quantity' => (int) $item->Quantity,
                 'unit_amount' => number_format($item->Price, 3) * 1000,
             ];

@@ -580,8 +580,9 @@ class CheckoutController extends Controller
                             $itemTotalPrice = $unit_amount * $item->qty;
                             $itemDiscount = ($itemTotalPrice / $subtotal) * $discountAmount;
                             $newUnitAmount = $unit_amount - ($itemDiscount / $item->qty);
+                            $cleanName = preg_replace('/[^A-Za-z0-9\s\x{0600}-\x{06FF}]/u', '', $item->name);
                             $checkoutProduct[] = [
-                                'name' => Str::limit($item->name, 35),
+                                'name' => Str::limit($cleanName, 35),
                                 'quantity' => $item->qty,
                                 'unit_amount' => number_format($newUnitAmount, 3) * 1000,
                             ];

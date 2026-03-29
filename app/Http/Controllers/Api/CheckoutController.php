@@ -308,8 +308,9 @@ class CheckoutController extends Controller
 
             // Add product details to payment data
             $productName = App::getLocale() === 'ar' ? $product->fr_Product_Name : $product->en_Product_Name;
+            $cleanName = preg_replace('/[^A-Za-z0-9\s\x{0600}-\x{06FF}]/u', '', $productName);
             $paymentData['products'][] = [
-                'name' => Str::limit($productName, 35),
+                'name' => Str::limit($cleanName, 35),
                 'quantity' => $item['quantity'],
                 'unit_amount' => round($price * 1000, 2),
             ];
