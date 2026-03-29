@@ -26,29 +26,28 @@ class WhatsappStoreController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
             'phone' => 'required|string',
-            'country_code' => 'required|string',
-            'password' => 'required|string|min:6',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $full_phone = $request->country_code . $request->phone;
+        $phone = $request->phone;
+        // Ensure email uniqueness by using phone-based dummy email
+        $email = $phone . '@hispeed.om';
 
-        // Check if phone number is unique
-        if (User::where('Number', $full_phone)->exists()) {
-            return response()->json(['errors' => ['phone' => [__('The phone number has already been taken.')]]], 422);
+        // Check if phone number or dummy email is already taken
+        if (User::where('Number', $phone)->orWhere('email', $email)->exists()) {
+            return response()->json(['errors' => ['phone' => [__('The phone number or email has already been taken.')]]], 422);
         }
 
         $user = User::create([
             'name' => $request->name,
-            'email' => $request->email,
-            'Number' => $full_phone,
-            'password' => Hash::make($request->password),
-            'email_verified_at' => now(), // Assume verified if coming from WhatsApp for now, or we can use OTP
+            'email' => $email,
+            'Number' => $phone,
+            'password' => Hash::make(\Illuminate\Support\Str::random(12)),
+            'email_verified_at' => now(),
         ]);
 
         $token = $user->createToken('whatsapp_token')->plainTextToken;
@@ -66,21 +65,17 @@ class WhatsappStoreController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'login_id' => 'required|string', // Email or Phone
-            'password' => 'required|string',
+            'phone' => 'required|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $login_id = $request->login_id;
-        $user = User::where('email', $login_id)
-            ->orWhere('Number', $login_id)
-            ->first();
+        $user = User::where('Number', $request->phone)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
         }
 
         $token = $user->createToken('whatsapp_token')->plainTextToken;
@@ -491,7 +486,8 @@ class WhatsappStoreController extends Controller
             'order_number' => $order_number,
             'grand_total' => $order->Grand_Total,
             'payment_method' => $validated['Payment_Method'],
-            'receipt_url' => route('order.print', ['id' => $order->id])
+            'receipt_url' => route('order.print', ['id' => $order->id]),
+            'invoice_pdf_url' => route('api.whatsapp.invoice_pdf', ['id' => $order->id])
         ]);
     }
 
@@ -609,12 +605,53 @@ class WhatsappStoreController extends Controller
                     'order_number' => $order->Order_Number,
                     'grand_total' => $order->Grand_Total,
                     'payment_method' => 'Thawani',
-                    'url' => $paymentUrl
+                    'url' => $paymentUrl,
+                    'invoice_pdf_url' => route('api.whatsapp.invoice_pdf', ['id' => $order->id])
                 ]);
             }
         }
 
         \Illuminate\Support\Facades\Log::error('Thawani API Checkout Error', ['body' => $response->body(), 'status' => $response->status()]);
         return response()->json(['error' => 'Payment gateway error', 'details' => $response->json() ?? $response->body()], 500);
+    }
+
+    /**
+     * Generate actual PDF for WhatsApp Invoice
+     */
+    public function getOrderInvoicePdf($id)
+    {
+        $order = \App\Models\Admin\Order::with(['order_details', 'user', 'billing', 'order_details.product'])->find($id);
+        
+        if (!$order) {
+            abort(404, 'Order not found');
+        }
+
+        $order['billing_address'] = $order->billing_address;
+
+        $pdf = \PDF::loadView('admin.pages.orders.invoice', compact('order'));
+        return $pdf->stream('invoice-' . $order->Order_Number . '.pdf');
+    }
+
+    /**
+     * Get last order details for authenticated user
+     */
+    public function getLastOrder()
+    {
+        $order = \App\Models\Admin\Order::where('User_Id', auth()->id())->latest()->first();
+        
+        if (!$order) {
+            return response()->json(['message' => 'No orders found'], 404);
+        }
+
+        return response()->json([
+            'order' => [
+                'id' => $order->id,
+                'order_number' => $order->Order_Number,
+                'grand_total' => $order->Grand_Total,
+                'order_status' => $order->Order_Status,
+                'created_at' => $order->created_at?->toDateTimeString(),
+                'invoice_pdf_url' => route('api.whatsapp.invoice_pdf', ['id' => $order->id])
+            ]
+        ]);
     }
 }
