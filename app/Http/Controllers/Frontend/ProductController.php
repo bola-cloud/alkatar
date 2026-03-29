@@ -506,12 +506,30 @@ class ProductController extends Controller
         $query = $request->get('query');
         $suggestions = Product::where(function ($q) use ($query) {
             $q->where('en_Product_Name', 'LIKE', "%{$query}%")
-                ->orWhere('fr_Product_Name', 'LIKE', "%{$query}%");
+                ->orWhere('fr_Product_Name', 'LIKE', "%{$query}%")
+                ->orWhere('ar_Product_Name', 'LIKE', "%{$query}%");
         })
             ->where('Status', 1)->where('Quantity', '>', 0)
-            ->select('id', 'fr_Product_Name', 'en_Product_Name', 'en_Product_Slug')
+            ->select('id', 'ar_Product_Name', 'fr_Product_Name', 'en_Product_Name', 'en_Product_Slug', 'Primary_Image')
             ->limit(5)
             ->get();
+
+        // Standardize URLs for frontend consumption
+        $suggestions->transform(function ($it) {
+            $img = $it->Primary_Image;
+            $imgUrl = asset('new-design/images/special-offer.png');
+            if ($img) {
+                if (filter_var($img, FILTER_VALIDATE_URL)) {
+                    $imgUrl = str_replace('http://', 'https://', $img);
+                } elseif (strpos($img, 'uploaded_files/') === 0) {
+                    $imgUrl = asset($img);
+                } else {
+                    $imgUrl = asset(ProductImage() . $img);
+                }
+            }
+            $it->Primary_Image = $imgUrl;
+            return $it;
+        });
 
         return response()->json($suggestions);
     }

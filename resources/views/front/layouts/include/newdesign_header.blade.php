@@ -214,22 +214,28 @@
                       }
                       resultsBox.innerHTML = '';
                       items.forEach(function (it) {
-                        const name = it.en_Product_Name || it.fr_Product_Name || it.name || '';
-                        const slug = it.en_Product_Slug || it.en_Product_Slug || it.en_slug || '';
+                        // Priority based on current locale
+                        const name = (locale === 'ar') 
+                          ? (it.ar_Product_Name || it.fr_Product_Name || it.en_Product_Name || '')
+                          : (it.en_Product_Name || it.fr_Product_Name || it.ar_Product_Name || '');
+                        
+                        const slug = it.en_Product_Slug || '';
                         const itemEl = document.createElement('a');
                         itemEl.href = productBase + '/' + encodeURIComponent(slug);
                         itemEl.className = 'list-group-item list-group-item-action d-flex align-items-center';
                         itemEl.style.gap = '12px';
+                        
                         const img = document.createElement('img');
-                        img.src = it.Primary_Image ? it.Primary_Image : '{{ asset(ProductImage() . "prod.png") }}';
+                        // Use pre-resolved and secure Primary_Image from controller, or global fallback
+                        img.src = it.Primary_Image ? it.Primary_Image : '{{ asset("new-design/images/special-offer.png") }}';
                         img.alt = name;
                         img.style.width = '48px';
                         img.style.height = '48px';
-                        img.style.objectFit = 'cover';
-                        img.className = 'rounded';
+                        img.style.objectFit = 'contain';
+                        img.className = 'rounded border bg-light';
 
                         const txt = document.createElement('div');
-                        txt.innerHTML = '<div class="fw-semibold">' + name + '</div>';
+                        txt.innerHTML = '<div class="fw-semibold text-truncate" style="max-width: 250px;">' + name + '</div>';
 
                         itemEl.appendChild(img);
                         itemEl.appendChild(txt);
