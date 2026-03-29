@@ -30,24 +30,16 @@
                             <div class="product-card" dir="{{ $isDisplayAr ? 'rtl' : 'ltr' }}">
                                 <div class="card-wrap" style="background-color: #f8f9fa; min-height: 200px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                                     <a href="{{ route('single.product.new', $p->en_Product_Slug) }}" class="card-image-link w-100 h-100 d-flex align-items-center justify-content-center">
-                                        {{-- image wrapper clickable to new product detail --}}
                                         @php
                                             $imgSrc = asset('new-design/images/special-offer.png');
-                                            if (isset($p->Primary_Image) && $p->Primary_Image) {
-                                                $pi = $p->Primary_Image;
+                                            $pi = $p->Primary_Image ?? null;
+                                            if ($pi) {
                                                 if (filter_var($pi, FILTER_VALIDATE_URL)) {
-                                                    $bn = basename(parse_url($pi, PHP_URL_PATH));
-                                                    if (file_exists(public_path('uploaded_files/product_image/' . $bn))) {
-                                                        $imgSrc = asset('uploaded_files/product_image/' . $bn);
-                                                    } elseif (file_exists(public_path(ProductImage() . $bn))) {
-                                                        $imgSrc = asset(ProductImage() . $bn);
-                                                    }
+                                                    $imgSrc = $pi;
+                                                } elseif (strpos($pi, 'uploaded_files/') === 0) {
+                                                    $imgSrc = asset($pi);
                                                 } else {
-                                                    if (file_exists(public_path('uploaded_files/product_image/' . $pi))) {
-                                                        $imgSrc = asset('uploaded_files/product_image/' . $pi);
-                                                    } elseif (file_exists(public_path(ProductImage() . $pi))) {
-                                                        $imgSrc = asset(ProductImage() . $pi);
-                                                    }
+                                                    $imgSrc = asset(ProductImage() . $pi);
                                                 }
                                             }
                                         @endphp

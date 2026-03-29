@@ -32,9 +32,13 @@
         $img = $product->Primary_Image ?? null;
         $imgUrl = asset('new-design/images/special-offer.png');
         if ($img) {
-          // Directly use the path without file_exists check to improve performance.
-          // Using strict path concatenation based on standard folder structure.
-          $imgUrl = asset(ProductImage() . $img);
+          if (filter_var($img, FILTER_VALIDATE_URL)) {
+            $imgUrl = $img;
+          } elseif (strpos($img, 'uploaded_files/') === 0) {
+            $imgUrl = asset($img);
+          } else {
+            $imgUrl = asset(ProductImage() . $img);
+          }
         }
         $isWish = function_exists('isInWishlist') ? isInWishlist($product->id) : false;
       @endphp
