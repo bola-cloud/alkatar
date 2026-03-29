@@ -616,7 +616,7 @@ class WhatsappStoreController extends Controller
     }
 
     /**
-     * Generate actual PDF for WhatsApp Invoice
+     * Generate actual PDF for WhatsApp Invoice (Optimized for mPDF)
      */
     public function getOrderInvoicePdf($id)
     {
@@ -628,7 +628,17 @@ class WhatsappStoreController extends Controller
 
         $order['billing_address'] = $order->billing_address;
 
-        $pdf = \PDF::loadView('admin.pages.orders.invoice', compact('order'));
+        $pdf = \PDF::loadView('admin.pages.orders.pdf_invoice', compact('order'), [], [
+            'mode'                 => 'utf-8',
+            'format'               => 'A4-P',
+            'autoScriptToLang'     => true,
+            'autoArabic'           => true,
+            'margin_left'          => 10,
+            'margin_right'         => 10,
+            'margin_top'           => 10,
+            'margin_bottom'        => 10,
+        ]);
+
         return $pdf->stream('invoice-' . $order->Order_Number . '.pdf');
     }
 
