@@ -37,79 +37,140 @@ class SmartLifeErpService
     }
 
     /**
-     * Atomically refresh the access token using a cache lock to prevent
-     * concurrent logins from thrashing the single ERP session.
+     * Login and return BOTH the access token AND session cookies.
+     * The SmartLife ERP uses cookie/session-based auth — the token alone is not enough.
+     * We must capture Set-Cookie headers from the login response and forward them.
      */
-    protected function refreshTokenAtomically()
+    protected function loginWithCookies()
     {
-        // Use a cache lock so only ONE process/request logs in at a time
-        $lock = Cache::lock('smartlife_token_refresh', 10); // 10 second lock
-
         try {
-            // Wait up to 5 seconds to acquire the lock
-            if ($lock->block(5)) {
-                // Double-check: another request may have already refreshed the token
-                // while we were waiting for the lock
-                $this->clearTokenCache();
-                $newToken = $this->login();
-                if ($newToken) {
-                    Cache::put('smartlife_access_token', $newToken, $this->tokenCacheTtl);
+            // Use Guzzle directly to capture cookies
+            $jar = new \GuzzleHttp\Cookie\CookieJar();
+
+            $client = new \GuzzleHttp\Client([
+                'cookies' => $jar,
+                'verify' => false,
+                'timeout' => 15,
+            ]);
+
+            $guzzleResponse = $client->post("{$this->apiUrl}/user/login", [
+                'form_params' => $this->credentials,
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
+            ]);
+
+            $body = (string) $guzzleResponse->getBody();
+            $data = json_decode($body, true);
+
+            if (isset($data['success']) && $data['success'] === true && isset($data['access_token'])) {
+                // Extract cookies as an associative array
+                $cookies = [];
+                foreach ($jar->toArray() as $cookie) {
+                    $cookies[$cookie['Name']] = $cookie['Value'];
                 }
-                return $newToken;
+
+                Log::info('SmartLife ERP login successful (with cookies)', [
+                    'user_id' => $data['user_id'] ?? null,
+                    'cookie_count' => count($cookies),
+                    'cookie_names' => array_keys($cookies),
+                ]);
+
+                return [
+                    'token' => $data['access_token'],
+                    'cookies' => $cookies,
+                ];
             }
 
-            // Lock not acquired: another process is refreshing. Wait briefly
-            // and then read whatever token they stored.
-            Log::info('SmartLife ERP: Waiting for concurrent token refresh...');
-            usleep(500000); // 0.5 seconds
-            return Cache::get('smartlife_access_token');
+            Log::error('SmartLife ERP login failed', ['response' => $data]);
+            return null;
+
+        } catch (Exception $e) {
+            Log::error('SmartLife ERP login exception', ['error' => $e->getMessage()]);
+            return null;
+        }
+    }
+
+    /**
+     * Get cached session (token + cookies). If not cached, login fresh.
+     */
+    protected function getSession()
+    {
+        return Cache::remember('smartlife_session', $this->tokenCacheTtl, function () {
+            return $this->loginWithCookies();
+        });
+    }
+
+    /**
+     * Refresh the session atomically (token + cookies) using a cache lock
+     * to prevent concurrent logins from thrashing the single ERP session.
+     */
+    protected function refreshSessionAtomically()
+    {
+        $lock = Cache::lock('smartlife_token_refresh', 10);
+
+        try {
+            if ($lock->block(5)) {
+                Cache::forget('smartlife_session');
+                Cache::forget('smartlife_access_token'); // clean up old key too
+                $session = $this->loginWithCookies();
+                if ($session) {
+                    Cache::put('smartlife_session', $session, $this->tokenCacheTtl);
+                }
+                return $session;
+            }
+
+            // Another process is refreshing — wait and use their result
+            Log::info('SmartLife ERP: Waiting for concurrent session refresh...');
+            usleep(500000);
+            return Cache::get('smartlife_session');
 
         } catch (\Exception $e) {
-            Log::error('SmartLife ERP: Token refresh lock error', ['error' => $e->getMessage()]);
-            // Fallback: just do a plain refresh
-            $this->clearTokenCache();
-            return $this->getAccessToken();
+            Log::error('SmartLife ERP: Session refresh lock error', ['error' => $e->getMessage()]);
+            Cache::forget('smartlife_session');
+            return $this->loginWithCookies();
         } finally {
             optional($lock)->release();
         }
     }
 
     /**
-     * Common request handler with automatic retry on session timeout (HTML response).
-     * Uses atomic token refresh to prevent concurrent logins from invalidating each other.
+     * Common request handler that sends BOTH the access token AND session cookies.
+     * Automatically retries once on session timeout (HTML response).
      */
     protected function request($method, $endpoint, $data = [], $headers = [])
     {
-        $token = $this->getAccessToken();
-        if (!$token) {
+        $session = $this->getSession();
+        if (!$session || empty($session['token'])) {
+            Log::error("SmartLife ERP: No session available for {$endpoint}");
             return null;
         }
 
         $url = Str::startsWith($endpoint, 'http') ? $endpoint : "{$this->apiUrl}/{$endpoint}";
 
-        $makeRequest = function($currentToken) use ($method, $url, $data, $headers) {
+        $makeRequest = function($sess) use ($method, $url, $data, $headers) {
             $request = Http::withHeaders(array_merge([
-                'Authorization' => $currentToken,
+                'Authorization' => $sess['token'],
                 'Accept' => 'application/json',
-            ], $headers));
+            ], $headers))
+            ->withCookies($sess['cookies'] ?? [], parse_url($url, PHP_URL_HOST));
 
             return $method === 'GET' ? $request->get($url, $data) : $request->post($url, $data);
         };
 
-        $response = $makeRequest($token);
+        $response = $makeRequest($session);
 
         if ($this->isHtmlResponse($response)) {
-            Log::warning("SmartLife ERP: HTML response for {$endpoint}. Refreshing token atomically...");
+            Log::warning("SmartLife ERP: HTML response for {$endpoint}. Refreshing session (token + cookies)...");
 
-            $newToken = $this->refreshTokenAtomically();
-            if ($newToken) {
-                $response = $makeRequest($newToken);
+            $newSession = $this->refreshSessionAtomically();
+            if ($newSession) {
+                $response = $makeRequest($newSession);
 
-                // If STILL HTML after atomic refresh, log the body and give up
                 if ($this->isHtmlResponse($response)) {
-                    Log::error("SmartLife ERP: Still HTML after token refresh for {$endpoint}", [
+                    Log::error("SmartLife ERP: Still HTML after session refresh for {$endpoint}", [
                         'status' => $response->status(),
-                        'body_preview' => substr($response->body(), 0, 500),
+                        'body_preview' => substr($response->body(), 0, 300),
                     ]);
                 }
             }
@@ -119,49 +180,21 @@ class SmartLifeErpService
     }
 
     /**
-     * Get access token (cached)
-     *
-     * @return string|null
+     * Get access token (cached) — legacy compatibility
      */
     public function getAccessToken()
     {
-        return Cache::remember('smartlife_access_token', $this->tokenCacheTtl, function () {
-            return $this->login();
-        });
+        $session = $this->getSession();
+        return $session['token'] ?? null;
     }
 
     /**
-     * Login to SmartLife ERP and get access token
-     *
-     * @return string|null
+     * Login to SmartLife ERP — legacy compatibility wrapper
      */
     protected function login()
     {
-        try {
-            $response = Http::post("{$this->apiUrl}/user/login", $this->credentials);
-
-            if ($response->successful()) {
-                $data = $response->json();
-
-                if (isset($data['success']) && $data['success'] === true && isset($data['access_token'])) {
-                    Log::info('SmartLife ERP login successful', ['user_id' => $data['user_id'] ?? null]);
-                    return $data['access_token'];
-                }
-
-                Log::error('SmartLife ERP login failed', ['response' => $data]);
-                return null;
-            }
-
-            Log::error('SmartLife ERP login request failed', [
-                'status' => $response->status(),
-                'body' => $response->body()
-            ]);
-            return null;
-
-        } catch (Exception $e) {
-            Log::error('SmartLife ERP login exception', ['error' => $e->getMessage()]);
-            return null;
-        }
+        $result = $this->loginWithCookies();
+        return $result['token'] ?? null;
     }
 
     /**
@@ -454,6 +487,7 @@ class SmartLifeErpService
     public function clearTokenCache()
     {
         Cache::forget('smartlife_access_token');
+        Cache::forget('smartlife_session');
     }
 
     /**
