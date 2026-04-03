@@ -29,7 +29,7 @@ class SendDeliveryNotification
         try {
             $order = $event->order;
             // The CHANNEL_KEY provided by the user for OneSignal
-            $channelKey = '48459b3d-81ba-4858-8d13-fc241b087f69';
+            $channelKey = config('services.onesignal.android_channel_id');
 
             $payload = [
                 'app_id' => config('services.onesignal.app_id'),

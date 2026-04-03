@@ -253,15 +253,18 @@ class OrderController extends Controller
                 $phoneNumber = $order->user->Number ?? null;
                 if (empty($phoneNumber)) {
                     $billingAddress = $order->billing_address;
-                    $phoneNumber = $billingAddress->phone_number ?? '';
+                    $phoneNumber = $billingAddress['phone_number'] ?? '';
                 }
+                
+                $status_data = $order->getStatusLang()[$request->Order_Status] ?? null;
+                $status_ar = $status_data['status_ar'] ?? 'N/A';
 
                 // Updated WhatsApp API: hispeed.om and numeric booking_id
                 $response = Http::asJson()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/change_status', [
                     'phone_number' => $phoneNumber,
-                    'name' => $order->user->name ?? $billingAddress->name ?? '',
+                    'name' => $order->user->name ?? $billingAddress['name'] ?? '',
                     'booking_id' => $order->Order_Number,
-                    'status' => $order->getStatusLang()[$request->Order_Status],
+                    'status' => $status_ar,
                     'url' => $url,
                 ]);
 
