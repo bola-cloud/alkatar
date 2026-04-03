@@ -76,12 +76,55 @@ class PaymentCallbackController extends Controller
             return redirect()->route('checkout.thankyou_page')->with('success', 'Order successfully created!');
         }
 
-        // Payment not yet confirmed via webhook - show pending message
-        // The webhook will process it asynchronously
-        Log::info('Payment pending webhook confirmation', ['order_id' => $order->id]);
+        // If not already paid, try to verify immediately (Fallback to Webhook)
+        if (!$order->is_paid && $paymentId) {
+            Log::info('Attempting immediate verification fallback in callback', ['order_id' => $order->id, 'session_id' => $paymentId]);
+            
+            try {
+                // Reuse the same verification logic as the webhook controller if possible
+                // For simplicity and to avoid dependency issues in this specific controller, we'll do it directly
+                $response = \Illuminate\Support\Facades\Http::withHeaders([
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                    'thawani-api-key' => config('services.thawani.secret_key'),
+                ])->get(config('services.thawani.checkout_url') . '/checkout/session/' . $paymentId);
+
+                if ($response->successful() && isset($response['success']) && $response['success']) {
+                    $verifiedData = $response['data'];
+                    $status = $verifiedData['payment_status'] ?? '';
+
+                    if ($status === 'paid' || $status === 'succeeded') {
+                        Log::info('Payment verified via callback fallback. Syncing to ERP.', ['order_id' => $order->id]);
+                        
+                        // Mark as paid locally first
+                        $order->update([
+                            'is_paid' => true,
+                            'Payment_Status' => PAYMENT_SUCCESS,
+                            'Is_Order_Successful' => true,
+                            'Order_Status' => ORDER_PROCESSING,
+                        ]);
+
+                        // Sync to ERP
+                        if (class_exists(\App\Services\SmartLifeErpService::class) && config('smartlife.sync_enabled')) {
+                            $smartLifeService = app(\App\Services\SmartLifeErpService::class);
+                            $smartLifeService->submitOrder($order);
+                        }
+                        
+                        Cart::destroy();
+                        session()->forget(['pending_token', 'payment_session_id', 'thawani_session_id']);
+                        return redirect()->route('checkout.thankyou_page')->with('success', 'Order successfully created and paid!');
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::warning('Fallback verification failed', ['error' => $e->getMessage()]);
+            }
+        }
+
+        // Payment not yet confirmed via webhook or fallback - show pending message
+        Log::info('Payment still pending confirmation after fallback check', ['order_id' => $order->id]);
 
         Cart::destroy();
-        session()->forget(['pending_token', 'payment_session_id']);
+        session()->forget(['pending_token', 'payment_session_id', 'thawani_session_id']);
 
         return redirect()->route('checkout.thankyou_page')
             ->with('info', 'Your payment is being processed. You will receive a confirmation email shortly.');

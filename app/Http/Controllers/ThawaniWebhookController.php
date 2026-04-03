@@ -75,13 +75,18 @@ class ThawaniWebhookController extends Controller
             $verifiedPaymentData = $this->verifyPaymentWithThawani($sessionId);
 
             if (!$verifiedPaymentData) {
-                Log::error('Failed to verify payment with Thawani API', ['session_id' => $sessionId]);
+                Log::error('Failed to verify payment with Thawani API (Data null)', ['session_id' => $sessionId]);
                 return response()->json(['error' => 'Payment verification failed'], 400);
             }
 
             // Use verified data from Thawani API
             $paymentStatus = $verifiedPaymentData['payment_status'] ?? $paymentStatus;
             $clientRef = $verifiedPaymentData['client_reference_id'] ?? $clientRef;
+
+            Log::info('Verified Thawani Data', [
+                'verified_status' => $paymentStatus,
+                'verified_ref' => $clientRef
+            ]);
 
             // Find order by multiple identifiers
             $order = $this->findOrder($clientRef, $sessionId);
@@ -97,14 +102,16 @@ class ThawaniWebhookController extends Controller
             Log::info('Order found for webhook', [
                 'order_id' => $order->id,
                 'order_number' => $order->Order_Number,
-                'is_paid' => $order->is_paid,
-                'payment_status' => $paymentStatus,
+                'current_is_paid' => $order->is_paid,
+                'target_payment_status' => $paymentStatus,
             ]);
 
             // Handle payment status
-            if ($paymentStatus === 'paid') {
+            if ($paymentStatus === 'paid' || $paymentStatus === 'succeeded') {
+                Log::info('Triggering Successful Payment Handler', ['order_id' => $order->id]);
                 return $this->handleSuccessfulPayment($order, $sessionId);
             } elseif (in_array($paymentStatus, ['cancelled', 'failed', 'unpaid'])) {
+                Log::info('Triggering Failed Payment Handler', ['order_id' => $order->id, 'status' => $paymentStatus]);
                 return $this->handleFailedPayment($order, $paymentStatus);
             } else {
                 Log::warning('Unhandled payment status in webhook', [
