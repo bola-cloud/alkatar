@@ -92,13 +92,17 @@ class SmartLifeErpService
     }
 
     /**
-     * Get cached session (token + cookies). If not cached, login fresh.
+     * Get cached session (token + cookies). If not cached, fetch atomically.
      */
     protected function getSession()
     {
-        return Cache::remember('smartlife_session', $this->tokenCacheTtl, function () {
-            return $this->loginWithCookies();
-        });
+        $session = Cache::get('smartlife_session');
+        
+        if (!$session) {
+            return $this->refreshSessionAtomically();
+        }
+        
+        return $session;
     }
 
     /**
@@ -111,8 +115,12 @@ class SmartLifeErpService
 
         try {
             if ($lock->block(5)) {
-                Cache::forget('smartlife_session');
-                Cache::forget('smartlife_access_token'); // clean up old key too
+                // Double check if another process already populated the cache while we waited
+                $session = Cache::get('smartlife_session');
+                if ($session) {
+                    return $session;
+                }
+
                 $session = $this->loginWithCookies();
                 if ($session) {
                     Cache::put('smartlife_session', $session, $this->tokenCacheTtl);
@@ -127,7 +135,6 @@ class SmartLifeErpService
 
         } catch (\Exception $e) {
             Log::error('SmartLife ERP: Session refresh lock error', ['error' => $e->getMessage()]);
-            Cache::forget('smartlife_session');
             return $this->loginWithCookies();
         } finally {
             optional($lock)->release();
@@ -149,11 +156,16 @@ class SmartLifeErpService
         $url = Str::startsWith($endpoint, 'http') ? $endpoint : "{$this->apiUrl}/{$endpoint}";
 
         $makeRequest = function($sess) use ($method, $url, $data, $headers) {
+            // Manually construct the Cookie header for absolute certainty
+            $cookieString = collect($sess['cookies'] ?? [])
+                ->map(fn($v, $k) => "$k=$v")
+                ->join('; ');
+
             $request = Http::withHeaders(array_merge([
                 'Authorization' => $sess['token'],
                 'Accept' => 'application/json',
-            ], $headers))
-            ->withCookies($sess['cookies'] ?? [], parse_url($url, PHP_URL_HOST));
+                'Cookie' => $cookieString,
+            ], $headers));
 
             return $method === 'GET' ? $request->get($url, $data) : $request->post($url, $data);
         };
@@ -163,7 +175,10 @@ class SmartLifeErpService
         if ($this->isHtmlResponse($response)) {
             Log::warning("SmartLife ERP: HTML response for {$endpoint}. Refreshing session (token + cookies)...");
 
+            // Only clear if we actually hit an HTML response (to force a fresh atomic login)
+            Cache::forget('smartlife_session');
             $newSession = $this->refreshSessionAtomically();
+            
             if ($newSession) {
                 $response = $makeRequest($newSession);
 
