@@ -97,11 +97,11 @@ class SmartLifeErpService
     protected function getSession()
     {
         $session = Cache::get('smartlife_session');
-        
+
         if (!$session) {
             return $this->refreshSessionAtomically();
         }
-        
+
         return $session;
     }
 
@@ -111,10 +111,11 @@ class SmartLifeErpService
      */
     protected function refreshSessionAtomically()
     {
-        $lock = Cache::lock('smartlife_token_refresh', 10);
+        // Mutex for the LOGIN process
+        $lock = Cache::lock('smartlife_token_refresh', 20);
 
         try {
-            if ($lock->block(5)) {
+            if ($lock->block(10)) {
                 // Double check if another process already populated the cache while we waited
                 $session = Cache::get('smartlife_session');
                 if ($session) {
@@ -128,10 +129,8 @@ class SmartLifeErpService
                 return $session;
             }
 
-            // Another process is refreshing — wait and use their result
-            Log::info('SmartLife ERP: Waiting for concurrent session refresh...');
-            usleep(500000);
-            return Cache::get('smartlife_session');
+            Log::error('SmartLife ERP: Failed to acquire session refresh lock');
+            return null;
 
         } catch (\Exception $e) {
             Log::error('SmartLife ERP: Session refresh lock error', ['error' => $e->getMessage()]);
@@ -142,21 +141,46 @@ class SmartLifeErpService
     }
 
     /**
-     * Common request handler that sends BOTH the access token AND session cookies.
-     * Automatically retries once on session timeout (HTML response).
+     * High-Level Synchronized Request Handler.
+     * This uses a GLOBAL MUTEX for every ERP call.
+     * Why? The ERP enforces a single active session. Concurrent requests (sync vs checkout)
+     * invalidate each other. Serializing them ensures session stability.
      */
     protected function request($method, $endpoint, $data = [], $headers = [])
     {
+        // GLOBAL MUTEX: Only ONE process talks to the SmartLife ERP at a time across the whole system.
+        // This is THE solution to prevent session thrashing by the background sync.
+        $globalLock = Cache::lock('smartlife_global_request_lock', 30);
+
+        try {
+            if ($globalLock->block(20)) {
+                return $this->executeSynchronizedRequest($method, $endpoint, $data, $headers);
+            }
+
+            Log::error("SmartLife ERP: Global request timeout for {$endpoint}. ERP might be slow or overloaded.");
+            return null;
+        } catch (\Exception $e) {
+            Log::error("SmartLife ERP global lock error for {$endpoint}", ['error' => $e->getMessage()]);
+            return null;
+        } finally {
+            optional($globalLock)->release();
+        }
+    }
+
+    /**
+     * The internal request logic, executed under the global mutex.
+     */
+    protected function executeSynchronizedRequest($method, $endpoint, $data = [], $headers = [])
+    {
         $session = $this->getSession();
         if (!$session || empty($session['token'])) {
-            Log::error("SmartLife ERP: No session available for {$endpoint}");
+            Log::error("SmartLife ERP: No session available (after login attempt).");
             return null;
         }
 
         $url = Str::startsWith($endpoint, 'http') ? $endpoint : "{$this->apiUrl}/{$endpoint}";
 
         $makeRequest = function($sess) use ($method, $url, $data, $headers) {
-            // Manually construct the Cookie header for absolute certainty
             $cookieString = collect($sess['cookies'] ?? [])
                 ->map(fn($v, $k) => "$k=$v")
                 ->join('; ');
@@ -164,6 +188,8 @@ class SmartLifeErpService
             $request = Http::withHeaders(array_merge([
                 'Authorization' => $sess['token'],
                 'Accept' => 'application/json',
+                'X-Requested-With' => 'XMLHttpRequest', // Crucial: Tells the ERP we are an API, not a browser
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124 Safari/537.36',
                 'Cookie' => $cookieString,
             ], $headers));
 
@@ -172,20 +198,20 @@ class SmartLifeErpService
 
         $response = $makeRequest($session);
 
-        if ($this->isHtmlResponse($response)) {
-            Log::warning("SmartLife ERP: HTML response for {$endpoint}. Refreshing session (token + cookies)...");
+        // If we get HTML or an auth error, we refresh and retry ONCE
+        if ($this->isHtmlResponse($response) || $response->status() === 401) {
+            Log::warning("SmartLife ERP: Auth Failure/HTML Response for {$endpoint}. Triggering atomic refresh...");
 
-            // Only clear if we actually hit an HTML response (to force a fresh atomic login)
             Cache::forget('smartlife_session');
             $newSession = $this->refreshSessionAtomically();
-            
+
             if ($newSession) {
+                // Retry with new session
                 $response = $makeRequest($newSession);
 
                 if ($this->isHtmlResponse($response)) {
-                    Log::error("SmartLife ERP: Still HTML after session refresh for {$endpoint}", [
-                        'status' => $response->status(),
-                        'body_preview' => substr($response->body(), 0, 300),
+                    Log::error("SmartLife ERP: Persistent HTML response after refresh for {$endpoint}", [
+                        'status' => $response->status()
                     ]);
                 }
             }
@@ -222,6 +248,7 @@ class SmartLifeErpService
     public function getProducts($offset = 0, $limit = 100)
     {
         try {
+            // v3 API uses get_products_list
             $response = $this->request('GET', 'products/get_products_list', [
                 'offset' => $offset,
                 'limit' => $limit
@@ -452,23 +479,23 @@ class SmartLifeErpService
     public function addPayment($saleId, $amount, $paidBy = 'cash', $note = '', $chequeNo = '')
     {
         try {
+            // v3 API endpoint is sales/add_payments/{id} (plural)
+            // Payload MUST be a specifically formatted JSON array under 'payments'
             $payload = [
-                'sale_id' => (string) $saleId,
-                'sell_id' => (string) $saleId,
-                'transaction_id' => (string) $saleId,
-                'amount' => (float) $amount,
-                'account_id' => $this->paymentAccountId,
-                'paid_by' => in_array(strtolower($paidBy), ['card', 'thawani', 'online']) ? 'Card' : 'Cash',
-                'method' => in_array(strtolower($paidBy), ['card', 'thawani', 'online']) ? 'card' : 'cash',
-                'payment_status' => 'Paid',
-                'note' => $note,
-                'cheque_no' => $chequeNo,
-                'paid_on' => now()->toDateTimeString(),
+                'date' => now()->toDateTimeString(),
+                'payments' => [
+                    [
+                        'id' => in_array(strtolower($paidBy), ['card', 'thawani', 'online']) ? '4' : '1', // 4 is Card, 1 is Cash
+                        'amount' => (string) $amount,
+                        'note' => $note,
+                        'cheque_no' => $chequeNo
+                    ]
+                ]
             ];
 
-            Log::info('SmartLife ERP addPayment request', ['sale_id' => $saleId, 'amount' => $amount, 'paid_by' => $paidBy]);
+            Log::info('SmartLife ERP addPayments request (v3)', ['sale_id' => $saleId, 'amount' => $amount]);
 
-            $response = $this->request('POST', 'sales/add_payment', $payload);
+            $response = $this->request('POST', "sales/add_payments/{$saleId}", $payload);
 
             if ($response && $response->successful()) {
                 $data = $response->json();
