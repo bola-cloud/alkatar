@@ -17,8 +17,16 @@ class TaxController extends Controller
             'country' => 'nullable|string|max:255',
         ]);
         $taxAmount = 0;
+        $tax = null;
         if ($validated['country'] != null) {
-            $tax = Tax::where('country', $validated['country'])->where('status', ACTIVE)->first();
+            $countryName = $validated['country'];
+            if (is_numeric($countryName)) {
+                $countryModel = \App\Models\Country::find($countryName);
+                if ($countryModel) {
+                    $countryName = $countryModel->name_en ?? $countryModel->name;
+                }
+            }
+            $tax = Tax::where('country', $countryName)->where('status', ACTIVE)->first();
             if (!is_null($tax)) {
                 $taxAmount = ($validated['subtotal'] * $tax->percentage) / 100;
             }

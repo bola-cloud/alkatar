@@ -320,7 +320,15 @@ class WhatsappStoreController extends Controller
             ], 422);
         }
         
-        $countryName = $validated['billing_country'];
+        $countryParam = $validated['billing_country'];
+        $countryName = $countryParam;
+        if (is_numeric($countryParam)) {
+            $countryModel = \App\Models\Country::find($countryParam);
+            if ($countryModel) {
+                $countryName = $countryModel->name_en ?? $countryModel->name;
+            }
+        }
+
         $tax = 0;
         $taxFound = false;
         

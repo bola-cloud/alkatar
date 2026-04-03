@@ -43,15 +43,11 @@ class CheckoutController extends Controller
         $subtotal = $this->calculateSubtotal($validated['cart_items']);
         // Prefer per-country Tax table (admin) if available, otherwise fallback to global tax percentage
         $country = $validated['billing_country'] ?? null;
-        $countryName = null;
-        if ($country) {
-            if (is_numeric($country)) {
-                $countryModel = \App\Models\Country::find($country);
-                if ($countryModel) {
-                    $countryName = $countryModel->name_en ?? $countryModel->name;
-                }
-            } else {
-                $countryName = $country;
+        $countryName = $country;
+        if ($country && is_numeric($country)) {
+            $countryModel = \App\Models\Country::find($country);
+            if ($countryModel) {
+                $countryName = $countryModel->name_en ?? $countryModel->name;
             }
         }
 

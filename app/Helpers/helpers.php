@@ -581,7 +581,14 @@ if (!function_exists('tax_amount')) {
     {
         $tax = 0;
         if ($country != null) {
-            $tax_percentage = Tax::where('country', $country)->where('status', ACTIVE)->first();
+            $countryName = $country;
+            if (is_numeric($countryName)) {
+                $countryModel = \App\Models\Country::find($countryName);
+                if ($countryModel) {
+                    $countryName = $countryModel->name_en ?? $countryModel->name;
+                }
+            }
+            $tax_percentage = Tax::where('country', $countryName)->where('status', ACTIVE)->first();
             if (!is_null($tax_percentage)) {
                 $tax = ($subtotal * $tax_percentage->percentage) / 100;
             }
@@ -595,7 +602,14 @@ if (!function_exists('tax_rate')) {
     {
         $tax_rate = 0;
         if ($country != null) {
-            $tax = Tax::where('country', $country)->where('status', ACTIVE)->first();
+            $countryName = $country;
+            if (is_numeric($countryName)) {
+                $countryModel = \App\Models\Country::find($countryName);
+                if ($countryModel) {
+                    $countryName = $countryModel->name_en ?? $countryModel->name;
+                }
+            }
+            $tax = Tax::where('country', $countryName)->where('status', ACTIVE)->first();
             if (!is_null($tax)) {
                 $tax_rate = $tax->percentage;
             }
