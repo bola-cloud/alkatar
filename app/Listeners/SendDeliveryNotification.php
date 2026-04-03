@@ -26,8 +26,20 @@ class SendDeliveryNotification
      */
     public function handle(OrderCreated $event)
     {
+        $order = $event->order;
+
+        // Idempotency check: Ensure we only send one OneSignal notification per order lifecycle stage
+        // Uses a 10-minute lock to prevent duplicate sends due to race conditions or multiple event triggers
+        $cacheKey = 'onesignal_sent_' . $order->id;
+        if (!\Illuminate\Support\Facades\Cache::add($cacheKey, true, 600)) {
+            \Illuminate\Support\Facades\Log::info('OneSignal: Skipping duplicate notification (idempotency)', [
+                'order_number' => $order->Order_Number,
+                'order_id' => $order->id
+            ]);
+            return;
+        }
+
         try {
-            $order = $event->order;
             // The CHANNEL_KEY provided by the user for OneSignal
             $channelKey = config('services.onesignal.android_channel_id');
 

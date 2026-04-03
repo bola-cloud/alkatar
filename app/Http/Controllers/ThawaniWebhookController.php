@@ -276,6 +276,9 @@ class ThawaniWebhookController extends Controller
                 'grand_total' => $order->Grand_Total,
             ]);
 
+            // Trigger OneSignal/Delivery Notification (Idempotency handles duplicates)
+            event(new \App\Events\OrderCreated($order));
+
             try {
                 app(CheckoutController::class)->orderConfirmMail($order);
                 Log::info('Confirmation email sent via webhook', [

@@ -1149,9 +1149,6 @@ class CheckoutController extends Controller
                 $data['data'] = $order;
                 $data['success'] = true;
             }
-            // Trigger OneSignal/Delivery Notification
-            event(new \App\Events\OrderCreated($order));
-
             // WhatsApp notification for COD
             $this->sendOrderNotification($order->id);
 
