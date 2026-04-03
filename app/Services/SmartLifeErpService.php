@@ -26,7 +26,57 @@ class SmartLifeErpService
     }
 
     /**
-     * Common request handler with automatic retry on session timeout (HTML response)
+     * Check if an HTTP response is HTML (indicates session timeout/login redirect)
+     */
+    protected function isHtmlResponse($response)
+    {
+        if (!$response) return false;
+        $contentType = $response->header('Content-Type') ?? '';
+        $body = $response->body() ?? '';
+        return strpos($contentType, 'text/html') !== false || strpos($body, '<!DOCTYPE html>') !== false;
+    }
+
+    /**
+     * Atomically refresh the access token using a cache lock to prevent
+     * concurrent logins from thrashing the single ERP session.
+     */
+    protected function refreshTokenAtomically()
+    {
+        // Use a cache lock so only ONE process/request logs in at a time
+        $lock = Cache::lock('smartlife_token_refresh', 10); // 10 second lock
+
+        try {
+            // Wait up to 5 seconds to acquire the lock
+            if ($lock->block(5)) {
+                // Double-check: another request may have already refreshed the token
+                // while we were waiting for the lock
+                $this->clearTokenCache();
+                $newToken = $this->login();
+                if ($newToken) {
+                    Cache::put('smartlife_access_token', $newToken, $this->tokenCacheTtl);
+                }
+                return $newToken;
+            }
+
+            // Lock not acquired: another process is refreshing. Wait briefly
+            // and then read whatever token they stored.
+            Log::info('SmartLife ERP: Waiting for concurrent token refresh...');
+            usleep(500000); // 0.5 seconds
+            return Cache::get('smartlife_access_token');
+
+        } catch (\Exception $e) {
+            Log::error('SmartLife ERP: Token refresh lock error', ['error' => $e->getMessage()]);
+            // Fallback: just do a plain refresh
+            $this->clearTokenCache();
+            return $this->getAccessToken();
+        } finally {
+            optional($lock)->release();
+        }
+    }
+
+    /**
+     * Common request handler with automatic retry on session timeout (HTML response).
+     * Uses atomic token refresh to prevent concurrent logins from invalidating each other.
      */
     protected function request($method, $endpoint, $data = [], $headers = [])
     {
@@ -36,7 +86,7 @@ class SmartLifeErpService
         }
 
         $url = Str::startsWith($endpoint, 'http') ? $endpoint : "{$this->apiUrl}/{$endpoint}";
-        
+
         $makeRequest = function($currentToken) use ($method, $url, $data, $headers) {
             $request = Http::withHeaders(array_merge([
                 'Authorization' => $currentToken,
@@ -48,16 +98,20 @@ class SmartLifeErpService
 
         $response = $makeRequest($token);
 
-        // Check if response is HTML (indicates session timeout/login redirect)
-        $isHtml = strpos($response->header('Content-Type'), 'text/html') !== false || 
-                  strpos($response->body(), '<!DOCTYPE html>') !== false;
+        if ($this->isHtmlResponse($response)) {
+            Log::warning("SmartLife ERP: HTML response for {$endpoint}. Refreshing token atomically...");
 
-        if ($isHtml) {
-            Log::warning("SmartLife ERP: Received HTML response for {$endpoint}. Retrying with fresh token...");
-            $this->clearTokenCache();
-            $newToken = $this->getAccessToken();
+            $newToken = $this->refreshTokenAtomically();
             if ($newToken) {
                 $response = $makeRequest($newToken);
+
+                // If STILL HTML after atomic refresh, log the body and give up
+                if ($this->isHtmlResponse($response)) {
+                    Log::error("SmartLife ERP: Still HTML after token refresh for {$endpoint}", [
+                        'status' => $response->status(),
+                        'body_preview' => substr($response->body(), 0, 500),
+                    ]);
+                }
             }
         }
 
@@ -321,6 +375,14 @@ class SmartLifeErpService
                     Log::info('SmartLife ERP sale successful', ['sale_id' => $data['data'] ?? $data['id'] ?? null]);
                     return $data;
                 }
+                Log::error('SmartLife ERP addSale: API returned success=false', [
+                    'response' => $data,
+                ]);
+            } else {
+                Log::error('SmartLife ERP addSale: Request failed', [
+                    'status' => $response ? $response->status() : 'null',
+                    'body' => $response ? substr($response->body(), 0, 500) : 'null',
+                ]);
             }
             return null;
         } catch (Exception $e) {
@@ -356,18 +418,30 @@ class SmartLifeErpService
                 'paid_on' => now()->toDateTimeString(),
             ];
 
+            Log::info('SmartLife ERP addPayment request', ['sale_id' => $saleId, 'amount' => $amount, 'paid_by' => $paidBy]);
+
             $response = $this->request('POST', 'sales/add_payment', $payload);
 
             if ($response && $response->successful()) {
                 $data = $response->json();
                 if (isset($data['success']) && $data['success'] === true) {
-                    Log::info('SmartLife ERP payment added', ['sale_id' => $saleId]);
+                    Log::info('SmartLife ERP payment added successfully', ['sale_id' => $saleId, 'response' => $data]);
                     return $data;
                 }
+                Log::error('SmartLife ERP addPayment: API returned success=false', [
+                    'sale_id' => $saleId,
+                    'response' => $data,
+                ]);
+            } else {
+                Log::error('SmartLife ERP addPayment: Request failed', [
+                    'sale_id' => $saleId,
+                    'status' => $response ? $response->status() : 'null',
+                    'body' => $response ? substr($response->body(), 0, 500) : 'null',
+                ]);
             }
             return null;
         } catch (Exception $e) {
-            Log::error('SmartLife ERP addPayment exception', ['error' => $e->getMessage()]);
+            Log::error('SmartLife ERP addPayment exception', ['sale_id' => $saleId, 'error' => $e->getMessage()]);
             return null;
         }
     }
