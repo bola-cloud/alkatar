@@ -104,6 +104,7 @@ class DeliveryOrderController extends Controller
         $validator = Validator::make($request->all(), [
             'order_id' => 'required|exists:orders,id',
             'status' => 'required|in:delivered,failed',
+            'collection_method' => 'nullable|in:cash,transfer,visa',
         ]);
 
         if ($validator->fails()) {
@@ -140,6 +141,11 @@ class DeliveryOrderController extends Controller
                 $order->is_paid = 1;
                 $order->Payment_Status = PAYMENT_SUCCESS;
                 
+                // Store collection method if provided
+                if ($request->collection_method) {
+                    $order->collection_method = $request->collection_method;
+                }
+
                 // Sync to SmartLife ERP as PAID
                 if (config('smartlife.sync_enabled')) {
                     try {

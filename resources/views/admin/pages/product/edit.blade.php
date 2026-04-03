@@ -103,7 +103,10 @@
                                         <div class="form-group">
                                             <label for="exampleInputEmail1">{{ __('Quantity')}}</label>
                                             <input type="text" class="form-control" id="qty" name="qty"
-                                                value="{{$product->Quantity}}">
+                                                value="{{$product->Quantity}}" @if($product->synced_from_smartlife) readonly @endif>
+                                            @if($product->synced_from_smartlife)
+                                                <small class="text-muted">{{ __('Quantity is managed by SmartLife ERP sync and cannot be edited manually.') }}</small>
+                                            @endif
                                         </div>
                                         <div class="form-group">
                                             <label for="exampleInputEmail1">{{ __('Price')}}</label>

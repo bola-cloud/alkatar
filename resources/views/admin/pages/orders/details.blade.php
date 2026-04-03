@@ -124,6 +124,9 @@
                     <p>وقت الشراء: {{ $order->created_at->timezone('Asia/Muscat')->format('h:i A') }}</p>
                     <p>رقم الطلب: {{ $order->Order_Number }}</p>
                     <p>طريقة الدفع: {{ $order->Payment_Method }}</p>
+                    @if($order->collection_method)
+                        <p>طريقة التحصيل: {{ ucfirst($order->collection_method) }}</p>
+                    @endif
                     <p>طريقة الشحن: مصاريف الشحن</p>
                 </div>
             </div>

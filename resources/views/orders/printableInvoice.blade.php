@@ -4,6 +4,11 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <style>
+        @page {
+            margin: 0;
+            padding: 0;
+        }
+
         td {
             border-color: black;
         }
@@ -15,14 +20,16 @@
 
         table {
             width: 100%;
+            border-collapse: collapse;
         }
 
         th,
         td {
             border-width: 1px;
-            padding: 0.5em;
+            padding: 2px 4px;
             position: relative;
             text-align: left;
+            font-size: 10px;
         }
 
         th,
@@ -42,39 +49,48 @@
         /* page */
 
         html {
-            font: 12px/1 'Open Sans', sans-serif;
+            font: 12px/1.2 'Open Sans', sans-serif;
             overflow: auto;
+            margin: 0;
+            padding: 0;
         }
 
         body {
             box-sizing: border-box;
             overflow: hidden;
-            margin: 0 auto !important;
-            max-width: 280px;
-            /* Slightly wider for better utilization of 80mm */
+            margin: 0 !important;
+            padding: 5px !important;
+            max-width: 100%;
+            width: 80mm;
+            direction: ltr;
+            text-align: left;
         }
 
         .item-name {
             font-weight: bold;
-            font-size: 11px;
+            font-size: 10px;
             display: block;
-            text-align: right;
-            direction: rtl;
+            text-align: left;
+            word-wrap: break-word;
         }
 
         .header-info p {
+            margin: 1px 0;
+            font-size: 10px;
+        }
+
+        .address-info p {
             margin: 2px 0;
             font-size: 11px;
         }
 
-        .address-info p {
-            margin: 4px 0;
-            font-size: 13px;
+        .total-row {
+            font-size: 14px;
+            font-weight: bold;
         }
 
-        .total-row {
-            font-size: 16px;
-            font-weight: bold;
+        .nowrap {
+            white-space: nowrap;
         }
 
         article:after {
@@ -127,7 +143,10 @@
         </p>
 
         <p>
-            السجل التجاري: {{ $settings['commercial_registration'] ?? 'غير متوفر' }}
+            C.R No.: 1275107
+        </p>
+        <p>
+            C.R Name: Al Akeed Lil Injaz
         </p>
     </div>
     <article class="address-info">
@@ -141,67 +160,75 @@
                     $billing['state_ar'] ?? null
                 ]));
                 if (empty($addressStr)) {
-                    $addressStr = 'استلام من الفرع';
+                    $addressStr = 'Pick up from branch';
                 }
             @endphp
-            <p><strong>الاسم:</strong> {{ $billing['name'] ?? ($order->user->name ?? '') }}</p>
-            <p><strong>الجوال:</strong> {{ $phone }}</p>
-            <p><strong>العنوان:</strong> {{ $addressStr }}</p>
+            <p><strong>Name:</strong> {{ $billing['name'] ?? ($order->user->name ?? '') }}</p>
+            <p><strong>Mobile:</strong> {{ $phone }}</p>
+            <p><strong>Address:</strong> {{ $addressStr }}</p>
         </address>
-        <table class="meta" style="font-size: 70%; border-collapse: collapse; direction: rtl; width: 100%;">
+        <table class="meta" style="font-size: 70%; border-collapse: collapse; direction: ltr; width: 100%;">
             <tr>
-                <th style="text-align: right;"><span>رقم الطلب</span></th>
-                <td style="text-align: left;"><span>{{$order->Order_Number ?? $order->id}}</span></td>
+                <th style="text-align: left;"><span>Order No.</span></th>
+                <td style="text-align: right;" class="nowrap"><span>{{ $order->Order_Number }}</span></td>
             </tr>
             <tr>
-                <th style="text-align: right;"><span>السعر الكلي</span></th>
-                <td style="text-align: left;"><span>{{$order->Grand_Total}}</span></td>
+                <th style="text-align: left;"><span>Total Price</span></th>
+                <td style="text-align: right;" class="nowrap"><span>{{ number_format($order->Grand_Total, 3) }}</span></td>
             </tr>
         </table>
         <br>
-        <table style="font-size: 75%; border-collapse: collapse; direction: rtl;" autosize="1" width="100%">
+        <table style="font-size: 75%; border-collapse: collapse; direction: ltr;" autosize="1" width="100%">
             <thead>
                 <tr>
-                    <th style="text-align: right;"><span>الصنف</span></th>
-                    <th style="width: 15%; text-align: center;"><span>السعر</span></th>
-                    <th style="width: 15%; text-align: center;"><span>الكمية</span></th>
-                    <th style="width: 15%; text-align: center;"><span>اجمالي</span></th>
+                    <th style="text-align: left;"><span>Item</span></th>
+                    <th style="width: 15%; text-align: center;"><span>Price</span></th>
+                    <th style="width: 15%; text-align: center;"><span>Qty</span></th>
+                    <th style="width: 15%; text-align: center;"><span>Total</span></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($order->order_details as $item)
                     <tr>
-                        <td style="text-align: right;"><span class="item-name">{{$item->Product_Name}}</span></td>
-                        <td style="text-align: center;"><span>{{ number_format($item->Price, 3) }}</span></td>
+                        <td style="text-align: left;"><span class="item-name">{{ $item->product->fr_Product_Name ?? $item->Product_Name }}</span></td>
+                        <td style="text-align: center;" class="nowrap"><span>{{ number_format($item->Price, 3) }}</span></td>
                         <td style="text-align: center;"><span>{{ (int) $item->Quantity }}<span></td>
-                        <td style="text-align: center;"><span>{{ number_format($item->Total_Price, 3) }}</span></td>
+                        <td style="text-align: center;" class="nowrap"><span>{{ number_format($item->Total_Price, 3) }}</span></td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
         <table class="balance"
-            style="float: right; margin-top: 15px; font-size: 80%; border-collapse: collapse; direction: rtl; width: 100%;">
+            style="float: right; margin-top: 10px; font-size: 80%; border-collapse: collapse; direction: ltr; width: 100%;">
             <tr>
-                <th style="text-align: right;"><span>سعر التوصيل</span></th>
-                <td style="text-align: left;">{{ number_format($order->Delivery_Charge ?? 0, 3) }}</td>
+                <th style="text-align: left;"><span>Delivery Charge</span></th>
+                <td style="text-align: right;" class="nowrap">{{ number_format($order->Delivery_Charge ?? 0, 3) }}</td>
             </tr>
             <tr>
-                <th style="text-align: right;"><span>الخصم</span></th>
-                <td style="text-align: left;">{{ number_format($order->Coupon_Amount ?? 0, 3) }}</td>
+                <th style="text-align: left;"><span>Discount</span></th>
+                <td style="text-align: right;" class="nowrap">{{ number_format($order->Coupon_Amount ?? 0, 3) }}</td>
             </tr>
             <tr>
-                <th style="text-align: right;"><span>تاريخ الطلب</span></th>
-                <td style="text-align: left;">{{ $order->created_at->format('Y-m-d H:i') }}</td>
+                <th style="text-align: left;"><span>Order Date</span></th>
+                <td style="text-align: right;" class="nowrap">{{ $order->created_at->format('Y-m-d H:i') }}</td>
             </tr>
             <tr>
-                <th style="text-align: right;"><span>نوع الدفع</span></th>
-                <td style="text-align: left;">
-                    {{ $order->Payment_Method == 'COD' ? 'الدفع عند الاستلام' : $order->Payment_Method }}
+                <th style="text-align: left;"><span>Payment Method</span></th>
+                <td style="text-align: right;">
+                    {{ $order->Payment_Method == 'COD' ? 'Cash on Delivery' : $order->Payment_Method }}
                 </td>
             </tr>
+            @if($order->collection_method)
+            <tr>
+                <th style="text-align: left;"><span>Collection Method</span></th>
+                <td style="text-align: right;">
+                    {{ ucfirst($order->collection_method) }}
+                </td>
+            </tr>
+            @endif
             <tr class="total-row">
-                <th style="text-align: right;"><span>الاجمالي الكلي</span></th>
-                <td style="text-align: left;">{{ number_format($order->Grand_Total, 3) }}</td>
+                <th style="text-align: left;"><span>Grand Total</span></th>
+                <td style="text-align: right;" class="nowrap">{{ number_format($order->Grand_Total, 3) }}</td>
             </tr>
         </table>
     </article>
@@ -219,7 +246,7 @@
             $cleanQrCode = ($svgStart !== false) ? substr($qrCodeString, $svgStart) : $qrCodeString;
         @endphp
         {!! $cleanQrCode !!}
-        <p>رقم الطلب: {{ $order->Order_Number ?? $order->id }}</p>
+        <p>Order No.: {{ $order->Order_Number }}</p>
     </aside>
 </body>
 

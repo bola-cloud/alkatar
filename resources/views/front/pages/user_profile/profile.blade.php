@@ -583,7 +583,7 @@
                                                     }
                                                 }
                                             @endphp
-                                            <div class="order-card" data-id="{{ $odata['id'] }}" data-stage="{{ $odata['stage'] }}"
+                                            <div class="order-card" data-id="{{ $odata['id'] }}" data-order-number="{{ $order->Order_Number }}" data-stage="{{ $odata['stage'] }}"
                                                 data-created="{{ $odata['created_at'] }}"
                                                 data-item-count="{{ $odata['item_count'] ?? 0 }}"
                                                 data-subtotal="{{ number_format($odata['subtotal'] ?? 0, 3, '.', '') }}"
@@ -604,7 +604,7 @@
                                                 data-delivered-at="{{ $order->delivered_at ?? (!empty($order->Delivery_At) ? \Carbon\Carbon::parse($order->Delivery_At)->format('j M Y h:i A') : '') }}">
                                                 <div class="order-head">
                                                     <div class="id">{{ __('Order No:') }} <span
-                                                            class="text-muted">#{{ $order->id }}</span></div>
+                                                            class="text-muted">#{{ $order->Order_Number }}</span></div>
                                                     <div class="order-status">
                                                         {{ $odata['status_label'] ?? ($order->status_label ?? ($order->Order_Status ?? __('Pending'))) }}
                                                     </div>
@@ -1125,7 +1125,7 @@
                                 <div style="border:1px dashed #2a6b2a;padding:24px;border-radius:12px;background:#fff;">
                                 <div class="order-panel-header">
                                     <div>
-                                        <div style="font-size:20px;font-weight:800">{{ __('Order No:') }} <span style="font-weight:600;color:#777">#${order.id}</span></div>
+                                        <div style="font-size:20px;font-weight:800">{{ __('Order No:') }} <span style="font-weight:600;color:#777">#${order.order_number}</span></div>
                                         <div style="color:#7b7b7b;margin-top:6px">${order.created_at || ''}</div>
                                     </div>
                                     <div>
@@ -1137,7 +1137,7 @@
                                 <div style="margin-top:16px;display:flex;justify-content:flex-end;gap:24px;align-items:center;flex-direction:column;">
                                     <div style="width:100%;max-width:420px;border-top:1px solid #eee;padding-top:12px;">
                                         <div style="display:flex;justify-content:space-between;color:#7b7b7b"><div>{{ __('Subtotal') }}</div><div>${subtotalFormatted}</div></div>
-                                        <div style="display:flex;justify-content:space-between;color:#7b7b7b"><div>{{ __('Tax') }}</div><div>${taxFormatted}</div></div>
+                                        ${order.tax > 0 ? `<div style="display:flex;justify-content:space-between;color:#7b7b7b"><div>{{ __('Tax') }}</div><div>${taxFormatted}</div></div>` : ''}
                                         <div style="display:flex;justify-content:space-between;color:#7b7b7b"><div>{{ __('Delivery') }}</div><div>${deliveryFormatted}</div></div>
                                         <div style="display:flex;justify-content:space-between;font-weight:800;margin-top:8px"><div>{{ __('Total') }}</div><div>${grandFormatted}</div></div>
                                     </div>
@@ -1238,7 +1238,7 @@
                                 <div style="border:1px dashed #2a6b2a;padding:24px;border-radius:12px;background:#fff;">
                                 <div class="order-panel-header">
                                     <div>
-                                        <div style="font-size:20px;font-weight:800">{{ __('Order No:') }} <span style="font-weight:600;color:#777">#${order.id}</span></div>
+                                        <div style="font-size:20px;font-weight:800">{{ __('Order No:') }} <span style="font-weight:600;color:#777">#${order.order_number}</span></div>
                                         <div style="color:#7b7b7b;margin-top:6px">${order.created_at || ''}</div>
                                     </div>
                                     <div style="display:flex;gap:8px;align-items:center;">
@@ -1259,7 +1259,7 @@
                                 <div style="margin-top:16px;display:flex;justify-content:flex-end;gap:24px;align-items:center;flex-direction:column;">
                                     <div style="width:100%;max-width:420px;border-top:1px solid #eee;padding-top:12px;">
                                         <div style="display:flex;justify-content:space-between;color:#7b7b7b"><div>{{ __('Subtotal') }}</div><div>${subtotalFormatted}</div></div>
-                                        <div style="display:flex;justify-content:space-between;color:#7b7b7b"><div>{{ __('Tax') }}</div><div>${taxFormatted}</div></div>
+                                        ${order.tax > 0 ? `<div style="display:flex;justify-content:space-between;color:#7b7b7b"><div>{{ __('Tax') }}</div><div>${taxFormatted}</div></div>` : ''}
                                         <div style="display:flex;justify-content:space-between;color:#7b7b7b"><div>{{ __('Delivery') }}</div><div>${deliveryFormatted}</div></div>
                                         <div style="display:flex;justify-content:space-between;font-weight:800;margin-top:8px"><div>{{ __('Total') }}</div><div>${grandFormatted}</div></div>
                                     </div>
@@ -1300,6 +1300,7 @@
 
                                         const order = {
                                             id: card.getAttribute('data-id') || '',
+                                            order_number: card.getAttribute('data-order-number') || '',
                                             stage: card.getAttribute('data-stage') || 'confirmed',
                                             created_at: card.getAttribute('data-created') || '',
                                             item_count: parseInt(card.getAttribute('data-item-count') || items.length || 0, 10),

@@ -158,6 +158,7 @@
                                                 <td>{{ __('Subtotal') }}</td>
                                                 <td>{{ currencyConverter($order->Sub_Total) }}</td>
                                             </tr>
+                                            @if($order->Tax > 0)
                                             <tr>
                                                 <td></td>
                                                 <td></td>
@@ -168,6 +169,7 @@
                                                 <td>{{ __('Tax') }}</td>
                                                 <td>{{ currencyConverter($order->Tax) }}</td>
                                             </tr>
+                                            @endif
                                             <tr>
                                                 <td></td>
                                                 <td></td>

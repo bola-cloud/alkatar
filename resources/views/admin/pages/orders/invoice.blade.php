@@ -125,6 +125,8 @@
                 <p><strong>{{ allsetting()['app_title'] ?? 'هاي سبيد' }}</strong></p>
                 <p>{{ __('Phone') }}: {{ allsetting()['call_us'] ?? '+968 94974726' }}</p>
                 <p>{{ allsetting()['email'] ?? 'alsaraamills@gmail.com' }}</p>
+                <p>رقم سجل التجاري (C.R No.): 1275107</p>
+                <p>اسم سجل التجاري (C.R Name): Al Akeed Lil Injaz</p>
                 <p>{{ url('/') }}</p>
             </div>
             <div>
@@ -132,6 +134,9 @@
                 <p>وقت الشراء: {{ $order->created_at->timezone('Asia/Muscat')->format('h:i A') }}</p>
                 <p>رقم الطلب: {{ $order->Order_Number }}</p>
                 <p>طريقة الدفع: {{ $order->Payment_Method }}</p>
+                @if($order->collection_method)
+                    <p>طريقة التحصيل: {{ ucfirst($order->collection_method) }}</p>
+                @endif
                 <p>طريقة الشحن: مصاريف الشحن</p>
             </div>
         </div>

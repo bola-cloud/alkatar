@@ -40,6 +40,7 @@ class Order extends Model
         'smartlife_invoice_id',
         'smartlife_synced_at',
         'is_printed',
+        'collection_method',
     ];
 
     protected $casts = [
@@ -49,6 +50,14 @@ class Order extends Model
         'Is_Order_Completed' => 'boolean',
         'Is_Free_Delivery' => 'boolean',
     ];
+    
+    /**
+     * Ensure Tax returns 0 or null if it's zero, as requested by mobile dev.
+     */
+    public function getTaxAttribute($value)
+    {
+        return $value == 0 ? 0 : (float)$value;
+    }
 
     public function order_details()
     {

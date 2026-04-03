@@ -68,8 +68,8 @@ class OrderController extends Controller
                     }
                     $serialized_billing = $data->billing_address;
 
-                    if (isset($serialized_billing->phone_number)) {
-                        return $serialized_billing->phone_number;
+                    if (isset($serialized_billing['phone_number'])) {
+                        return $serialized_billing['phone_number'];
                     } else {
                         return 'N/A';
                     }
@@ -92,8 +92,8 @@ class OrderController extends Controller
 
 
                     $serialized_billing = $data->billing_address;
-                    if (isset($serialized_billing->city_ar)) {
-                        return $serialized_billing->city_ar;
+                    if (isset($serialized_billing['city_ar'])) {
+                        return $serialized_billing['city_ar'];
                     } else {
                         return 'N/A';
                     }
@@ -398,8 +398,8 @@ class OrderController extends Controller
             $serialized_billing = $order->billing_address;
 
             $phoneNumber = null;
-            if (isset($serialized_billing->phone_number)) {
-                $phoneNumber = $serialized_billing->phone_number;
+            if (isset($serialized_billing['phone_number'])) {
+                $phoneNumber = $serialized_billing['phone_number'];
             }
 
             $pdfUrl = route('order.print', ['id' => $order->id]);

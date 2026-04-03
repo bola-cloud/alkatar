@@ -241,31 +241,6 @@ class SyncSmartLifeProducts extends Command
             // Quantity and unit
             $qty = $smartLifeProduct->quantity;
 
-            // Handle Combo Quantity Fallback: If combo qty is 0, try to find a related standard product
-            if (($smartLifeProduct->type === 'Combo' || $smartLifeProduct->type === 'تجميعي') && $qty <= 0) {
-                // Determine search term (e.g. "طماط عمان" from "طماط عمان كرتون")
-                $name = $smartLifeProduct->name;
-                $parts = explode(' ', $name);
-                if (count($parts) >= 2) {
-                    $searchTerm = $parts[0] . ' ' . $parts[1];
-                    // Search for a Standard product with similar name that has stock
-                    $related = Product::where('product_type', 'Standard')
-                        ->where('fr_Product_Name', 'LIKE', $searchTerm . '%')
-                        ->where('Quantity', '>', 0)
-                        ->orderBy('Quantity', 'desc')
-                        ->first();
-
-                    if ($related) {
-                        $qty = $related->Quantity;
-                        // Log::info('Combo quantity synced from related product', [
-                        //     'combo_id' => $smartLifeProduct->smartlife_id,
-                        //     'related_id' => $related->id,
-                        //     'qty' => $qty
-                        // ]);
-                    }
-                }
-            }
-
             $product->Quantity = $qty;
             $product->alert_quantity = $smartLifeProduct->alert_quantity;
             $product->unit = $smartLifeProduct->unit;

@@ -100,6 +100,8 @@
                     <p><strong>{{ allsetting()['app_title'] ?? 'هاي سبيد' }}</strong></p>
                     <p>{{ __('Phone') }}: {{ allsetting()['call_us'] ?? '+968 94974726' }}</p>
                     <p>{{ allsetting()['email'] ?? 'alsaraamills@gmail.com' }}</p>
+                    <p>سجل التجاري: 1275107</p>
+                    <p>اسم السجل: Al Akeed Lil Injaz</p>
                 </td>
                 <td width="50%" class="text-left">
                     <p>رقم الطلب: {{ $order->Order_Number }}</p>

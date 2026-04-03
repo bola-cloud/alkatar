@@ -96,7 +96,7 @@
                                 <button class="btn btn-light rounded-circle shadow-sm border lh-1" style="width:40px;height:40px;color:#84b718;" title="{{ __('Wishlist') }}">
                                     <i class="bi bi-heart"></i>
                                 </button>
-                                <button class="btn btn-light rounded-circle shadow-sm border lh-1" style="width:40px;height:40px;color:#84b718;" title="{{ __('Share') }}">
+                                <button id="shareProduct" class="btn btn-light rounded-circle shadow-sm border lh-1" style="width:40px;height:40px;color:#84b718;" title="{{ __('Share') }}">
                                     <i class="bi bi-share"></i>
                                 </button>
                             </div>
@@ -746,5 +746,35 @@
             const initial = parseInt(ratingInput?.value) || 5;
             updateAllPickers(initial);
         });
+        </script>
+        <script>
+            $(document).on('click', '#shareProduct', function() {
+                const title = document.title;
+                const text = '{{ $localizedTitle }}';
+                const url = window.location.href;
+
+                if (navigator.share) {
+                    navigator.share({
+                        title: title,
+                        text: text,
+                        url: url
+                    }).catch((error) => console.log('Error sharing:', error));
+                } else {
+                    // Fallback: Copy to clipboard
+                    const el = document.createElement('textarea');
+                    el.value = url;
+                    document.body.appendChild(el);
+                    el.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(el);
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: '{{ __("Link copied to clipboard!") }}',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
+            });
         </script>
 @endpush
