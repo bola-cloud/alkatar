@@ -43,32 +43,8 @@ class CheckoutController extends Controller
         $subtotal = $this->calculateSubtotal($validated['cart_items']);
         // Prefer per-country Tax table (admin) if available, otherwise fallback to global tax percentage
         $country = $validated['billing_country'] ?? null;
-        $countryName = $country;
-        if ($country && is_numeric($country)) {
-            $countryModel = \App\Models\Country::find($country);
-            if ($countryModel) {
-                $countryName = $countryModel->name_en ?? $countryModel->name;
-            }
-        }
-
-        $tax = 0;
-        $taxFound = false;
-        if ($countryName) {
-            // Use ACTIVE constant (integer 1) for status check
-            $taxModel = \App\Models\Tax::where('country', $countryName)->where('status', ACTIVE)->first();
-            if ($taxModel) {
-                $tax = ($subtotal * $taxModel->percentage) / 100;
-                $taxFound = true;
-            }
-        }
-
-        // Fallback: Use global tax ONLY if specific country tax not found
-        if (!$taxFound) {
-            $globalTaxPercentage = floatval(allsetting()['tax_percentage'] ?? 0);
-            if ($globalTaxPercentage > 0) {
-                $tax = ($subtotal * $globalTaxPercentage) / 100;
-            }
-        }
+        $tax = tax_amount($subtotal, $country);
+        $shipping_charge = delivery_charge($validated['billing_city'] ?? $validated['billing_state'] ?? $validated['billing_country']);
         $shipping_charge = delivery_charge($validated['billing_city'] ?? $validated['billing_state'] ?? $validated['billing_country']);
         $weight_charge = $this->calculateExtraWeightFees($validated['cart_items']);
         $grandTotal = $subtotal + $shipping_charge + $weight_charge + $tax;

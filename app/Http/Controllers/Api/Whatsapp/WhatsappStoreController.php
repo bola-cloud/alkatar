@@ -320,32 +320,9 @@ class WhatsappStoreController extends Controller
             ], 422);
         }
         
-        $countryParam = $validated['billing_country'];
-        $countryName = $countryParam;
-        if (is_numeric($countryParam)) {
-            $countryModel = \App\Models\Country::find($countryParam);
-            if ($countryModel) {
-                $countryName = $countryModel->name_en ?? $countryModel->name;
-            }
-        }
-
-        $tax = 0;
-        $taxFound = false;
+        $tax = tax_amount($subtotal, $validated['billing_country']);
         
-        $taxModel = \App\Models\Tax::where('country', $countryName)->where('status', 1)->first();
-        if ($taxModel) {
-            $tax = ($subtotal * $taxModel->percentage) / 100;
-            $taxFound = true;
-        }
-
-        if (!$taxFound) {
-            $globalTax = floatval(allsetting()['tax_percentage'] ?? 0);
-            if ($globalTax > 0) {
-                $tax = ($subtotal * $globalTax) / 100;
-            }
-        }
-
-        // Refined shipping charge resolution: City > State > Country
+        $shipping_charge = delivery_charge($validated['billing_city'] ?? $validated['billing_state'] ?? $validated['billing_country']);// Refined shipping charge resolution: City > State > Country
         // The improved delivery_charge helper now handles the fallback internally.
         $city_id = $validated['billing_city'] ?? null;
         $state_id = $validated['billing_state'] ?? null;

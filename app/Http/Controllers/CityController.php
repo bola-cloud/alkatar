@@ -130,29 +130,14 @@ class CityController extends Controller
         // Copying logic from getCityCharge but adapting for Area.
 
         $subtotal = floatval(subtotal());
-        // Compute tax
-        $globalTaxPercentage = floatval(allsetting()['tax_percentage'] ?? 0);
         $countryNameForTax = null;
         if ($delivery_area && $delivery_area->state && $delivery_area->state->country) {
-            $countryNameForTax = $delivery_area->state->country->name_en ?? $delivery_area->state->country->name;
+            $countryNameForTax = $delivery_area->state->country->id; // Use ID for helper
         } elseif ($delivery_area && $delivery_area->city && $delivery_area->city->state && $delivery_area->city->state->country) {
-            $countryNameForTax = $delivery_area->city->state->country->name_en ?? $delivery_area->city->state->country->name;
+            $countryNameForTax = $delivery_area->city->state->country->id; // Use ID for helper
         }
 
-        $tax = 0;
-        $taxFound = false;
-        if ($countryNameForTax) {
-            // Use ACTIVE constant (integer 1) for status check
-            $taxModel = \App\Models\Tax::where('country', $countryNameForTax)->where('status', ACTIVE)->first();
-            if ($taxModel) {
-                $tax = ($subtotal * $taxModel->percentage) / 100;
-                $taxFound = true;
-            }
-        }
-        if (!$taxFound && $globalTaxPercentage > 0) {
-            $tax = ($subtotal * $globalTaxPercentage) / 100;
-        }
-
+        $tax = tax_amount($subtotal, $countryNameForTax);
         $coupon = Session::get('CouponAmount', 0);
         $weight_charge = $this->calculateExtraWeightFees();
 
@@ -261,31 +246,12 @@ class CityController extends Controller
 
         $charge = $delivery_city ? $delivery_city->charge : 0;
         $subtotal = floatval(subtotal());
-        // Compute tax consistently with cart/checkout views:
-        // Prefer global setting `tax_percentage` when available, otherwise fall back
-        // to country-specific Tax entries via the helper using the country's name.
-        $globalTaxPercentage = floatval(allsetting()['tax_percentage'] ?? 0);
         $countryNameForTax = null;
         if ($delivery_city && $delivery_city->state && $delivery_city->state->country) {
-            $countryNameForTax = $delivery_city->state->country->name_en ?? $delivery_city->state->country->name;
+            $countryNameForTax = $delivery_city->state->country->id; // Use ID for helper
         }
 
-        // Prefer per-country Tax table (admin) if available, otherwise fallback to global tax percentage
-        $tax = 0;
-        $taxFound = false;
-        if ($countryNameForTax) {
-            // Use ACTIVE constant (integer 1) for status check
-            $taxModel = \App\Models\Tax::where('country', $countryNameForTax)->where('status', ACTIVE)->first();
-            if ($taxModel) {
-                $tax = ($subtotal * $taxModel->percentage) / 100;
-                $taxFound = true;
-            }
-        }
-
-        // Fallback: Use global tax ONLY if specific country tax not found
-        if (!$taxFound && $globalTaxPercentage > 0) {
-            $tax = ($subtotal * $globalTaxPercentage) / 100;
-        }
+        $tax = tax_amount($subtotal, $countryNameForTax);
         $coupon = Session::get('CouponAmount', 0);
         $weight_charge = $this->calculateExtraWeightFees();
 

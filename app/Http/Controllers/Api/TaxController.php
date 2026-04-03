@@ -16,25 +16,12 @@ class TaxController extends Controller
             'subtotal' => 'required|numeric|min:0',
             'country' => 'nullable|string|max:255',
         ]);
-        $taxAmount = 0;
-        $tax = null;
-        if ($validated['country'] != null) {
-            $countryName = $validated['country'];
-            if (is_numeric($countryName)) {
-                $countryModel = \App\Models\Country::find($countryName);
-                if ($countryModel) {
-                    $countryName = $countryModel->name_en ?? $countryModel->name;
-                }
-            }
-            $tax = Tax::where('country', $countryName)->where('status', ACTIVE)->first();
-            if (!is_null($tax)) {
-                $taxAmount = ($validated['subtotal'] * $tax->percentage) / 100;
-            }
-        }
+        $taxAmount = tax_amount($validated['subtotal'], $validated['country']);
+        
         return response()->json([
             'success' => true,
             'tax_amount' => $taxAmount,
-            'tax_details' =>  TaxResource::make($tax),
+            'tax_details' => Tax::where('country', is_numeric($validated['country']) ? (\App\Models\Country::find($validated['country'])->name_en ?? '') : $validated['country'])->first() ?? (object)[]
         ], 200);
     }
 

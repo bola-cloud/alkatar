@@ -289,36 +289,9 @@ class CheckoutController extends Controller
             } else {
                 $countryName = $countryParam;
             }
-            // Prefer per-country tax from Tax table (admin Tax Settings). If not found, fall back to global setting.
             $countryParam = $request->billing_country;
-            $countryName = null;
-            if (is_numeric($countryParam)) {
-                $countryModel = Country::find($countryParam);
-                if ($countryModel) {
-                    $countryName = $countryModel->name_en ?? $countryModel->name;
-                }
-            } else {
-                $countryName = $countryParam;
-            }
-
-            $tax = 0;
-            $taxFound = false;
-            if ($countryName) {
-                // Use ACTIVE constant (integer 1) for status check
-                $taxModel = \App\Models\Tax::where('country', $countryName)->where('status', ACTIVE)->first();
-                if ($taxModel) {
-                    $tax = ($subtotal * $taxModel->percentage) / 100;
-                    $taxFound = true;
-                }
-            }
-
-            // Fallback: Use global tax ONLY if specific country tax not found
-            if (!$taxFound) {
-                $globalTaxPercentage = floatval(allsetting()['tax_percentage'] ?? 0);
-                if ($globalTaxPercentage > 0) {
-                    $tax = ($subtotal * $globalTaxPercentage) / 100;
-                }
-            }
+            $tax = tax_amount($subtotal, $countryParam);
+            
             $shipping_charge = delivery_charge($request->billing_area ?? $request->billing_city ?? $request->billing_state ?? $request->billing_country, ($request->billing_area) ? 'area' : null);
             $weight_charge = $this->calculateExtraWeightFees();
             $shipping_charge += $weight_charge;
@@ -789,23 +762,7 @@ class CheckoutController extends Controller
             $guestCountryName = $guestCountryParam;
         }
 
-        // Calculate tax consistently with country check
-        $tax = 0;
-        $taxFound = false;
-        if ($guestCountryName) {
-            // Use ACTIVE constant (integer 1) for status check
-            $taxModel = \App\Models\Tax::where('country', $guestCountryName)->where('status', ACTIVE)->first();
-            if ($taxModel) {
-                $tax = ($subtotal * $taxModel->percentage) / 100;
-                $taxFound = true;
-            }
-        }
-        if (!$taxFound) {
-            $globalTaxPercent = floatval(allsetting()['tax_percentage'] ?? 0);
-            if ($globalTaxPercent > 0) {
-                $tax = ($subtotal * $globalTaxPercent / 100);
-            }
-        }
+        $tax = tax_amount($subtotal, $guestCountryName);
 
         $shipping_charge = delivery_charge($request->billing_area ?? $request->billing_city ?? $request->billing_state ?? $request->billing_country, ($request->billing_area) ? 'area' : null);
         $this->grand_total = $subtotal + $tax + $shipping_charge;
@@ -1306,31 +1263,7 @@ class CheckoutController extends Controller
             $countryForTax = 'Oman';
         }
 
-        // Resolve tax rate and amount consistently: country-first, then global fallback
-        $tax_rate = 0;
-        $tax_amount = 0;
-        $taxFound = false;
-        
-        if ($countryForTax) {
-            // Use ACTIVE constant (integer 1) for status check
-            $taxModel = \App\Models\Tax::where('country', $countryForTax)->where('status', ACTIVE)->first();
-            if ($taxModel) {
-                $tax_rate = $taxModel->percentage;
-                $tax_amount = (subtotal() * $tax_rate) / 100;
-                $taxFound = true;
-            }
-        }
-        
-        if (!$taxFound) {
-            $globalTaxPercent = floatval(allsetting()['tax_percentage'] ?? 0);
-            if ($globalTaxPercent > 0) {
-                $tax_rate = $globalTaxPercent;
-                $tax_amount = (subtotal() * $globalTaxPercent) / 100;
-            }
-        }
-
-        $data['tax_rate'] = $tax_rate;
-        $data['tax_amount'] = $tax_amount;
+        $data['tax_amount'] = tax_amount(subtotal(), $countryForTax);
         $data['tax_show'] = currencyConverter($data['tax_amount']);
 
         // On state change we do not want to provide a city-level delivery charge.
