@@ -236,6 +236,12 @@ class ThawaniWebhookController extends Controller
             // Two-Step Sync: Update the existing SmartLife invoice to "Paid"
             if (class_exists(SmartLifeErpService::class) && config('smartlife.sync_enabled')) {
                 try {
+                    Log::info('SmartLife Sync attempt via Webhook (Confirming Paid)', [
+                        'order' => $order->Order_Number,
+                        'is_paid' => $order->is_paid,
+                        'existing_erp_id' => $order->smartlife_invoice_id
+                    ]);
+
                     $smartLifeService = app(SmartLifeErpService::class);
                     $smartLifeInvoiceId = $smartLifeService->submitOrder($order);
 
@@ -244,15 +250,20 @@ class ThawaniWebhookController extends Controller
                             'smartlife_invoice_id' => $smartLifeInvoiceId,
                             'smartlife_synced_at' => now(),
                         ]);
+                        Log::info('SmartLife Sync via Webhook: New ERP ID assigned', [
+                            'order' => $order->Order_Number,
+                            'erp_id' => $smartLifeInvoiceId
+                        ]);
+                    } else {
+                        Log::info('SmartLife Sync via Webhook completed', [
+                            'order' => $order->Order_Number,
+                            'erp_id' => $smartLifeInvoiceId
+                        ]);
                     }
-                    Log::info('SmartLife Sync via Webhook (Updated to Paid)', [
-                        'order_id' => $order->id,
-                        'smartlife_invoice_id' => $smartLifeInvoiceId,
-                    ]);
                 } catch (\Exception $e) {
                     Log::error('Failed to sync order to SmartLife via webhook', [
-                        'error' => $e->getMessage(),
-                        'order_id' => $order->id,
+                        'order' => $order->Order_Number,
+                        'error' => $e->getMessage()
                     ]);
                 }
             }

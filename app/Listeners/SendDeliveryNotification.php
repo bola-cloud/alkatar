@@ -49,14 +49,18 @@ class SendDeliveryNotification
                 ]
             ];
 
-            if ($event->player_id) {
+            // Only include player_id if it's a valid UUID to avoid API errors
+            $isValidUuid = $event->player_id && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $event->player_id);
+
+            if ($isValidUuid) {
                 $payload['include_player_ids'] = [$event->player_id];
             } else {
-                $payload['included_segments'] = ['Subscribed Users'];
+                // Fallback to all subscribed users if player_id is missing or invalid
+                $payload['included_segments'] = ['Total Subscriptions'];
             }
 
             $response = \Illuminate\Support\Facades\Http::withHeaders([
-                'Authorization' => 'Basic ' . config('services.onesignal.rest_api_key'),
+                'Authorization' => 'Bearer ' . config('services.onesignal.rest_api_key'),
                 'Content-Type' => 'application/json',
                 'accept' => 'application/json',
             ])->post('https://onesignal.com/api/v1/notifications', $payload);

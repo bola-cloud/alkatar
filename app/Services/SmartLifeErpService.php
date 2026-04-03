@@ -26,6 +26,45 @@ class SmartLifeErpService
     }
 
     /**
+     * Common request handler with automatic retry on session timeout (HTML response)
+     */
+    protected function request($method, $endpoint, $data = [], $headers = [])
+    {
+        $token = $this->getAccessToken();
+        if (!$token) {
+            return null;
+        }
+
+        $url = Str::startsWith($endpoint, 'http') ? $endpoint : "{$this->apiUrl}/{$endpoint}";
+        
+        $makeRequest = function($currentToken) use ($method, $url, $data, $headers) {
+            $request = Http::withHeaders(array_merge([
+                'Authorization' => $currentToken,
+                'Accept' => 'application/json',
+            ], $headers));
+
+            return $method === 'GET' ? $request->get($url, $data) : $request->post($url, $data);
+        };
+
+        $response = $makeRequest($token);
+
+        // Check if response is HTML (indicates session timeout/login redirect)
+        $isHtml = strpos($response->header('Content-Type'), 'text/html') !== false || 
+                  strpos($response->body(), '<!DOCTYPE html>') !== false;
+
+        if ($isHtml) {
+            Log::warning("SmartLife ERP: Received HTML response for {$endpoint}. Retrying with fresh token...");
+            $this->clearTokenCache();
+            $newToken = $this->getAccessToken();
+            if ($newToken) {
+                $response = $makeRequest($newToken);
+            }
+        }
+
+        return $response;
+    }
+
+    /**
      * Get access token (cached)
      *
      * @return string|null
@@ -81,41 +120,19 @@ class SmartLifeErpService
     public function getProducts($offset = 0, $limit = 100)
     {
         try {
-            $token = $this->getAccessToken();
+            $response = $this->request('GET', 'products/get_products_list', [
+                'offset' => $offset,
+                'limit' => $limit
+            ]);
 
-            if (!$token) {
-                Log::error('SmartLife ERP: Cannot get products - no access token');
-                return null;
-            }
-
-            $response = Http::withHeaders([
-                'Authorization' => $token,
-            ])->get("{$this->apiUrl}/products/get_products_list", [
-                        'offset' => $offset,
-                        'limit' => $limit
-                    ]);
-
-            if ($response->successful()) {
+            if ($response && $response->successful()) {
                 $data = $response->json();
-
                 if (isset($data['success']) && $data['success'] === true) {
-                    // Log::info('SmartLife ERP products fetched', [
-                    //     'total_count' => $data['total_count'] ?? 0,
-                    //     'fetched' => count($data['data'] ?? [])
-                    // ]);
                     return $data;
                 }
-
                 Log::error('SmartLife ERP get products failed', ['response' => $data]);
-                return null;
             }
-
-            Log::error('SmartLife ERP get products request failed', [
-                'status' => $response->status(),
-                'body' => $response->body()
-            ]);
             return null;
-
         } catch (Exception $e) {
             Log::error('SmartLife ERP get products exception', ['error' => $e->getMessage()]);
             return null;
@@ -130,31 +147,12 @@ class SmartLifeErpService
     public function getCategories()
     {
         try {
-            $token = $this->getAccessToken();
+            $response = $this->request('GET', 'taxonomy', ['type' => 'product']);
 
-            if (!$token) {
-                Log::error('SmartLife ERP: Cannot get categories - no access token');
-                return null;
+            if ($response && $response->successful()) {
+                return $response->json();
             }
-
-            $response = Http::withHeaders([
-                'Authorization' => $token,
-            ])->get("{$this->apiUrl}/taxonomy", [
-                'type' => 'product'
-            ]);
-
-            if ($response->successful()) {
-                $data = $response->json();
-                // Log::info('SmartLife ERP categories response', ['data' => $data]);
-                return $data; 
-            }
-
-            Log::error('SmartLife ERP get categories request failed', [
-                'status' => $response->status(),
-                'body' => $response->body()
-            ]);
             return null;
-
         } catch (Exception $e) {
             Log::error('SmartLife ERP get categories exception', ['error' => $e->getMessage()]);
             return null;
@@ -175,28 +173,13 @@ class SmartLifeErpService
     public function getProductDetails($id)
     {
         try {
-            $token = $this->getAccessToken();
-            if (!$token)
-                return null;
+            $response = $this->request('GET', 'products/get_product_details', ['id' => $id]);
 
-            $response = Http::withHeaders([
-                'Authorization' => $token,
-            ])->get("{$this->apiUrl}/products/get_product_details", [
-                        'id' => $id
-                    ]);
-
-            if ($response->successful()) {
+            if ($response && $response->successful()) {
                 $data = $response->json();
                 if (isset($data['success']) && $data['success'] === true) {
                     return $data['data'] ?? null;
                 }
-                Log::warning('SmartLife ERP details success but logical failure', ['id' => $id, 'data' => $data]);
-            } else {
-                Log::error('SmartLife ERP product details request failed', [
-                    'id' => $id,
-                    'status' => $response->status(),
-                    'body' => $response->body()
-                ]);
             }
             return null;
         } catch (Exception $e) {
@@ -240,43 +223,20 @@ class SmartLifeErpService
     public function createCustomer($name, $phone, $customerGroupId = 6)
     {
         try {
-            $token = $this->getAccessToken();
-
-            if (!$token) {
-                Log::error('SmartLife ERP: Cannot create customer - no access token');
-                return null;
-            }
-
             $payload = [
                 'name' => $name,
                 'phone' => $phone,
                 'customer_group_id' => $customerGroupId
             ];
 
-            $response = Http::withHeaders([
-                'Authorization' => $token,
-            ])->post("{$this->apiUrl}/clients/add", $payload);
+            $response = $this->request('POST', 'clients/add', $payload);
 
-            if ($response->successful()) {
+            if ($response && $response->successful()) {
                 $data = $response->json();
-
                 if (isset($data['success']) && $data['success'] === true) {
-                    Log::info('SmartLife ERP customer created successfully', [
-                        'customer_id' => $data['id'] ?? null,
-                        'name' => $name,
-                        'phone' => $phone
-                    ]);
                     return $data;
                 }
-
-                Log::error('SmartLife ERP create customer failed', ['response' => $data]);
-                return null;
             }
-
-            Log::error('SmartLife ERP create customer request failed', [
-                'status' => $response->status(),
-                'body' => $response->body()
-            ]);
             return null;
         } catch (Exception $e) {
             Log::error('SmartLife ERP create customer exception', ['error' => $e->getMessage()]);
@@ -295,39 +255,17 @@ class SmartLifeErpService
     public function updateCustomer($id, $name, $phone)
     {
         try {
-            $token = $this->getAccessToken();
-
-            if (!$token) {
-                Log::error('SmartLife ERP: Cannot update customer - no access token');
-                return null;
-            }
-
             $payload = [
                 'name' => $name,
                 'phone' => $phone
             ];
 
-            // Standard UltimatePOS update endpoint
-            $response = Http::withHeaders([
-                'Authorization' => $token,
-            ])->post("{$this->apiUrl}/clients/update/$id", $payload);
+            $response = $this->request('POST', "clients/update/$id", $payload);
 
-            if ($response->successful()) {
-                $data = $response->json();
-                Log::info('SmartLife ERP customer updated successfully', [
-                    'customer_id' => $id,
-                    'name' => $name,
-                    'phone' => $phone
-                ]);
-                return $data;
+            if ($response && $response->successful()) {
+                return $response->json();
             }
-
-            Log::error('SmartLife ERP update customer request failed', [
-                'status' => $response->status(),
-                'body' => $response->body()
-            ]);
             return null;
-
         } catch (Exception $e) {
             Log::error('SmartLife ERP update customer exception', ['error' => $e->getMessage()]);
             return null;
@@ -345,13 +283,6 @@ class SmartLifeErpService
     public function addSale(array $products, $customerId = null, array $saleDetails = [])
     {
         try {
-            $token = $this->getAccessToken();
-
-            if (!$token) {
-                Log::error('SmartLife ERP: Cannot add sale - no access token');
-                return null;
-            }
-
             if (empty($products)) {
                 Log::error('SmartLife ERP: Cannot add sale - no products provided');
                 return null;
@@ -362,139 +293,36 @@ class SmartLifeErpService
                 'products' => $products
             ];
 
-            // Add optional sale details if provided (discount, order reference, etc.)
             if (!empty($saleDetails)) {
-                // Support invoice_no (primary for SmartERP), ref_no, and order_reference for compatibility
-                if (isset($saleDetails['invoice_no'])) {
-                    $payload['invoice_no'] = $saleDetails['invoice_no'];
-                }
-                if (isset($saleDetails['ref_no'])) {
-                    $payload['ref_no'] = $saleDetails['ref_no'];
-                    if (!isset($payload['invoice_no'])) {
-                        $payload['invoice_no'] = $saleDetails['ref_no'];
-                    }
-                }
-                if (isset($saleDetails['order_reference'])) {
-                    $payload['order_reference'] = $saleDetails['order_reference'];
-                    if (!isset($payload['invoice_no'])) {
-                        $payload['invoice_no'] = $saleDetails['order_reference'];
-                    }
-                }
-
-                if (isset($saleDetails['discount_amount'])) {
-                    $payload['discount_amount'] = $saleDetails['discount_amount'];
-                }
-                if (isset($saleDetails['discount_type'])) {
-                    $payload['discount_type'] = $saleDetails['discount_type'];
-                }
-                if (isset($saleDetails['status'])) {
-                    $payload['status'] = $saleDetails['status'];
-                }
-                if (isset($saleDetails['payment_status'])) {
-                    $payload['payment_status'] = $saleDetails['payment_status'];
-                }
-
-                // Add payment array (plural as requested by developer)
-                if (isset($saleDetails['payments'])) {
-                    $payload['payments'] = $saleDetails['payments'];
-                } else if (isset($saleDetails['payment'])) {
-                    // Fallback alias
-                    $payload['payments'] = $saleDetails['payment'];
-                } else if (isset($saleDetails['paid_by'])) {
-                    // Fallback to legacy single payment fields
-                    $payload['amount'] = $saleDetails['amount'] ?? 0;
-                    $payload['paid_by'] = $saleDetails['paid_by'];
-                    $payload['cheque_no'] = $saleDetails['cheque_no'] ?? '';
-                }
-
-                if (isset($saleDetails['notes'])) {
-                    $payload['notes'] = $saleDetails['notes'];
-                    $payload['additional_notes'] = $saleDetails['notes']; // Alias
-                }
-
-                if (isset($saleDetails['warehouse_id'])) {
-                    $payload['warehouse_id'] = $saleDetails['warehouse_id'];
-                }
+                if (isset($saleDetails['invoice_no'])) $payload['invoice_no'] = $saleDetails['invoice_no'];
+                if (isset($saleDetails['ref_no'])) $payload['ref_no'] = $saleDetails['ref_no'];
+                if (isset($saleDetails['order_reference'])) $payload['order_reference'] = $saleDetails['order_reference'];
+                if (isset($saleDetails['discount_amount'])) $payload['discount_amount'] = $saleDetails['discount_amount'];
+                if (isset($saleDetails['discount_type'])) $payload['discount_type'] = $saleDetails['discount_type'];
+                if (isset($saleDetails['status'])) $payload['status'] = $saleDetails['status'];
+                if (isset($saleDetails['payment_status'])) $payload['payment_status'] = $saleDetails['payment_status'];
+                if (isset($saleDetails['payments'])) $payload['payments'] = $saleDetails['payments'];
+                if (isset($saleDetails['notes'])) $payload['notes'] = $payload['additional_notes'] = $saleDetails['notes'];
+                if (isset($saleDetails['warehouse_id'])) $payload['warehouse_id'] = $saleDetails['warehouse_id'];
             }
-
-            Log::info('SmartLife ERP addSale/updateSale Payload', ['payload' => $payload]);
 
             if (isset($saleDetails['smartlife_invoice_id']) && !empty($saleDetails['smartlife_invoice_id'])) {
-                // Update existing invoice (Payment Success Step 2)
                 $saleId = $saleDetails['smartlife_invoice_id'];
-                $payload['sale_id'] = $saleId; // Important for PUT
-                $payload['_method'] = 'PUT'; // Method spoofing for better compatibility
-
-                Log::info('SmartLife ERP Updating Existing Invoice to Paid (PUT)', ['sale_id' => $saleId]);
-                // Try POST with _method spoofing if direct PUT returned HTML before
-                $response = Http::withHeaders([
-                    'Authorization' => $token,
-                ])->post("{$this->apiUrl}/sales/{$saleId}", $payload);
+                $payload['sale_id'] = $saleId;
+                $payload['_method'] = 'PUT';
+                $response = $this->request('POST', "sales/{$saleId}", $payload);
             } else {
-                // Create new invoice (Checkout Step 1)
-                $response = Http::withHeaders([
-                    'Authorization' => $token,
-                ])->post("{$this->apiUrl}/sales/add", $payload);
+                $response = $this->request('POST', "sales/add", $payload);
             }
 
-            // Log full response details
-            Log::info('SmartLife ERP API Response', [
-                'status_code' => $response->status(),
-                'headers' => $response->headers(),
-                'body' => $response->body(),
-                'json' => $response->json(),
-            ]);
-
-            if ($response->successful()) {
+            if ($response && $response->successful()) {
                 $data = $response->json();
-
                 if (isset($data['success']) && $data['success'] === true) {
-                    Log::info('SmartLife ERP sale added successfully', [
-                        'products_count' => count($products),
-                        'response' => $data,
-                        'sale_id' => $data['data'] ?? null
-                    ]);
-
-                    // Try to fetch the created sale to verify it exists
-                    if (isset($data['data'])) {
-                        try {
-                            $saleId = $data['data'];
-                            $verifySale = Http::withHeaders([
-                                'Authorization' => $token,
-                            ])->get("{$this->apiUrl}/sales/get_sale_details", ['id' => $saleId]);
-
-                            Log::info('Sale verification attempt', [
-                                'sale_id' => $saleId,
-                                'verification_status' => $verifySale->status(),
-                                'verification_body' => $verifySale->body()
-                            ]);
-                        } catch (\Exception $e) {
-                            Log::warning('Could not verify sale creation', ['error' => $e->getMessage()]);
-                        }
-                    }
-
+                    Log::info('SmartLife ERP sale successful', ['sale_id' => $data['data'] ?? $data['id'] ?? null]);
                     return $data;
                 }
-
-                Log::error('SmartLife ERP add sale failed', ['response' => $data]);
-                return null;
             }
-
-            // Check for HTML response (Login page redirect usually indicates invalid token)
-            $contentType = $response->header('Content-Type');
-            if (strpos($contentType, 'text/html') !== false || strpos($response->body(), '<!DOCTYPE html>') !== false) {
-                Log::warning('SmartLife ERP returned HTML (likely login redirect). Clearing token cache.');
-                $this->clearTokenCache();
-                return null;
-            }
-
-            Log::error('SmartLife ERP add sale request failed', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-                'json' => $response->json()
-            ]);
             return null;
-
         } catch (Exception $e) {
             Log::error('SmartLife ERP add sale exception', ['error' => $e->getMessage()]);
             return null;
@@ -514,16 +342,12 @@ class SmartLifeErpService
     public function addPayment($saleId, $amount, $paidBy = 'cash', $note = '', $chequeNo = '')
     {
         try {
-            $token = $this->getAccessToken();
-            if (!$token)
-                return null;
-
             $payload = [
                 'sale_id' => (string) $saleId,
                 'sell_id' => (string) $saleId,
                 'transaction_id' => (string) $saleId,
                 'amount' => (float) $amount,
-                'account_id' => $this->paymentAccountId, // Mandatory field in some Smarterp versions
+                'account_id' => $this->paymentAccountId,
                 'paid_by' => in_array(strtolower($paidBy), ['card', 'thawani', 'online']) ? 'Card' : 'Cash',
                 'method' => in_array(strtolower($paidBy), ['card', 'thawani', 'online']) ? 'card' : 'cash',
                 'payment_status' => 'Paid',
@@ -532,33 +356,16 @@ class SmartLifeErpService
                 'paid_on' => now()->toDateTimeString(),
             ];
 
-            Log::info('SmartLife ERP addPayment Payload', ['payload' => $payload]);
+            $response = $this->request('POST', 'sales/add_payment', $payload);
 
-            $response = Http::withHeaders([
-                'Authorization' => $token,
-            ])->post("{$this->apiUrl}/sales/add_payment", $payload);
-
-            // Detailed response logging
-            Log::info('SmartLife ERP addPayment API Response', [
-                'status_code' => $response->status(),
-                'headers' => $response->header('Content-Type'),
-                'body' => $response->successful() ? $response->json() : Str::limit($response->body(), 500),
-            ]);
-
-            if ($response->successful()) {
+            if ($response && $response->successful()) {
                 $data = $response->json();
                 if (isset($data['success']) && $data['success'] === true) {
+                    Log::info('SmartLife ERP payment added', ['sale_id' => $saleId]);
                     return $data;
                 }
             }
-
-            Log::error('SmartLife ERP addPayment request failed', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-                'url' => "{$this->apiUrl}/sales/add_payment"
-            ]);
             return null;
-
         } catch (Exception $e) {
             Log::error('SmartLife ERP addPayment exception', ['error' => $e->getMessage()]);
             return null;

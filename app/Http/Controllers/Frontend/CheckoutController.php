@@ -1419,16 +1419,29 @@ class CheckoutController extends Controller
         // Two-Step Sync: Update the existing SmartLife invoice to "Paid"
         if (config('smartlife.sync_enabled')) {
             try {
+                Log::info('SmartLife Sync attempt via paymentSuccess (Confirming Paid)', [
+                    'order' => $order->Order_Number,
+                    'is_paid' => $order->is_paid,
+                    'payment_status' => $order->Payment_Status,
+                    'existing_erp_id' => $order->smartlife_invoice_id
+                ]);
+
                 $smartLifeService = new \App\Services\SmartLifeErpService();
                 $invoiceId = $smartLifeService->submitOrder($order);
+
                 if ($invoiceId && !$order->smartlife_invoice_id) {
                     $order->smartlife_synced_at = now();
                     $order->smartlife_invoice_id = $invoiceId;
                     $order->save();
+                    Log::info('SmartLife Sync via paymentSuccess: New ERP ID assigned', ['order' => $order->Order_Number, 'erp_id' => $invoiceId]);
+                } else {
+                    Log::info('SmartLife Sync via paymentSuccess completed', ['order' => $order->Order_Number, 'erp_id' => $invoiceId]);
                 }
-                Log::info('SmartLife Sync via paymentSuccess (Updated to Paid)', ['order' => $order->Order_Number, 'erp_id' => $invoiceId]);
             } catch (\Exception $e) {
-                Log::error('SmartLife update sync failed in paymentSuccess', ['error' => $e->getMessage()]);
+                Log::error('SmartLife update sync failed in paymentSuccess', [
+                    'order' => $order->Order_Number,
+                    'error' => $e->getMessage()
+                ]);
             }
         }
 
