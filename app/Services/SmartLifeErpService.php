@@ -302,7 +302,8 @@ class SmartLifeErpService
     public function getProductDetails($id)
     {
         try {
-            $response = $this->request('GET', 'products/get_product_details', ['id' => $id]);
+            // v3 API: Try query param vs path
+            $response = $this->request('GET', "products/get_product_details", ['id' => $id]);
 
             if ($response && $response->successful()) {
                 $data = $response->json();
@@ -437,9 +438,11 @@ class SmartLifeErpService
 
             if (isset($saleDetails['smartlife_invoice_id']) && !empty($saleDetails['smartlife_invoice_id'])) {
                 $saleId = $saleDetails['smartlife_invoice_id'];
-                $payload['sale_id'] = $saleId;
-                $payload['_method'] = 'PUT';
-                $response = $this->request('POST', "sales/{$saleId}", $payload);
+                $payload['sale_id'] = (string) $saleId;
+                
+                // v3 UPDATE: Use 'sales/update/{id}' (POST) instead of 'sales/{id}' (PUT)
+                // Note: v3 documentation requires the full 'products' list during update.
+                $response = $this->request('POST', "sales/update/{$saleId}", $payload);
             } else {
                 $response = $this->request('POST', "sales/add", $payload);
             }

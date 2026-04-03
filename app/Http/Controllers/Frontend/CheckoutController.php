@@ -1002,11 +1002,13 @@ class CheckoutController extends Controller
 
         $pdfUrl = route('api.whatsapp.invoice_pdf', ['id' => $order->id]);
         $phoneNumber = $order->billing_address['phone_number'] ?? $order->user->Number ?? '';
+        $name = $order->billing_address['name'] ?? $order->user->name ?? 'Customer';
 
         try {
-            // Trigger WhatsApp notification for all successful orders (Online/COD)
-            $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/success/payment', [
+            // Updated WhatsApp Notification: Using asJson() and including name for server compatibility
+            $response = Http::asJson()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/success/payment', [
                 'phone_number' => $phoneNumber,
+                'name' => $name,
                 'booking_id' => $order->Order_Number,
                 'pdf' => $pdfUrl,
             ]);
