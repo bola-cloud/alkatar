@@ -13,7 +13,7 @@ class TestDeliveryNotification extends Command
      *
      * @var string
      */
-    protected $signature = 'notify:test-delivery {order_id?}';
+    protected $signature = 'notify:test-delivery {order_id?} {--player=}';
 
     /**
      * The console command description.
@@ -30,6 +30,7 @@ class TestDeliveryNotification extends Command
     public function handle()
     {
         $orderId = $this->argument('order_id');
+        $playerId = $this->option('player');
         
         if ($orderId) {
             $order = Order::find($orderId);
@@ -42,10 +43,17 @@ class TestDeliveryNotification extends Command
             return 0;
         }
 
+        $this->info("App ID: " . config('services.onesignal.app_id'));
+        if ($playerId) {
+            $this->info("Targeting Player ID: {$playerId}");
+        } else {
+            $this->info("Targeting Segment: Subscribed Users");
+        }
+
         $this->info("Triggering OrderCreated event for Order #{$order->Order_Number}...");
         
         // Dispatch the event which triggers the SendDeliveryNotification listener
-        event(new OrderCreated($order));
+        event(new OrderCreated($order, $playerId));
 
         $this->info('Event dispatched. Check storage/logs/laravel.log for OneSignal API response.');
         

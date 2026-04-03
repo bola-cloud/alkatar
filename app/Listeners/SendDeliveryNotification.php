@@ -33,7 +33,6 @@ class SendDeliveryNotification
 
             $payload = [
                 'app_id' => config('services.onesignal.app_id'),
-                'included_segments' => ['Subscribed Users'],
                 'android_channel_id' => $channelKey,
                 'headings' => [
                     'en' => 'New Order Alert!',
@@ -49,6 +48,12 @@ class SendDeliveryNotification
                     'type' => 'new_order'
                 ]
             ];
+
+            if ($event->player_id) {
+                $payload['include_player_ids'] = [$event->player_id];
+            } else {
+                $payload['included_segments'] = ['Subscribed Users'];
+            }
 
             $response = \Illuminate\Support\Facades\Http::withHeaders([
                 'Authorization' => 'Basic ' . config('services.onesignal.rest_api_key'),

@@ -15,15 +15,17 @@ class OrderCreated implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $order;
+    public $player_id;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($order)
+    public function __construct($order, $player_id = null)
     {
         $this->order = $order;
+        $this->player_id = $player_id;
     }
 
     /**
