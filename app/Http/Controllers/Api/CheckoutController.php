@@ -109,7 +109,7 @@ class CheckoutController extends Controller
         }
 
         $initial_status = ORDER_PENDING;
-        if (strtoupper($payment_method) == 'COD' || strtoupper($payment_method) == 'THAWANI') {
+        if (strtoupper($payment_method) == 'COD') {
             $initial_status = ORDER_PROCESSING;
         }
 

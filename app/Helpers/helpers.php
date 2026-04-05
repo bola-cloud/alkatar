@@ -643,12 +643,12 @@ if (!function_exists('delivery_charge')) {
 
             // 2. City Check
             if ($type === 'city' || (is_numeric($location) && is_null($type))) {
-                $item = DeliveryCharge::where('city_id', $location)->where('status', ACTIVE)->first();
+                $item = DeliveryCharge::where('city_id', $location)->whereNull('area_id')->where('status', ACTIVE)->first();
                 if ($item && $item->charge > 0) {
                     return $item->charge;
                 }
                 // Fallback: If city charge is 0 or not found, try its state
-                if (is_null($type)) {
+                if (is_null($type) || $type === 'city') {
                     $city = \App\Models\City::find($location);
                     if ($city) {
                         $location = $city->state_id;
@@ -659,7 +659,7 @@ if (!function_exists('delivery_charge')) {
 
             // 3. State Check
             if ($type === 'state' || (is_numeric($location) && is_null($type))) {
-                $item = DeliveryCharge::where('state_id', $location)->whereNull('city_id')->where('status', ACTIVE)->first();
+                $item = DeliveryCharge::where('state_id', $location)->whereNull('city_id')->whereNull('area_id')->where('status', ACTIVE)->first();
                 if ($item && $item->charge > 0) {
                     return $item->charge;
                 }

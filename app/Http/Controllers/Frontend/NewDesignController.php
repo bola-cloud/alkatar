@@ -20,7 +20,7 @@ class NewDesignController extends Controller
 
         // Only show admin-selected Today Special products in the special offers carousel.
         $products = Product::where('Status', 1)
-            ->where('Quantity', '>', 0)
+            ->available()
             ->where('Today_Special', 1)
             ->with($relations)
             ->orderBy('id', 'desc')
@@ -29,7 +29,7 @@ class NewDesignController extends Controller
         // If no Today_Special products are set, fallback to the latest 5 active products.
         if ($products->isEmpty()) {
             $products = Product::where('Status', 1)
-                ->where('Quantity', '>', 0)
+                ->available()
                 ->with($relations)
                 ->orderBy('id', 'desc')
                 ->take(5)
@@ -38,7 +38,7 @@ class NewDesignController extends Controller
 
         // Best sellers: products ordered by `Sold` desc. If none sold products exist, fallback to latest 5.
         $bestSellers = Product::where('Status', 1)
-            ->where('Quantity', '>', 0)
+            ->available()
             ->where('Sold', '>', 0)
             ->with($relations)
             ->orderBy('Sold', 'desc')
@@ -47,7 +47,7 @@ class NewDesignController extends Controller
 
         if ($bestSellers->isEmpty()) {
             $bestSellers = Product::where('Status', 1)
-                ->where('Quantity', '>', 0)
+                ->available()
                 ->with($relations)
                 ->orderBy('id', 'desc')
                 ->take(5)
@@ -63,7 +63,7 @@ class NewDesignController extends Controller
         $reviews = ProductReview::with('user', 'product')
             ->where('is_visible', true)
             ->whereHas('product', function ($q) {
-                $q->where('Status', 1)->where('Quantity', '>', 0);
+                $q->where('Status', 1)->available();
             })
             ->orderBy('created_at', 'desc')
             ->take(6)
@@ -82,7 +82,7 @@ class NewDesignController extends Controller
 
         // Manual lazy load products per featured category
         foreach ($featuredCategories as $cat) {
-            $catProducts = $cat->products()->where('Status', 1)->where('Quantity', '>', 0)->orderByRaw('fr_Product_Name COLLATE utf8mb4_unicode_ci ASC')->with($relations)->take(12)->get();
+            $catProducts = $cat->products()->where('Status', 1)->available()->orderByRaw('fr_Product_Name COLLATE utf8mb4_unicode_ci ASC')->with($relations)->take(12)->get();
             $cat->setRelation('products', $catProducts);
         }
 

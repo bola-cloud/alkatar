@@ -23,6 +23,7 @@ class StoreOrderRequest extends FormRequest
             'billing_country' => 'required|string|max:255',
             'billing_state' => 'required|exists:states,id',
             'billing_city' => 'nullable|exists:cities,id',
+            'billing_area_id' => 'nullable|exists:areas,id',
             'cart_items' => 'required|array',
             'cart_items.*.product_id' => 'required|exists:products,id',
             'cart_items.*.quantity' => 'required|integer|min:1',

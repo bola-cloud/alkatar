@@ -1022,7 +1022,7 @@ class CheckoutController extends Controller
             ]);
 
             $initial_order_status = ORDER_PENDING;
-            if (strtoupper($payment_method) == 'COD' || strtoupper($payment_method) == 'THAWANI') {
+            if (strtoupper($payment_method) == 'COD') {
                 $initial_order_status = ORDER_PROCESSING;
             }
 
@@ -1071,7 +1071,7 @@ class CheckoutController extends Controller
                         'Total_Price' => $item->price * $item->qty,
                     ]);
                 }
-                if ($shouldBroadcast) {
+                if ($shouldBroadcast && $order->Order_Status == ORDER_PROCESSING) {
                     event(new \App\Events\OrderCreated($order));
                 }
 

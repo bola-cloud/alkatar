@@ -102,7 +102,10 @@ class WhatsappStoreController extends Controller
     {
         $query = Product::with(['category', 'brand', 'weights', 'sizes', 'additions'])
             ->where('Status', 1)
-            ->where('Quantity', '>', 0);
+            ->where(function($q) {
+                $q->where('Quantity', '>', 0)
+                  ->orWhereIn('product_type', ['Combo', 'تجميعي']);
+            });
 
         if ($request->filled('category_id')) {
             $query->where('Category_Id', $request->category_id);
@@ -139,7 +142,11 @@ class WhatsappStoreController extends Controller
             'product_reviews',
             'product_reviews.user',
             'comboItems',
-        ])->where('Status', 1)->where('Quantity', '>', 0)->find($id);
+        ])->where('Status', 1)
+            ->where(function($q) {
+                $q->where('Quantity', '>', 0)
+                  ->orWhereIn('product_type', ['Combo', 'تجميعي']);
+            })->find($id);
 
         if (!$product) {
             return response()->json(['message' => 'Product not found'], 404);
@@ -155,7 +162,10 @@ class WhatsappStoreController extends Controller
 
         $related = Product::with(['category', 'brand', 'weights', 'sizes'])
             ->where('Status', 1)
-            ->where('Quantity', '>', 0)
+            ->where(function($q) {
+                $q->where('Quantity', '>', 0)
+                  ->orWhereIn('product_type', ['Combo', 'تجميعي']);
+            })
             ->where('id', '!=', $product->id)
             ->where(function ($q) use ($cat_id, $keywords) {
                 if (!empty($cat_id)) {
@@ -272,7 +282,7 @@ class WhatsappStoreController extends Controller
      */
     public function getShippingLocations()
     {
-        $countries = Country::with(['states.cities'])->get()->map(function($country) {
+        $countries = Country::with(['states.cities.areas'])->get()->map(function($country) {
             return [
                 'id' => $country->id,
                 'name' => $country->name,
@@ -283,13 +293,21 @@ class WhatsappStoreController extends Controller
                         'id' => $state->id,
                         'name' => $state->name_en,
                         'name_ar' => $state->name_ar,
-                        'delivery_charge' => delivery_charge($state->id), // State charge
+                        'delivery_charge' => delivery_charge($state->id, 'state'), 
                         'cities' => $state->cities->map(function($city) {
                             return [
                                 'id' => $city->id,
                                 'name' => $city->name_en,
                                 'name_ar' => $city->name_ar,
-                                'delivery_charge' => delivery_charge($city->id), // City charge
+                                'delivery_charge' => delivery_charge($city->id, 'city'),
+                                'areas' => $city->areas->map(function($area) {
+                                    return [
+                                        'id' => $area->id,
+                                        'name' => $area->name_en,
+                                        'name_ar' => $area->name_ar,
+                                        'delivery_charge' => delivery_charge($area->id, 'area'),
+                                    ];
+                                })
                             ];
                         })
                     ];
@@ -322,23 +340,32 @@ class WhatsappStoreController extends Controller
         
         $tax = tax_amount($subtotal, $validated['billing_country']);
         
-        $shipping_charge = delivery_charge($validated['billing_city'] ?? $validated['billing_state'] ?? $validated['billing_country']);// Refined shipping charge resolution: City > State > Country
-        // The improved delivery_charge helper now handles the fallback internally.
+        $area_id = $validated['billing_area_id'] ?? null;
         $city_id = $validated['billing_city'] ?? null;
         $state_id = $validated['billing_state'] ?? null;
         $country = $validated['billing_country'] ?? 'Oman';
 
-        $shipping_charge = delivery_charge($city_id, 'city');
+        // 1. Try Area Charge
+        $shipping_charge = 0;
+        if ($area_id) {
+            $shipping_charge = delivery_charge($area_id, 'area');
+        }
+
+        // 2. Try City Charge (Fallback)
+        if ($shipping_charge == 0 && $city_id) {
+            $shipping_charge = delivery_charge($city_id, 'city');
+        }
         
-        // If still zero, the helper didn't find a city charge or it was zero, so try state
-        if ($shipping_charge == 0) {
+        // 3. Try State Charge (Fallback)
+        if ($shipping_charge == 0 && $state_id) {
             $shipping_charge = delivery_charge($state_id, 'state');
         }
 
-        // If STILL zero, fallback to country name string match
+        // 4. Try Country Charge (Fallback)
         if ($shipping_charge == 0) {
             $shipping_charge = delivery_charge($country);
         }
+
         $weight_charge = $this->calculateExtraWeightFees($validated['cart_items']);
         $grandTotal = $subtotal + $shipping_charge + $weight_charge + $tax;
 
@@ -375,6 +402,7 @@ class WhatsappStoreController extends Controller
 
         $state = \App\Models\State::find($validated['billing_state']);
         $city = \App\Models\City::find($validated['billing_city']);
+        $area = isset($validated['billing_area_id']) ? \App\Models\Area::find($validated['billing_area_id']) : null;
 
         $billing_address = [
             'name' => $billing->Name,
@@ -382,12 +410,15 @@ class WhatsappStoreController extends Controller
             'street' => $billing->Street,
             'state' => $billing->State,
             'city' => $billing->City,
+            'area_id' => $validated['billing_area_id'] ?? null,
             'zipcode' => $billing->Zipcode,
             'country' => $billing->Country,
             'state_en' => $state->name_en ?? '',
             'state_ar' => $state->name_ar ?? '',
             'city_en' => $city->name_en ?? '',
             'city_ar' => $city->name_ar ?? '',
+            'area_en' => $area->name_en ?? '',
+            'area_ar' => $area->name_ar ?? '',
             'phone_number' => $user->Number ?? '',
         ];
 

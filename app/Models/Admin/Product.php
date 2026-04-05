@@ -226,6 +226,14 @@ class Product extends Model
         return $query->where('Discount', '>', 0);
     }
 
+    public function scopeAvailable($query)
+    {
+        return $query->where(function($q) {
+            $q->where('Quantity', '>', 0)
+              ->orWhereIn('product_type', ['Combo', 'تجميعي']);
+        });
+    }
+
     public function getLocalizedNameAttribute()
     {
         $locale = app()->getLocale();

@@ -19,6 +19,11 @@ class DeliveryOrderController extends Controller
         $orders = Order::with(['order_details', 'user'])
             ->where('Order_Status', ORDER_PROCESSING)
             ->whereNull('delivery_man_id')
+            ->where(function ($query) {
+                // Show all non-thawani orders (like COD) OR paid Thawani orders
+                $query->where('Payment_Method', '!=', THAWANI)
+                    ->orWhere('is_paid', 1);
+            })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 

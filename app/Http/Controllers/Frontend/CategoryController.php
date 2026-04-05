@@ -22,7 +22,7 @@ class CategoryController extends Controller
         Log::info('CategoryController@show hit with slug: ' . ($slug ?? 'null'));
         // If no slug provided, treat this as "All Categories" / "All Products" view
         if (is_null($slug) || in_array($slug, ['', 'all', 'all-products', 'categories'])) {
-            $products = Product::where('Status', 1)->where('Quantity', '>', 0)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->paginate(12);
+            $products = Product::where('Status', 1)->available()->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->paginate(12);
             // Use the display locale (HTML_LANG) from session for UI translations so the
             // frontend shows the language selected by the user (e.g. 'ar') while
             // backend/service locale (APP_LOCALE) may remain for DB compatibility.
@@ -47,7 +47,7 @@ class CategoryController extends Controller
         if ($category) {
             $products = Product::where('Status', 1)
                 ->where('Category_Id', $category->id)
-                ->where('Quantity', '>', 0)
+                ->available()
                 ->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')
                 ->paginate(12);
 
@@ -58,7 +58,7 @@ class CategoryController extends Controller
             $title = $category->{$dbPrefix . '_Category_Name'} ?? $category->en_Category_Name ?? $category->fr_Category_Name ?? ucfirst($searchName);
         } else {
             // Fallback: no matching category found — show generic product list
-            $products = Product::where('Status', 1)->where('Quantity', '>', 0)->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->paginate(12);
+            $products = Product::where('Status', 1)->available()->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')->paginate(12);
             $title = ucfirst($searchName);
         }
 

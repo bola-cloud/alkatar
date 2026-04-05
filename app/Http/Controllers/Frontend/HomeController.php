@@ -44,7 +44,7 @@ class HomeController extends Controller
                     $query->where('status', 1);
                 },
                 'product_tags'
-            ])->where('Status', ACTIVE)->where('Quantity', '>', 0)->orderBy('fr_Product_Name', 'asc');
+            ])->where('Status', ACTIVE)->available()->orderBy('fr_Product_Name', 'asc');
 
             $data['featured_products'] = $all_products->clone()->where('Featured_Product', ACTIVE)->orderByRaw('fr_Product_Name COLLATE utf8mb4_unicode_ci ASC')->paginate(10);
             $data['on_sales'] = $all_products->clone()->where('Discount', "!=", '0')->orderByRaw('fr_Product_Name COLLATE utf8mb4_unicode_ci ASC')->paginate(10);
