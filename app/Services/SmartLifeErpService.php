@@ -281,31 +281,39 @@ class SmartLifeErpService
     }
 
     /**
-     * Get categories list from SmartLife ERP
-     *
-     * @return array|null
+     * Fetch all product categories from SmartLife ERP v3.
      */
     public function getCategories()
     {
         try {
-            // v3 Primary taxonomy endpoint
-            $response = $this->request('GET', 'taxonomy', ['type' => 'product']);
-
+            $response = $this->request('GET', 'category/get_categories');
             if ($response && $response->successful()) {
                 return $response->json();
             }
             return null;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('SmartLife ERP get categories exception', ['error' => $e->getMessage()]);
             return null;
         }
     }
 
     /**
-     * Get all products (handles pagination automatically)
-     *
-     * @return array
+     * Fetch all product brands from SmartLife ERP v3.
      */
+    public function getBrands()
+    {
+        try {
+            $response = $this->request('GET', 'brands/get_brands');
+            if ($response && $response->successful()) {
+                return $response->json();
+            }
+            return null;
+        } catch (\Exception $e) {
+            Log::error('SmartLife ERP get brands exception', ['error' => $e->getMessage()]);
+            return null;
+        }
+    }
+
     /**
      * Get product details from SmartLife ERP
      *
