@@ -286,8 +286,13 @@ class SmartLifeErpService
     public function getCategories()
     {
         try {
-            // v2/v3 pattern: GET for taxonomy with query params
-            $response = $this->request('GET', 'taxonomy', ['type' => 'product']);
+            // Attempting alternative v3 path if 'taxonomy' fails
+            $response = $this->request('GET', 'categories/get_categories_list', ['type' => 'product']);
+
+            if (!$response || !$response->successful()) {
+                // Fallback to original path with GET
+                $response = $this->request('GET', 'taxonomy', ['type' => 'product']);
+            }
 
             if ($response && $response->successful()) {
                 return $response->json();
@@ -318,6 +323,13 @@ class SmartLifeErpService
 
             if ($response && $response->successful()) {
                 $data = $response->json();
+                
+                // DEBUG: Log the structure to see combo_items
+                Log::debug("SmartLife ERP Product Details Response for ID {$id}", [
+                    'keys' => array_keys($data['data'] ?? $data),
+                    'body_preview' => substr($response->body(), 0, 500)
+                ]);
+
                 if (isset($data['success']) && $data['success'] === true) {
                     return $data['data'] ?? null;
                 }
