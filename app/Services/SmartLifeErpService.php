@@ -286,11 +286,17 @@ class SmartLifeErpService
     public function getCategories()
     {
         try {
-            // Attempting alternative v3 path if 'taxonomy' fails
-            $response = $this->request('GET', 'categories/get_categories_list', ['type' => 'product']);
+            // v3/v2 Path Exploration:
+            // 1. Try category/categories_list (matches branch/branches_list pattern)
+            $response = $this->request('GET', 'category/categories_list', ['type' => 'product']);
 
             if (!$response || !$response->successful()) {
-                // Fallback to original path with GET
+                // 2. Try categories/get_categories_list
+                $response = $this->request('GET', 'categories/get_categories_list', ['type' => 'product']);
+            }
+
+            if (!$response || !$response->successful()) {
+                // 3. Fallback to original taxonomy GET
                 $response = $this->request('GET', 'taxonomy', ['type' => 'product']);
             }
 
@@ -323,15 +329,24 @@ class SmartLifeErpService
 
             if ($response && $response->successful()) {
                 $data = $response->json();
-                
-                // DEBUG: Log the structure to see combo_items
-                Log::debug("SmartLife ERP Product Details Response for ID {$id}", [
-                    'keys' => array_keys($data['data'] ?? $data),
-                    'body_preview' => substr($response->body(), 0, 500)
-                ]);
+                $product = $data['data'] ?? null;
+
+                // SPECIAL CASE: If product is combo but NO combo_items found, try v2 specifically
+                if ($product && isset($product['type']) && strtolower($product['type']) == 'combo' && !isset($product['combo_items'])) {
+                    Log::debug("SmartLife ERP: Combo detected but no items in v3, trying v2 fallback for ID {$id}");
+                    $v2Url = str_replace('/v3', '/v2', $this->apiUrl) . "/products/product/{$id}";
+                    $v2Response = $this->request('GET', $v2Url);
+                    if ($v2Response && $v2Response->successful()) {
+                        $v2Data = $v2Response->json();
+                        if (isset($v2Data['data']['combo_items'])) {
+                            $product['combo_items'] = $v2Data['data']['combo_items'];
+                            Log::info("SmartLife ERP: Successfully fetched combo items from v2 fallback for ID {$id}");
+                        }
+                    }
+                }
 
                 if (isset($data['success']) && $data['success'] === true) {
-                    return $data['data'] ?? null;
+                    return $product;
                 }
             }
             return null;
