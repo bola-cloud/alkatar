@@ -33,8 +33,18 @@ class Product extends Model
 
     public function getVirtualStockAttribute()
     {
-        if ($this->product_type === 'Combo' || $this->product_type === 'تجميعي') {
+        $type = trim($this->product_type);
+        if ($type === 'Combo' || $type === 'تجميعي' || $type === 'combo') {
             if ($this->comboItems->isEmpty()) {
+                // If items are empty, it means the sync failed to link them OR it's a manual combo without items.
+                // We log this to help the admin identify the problematic product.
+                if ($this->Quantity <= 0) {
+                    \Illuminate\Support\Facades\Log::warning("Combo product has no items linked", [
+                        'id' => $this->id,
+                        'name' => $this->en_Product_Name,
+                        'barcode' => $this->barcode
+                    ]);
+                }
                 return $this->Quantity;
             }
 

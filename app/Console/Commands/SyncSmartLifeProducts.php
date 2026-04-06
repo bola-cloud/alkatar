@@ -598,25 +598,37 @@ class SyncSmartLifeProducts extends Command
         $syncData = [];
 
         foreach ($comboItems as $item) {
-            Log::info('Processing Combo Item', ['parent_id' => $parentProduct->id, 'item_barcode' => $item['barcode'] ?? 'N/A']);
-            $childBarcode = $item['barcode'] ?? null;
-            if (!$childBarcode)
-                continue;
+            $childBarcode = trim($item['barcode'] ?? '');
+            $childId = $item['id'] ?? null; // SmartLife ID
 
-            // Find child product
-            $childProduct = Product::where('barcode', $childBarcode)->first();
+            Log::info('Processing Combo Item', [
+                'parent_id' => $parentProduct->id,
+                'parent_name' => $parentProduct->en_Product_Name,
+                'child_barcode' => $childBarcode ?: 'N/A',
+                'child_id' => $childId ?: 'N/A'
+            ]);
+
+            if (!$childBarcode && !$childId) {
+                continue;
+            }
+
+            // Find child product - Priority 1: SmartLife ID
+            $childProduct = null;
+            if ($childId) {
+                $childProduct = Product::where('smartlife_id', $childId)->first();
+            }
+
+            // Priority 2: Barcode (normalized)
+            if (!$childProduct && $childBarcode) {
+                $childProduct = Product::where('barcode', $childBarcode)->first();
+            }
 
             if (!$childProduct) {
-                // Try to find in Shadow table
-                $shadow = SmartLifeProduct::where('barcode', $childBarcode)->first();
-                if ($shadow) {
-                    // Sync shadow to main if needed, but for now just log warning if not found
-                    // Or ideally we should sync it here recursively?
-                    // Safe approach: skip if not found, rely on main loop to sync child later
-                    Log::warning("Combo Child product not found in main table (skipping relationship)", ['parent_id' => $parentProduct->id, 'child_barcode' => $childBarcode]);
-                    continue;
-                }
-                Log::warning("Combo Child product barcode not found", ['parent_id' => $parentProduct->id, 'child_barcode' => $childBarcode]);
+                Log::warning("Combo Child product NOT FOUND in store", [
+                    'parent_id' => $parentProduct->id,
+                    'search_id' => $childId,
+                    'search_barcode' => $childBarcode
+                ]);
                 continue;
             }
 
@@ -628,7 +640,9 @@ class SyncSmartLifeProducts extends Command
 
         if (!empty($syncData)) {
             $parentProduct->comboItems()->sync($syncData);
-            Log::info('Synced combo items', ['parent_id' => $parentProduct->id, 'count' => count($syncData)]);
+            Log::info('Successfully synced combo items', ['parent_id' => $parentProduct->id, 'count' => count($syncData)]);
+        } else {
+            Log::warning('No combo items were successfully linked for product', ['parent_id' => $parentProduct->id]);
         }
     }
 
