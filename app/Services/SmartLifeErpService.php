@@ -286,8 +286,8 @@ class SmartLifeErpService
     public function getCategories()
     {
         try {
-            // v3 API: Try POST for taxonomy to avoid redirects
-            $response = $this->request('POST', 'taxonomy', ['type' => 'product']);
+            // v2/v3 pattern: GET for taxonomy with query params
+            $response = $this->request('GET', 'taxonomy', ['type' => 'product']);
 
             if ($response && $response->successful()) {
                 return $response->json();
@@ -313,8 +313,8 @@ class SmartLifeErpService
     public function getProductDetails($id)
     {
         try {
-            // v3 API: Try POST for get_product_details to avoid redirects
-            $response = $this->request('POST', "products/get_product_details", ['id' => $id]);
+            // v2/v3 pattern: GET with path parameter /products/product/{id}
+            $response = $this->request('GET', "products/product/{$id}");
 
             if ($response && $response->successful()) {
                 $data = $response->json();
