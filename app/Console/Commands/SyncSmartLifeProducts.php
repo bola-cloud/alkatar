@@ -408,7 +408,7 @@ class SyncSmartLifeProducts extends Command
                 $product->Best_Selling = 0;
                 $product->New_Arrival = 0;
                 $product->Today_Special = 0;
-                $product->On_Sale = 1;
+                $product->On_Sale = 0;
                 $product->en_ShippingReturn = $product->en_ShippingReturn ?: 'Standard shipping and return policy applies.';
                 $product->fr_ShippingReturn = $product->fr_ShippingReturn ?: $product->en_ShippingReturn;
                 $product->en_AdditionalInformation = $product->en_AdditionalInformation ?: 'Product synced from SmartLife ERP';
