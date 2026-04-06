@@ -180,7 +180,7 @@ class SmartLifeErpService
 
         $url = Str::startsWith($endpoint, 'http') ? $endpoint : "{$this->apiUrl}/{$endpoint}";
 
-        $makeRequest = function($sess) use ($method, $url, $data, $headers) {
+        $makeRequest = function($sess) use ($method, $url, $data, $headers, $endpoint) {
             $cookieString = collect($sess['cookies'] ?? [])
                 ->map(fn($v, $k) => "$k=$v")
                 ->join('; ');
@@ -188,10 +188,17 @@ class SmartLifeErpService
             $request = Http::withHeaders(array_merge([
                 'Authorization' => $sess['token'],
                 'Accept' => 'application/json',
-                'X-Requested-With' => 'XMLHttpRequest', // Crucial: Tells the ERP we are an API, not a browser
+                'X-Requested-With' => 'XMLHttpRequest',
+                'Referer' => $this->apiUrl,
                 'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124 Safari/537.36',
                 'Cookie' => $cookieString,
             ], $headers));
+
+            Log::debug("SmartLife ERP Request Details", [
+                'endpoint' => $endpoint,
+                'method' => $method,
+                'has_cookie' => !empty($cookieString)
+            ]);
 
             return $method === 'GET' ? $request->get($url, $data) : $request->post($url, $data);
         };
@@ -200,7 +207,8 @@ class SmartLifeErpService
 
         // If we get HTML or an auth error, we refresh and retry ONCE
         if ($this->isHtmlResponse($response) || $response->status() === 401) {
-            Log::warning("SmartLife ERP: Auth Failure/HTML Response for {$endpoint}. Triggering atomic refresh...");
+            $bodyPreview = substr($response->body(), 0, 1000);
+            Log::warning("SmartLife ERP: Auth Failure/HTML Response for $endpoint. Body Preview: $bodyPreview. Triggering atomic refresh...");
 
             Cache::forget('smartlife_session');
             $newSession = $this->refreshSessionAtomically();
@@ -210,8 +218,10 @@ class SmartLifeErpService
                 $response = $makeRequest($newSession);
 
                 if ($this->isHtmlResponse($response)) {
-                    Log::error("SmartLife ERP: Persistent HTML response after refresh for {$endpoint}", [
-                        'status' => $response->status()
+                    $bodyPreviewAfter = substr($response->body(), 0, 1000);
+                    Log::error("SmartLife ERP: Persistent HTML response after refresh for $endpoint", [
+                        'status' => $response->status(),
+                        'body_preview' => $bodyPreviewAfter
                     ]);
                 }
             }
