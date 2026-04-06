@@ -146,7 +146,7 @@ class SmartLifeErpService
      * Why? The ERP enforces a single active session. Concurrent requests (sync vs checkout)
      * invalidate each other. Serializing them ensures session stability.
      */
-    protected function request($method, $endpoint, $data = [], $headers = [])
+    public function request($method, $endpoint, $data = [], $headers = [])
     {
         // GLOBAL MUTEX: Only ONE process talks to the SmartLife ERP at a time across the whole system.
         // This is THE solution to prevent session thrashing by the background sync.
@@ -188,6 +188,7 @@ class SmartLifeErpService
             $request = Http::withHeaders(array_merge([
                 'Authorization' => $sess['token'],
                 'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
                 'X-Requested-With' => 'XMLHttpRequest',
                 'Referer' => $this->apiUrl,
                 'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124 Safari/537.36',
@@ -261,7 +262,8 @@ class SmartLifeErpService
             // v3 API uses get_products_list
             $response = $this->request('GET', 'products/get_products_list', [
                 'offset' => $offset,
-                'limit' => $limit
+                'limit' => $limit,
+                'include' => 'combo_items,options,category' // v3 bulk include pattern
             ]);
 
             if ($response && $response->successful()) {
@@ -286,19 +288,8 @@ class SmartLifeErpService
     public function getCategories()
     {
         try {
-            // v3 Pattern Exploration:
-            // 1. Try categories/get_categories (More likely in v3)
-            $response = $this->request('GET', 'categories/get_categories', ['type' => 'product']);
-
-            if (!$response || !$response->successful()) {
-                // 2. Try category/categories
-                $response = $this->request('GET', 'category/categories', ['type' => 'product']);
-            }
-
-            if (!$response || !$response->successful()) {
-                // 3. Fallback to current working pattern for list
-                $response = $this->request('GET', 'taxonomy', ['type' => 'product']);
-            }
+            // v3 Primary taxonomy endpoint
+            $response = $this->request('GET', 'taxonomy', ['type' => 'product']);
 
             if ($response && $response->successful()) {
                 return $response->json();
@@ -324,25 +315,12 @@ class SmartLifeErpService
     public function getProductDetails($id)
     {
         try {
-            // v3 pattern: GET with path parameter /products/product/{id}
+            // Simple product details fetch
             $response = $this->request('GET', "products/product/{$id}");
 
             if ($response && $response->successful()) {
                 $data = $response->json();
-                $product = $data['data'] ?? null;
-
-                // v3: If combo product, fetch children from a separate endpoint if missing
-                if ($product && isset($product['type']) && strtolower($product['type']) == 'combo' && !isset($product['combo_items'])) {
-                    $itemsResponse = $this->request('GET', "products/get_combo_items/{$id}");
-                    if ($itemsResponse && $itemsResponse->successful()) {
-                        $itemsData = $itemsResponse->json();
-                        $product['combo_items'] = $itemsData['data'] ?? [];
-                    }
-                }
-
-                if (isset($data['success']) && $data['success'] === true) {
-                    return $product;
-                }
+                return $data['data'] ?? null;
             }
             return null;
         } catch (Exception $e) {

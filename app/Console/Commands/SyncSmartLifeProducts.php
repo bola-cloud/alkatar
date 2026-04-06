@@ -67,15 +67,19 @@ class SyncSmartLifeProducts extends Command
         // Step 0: Sync Categories first to ensure correct mapping
         if (!$shadowOnly) {
             $this->info('Syncing categories from API...');
-            $apiCategories = $service->getCategories();
-            if ($apiCategories) {
-                $catData = $apiCategories['data'] ?? $apiCategories;
-                if (is_array($catData)) {
-                    $this->syncCategoriesFromApi($catData);
+            try {
+                $apiCategories = $service->getCategories();
+                if ($apiCategories) {
+                    $catData = $apiCategories['data'] ?? $apiCategories;
+                    if (is_array($catData)) {
+                        $this->syncCategoriesFromApi($catData);
+                    }
                 }
+            } catch (\Exception $e) {
+                $this->warn('Category API failed, falling back to data extraction: ' . $e->getMessage());
             }
 
-            $this->info('Syncing categories from product data...');
+            $this->info('Syncing categories from product data extraction...');
             $this->syncCategoriesFromProducts($products);
         }
 
@@ -92,21 +96,23 @@ class SyncSmartLifeProducts extends Command
 
         foreach ($products as $productData) {
             try {
-                // Check if product is Combo/Group and missing items, then fetch details
-                if (
-                    ($productData['type'] === 'Combo' || $productData['type'] === 'تجميعي') &&
-                    empty($productData['combo_items']) && empty($productData['combo_products'])
-                ) {
+                // Check if product is Combo/Group and missing items, then fetch details ONLY if not in bulk data
+                if (($productData['type'] === 'Combo' || $productData['type'] === 'تجميعي')) {
+                    if (empty($productData['combo_items']) && empty($productData['combo_products'])) {
+                        $this->info("Fetching missing details for Combo: " . ($productData['name'] ?? 'Unknown'));
+                        $details = $service->getProductDetails($productData['id']);
 
-                    $this->info("Fetching details for Combo: " . ($productData['name'] ?? 'Unknown'));
-                    $details = $service->getProductDetails($productData['id']);
-
-                    if ($details) {
-                        if (!empty($details['combo_items'])) {
-                            $productData['combo_items'] = $details['combo_items'];
-                        } elseif (!empty($details['combo_products'])) {
-                            $productData['combo_items'] = $details['combo_products'];
+                        if ($details) {
+                            if (!empty($details['combo_items'])) {
+                                $productData['combo_items'] = $details['combo_items'];
+                            } elseif (!empty($details['combo_products'])) {
+                                $productData['combo_items'] = $details['combo_products'];
+                            }
                         }
+                    } else {
+                        // Priority to what came in bulk
+                        $productData['combo_items'] = $productData['combo_items'] ?? $productData['combo_products'] ?? [];
+                        Log::debug("SmartLife ERP: Using bulk combo items for product {$productData['id']}");
                     }
                 }
 
