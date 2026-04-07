@@ -161,7 +161,11 @@ class SyncSmartLifeProducts extends Command
             foreach ($comboDataToSync as $combo) {
                 $product = Product::where('smartlife_id', $combo['smartlife_id'])->first();
                 if ($product && !empty($combo['combo_items'])) {
+                    // API returned combo_items — use them directly
                     $this->syncComboItems($product, $combo['combo_items']);
+                } elseif ($product && $product->comboItems()->count() === 0) {
+                    // API did NOT return combo_items and no existing link — infer by name
+                    $this->inferComboByName($product, $products);
                 }
             }
         }
@@ -650,6 +654,184 @@ class SyncSmartLifeProducts extends Command
         } else {
             Log::warning('No combo items were successfully linked for product', ['parent_id' => $parentProduct->id]);
         }
+    }
+
+    /**
+     * Infer combo component by matching product names.
+     * Strips weight/count suffixes and finds the best matching Standard product.
+     * Calculates quantity from weight ratio (e.g., 2.5kg / 500g = 5).
+     */
+    private function inferComboByName(Product $comboProduct, array $allApiProducts)
+    {
+        $comboName = $comboProduct->fr_Product_Name ?? $comboProduct->en_Product_Name;
+        if (empty($comboName)) return;
+
+        Log::info('Inferring combo component by name', [
+            'combo_id' => $comboProduct->id,
+            'combo_name' => $comboName
+        ]);
+
+        // Extract weight info from combo name
+        $comboWeight = $this->extractWeight($comboName);
+
+        // Strip weight/count suffixes to get the base name
+        $comboBaseName = $this->stripWeightSuffix($comboName);
+
+        if (empty(trim($comboBaseName))) return;
+
+        // Find all Standard products from the API data
+        $bestMatch = null;
+        $bestScore = 0;
+
+        foreach ($allApiProducts as $apiProduct) {
+            $apiType = $apiProduct['type'] ?? '';
+            // Skip other combos
+            if ($apiType === 'combo' || $apiType === 'تجميعي' || $apiType === 'Combo') {
+                continue;
+            }
+
+            $stdName = $apiProduct['name'] ?? '';
+            if (empty($stdName)) continue;
+
+            $stdBaseName = $this->stripWeightSuffix($stdName);
+
+            // Calculate word-level similarity
+            $comboWords = preg_split('/\s+/u', $comboBaseName);
+            $stdWords = preg_split('/\s+/u', $stdBaseName);
+
+            $commonWords = 0;
+            foreach ($comboWords as $w) {
+                if (mb_strlen($w) > 1 && in_array($w, $stdWords)) {
+                    $commonWords++;
+                }
+            }
+
+            // Need at least 2 common words
+            if ($commonWords < 2) continue;
+
+            $score = $commonWords / max(count($comboWords), count($stdWords));
+
+            // Bonus for consecutive SmartLife IDs (often related)
+            $comboSlId = $comboProduct->smartlife_id;
+            $stdSlId = $apiProduct['id'] ?? 0;
+            if ($comboSlId && $stdSlId && abs($comboSlId - $stdSlId) <= 2) {
+                $score += 0.3;
+            }
+
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $bestMatch = $apiProduct;
+            }
+        }
+
+        if (!$bestMatch || $bestScore < 0.4) {
+            Log::warning('No name match found for combo', [
+                'combo_id' => $comboProduct->id,
+                'combo_name' => $comboName,
+                'best_score' => $bestScore
+            ]);
+            return;
+        }
+
+        // Find the matched standard product in local DB
+        $stdProduct = Product::where('smartlife_id', $bestMatch['id'])->first();
+        if (!$stdProduct) {
+            Log::warning('Matched standard product not found in local DB', [
+                'smartlife_id' => $bestMatch['id'],
+                'name' => $bestMatch['name']
+            ]);
+            return;
+        }
+
+        // Calculate quantity from weight ratio
+        $stdWeight = $this->extractWeight($bestMatch['name']);
+        $quantity = 1;
+
+        if ($comboWeight && $stdWeight && $stdWeight['value'] > 0 && $comboWeight['unit'] === $stdWeight['unit']) {
+            $quantity = (int) round($comboWeight['value'] / $stdWeight['value']);
+        } elseif ($comboWeight && $comboWeight['unit'] === 'piece') {
+            // Combo says "15 حبة" and standard is "بالحبة" — quantity = 15
+            $quantity = (int) $comboWeight['value'];
+        }
+
+        // Ensure quantity is at least 1
+        $quantity = max(1, $quantity);
+
+        // Link them
+        $comboProduct->comboItems()->sync([
+            $stdProduct->id => ['quantity' => $quantity]
+        ]);
+
+        Log::info('Successfully inferred combo component by name', [
+            'combo_id' => $comboProduct->id,
+            'combo_name' => $comboName,
+            'component_id' => $stdProduct->id,
+            'component_name' => $stdProduct->fr_Product_Name,
+            'quantity' => $quantity,
+            'match_score' => $bestScore
+        ]);
+
+        $this->info("  Linked: {$comboName} → {$stdProduct->fr_Product_Name} (qty: {$quantity})");
+    }
+
+    /**
+     * Strip weight/count suffixes from a product name to get the base name.
+     * e.g., "فليفلة عمان اخضر ٥٠٠ج" → "فليفلة عمان اخضر"
+     */
+    private function stripWeightSuffix(string $name): string
+    {
+        // Normalize Arabic numerals to Latin
+        $name = $this->normalizeArabicNumerals($name);
+
+        // Remove weight patterns: 2.5كج, 500ج, 3كج, 1كج, etc.
+        $name = preg_replace('/[\d]+\.?[\d]*\s*(كج|كجم|كيلو|ج|جرام|غرام|غم)/u', '', $name);
+
+        // Remove piece patterns: 15حبة, 9حبة, 15 حبة, etc.
+        $name = preg_replace('/[\d]+\s*(حبة|حبات)/u', '', $name);
+
+        // Remove "بالحبة", "للحبة", "بالكيلو"
+        $name = preg_replace('/(بالحبة|للحبة|بالكيلو)/u', '', $name);
+
+        // Remove "كرتون", "كيس", "علبة", "صفة"
+        $name = preg_replace('/(كرتون|كيس|علبة|صفة)/u', '', $name);
+
+        return trim(preg_replace('/\s+/u', ' ', $name));
+    }
+
+    /**
+     * Extract weight/count value and unit from a product name.
+     * Returns ['value' => float, 'unit' => 'gram'|'piece'] or null.
+     */
+    private function extractWeight(string $name): ?array
+    {
+        $name = $this->normalizeArabicNumerals($name);
+
+        // Match kg: 2.5كج, 3كج, 1كج, etc.
+        if (preg_match('/([\d]+\.?[\d]*)\s*(كج|كجم|كيلو)/u', $name, $m)) {
+            return ['value' => (float)$m[1] * 1000, 'unit' => 'gram']; // Convert to grams
+        }
+
+        // Match grams: 500ج, 250ج, etc.
+        if (preg_match('/([\d]+\.?[\d]*)\s*(ج|جرام|غرام|غم)/u', $name, $m)) {
+            return ['value' => (float)$m[1], 'unit' => 'gram'];
+        }
+
+        // Match pieces: 15حبة, 9حبة, etc.
+        if (preg_match('/([\d]+)\s*(حبة|حبات)/u', $name, $m)) {
+            return ['value' => (int)$m[1], 'unit' => 'piece'];
+        }
+
+        return null;
+    }
+
+    /**
+     * Convert Arabic-Indic numerals (٠١٢٣٤٥٦٧٨٩) to Latin digits (0123456789).
+     */
+    private function normalizeArabicNumerals(string $str): string
+    {
+        $arabic = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+        $latin  = ['0','1','2','3','4','5','6','7','8','9'];
+        return str_replace($arabic, $latin, $str);
     }
 
     /**
