@@ -59,7 +59,7 @@
             box-sizing: border-box;
             overflow: hidden;
             margin: 0 !important;
-            padding: 5px !important;
+            padding: 5px 15px 5px 5px !important; /* Added 15px padding to the right to prevent printing cutoff */
             max-width: 100%;
             width: 80mm;
             direction: ltr;
@@ -192,7 +192,7 @@
                     <tr>
                         <td style="text-align: left;"><span class="item-name">{{ $item->product->fr_Product_Name ?? $item->Product_Name }}</span></td>
                         <td style="text-align: center;" class="nowrap"><span>{{ number_format($item->Price, 3) }}</span></td>
-                        <td style="text-align: center;"><span>{{ (int) $item->Quantity }}<span></td>
+                        <td style="text-align: center;" class="nowrap"><span>{{ (int) $item->Quantity }}<span></td>
                         <td style="text-align: center;" class="nowrap"><span>{{ number_format($item->Total_Price, 3) }}</span></td>
                     </tr>
                 @endforeach

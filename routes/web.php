@@ -249,6 +249,15 @@ Route::get('/debug-api-v4', function () {
     return "Route V4 is Working. Time: " . date('H:i:s');
 });
 
+// TEMP: Preview printable invoice in browser (remove after testing)
+Route::get('/preview-invoice/{id?}', function ($id = null) {
+    $order = $id
+        ? Order::with(['order_details.product', 'user'])->findOrFail($id)
+        : Order::with(['order_details.product', 'user'])->latest()->first();
+    if (!$order) return 'No orders found';
+    return view('orders.printableInvoice', compact('order'));
+});
+
 
 
 // Debug ERP Sync Route
