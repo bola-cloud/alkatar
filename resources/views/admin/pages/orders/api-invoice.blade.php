@@ -103,6 +103,10 @@
             font-weight: bold;
         }
 
+        .nowrap {
+            white-space: nowrap;
+        }
+
         .invoice-footer {
             border-top: 1px solid #ddd;
             padding-top: 8px;
@@ -206,7 +210,7 @@
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $od->product->fr_Product_Name }}</td>
-                        <td>{{ $od->Quantity }}</td>
+                        <td class="nowrap">{{ $od->Quantity }}</td>
                         {{-- <td>{{ is_null($od->Size) ? 'N/A' : $od->Size }}</td> --}}
                         @if ($order->order_source == 'whatsapp')
                             <td>{{ $od->Size }}</td>
@@ -216,21 +220,21 @@
                             @endphp
                             <td>{{ is_null($size?->weight) ? 'N/A' : $size?->weight }} جرام</td>
                         @endif
-                        <td>{{ $od->Price }}</td>
-                        <td>{{ $od->Total_Price }} OMR</td>
+                        <td class="nowrap">{{ $od->Price }}</td>
+                        <td class="nowrap">{{ $od->Total_Price }} OMR</td>
                     </tr>
                 @endforeach
                 <tr class="total-row">
                     <td colspan="5">الإجمالي قبل النهائي</td>
-                    <td>{{ $order->Sub_Total }} OMR</td>
+                    <td class="nowrap">{{ $order->Sub_Total }} OMR</td>
                 </tr>
                 <tr>
                     <td colspan="5">مصاريف الشحن</td>
-                    <td>{{ $order->Delivery_Charge }} OMR</td>
+                    <td class="nowrap">{{ $order->Delivery_Charge }} OMR</td>
                 </tr>
                 <tr class="total-row">
                     <td colspan="5">المجموع النهائي:</td>
-                    <td>{{ $order->Grand_Total }} OMR</td>
+                    <td class="nowrap">{{ $order->Grand_Total }} OMR</td>
                 </tr>
             </tbody>
         </table>

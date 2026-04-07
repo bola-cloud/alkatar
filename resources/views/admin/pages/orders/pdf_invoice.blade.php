@@ -66,6 +66,9 @@
             font-weight: bold;
             background: #f9f9f9;
         }
+        .nowrap {
+            white-space: nowrap;
+        }
         .footer {
             margin-top: 30px;
             text-align: center;
@@ -148,7 +151,7 @@
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td class="text-right">{{ $od->product->fr_Product_Name ?? $od->Product_Name }}</td>
-                        <td>{{ $od->Quantity }}</td>
+                        <td class="nowrap">{{ $od->Quantity }}</td>
                         <td>
                             @if ($order->order_source == 'whatsapp')
                                 {{ $od->Size }}
@@ -157,29 +160,29 @@
                                 {{ is_null($size?->weight) ? 'N/A' : $size?->weight . ' جرام' }}
                             @endif
                         </td>
-                        <td>{{ number_format($od->Price, 3) }}</td>
-                        <td>{{ number_format($od->Total_Price, 3) }}</td>
+                        <td class="nowrap">{{ number_format($od->Price, 3) }}</td>
+                        <td class="nowrap">{{ number_format($od->Total_Price, 3) }}</td>
                     </tr>
                 @endforeach
             </tbody>
             <tfoot>
                 <tr>
                     <td colspan="5" class="text-left">الإجمالي الفرعي:</td>
-                    <td>{{ number_format($order->Sub_Total, 3) }} OMR</td>
+                    <td class="nowrap">{{ number_format($order->Sub_Total, 3) }} OMR</td>
                 </tr>
                 <tr>
                     <td colspan="5" class="text-left">مصاريف الشحن:</td>
-                    <td>{{ number_format($order->Delivery_Charge, 3) }} OMR</td>
+                    <td class="nowrap">{{ number_format($order->Delivery_Charge, 3) }} OMR</td>
                 </tr>
                 @if ($order->Coupon_Amount > 0)
                     <tr>
                         <td colspan="5" class="text-left">الخصم:</td>
-                        <td>{{ number_format($order->Coupon_Amount, 3) }} OMR</td>
+                        <td class="nowrap">{{ number_format($order->Coupon_Amount, 3) }} OMR</td>
                     </tr>
                 @endif
                 <tr class="total-row">
                     <td colspan="5" class="text-left">المجموع النهائي:</td>
-                    <td>{{ number_format($order->Grand_Total, 3) }} OMR</td>
+                    <td class="nowrap">{{ number_format($order->Grand_Total, 3) }} OMR</td>
                 </tr>
             </tfoot>
         </table>
