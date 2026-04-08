@@ -437,9 +437,20 @@ class SmartLifeErpService
                 return null;
             }
 
+            // Calculate subtotal from products
+            $subtotal = 0;
+            foreach ($products as $p) {
+                $subtotal += ($p['price'] ?? 0) * ($p['quantity'] ?? 1);
+            }
+
+            // V3 API uses 'items' not 'products'
             $payload = [
                 'customer_id' => $customerId ?? $this->customerId,
-                'products' => $products
+                'items' => $products,
+                'warehouse_id' => 1, // Default warehouse
+                'total' => round($subtotal, 2),
+                'total_tax' => 0,
+                'date' => now()->toDateTimeString(),
             ];
 
             Log::debug('SmartLife ERP Sale Payload Preparation', [
@@ -449,18 +460,23 @@ class SmartLifeErpService
             ]);
 
             if (!empty($saleDetails)) {
-                if (isset($saleDetails['invoice_no'])) $payload['invoice_no'] = $saleDetails['invoice_no'];
+                if (isset($saleDetails['invoice_no'])) $payload['reference'] = $saleDetails['invoice_no'];
                 if (isset($saleDetails['ref_no'])) $payload['ref_no'] = $saleDetails['ref_no'];
                 if (isset($saleDetails['order_reference'])) $payload['order_reference'] = $saleDetails['order_reference'];
-                if (isset($saleDetails['discount_amount'])) $payload['discount_amount'] = $saleDetails['discount_amount'];
-                if (isset($saleDetails['discount_type'])) $payload['discount_type'] = $saleDetails['discount_type'];
-                if (isset($saleDetails['status'])) $payload['status'] = $saleDetails['status'];
+                if (isset($saleDetails['discount_amount'])) $payload['order_discount'] = $saleDetails['discount_amount'];
+                if (isset($saleDetails['status'])) $payload['sale_status'] = $saleDetails['status'];
                 if (isset($saleDetails['payment_status'])) $payload['payment_status'] = $saleDetails['payment_status'];
                 if (isset($saleDetails['payments'])) $payload['payments'] = $saleDetails['payments'];
-                if (isset($saleDetails['notes'])) $payload['notes'] = $payload['additional_notes'] = $saleDetails['notes'];
+                if (isset($saleDetails['notes'])) $payload['notes'] = $saleDetails['notes'];
                 if (isset($saleDetails['warehouse_id'])) $payload['warehouse_id'] = $saleDetails['warehouse_id'];
-                if (isset($saleDetails['shipping_charges'])) $payload['shipping_charges'] = $saleDetails['shipping_charges'];
+                // V3 API uses 'shipping' not 'shipping_charges'
+                if (isset($saleDetails['shipping_charges'])) $payload['shipping'] = (float) $saleDetails['shipping_charges'];
             }
+
+            // Calculate grand_total = subtotal + tax + shipping - discount
+            $shipping = $payload['shipping'] ?? 0;
+            $discount = $payload['order_discount'] ?? 0;
+            $payload['grand_total'] = round($subtotal + $payload['total_tax'] + $shipping - $discount, 2);
 
             Log::debug('SmartLife ERP Sale FINAL Payload', ['payload' => json_encode($payload)]);
 

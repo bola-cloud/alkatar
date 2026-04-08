@@ -962,12 +962,11 @@ class CheckoutController extends Controller
         $name = $order->billing_address['name'] ?? $order->user->name ?? 'Customer';
 
         try {
-            // Updated WhatsApp Notification: Using asJson() and including name for server compatibility
-            $response = Http::asJson()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/success/payment', [
+            // Updated WhatsApp Notification: Using asForm() with new API spec (order_id = DB primary key)
+            $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/success/payment', [
                 'phone_number' => $phoneNumber,
                 'name' => $name,
-                'booking_id' => $order->Order_Number,
-                'pdf' => $pdfUrl,
+                'order_id' => $order->id,
             ]);
 
             Log::info('WhatsApp Order Notification response', [

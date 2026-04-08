@@ -571,10 +571,12 @@ class CheckoutController extends Controller
 
         try {
             // Trigger WhatsApp notification for all successful orders (Online/COD)
+            // Updated: Using order_id (DB primary key) instead of booking_id, removed pdf parameter
+            $name = $order->billing_address['name'] ?? $order->user->name ?? 'Customer';
             $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/success/payment', [
                 'phone_number' => $phoneNumber,
-                'booking_id' => $order->Order_Number,
-                'pdf' => $pdfUrl,
+                'name' => $name,
+                'order_id' => $order->id,
             ]);
 
             Log::info('WhatsApp Order Notification response (API)', [
