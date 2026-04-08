@@ -80,8 +80,7 @@
               @if($product->Discount > 0)
                 {{-- show discounted price first, then original struck-through to the right to match home --}}
                 <span class="h6 mb-0" style="font-weight:600;">{{ currencyConverter($displayPrice) }}</span>
-                <span class="h6 mb-0"
-                  style="margin-left:8px; text-decoration-line: line-through; text-decoration-color: #b5c61a; text-decoration-thickness: 2px; color: #6b6b6b;">{{ currencyConverter($basePrice) }}</span>
+                <span class="h6 mb-0 price-strikethrough">{{ currencyConverter($basePrice) }}</span>
               @else
                 <span class="h6 mb-0">{{ currencyConverter($displayPrice) }}</span>
               @endif

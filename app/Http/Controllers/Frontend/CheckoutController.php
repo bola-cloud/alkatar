@@ -967,6 +967,7 @@ class CheckoutController extends Controller
                 'phone_number' => $phoneNumber,
                 'name' => $name,
                 'order_id' => $order->id,
+                'pdf' => $pdfUrl,
             ]);
 
             Log::info('WhatsApp Order Notification response', [
@@ -1070,12 +1071,9 @@ class CheckoutController extends Controller
                         'Total_Price' => $item->price * $item->qty,
                     ]);
                 }
+
                 if ($shouldBroadcast && $order->Order_Status == ORDER_PROCESSING) {
-                    try {
-                        event(new \App\Events\OrderCreated($order));
-                    } catch (\Exception $broadcastEx) {
-                        Log::warning('OrderCreated broadcast failed (non-fatal)', ['error' => $broadcastEx->getMessage()]);
-                    }
+                    event(new \App\Events\OrderCreated($order));
                 }
 
                 // Sync Order to Smart ERP immediately as UNPAID (Two-step sync approach)
@@ -1349,11 +1347,7 @@ class CheckoutController extends Controller
 
         $order->save();
 
-        try {
-            event(new \App\Events\OrderCreated($order));
-        } catch (\Exception $broadcastEx) {
-            Log::warning('paymentSuccess: OrderCreated broadcast failed (non-fatal)', ['error' => $broadcastEx->getMessage()]);
-        }
+        event(new \App\Events\OrderCreated($order));
 
         // Two-Step Sync: Update the existing SmartLife invoice to "Paid"
         if (config('smartlife.sync_enabled')) {

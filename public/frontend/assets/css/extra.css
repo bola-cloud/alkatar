@@ -769,4 +769,10 @@
     transition: all 0.3s linear;
     border: none;
 }
+.regular-price, .price-strikethrough {
+    text-decoration: line-through !important;
+    color: #6b6b6b !important;
+    margin-right: 5px;
+    margin-left: 5px;
+}
 /* ----- Extra CSS End ----- */

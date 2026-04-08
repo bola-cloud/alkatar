@@ -92,10 +92,10 @@
                                         @endphp
 
                                         @if ($p->Discount > 0 && $p->Discount_Price && $basePrice != $displayPrice)
-                                            <span class="regular-price">{{ currencyConverter($basePrice) }}</span>
-                                            <span class="price">{{ currencyConverter($displayPrice) }}</span>
+                                            <span class="price" style="font-weight:600;">{{ currencyConverter($displayPrice) }}</span>
+                                            <span class="regular-price price-strikethrough">{{ currencyConverter($basePrice) }}</span>
                                         @else
-                                            <span class="price">{{ currencyConverter($displayPrice) }}</span>
+                                            <span class="price" style="font-weight:600;">{{ currencyConverter($displayPrice) }}</span>
                                         @endif
                                     </div>
                                     <div class="rating">★★★★★</div>

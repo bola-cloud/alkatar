@@ -1218,3 +1218,12 @@ img.inline-block.max-w-full {
 a.text-inherit.text-decoration-none{
   color:black;
 }
+
+/* Price Strikethrough */
+.regular-price, .price-strikethrough {
+    margin-left: 8px;
+    text-decoration-line: line-through;
+    text-decoration-color: #b5c61a;
+    text-decoration-thickness: 2px;
+    color: #6b6b6b;
+}

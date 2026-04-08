@@ -180,7 +180,7 @@
 
                     <div class="price-block mb-4 d-flex align-items-center gap-2">
                         @if($product->Discount > 0 && $product->Discount_Price && $basePrice != $displayPrice)
-                            <div class="text-muted text-decoration-line-through fs-5">{{ $formattedBase }}</div>
+                            <div class="text-muted text-decoration-line-through price-strikethrough fs-5">{{ $formattedBase }}</div>
                             <div class="h2 mb-0 text-success fw-bold">{{ $formattedDisplay }}</div>
                             <div class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2" style="font-size: 0.8rem;">
                                 {{ $product->Discount }}% {{ __('Off') }}

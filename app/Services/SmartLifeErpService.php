@@ -443,10 +443,10 @@ class SmartLifeErpService
                 $subtotal += ($p['price'] ?? 0) * ($p['quantity'] ?? 1);
             }
 
-            // V3 API uses 'items' not 'products'
+            // V3 API uses 'products' field for the product list
             $payload = [
                 'customer_id' => $customerId ?? $this->customerId,
-                'items' => $products,
+                'products' => $products,
                 'warehouse_id' => 1, // Default warehouse
                 'total' => round($subtotal, 2),
                 'total_tax' => 0,
@@ -464,7 +464,7 @@ class SmartLifeErpService
                 if (isset($saleDetails['ref_no'])) $payload['ref_no'] = $saleDetails['ref_no'];
                 if (isset($saleDetails['order_reference'])) $payload['order_reference'] = $saleDetails['order_reference'];
                 if (isset($saleDetails['discount_amount'])) $payload['order_discount'] = $saleDetails['discount_amount'];
-                if (isset($saleDetails['status'])) $payload['sale_status'] = $saleDetails['status'];
+                if (isset($saleDetails['sale_status'])) $payload['sale_status'] = $saleDetails['sale_status'];
                 if (isset($saleDetails['payment_status'])) $payload['payment_status'] = $saleDetails['payment_status'];
                 if (isset($saleDetails['payments'])) $payload['payments'] = $saleDetails['payments'];
                 if (isset($saleDetails['notes'])) $payload['notes'] = $saleDetails['notes'];
@@ -661,11 +661,22 @@ class SmartLifeErpService
 
                 if ($smartLifeId) {
                     $products[] = [
-                        'id' => $smartLifeId,
+                        'id' => (int) $smartLifeId,
+                        'product_id' => (int) $smartLifeId,
+                        'variation_id' => (int) $smartLifeId,
                         'barcode' => $barcode ?? '0000',
                         'name' => $detail->Product_Name,
                         'price' => (float) $detail->Price,
+                        'unit_price' => (float) $detail->Price,
                         'quantity' => (int) $detail->Quantity,
+                        'net_unit_price' => (float) $detail->Price,
+                        'tax' => "0%",
+                        'total_tax' => 0,
+                        'tax_rate_id' => "0",
+                        'discount' => 0,
+                        'type_discount' => "total",
+                        'option_id' => "0",
+                        'unit' => "1",
                     ];
                 }
             }
@@ -674,7 +685,7 @@ class SmartLifeErpService
                 return null;
             }
 
-            $status = 'final'; // Use 'final' for completed sales
+            $status = 'completed'; // ERP API enum: pending, completed, returned
             $paymentStatus = 'due';
             $payments = [];
 
@@ -707,7 +718,7 @@ class SmartLifeErpService
                 'ref_no' => $order->Order_Number,
                 'order_reference' => $order->Order_Number,
                 'notes' => 'Order ' . $order->Order_Number,
-                'status' => $status,
+                'sale_status' => $status,
                 'payment_status' => $paymentStatus,
                 'smartlife_invoice_id' => $order->smartlife_invoice_id,
                 'shipping_charges' => (float) $order->Delivery_Charge,
