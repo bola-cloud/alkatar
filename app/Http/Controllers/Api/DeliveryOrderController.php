@@ -186,12 +186,11 @@ class DeliveryOrderController extends Controller
                 $status_data = $order->getStatusLang()[$order->Order_Status] ?? null;
                 $status_ar = $status_data['status_ar'] ?? 'N/A';
 
-                $response = Http::asJson()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/change_status', [
+                $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/change_status', [
                     'phone_number' => $phoneNumber,
                     'name' => $order->user->name ?? $billingAddress['name'] ?? '',
-                    'booking_id' => $order->Order_Number, // Numeric ID
+                    'order_id' => $order->id,
                     'status' => $status_ar,
-                    'url' => $url,
                 ]);
 
                 if ($response->failed()) {
