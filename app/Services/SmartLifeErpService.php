@@ -444,7 +444,8 @@ class SmartLifeErpService
 
             Log::debug('SmartLife ERP Sale Payload Preparation', [
                 'has_sale_details' => !empty($saleDetails),
-                'details_keys' => !empty($saleDetails) ? array_keys($saleDetails) : []
+                'details_keys' => !empty($saleDetails) ? array_keys($saleDetails) : [],
+                'sale_details_values' => $saleDetails,
             ]);
 
             if (!empty($saleDetails)) {
@@ -461,6 +462,8 @@ class SmartLifeErpService
                 if (isset($saleDetails['shipping_charges'])) $payload['shipping_charges'] = $saleDetails['shipping_charges'];
             }
 
+            Log::debug('SmartLife ERP Sale FINAL Payload', ['payload' => json_encode($payload)]);
+
             if (isset($saleDetails['smartlife_invoice_id']) && !empty($saleDetails['smartlife_invoice_id'])) {
                 $saleId = $saleDetails['smartlife_invoice_id'];
                 $payload['sale_id'] = (string) $saleId;
@@ -471,6 +474,8 @@ class SmartLifeErpService
             } else {
                 $response = $this->request('POST', "sales/add", $payload);
             }
+            
+            Log::debug('SmartLife ERP Sale Response', ['response_body' => $response ? substr((string)$response->body(), 0, 500) : 'null']);
 
             if ($response && $response->successful()) {
                 $data = $response->json();
