@@ -442,6 +442,11 @@ class SmartLifeErpService
                 'products' => $products
             ];
 
+            Log::debug('SmartLife ERP Sale Payload Preparation', [
+                'has_sale_details' => !empty($saleDetails),
+                'details_keys' => !empty($saleDetails) ? array_keys($saleDetails) : []
+            ]);
+
             if (!empty($saleDetails)) {
                 if (isset($saleDetails['invoice_no'])) $payload['invoice_no'] = $saleDetails['invoice_no'];
                 if (isset($saleDetails['ref_no'])) $payload['ref_no'] = $saleDetails['ref_no'];
@@ -453,6 +458,7 @@ class SmartLifeErpService
                 if (isset($saleDetails['payments'])) $payload['payments'] = $saleDetails['payments'];
                 if (isset($saleDetails['notes'])) $payload['notes'] = $payload['additional_notes'] = $saleDetails['notes'];
                 if (isset($saleDetails['warehouse_id'])) $payload['warehouse_id'] = $saleDetails['warehouse_id'];
+                if (isset($saleDetails['shipping_charges'])) $payload['shipping_charges'] = $saleDetails['shipping_charges'];
             }
 
             if (isset($saleDetails['smartlife_invoice_id']) && !empty($saleDetails['smartlife_invoice_id'])) {
@@ -683,6 +689,7 @@ class SmartLifeErpService
                 'status' => $status,
                 'payment_status' => $paymentStatus,
                 'smartlife_invoice_id' => $order->smartlife_invoice_id,
+                'shipping_charges' => (float) $order->Delivery_Charge,
             ];
 
             // If the order is already synced to ERP and is now PAID, use addPayment specifically
