@@ -499,8 +499,8 @@
             <div class="feature-card h-100 w-100 d-flex align-items-center p-4 bg-white rounded shadow-sm">
               <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/delivery-truck-1.svg" alt="{{ __('Delivery') }}" class="me-3" style="width: 45px;">
               <div>
-                <h6 class="mb-1 fw-semibold">{{ __('Fast delivery within 20 min') }}</h6>
-                <p class="text-muted small mb-0">{{ __('Free shipping on all your order.') }}</p>
+                <h6 class="mb-1 fw-semibold">{{ __('Fast delivery within the same day') }}</h6>
+                <!-- <p class="text-muted small mb-0">{{ __('Free shipping on all your order.') }}</p> -->
               </div>
             </div>
           </div>
@@ -509,7 +509,7 @@
               <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/headphones-1.svg" alt="{{ __('Support') }}" class="me-3" style="width: 45px;">
               <div>
                 <h6 class="mb-1 fw-semibold">{{ __('Customer Support 24/7') }}</h6>
-                <p class="text-muted small mb-0">{{ __('Instant access to Support') }}</p>
+                <!-- <p class="text-muted small mb-0">{{ __('Instant access to Support') }}</p> -->
               </div>
             </div>
           </div>
@@ -518,7 +518,7 @@
               <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/shopping-bag.svg" alt="{{ __('Payment') }}" class="me-3" style="width: 45px;">
               <div>
                 <h6 class="mb-1 fw-semibold">{{ __('100% Secure Payment') }}</h6>
-                <p class="text-muted small mb-0">{{ __('We ensure your money is safe') }}</p>
+                <!-- <p class="text-muted small mb-0">{{ __('We ensure your money is safe') }}</p> -->
               </div>
             </div>
           </div>
@@ -527,7 +527,7 @@
               <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/package.svg" alt="{{ __('Guarantee') }}" class="me-3" style="width: 45px;">
               <div>
                 <h6 class="mb-1 fw-semibold">{{ __('Money-Back Guarantee') }}</h6>
-                <p class="text-muted small mb-0">{{ __('30 Days Money-Back Guarantee') }}</p>
+                <!-- <p class="text-muted small mb-0">{{ __('30 Days Money-Back Guarantee') }}</p> -->
               </div>
             </div>
           </div>
