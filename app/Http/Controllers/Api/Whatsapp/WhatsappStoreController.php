@@ -349,11 +349,21 @@ class WhatsappStoreController extends Controller
         if (isset($validated['shipping_charge'])) {
             $shipping_charge = floatval($validated['shipping_charge']);
         } else {
+            // Sanitize IDs from WhatsApp Bot (handling cases where they send string "null" or "undefined")
+            $rawAreaId = $validated['billing_area_id'] ?? null;
+            $rawCityId = $validated['billing_city'] ?? null;
+            $rawStateId = $validated['billing_state'] ?? null;
+
+            $cleanAreaId = (is_numeric($rawAreaId) && floatval($rawAreaId) > 0) ? intval($rawAreaId) : null;
+            $cleanCityId = (is_numeric($rawCityId) && floatval($rawCityId) > 0) ? intval($rawCityId) : null;
+            $cleanStateId = (is_numeric($rawStateId) && floatval($rawStateId) > 0) ? intval($rawStateId) : null;
+            $cleanCountry = $validated['billing_country'] ?? 'Oman';
+
             // Simplified logic matching website: prioritizing most specific location
             // Use delivery_charge helper's internal fallback (Area > City > State > Country)
             $shipping_charge = delivery_charge(
-                $validated['billing_area_id'] ?? $validated['billing_city'] ?? $validated['billing_state'] ?? $validated['billing_country'],
-                isset($validated['billing_area_id']) ? 'area' : null
+                $cleanAreaId ?? $cleanCityId ?? $cleanStateId ?? $cleanCountry,
+                $cleanAreaId ? 'area' : ($cleanCityId ? 'city' : ($cleanStateId ? 'state' : null))
             );
         }
 
@@ -361,6 +371,8 @@ class WhatsappStoreController extends Controller
             'order_source' => $validated['order_source'],
             'billing_area_id' => $validated['billing_area_id'] ?? 'null',
             'billing_city' => $validated['billing_city'] ?? 'null',
+            'clean_area_id' => $cleanAreaId ?? 'null',
+            'clean_city_id' => $cleanCityId ?? 'null',
             'received_shipping_override' => $validated['shipping_charge'] ?? 'none',
             'final_shipping_charge' => $shipping_charge,
         ]);

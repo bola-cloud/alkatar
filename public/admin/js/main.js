@@ -25,6 +25,11 @@ All javascript and jquery plugins activation
         sidebarClose.show();
         sidebarOpen.hide();
     });
+
+    sidebarToggler.on('click', () => {
+        sidebarArea.toggleClass('active');
+        mainContent.toggleClass('active');
+    });
     
 
     var alterClass = function() {
