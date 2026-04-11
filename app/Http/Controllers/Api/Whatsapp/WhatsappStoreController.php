@@ -349,35 +349,20 @@ class WhatsappStoreController extends Controller
         if (isset($validated['shipping_charge'])) {
             $shipping_charge = floatval($validated['shipping_charge']);
         } else {
-            // Recalculate if not provided
-            $area_id = $validated['billing_area_id'] ?? null;
-            $city_id = $validated['billing_city'] ?? null;
-            $state_id = $validated['billing_state'] ?? null;
-            $country = $validated['billing_country'] ?? 'Oman';
-
-            $shipping_charge = 0;
-            if ($area_id) {
-                $shipping_charge = delivery_charge($area_id, 'area');
-            }
-
-            if ($shipping_charge == 0 && $city_id) {
-                $shipping_charge = delivery_charge($city_id, 'city');
-            }
-
-            if ($shipping_charge == 0 && $state_id) {
-                $shipping_charge = delivery_charge($state_id, 'state');
-            }
-
-            if ($shipping_charge == 0) {
-                $shipping_charge = delivery_charge($country);
-            }
+            // Simplified logic matching website: prioritizing most specific location
+            // Use delivery_charge helper's internal fallback (Area > City > State > Country)
+            $shipping_charge = delivery_charge(
+                $validated['billing_area_id'] ?? $validated['billing_city'] ?? $validated['billing_state'] ?? $validated['billing_country'],
+                isset($validated['billing_area_id']) ? 'area' : null
+            );
         }
 
-        \Illuminate\Support\Facades\Log::info('WhatsApp Checkout Shipping Calculation', [
-            'received_charge' => $validated['shipping_charge'] ?? 'none',
+        \Illuminate\Support\Facades\Log::info('WhatsApp Checkout Debug', [
+            'order_source' => $validated['order_source'],
+            'billing_area_id' => $validated['billing_area_id'] ?? 'null',
+            'billing_city' => $validated['billing_city'] ?? 'null',
+            'received_shipping_override' => $validated['shipping_charge'] ?? 'none',
             'final_shipping_charge' => $shipping_charge,
-            'area_id' => $validated['billing_area_id'] ?? null,
-            'order_source' => $validated['order_source'] ?? 'N/A'
         ]);
 
         $weight_charge = $this->calculateExtraWeightFees($validated['cart_items']);
