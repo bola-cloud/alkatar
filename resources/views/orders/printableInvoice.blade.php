@@ -59,7 +59,7 @@
             box-sizing: border-box;
             overflow: hidden;
             margin: 0 !important;
-            padding: 5px 15px 5px 5px !important; /* Added 15px padding to the right to prevent printing cutoff */
+            padding: 5px 2mm 5px 2mm !important; /* Reduced padding to maximize printable area */
             max-width: 100%;
             width: 80mm;
             direction: ltr;
@@ -156,8 +156,8 @@
                 $phone = $billing['phone_number'] ?? ($order->user->Number ?? '');
                 $addressStr = implode(', ', array_filter([
                     $billing['street'] ?? null,
-                    $billing['city_ar'] ?? null,
-                    $billing['state_ar'] ?? null
+                    $billing['city_en'] ?? null,
+                    $billing['state_en'] ?? null
                 ]));
                 if (empty($addressStr)) {
                     $addressStr = 'Pick up from branch';
@@ -181,19 +181,21 @@
         <table style="font-size: 75%; border-collapse: collapse; direction: ltr;" autosize="1" width="100%">
             <thead>
                 <tr>
-                    <th style="text-align: left;"><span>Item</span></th>
-                    <th style="width: 15%; text-align: center;"><span>Price</span></th>
+                    <th style="text-align: left; width: 45%;"><span>Item</span></th>
+                    <th style="width: 20%; text-align: center;"><span>Price</span></th>
                     <th style="width: 15%; text-align: center;"><span>Qty</span></th>
-                    <th style="width: 15%; text-align: center;"><span>Total</span></th>
+                    <th style="width: 20%; text-align: center;"><span>Total</span></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($order->order_details as $item)
                     <tr>
-                        <td style="text-align: left;"><span class="item-name">{{ $item->product->fr_Product_Name ?? $item->Product_Name }}</span></td>
-                        <td style="text-align: center;" class="nowrap"><span>{{ number_format($item->Price, 3) }}</span></td>
-                        <td style="text-align: center;" class="nowrap"><span>{{ (int) $item->Quantity }}<span></td>
-                        <td style="text-align: center;" class="nowrap"><span>{{ number_format($item->Total_Price, 3) }}</span></td>
+                        <td style="text-align: left; vertical-align: top;">
+                            <span class="item-name">{{ $item->product->en_Product_Name ?? $item->Product_Name }}</span>
+                        </td>
+                        <td style="text-align: center; vertical-align: top;" class="nowrap"><span>{{ number_format($item->Price, 3) }}</span></td>
+                        <td style="text-align: center; vertical-align: top;" class="nowrap"><span>{{ (int) $item->Quantity }}<span></td>
+                        <td style="text-align: center; vertical-align: top;" class="nowrap"><span>{{ number_format($item->Total_Price, 3) }}</span></td>
                     </tr>
                 @endforeach
             </tbody>

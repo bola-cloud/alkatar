@@ -127,7 +127,7 @@ class PrinterOrderController extends Controller
      */
     public function print($id)
     {
-        $order = Order::with(['order_details', 'user'])->findOrFail($id);
+        $order = Order::with(['order_details', 'order_details.product', 'user'])->findOrFail($id);
 
         $pdf = PDF::loadView('orders.printableInvoice', compact('order'), [], [
             'title' => 'Order #' . $order->id,
