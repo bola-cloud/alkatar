@@ -452,10 +452,15 @@ class CheckoutController extends Controller
 
     protected function generateOrderNumber()
     {
-        do {
-            $order_number = $this->generateRandomString(6);
-            $exists_order_number = Order::where('Order_Number', $order_number)->exists();
-        } while ($exists_order_number);
+        $maxId = Order::max('id') ?? 0;
+        $nextNumber = 10000 + ($maxId + 1);
+        $order_number = (string) $nextNumber;
+
+        // Safety check: ensure uniqueness (should never loop, but just in case)
+        while (Order::where('Order_Number', $order_number)->exists()) {
+            $nextNumber++;
+            $order_number = (string) $nextNumber;
+        }
 
         return $order_number;
     }

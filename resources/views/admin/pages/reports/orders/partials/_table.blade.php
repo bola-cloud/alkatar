@@ -16,7 +16,7 @@
                     <td>{{ method_exists($orders, 'firstItem') ? $orders->firstItem() + $i : $loop->iteration }}</td>
                     <td>{{ $order->{$fieldMap['order_number']} ?? '-' }}</td>
                     <td>{{ optional($order->user)->name ?: 'Guest User' }}</td>
-                    <td>{{ optional(json_decode($order->billing_address))->phone_number ?? '-'  }}</td>
+                    <td>{{ (is_array($order->billing_address) ? ($order->billing_address['phone_number'] ?? '-') : '-')  }}</td>
                     @php
                         $dateValue = $order->{$fieldMap['date']} ?? null;
                         if ($dateValue instanceof \Carbon\CarbonInterface) {

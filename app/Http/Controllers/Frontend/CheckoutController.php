@@ -471,11 +471,8 @@ class CheckoutController extends Controller
                 Session::put('shipping_id', $billing_create->id);
             }
 
-            // Generate unique order number
-            do {
-                $order_number = $this->generateRandomString(6);
-                $exists_order_number = Order::where('Order_Number', $order_number)->exists();
-            } while ($exists_order_number);
+            // Generate unique sequential order number (numeric only)
+            $order_number = $this->generateOrderNumber();
 
             // Coupon handling
             if ($isLoggedIn && Session::has('Coupon_Id')) {
@@ -767,10 +764,8 @@ class CheckoutController extends Controller
         $shipping_charge = delivery_charge($request->billing_area ?? $request->billing_city ?? $request->billing_state ?? $request->billing_country, ($request->billing_area) ? 'area' : null);
         $this->grand_total = $subtotal + $tax + $shipping_charge;
 
-        do {
-            $order_number = $this->generateRandomString(6);
-            $exists_order_number = Order::where('Order_Number', $order_number)->exists();
-        } while ($exists_order_number);
+        // Generate unique sequential order number (numeric only)
+        $order_number = $this->generateOrderNumber();
 
         if (Auth::check() && Session::has('Coupon_Id')) {
             $user_id = Auth::id();
@@ -1230,6 +1225,25 @@ class CheckoutController extends Controller
             $randomString .= $characters[rand(0, $charactersLength - 1)];
         }
         return $randomString;
+    }
+
+    /**
+     * Generate a unique sequential numeric order number.
+     * Format: 10000 + next order ID (e.g., 10077, 10078, ...)
+     */
+    protected function generateOrderNumber()
+    {
+        $maxId = Order::max('id') ?? 0;
+        $nextNumber = 10000 + ($maxId + 1);
+        $order_number = (string) $nextNumber;
+
+        // Safety check: ensure uniqueness (should never loop, but just in case)
+        while (Order::where('Order_Number', $order_number)->exists()) {
+            $nextNumber++;
+            $order_number = (string) $nextNumber;
+        }
+
+        return $order_number;
     }
 
     public function getTaxAmount(Request $request)

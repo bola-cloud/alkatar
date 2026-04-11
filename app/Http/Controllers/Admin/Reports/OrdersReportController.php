@@ -79,7 +79,7 @@ class OrdersReportController extends Controller
     {
         $dateColumn = $this->fieldMap['date'];
 
-        $query = Order::query()->where('Payment_Method', 'thawani')
+        $query = Order::query()
             ->with(['user'])
             ->when($dateColumn === 'created_at', function ($q) use ($start, $end, $dateColumn) {
                 $q->whereBetween($dateColumn, [$start, $end]);
