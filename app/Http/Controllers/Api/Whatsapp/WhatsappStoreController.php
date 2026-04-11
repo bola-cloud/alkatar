@@ -345,26 +345,40 @@ class WhatsappStoreController extends Controller
         $state_id = $validated['billing_state'] ?? null;
         $country = $validated['billing_country'] ?? 'Oman';
 
-        // 1. Try Area Charge
-        $shipping_charge = 0;
-        if ($area_id) {
-            $shipping_charge = delivery_charge($area_id, 'area');
+        // Determine Shipping Charge
+        if (isset($validated['shipping_charge'])) {
+            $shipping_charge = floatval($validated['shipping_charge']);
+        } else {
+            // Recalculate if not provided
+            $area_id = $validated['billing_area_id'] ?? null;
+            $city_id = $validated['billing_city'] ?? null;
+            $state_id = $validated['billing_state'] ?? null;
+            $country = $validated['billing_country'] ?? 'Oman';
+
+            $shipping_charge = 0;
+            if ($area_id) {
+                $shipping_charge = delivery_charge($area_id, 'area');
+            }
+
+            if ($shipping_charge == 0 && $city_id) {
+                $shipping_charge = delivery_charge($city_id, 'city');
+            }
+
+            if ($shipping_charge == 0 && $state_id) {
+                $shipping_charge = delivery_charge($state_id, 'state');
+            }
+
+            if ($shipping_charge == 0) {
+                $shipping_charge = delivery_charge($country);
+            }
         }
 
-        // 2. Try City Charge (Fallback)
-        if ($shipping_charge == 0 && $city_id) {
-            $shipping_charge = delivery_charge($city_id, 'city');
-        }
-        
-        // 3. Try State Charge (Fallback)
-        if ($shipping_charge == 0 && $state_id) {
-            $shipping_charge = delivery_charge($state_id, 'state');
-        }
-
-        // 4. Try Country Charge (Fallback)
-        if ($shipping_charge == 0) {
-            $shipping_charge = delivery_charge($country);
-        }
+        \Illuminate\Support\Facades\Log::info('WhatsApp Checkout Shipping Calculation', [
+            'received_charge' => $validated['shipping_charge'] ?? 'none',
+            'final_shipping_charge' => $shipping_charge,
+            'area_id' => $validated['billing_area_id'] ?? null,
+            'order_source' => $validated['order_source'] ?? 'N/A'
+        ]);
 
         $weight_charge = $this->calculateExtraWeightFees($validated['cart_items']);
         $grandTotal = $subtotal + $shipping_charge + $weight_charge + $tax;
@@ -591,10 +605,18 @@ class WhatsappStoreController extends Controller
 
     protected function generateOrderNumber()
     {
-        do {
-            $num = strtoupper(\Illuminate\Support\Str::random(6));
-        } while (\App\Models\Admin\Order::where('Order_Number', $num)->exists());
-        return $num;
+        // Use a transaction-safe lock if possible, but for simple incremental:
+        $maxOrderId = \App\Models\Admin\Order::max('id') ?? 0;
+        $nextId = $maxOrderId + 1;
+        $orderNumber = (string)(10000 + $nextId);
+
+        // Double check uniqueness to prevent collisions
+        while (\App\Models\Admin\Order::where('Order_Number', $orderNumber)->exists()) {
+            $nextId++;
+            $orderNumber = (string)(10000 + $nextId);
+        }
+
+        return $orderNumber;
     }
 
     protected function subQtyProduct($product_id, $qty)
