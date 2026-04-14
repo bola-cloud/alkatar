@@ -238,9 +238,27 @@ class Product extends Model
 
     public function scopeAvailable($query)
     {
-        return $query->where(function($q) {
-            $q->where('Quantity', '>', 0)
-              ->orWhereIn('product_type', ['Combo', 'تجميعي']);
+        return $query->where('Status', 1)->where(function ($q) {
+            // Standard products must have Quantity > 0
+            $q->where(function ($q2) {
+                $q2->whereNotIn('product_type', ['Combo', 'تجميعي'])
+                    ->where('Quantity', '>', 0);
+            })
+            // Combo products: only show if ALL linked components have sufficient stock and are Active.
+            // A combo is hidden if EXISTS a component with Quantity < required_quantity OR Status = 0.
+            ->orWhere(function ($q2) {
+                $q2->whereIn('product_type', ['Combo', 'تجميعي'])
+                    ->whereNotExists(function ($sub) {
+                        $sub->select(\Illuminate\Support\Facades\DB::raw(1))
+                            ->from('product_combos')
+                            ->join('products as components', 'product_combos.combo_product_id', '=', 'components.id')
+                            ->whereColumn('product_combos.product_id', 'products.id')
+                            ->where(function ($q3) {
+                                $q3->where('components.Quantity', '<', \Illuminate\Support\Facades\DB::raw('product_combos.quantity'))
+                                    ->orWhere('components.Status', 0);
+                            });
+                    });
+            });
         });
     }
 
