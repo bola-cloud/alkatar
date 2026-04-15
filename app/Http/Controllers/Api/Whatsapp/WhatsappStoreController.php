@@ -121,6 +121,34 @@ class WhatsappStoreController extends Controller
     }
 
     /**
+     * Get ALL products for Master Catalog (No availability filtering)
+     * Requested for Facebook/WhatsApp Catalog synchronization
+     */
+    public function getCatalog(Request $request)
+    {
+        // Fetch EVERYTHING: Active, Inactive, Out of Stock, even Combos with 0 components
+        // We use the same relationships as getProducts to ensure data consistency
+        $query = Product::with(['category', 'brand', 'weights', 'sizes', 'additions']);
+
+        if ($request->filled('category_id')) {
+            $query->where('Category_Id', $request->category_id);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('en_Product_Name', 'like', "%{$search}%")
+                  ->orWhere('fr_Product_Name', 'like', "%{$search}%");
+            });
+        }
+
+        // Return a larger page size by default for catalogs (100)
+        $products = $query->orderBy('id', 'desc')->paginate($request->get('per_page', 100));
+
+        return ProductResource::collection($products);
+    }
+
+    /**
      * Get a single product detail by ID (same data as product details page)
      */
     public function getProductDetail($id)

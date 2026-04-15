@@ -13,15 +13,18 @@
         /* ensure the intl input uses full width and the flag is placed correctly */
         .iti {
             width: 100%;
+            /* Force LTR for phone numbers regardless of site language */
+            direction: ltr !important;
         }
 
         .iti .iti__flag-container {
-            top: 8px;
+            top: 5px;
             left: 10px;
         }
 
         #phone_number {
-            direction: ltr;
+            direction: ltr !important;
+            text-align: left !important;
         }
 
         /* ensure country list is scrollable and stays above other elements */
@@ -29,33 +32,36 @@
             max-height: 300px;
             overflow-y: auto;
             z-index: 999999 !important;
+            direction: ltr !important;
+            text-align: left !important;
         }
 
-        /* when using separate dial code, keep dial code visible and input padding consistent
-                   increase padding so placeholder/text never sits under the flag/dial-code */
-        .iti--separate-dial-code .iti__selected-dial-code {
-            left: 56px;
-            position: absolute;
-        }
-
+        /* when using separate dial code, ensure enough padding so text never overlaps */
         .iti--separate-dial-code input {
-            padding-left: 130px !important;
+            padding-left: 100px !important;
         }
 
-        /* also target the input directly (ID) to be extra-safe for this layout */
         #phone_number {
-            padding-left: 130px !important;
+            padding-left: 100px !important;
         }
 
-        /* Slightly reduce padding on narrow screens but keep enough room for the dial code */
-        @media (max-width: 768px) {
-            .iti--separate-dial-code input {
-                padding-left: 90px !important;
+        /* More generous padding for desktop where dial code might be wider */
+        @media (min-width: 769px) {
+            .iti--separate-dial-code input, #phone_number {
+                padding-left: 130px !important;
             }
+        }
 
-            #phone_number {
-                padding-left: 90px !important;
+        /* Slightly reduce padding on very narrow screens but keep enough room */
+        @media (max-width: 480px) {
+            .iti--separate-dial-code input, #phone_number {
+                padding-left: 95px !important;
             }
+        }
+        
+        /* Fix dial code positioning if it was shifting too much */
+        .iti--separate-dial-code .iti__selected-dial-code {
+            margin-left: 5px;
         }
     </style>
 
@@ -356,7 +362,7 @@
 
                 if (form) {
                     form.addEventListener('submit', function (e) {
-                        if (iti && !iti.isValidNumber()) {
+                        if (iti && !iti.isPossibleNumber()) {
                             e.preventDefault();
                             alert("Please enter a valid phone number.");
                             return false;

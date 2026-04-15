@@ -522,7 +522,7 @@
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
 
-                    if (iti.isValidNumber()) {
+                    if (iti.isPossibleNumber()) {
                         var fullNumber = iti.getNumber();
                         var countryCode = iti.getSelectedCountryData().dialCode;
                         countryCodeInput.value = countryCode;
