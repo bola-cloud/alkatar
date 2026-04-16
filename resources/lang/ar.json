@@ -207,5 +207,16 @@
     "Sign Up Successfully! Please verify your account with the OTP sent to your WhatsApp.": "تم التسجيل بنجاح! يرجى التحقق من حسابك باستخدام رمز التحقق (OTP) المرسل إلى واتساب.",
     "Phone number not found. Please sign up.": "رقم الهاتف غير موجود. يرجى التسجيل.",
     "The full phone has already been taken.": "رقم الهاتف موجود بالفعل.",
-    "Return Policy": "سياسة الإرجاع"
+    "Return Policy": "سياسة الإرجاع",
+    "Invoice": "فاتورة",
+    "Order Number": "رقم الطلب",
+    "Date": "التاريخ",
+    "Time": "الوقت",
+    "Payment": "الدفع",
+    "Bill To": "الفاتورة إلى",
+    "Ship To": "الشحن إلى",
+    "Size/Weight": "الحجم/الوزن",
+    "Oman": "سلطنة عمان",
+    "Commercial Register": "سجل التجاري",
+    "Register Name": "اسم السجل"
 }

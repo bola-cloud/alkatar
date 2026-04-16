@@ -315,5 +315,16 @@
     "Account verified successfully!": "Account verified successfully!",
     "OTP has been resent.": "OTP has been resent.",
     "Code": "Code",
-    "Verify Your Account": "Verify Your Account"
+    "Verify Your Account": "Verify Your Account",
+    "Invoice": "Invoice",
+    "Order Number": "Order Number",
+    "Date": "Date",
+    "Time": "Time",
+    "Payment": "Payment",
+    "Bill To": "Bill To",
+    "Ship To": "Ship To",
+    "Size/Weight": "Size/Weight",
+    "Oman": "Oman",
+    "Commercial Register": "Commercial Register",
+    "Register Name": "Register Name"
 }

@@ -696,6 +696,9 @@ class WhatsappStoreController extends Controller
      */
     public function getOrderInvoicePdf($id)
     {
+        // Force English locale for WhatsApp/App invoices as requested
+        app()->setLocale('en');
+
         $order = \App\Models\Admin\Order::with(['order_details', 'user', 'billing', 'order_details.product'])->find($id);
         
         if (!$order) {
