@@ -46,7 +46,7 @@
 
       <div class="product-item card h-100 d-flex flex-column">
         <div class="card-wrap position-relative">
-          <a href="{{ route('single.product.new', $product->en_Product_Slug) }}" class="card-image-link d-block" style="background-color: #f9f9f9; min-height: 180px;">
+          <a href="{{ route('single.product.new', $product->en_Product_Slug) }}" class="card-image-link d-block" style="background-color: #ffffff; min-height: 180px;">
             <img src="{{ $imgUrl }}" class="card-img-top p-3" alt="{{ $name }}"
               style="height: 160px; object-fit: contain;"
               onerror="this.onerror=null;this.src='{{ asset('new-design/images/special-offer.png') }}';">
@@ -231,7 +231,7 @@
     }
 
     .card-wrap {
-      background-color: #f8f9fa;
+      background-color: #ffffff;
       overflow: hidden;
     }
   </style>
