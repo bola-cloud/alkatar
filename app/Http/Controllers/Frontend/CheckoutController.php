@@ -952,7 +952,7 @@ class CheckoutController extends Controller
             return response()->json(['success' => false, 'message' => 'Order not found']);
         }
 
-        $pdfUrl = route('api.whatsapp.invoice_pdf', ['id' => $order->id]);
+        $pdfUrl = route('api.whatsapp.invoice_pdf', ['id' => $order->id, 'lang' => app()->getLocale()]);
         $phoneNumber = $order->billing_address['phone_number'] ?? $order->user->Number ?? '';
         $name = $order->billing_address['name'] ?? $order->user->name ?? 'Customer';
 

@@ -694,10 +694,12 @@ class WhatsappStoreController extends Controller
     /**
      * Generate actual PDF for WhatsApp Invoice (Optimized for mPDF)
      */
-    public function getOrderInvoicePdf($id)
+    public function getOrderInvoicePdf(\Illuminate\Http\Request $request, $id)
     {
-        // Force English locale for WhatsApp/App invoices as requested
-        app()->setLocale('en');
+        // Use requested language (from WhatsApp link) or fallback to app locale
+        if ($request->has('lang')) {
+            app()->setLocale($request->lang);
+        }
 
         $order = \App\Models\Admin\Order::with(['order_details', 'user', 'billing', 'order_details.product'])->find($id);
         

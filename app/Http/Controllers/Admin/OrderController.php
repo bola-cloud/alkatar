@@ -118,6 +118,11 @@ class OrderController extends Controller
                 })
                 ->addColumn('Payment_Method', function ($data) {
                     $payment_method = $data->Payment_Method;
+                    
+                    // If Thawani and not paid yet, show "لم يتم الدفع" as requested by client
+                    if (strtoupper($payment_method) === 'THAWANI' && ($data->is_paid == 0 || $data->Payment_Status === 'Unpaid')) {
+                        return '<span style="color:red; font-weight: bold;">لم يتم الدفع</span>';
+                    }
 
                     if ($payment_method === 'COD') {
                         return '<span style="color:green; font-weight: bold;">' . $payment_method . '</span>';
@@ -198,6 +203,9 @@ class OrderController extends Controller
 
     public function order_print(Request $request)
     {
+        // Printing should always be in English as requested
+        app()->setLocale('en');
+
         $order = Order::query()
             ->with('order_details', 'user', 'coupon', 'order_details.product', 'billing', 'shipping')
             ->find($request->id);
@@ -404,7 +412,7 @@ class OrderController extends Controller
                 $phoneNumber = $serialized_billing['phone_number'];
             }
 
-            $pdfUrl = route('order.print', ['id' => $order->id]);
+            $pdfUrl = route('api.whatsapp.invoice_pdf', ['id' => $order->id, 'lang' => (session('APP_LOCALE') == 'fr' ? 'ar' : 'en')]);
             $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/payment_pdf', [
                 'phone_number' => $phoneNumber,
                 'payment_url' => $paymentUrl,
