@@ -59,9 +59,9 @@
             box-sizing: border-box;
             overflow: hidden;
             margin: 0 !important;
-            padding: 5px 2mm 5px 2mm !important; /* Reduced padding to maximize printable area */
+            padding: 5px 4mm 5px 2mm !important; /* Increased right padding to prevent cut-off */
             max-width: 100%;
-            width: 80mm;
+            width: 72mm; /* Reduced from 80mm to safe printable area */
             direction: ltr;
             text-align: left;
         }
@@ -71,7 +71,9 @@
             font-size: 10px;
             display: block;
             text-align: left;
+            white-space: normal; /* Force wrapping */
             word-wrap: break-word;
+            word-break: break-word;
         }
 
         .header-info p {
@@ -243,7 +245,7 @@
             $phoneNumber = is_array($billingAddress) ? ($billingAddress['phone_number'] ?? 'N/A') : ($order->user->Number ?? 'N/A');
             $qrData = "Order:" . $order->id . " | Phone:" . $phoneNumber;
             
-            $qrCodeString = (string) QrCode::size(120)->generate($qrData);
+            $qrCodeString = (string) QrCode::size(100)->generate($qrData);
             $svgStart = strpos($qrCodeString, '<svg');
             $cleanQrCode = ($svgStart !== false) ? substr($qrCodeString, $svgStart) : $qrCodeString;
         @endphp
