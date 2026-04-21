@@ -10,6 +10,9 @@ class OrderController extends Controller
 {
     public function order_print(Request $request)
     {
+        // Printing should always be in English
+        app()->setLocale('en');
+
         $order = Order::query()
             ->with('order_details', 'user', 'coupon', 'order_details.product', 'billing', 'shipping')
             ->find($request->id);

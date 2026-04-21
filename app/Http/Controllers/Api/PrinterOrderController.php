@@ -127,6 +127,9 @@ class PrinterOrderController extends Controller
      */
     public function print($id)
     {
+        // Force English locale for the printer app
+        app()->setLocale('en');
+
         $order = Order::with(['order_details', 'order_details.product', 'user'])->findOrFail($id);
 
         $pdf = PDF::loadView('orders.printableInvoice', compact('order'), [], [
