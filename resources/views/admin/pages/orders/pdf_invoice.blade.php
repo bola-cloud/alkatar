@@ -157,10 +157,10 @@
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td class="{{ app()->getLocale() == 'ar' ? 'text-right' : 'text-left' }}">
-                            @if(app()->getLocale() == 'ar')
-                                {{ $od->product->fr_Product_Name ?? $od->Product_Name }}
+                            @if($od->product)
+                                {{ langConverter($od->product->en_Product_Name, $od->product->fr_Product_Name) }}
                             @else
-                                {{ $od->product->en_Product_Name ?? $od->Product_Name }}
+                                {{ $od->Product_Name }}
                             @endif
                         </td>
                         <td class="nowrap">{{ $od->Quantity }}</td>
