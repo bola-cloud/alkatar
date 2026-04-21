@@ -43,6 +43,7 @@ class StoreOrderRequest extends FormRequest
             'cart_items.*.addition_ids.*' => 'exists:additions,id',
             'coupon_code' => 'nullable|string|exists:coupons,CouponCode',
             'shipping_charge' => 'nullable|numeric',
+            'language' => 'nullable|string|in:ar,en',
         ];
     }
 

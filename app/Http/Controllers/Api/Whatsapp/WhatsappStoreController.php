@@ -341,6 +341,12 @@ class WhatsappStoreController extends Controller
     public function checkout(\App\Http\Requests\StoreOrderRequest $request)
     {
         $validated = $request->validated();
+        
+        // Set locale based on bot request if provided
+        if (isset($validated['language'])) {
+            app()->setLocale($validated['language']);
+        }
+
         $user = auth()->user();
         $user_id = $user->id;
 
@@ -554,8 +560,9 @@ class WhatsappStoreController extends Controller
             'order_number' => $order_number,
             'grand_total' => $order->Grand_Total,
             'payment_method' => $validated['Payment_Method'],
-            'receipt_url' => route('order.print', ['id' => $order->id]),
-            'invoice_pdf_url' => route('api.whatsapp.invoice_pdf', ['id' => $order->id])
+            'language' => app()->getLocale(),
+            'receipt_url' => route('order.print', ['id' => $order->id, 'lang' => app()->getLocale()]),
+            'invoice_pdf_url' => route('api.whatsapp.invoice_pdf', ['id' => $order->id, 'lang' => app()->getLocale()])
         ]);
     }
 
@@ -682,7 +689,8 @@ class WhatsappStoreController extends Controller
                     'grand_total' => $order->Grand_Total,
                     'payment_method' => 'Thawani',
                     'url' => $paymentUrl,
-                    'invoice_pdf_url' => route('api.whatsapp.invoice_pdf', ['id' => $order->id])
+                    'language' => app()->getLocale(),
+                    'invoice_pdf_url' => route('api.whatsapp.invoice_pdf', ['id' => $order->id, 'lang' => app()->getLocale()])
                 ]);
             }
         }
