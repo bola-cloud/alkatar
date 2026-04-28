@@ -460,9 +460,20 @@ class WhatsappStoreController extends Controller
         if ($payment_method == 'CashOnDelivery') {
             $payment_method = 'COD';
         }
+        
+        $collection_method = $validated['Collection_Method'] ?? 'Delivery';
+
+        // Paid methods: Bank Transfer
+        $isPaidMethod = in_array(strtoupper($payment_method), ['BANK_TRANSFER']);
+
+        // For store pickup: override shipping to 0
+        if (strtoupper($collection_method) === 'STORE_PICKUP') {
+            $shipping_charge = 0;
+            $grandTotal = $subtotal + $tax;
+        }
 
         $initial_status = ORDER_PENDING;
-        if ($payment_method == 'COD' || $payment_method == 'Thawani') {
+        if ($payment_method == 'COD' || $payment_method == 'Thawani' || $isPaidMethod || strtoupper($collection_method) === 'STORE_PICKUP') {
             $initial_status = ORDER_PROCESSING;
         }
 
@@ -472,7 +483,7 @@ class WhatsappStoreController extends Controller
             'User_Id' => $user_id,
             'Billing_Id' => $billing->id,
             'billing_address' => $billing_address,
-            'shipping_address' => $billing_address, // Same as billing for simplicity in bots
+            'shipping_address' => $billing_address,
             'Delivery_Charge' => $shipping_charge,
             'Tax' => $tax,
             'Sub_Total' => $subtotal,
@@ -483,8 +494,11 @@ class WhatsappStoreController extends Controller
             'Is_Order_Successful' => false,
             'Is_Order_Completed' => false,
             'Payment_Method' => $payment_method,
+            'Payment_Status' => $isPaidMethod ? PAYMENT_SUCCESS : PAYMENT_PENDING,
+            'is_paid' => $isPaidMethod ? 1 : 0,
+            'collection_method' => strtolower($collection_method),
             'Order_Status' => $initial_status,
-            'order_source' => $validated['order_source'],
+            'order_source' => 'whatsapp',
         ]);
 
         foreach ($validated['cart_items'] as $item) {
@@ -533,7 +547,11 @@ class WhatsappStoreController extends Controller
         }
 
         // Sync Order to Smart ERP immediately as UNPAID (Two-step sync approach)
-        if (config('smartlife.sync_enabled')) {
+        // However, do NOT sync online payments (Thawani, Stripe, etc.) if they are not paid yet.
+        $isOnlinePayment = in_array(strtolower($payment_method), ['thawani', 'stripe', 'paypal']);
+        $shouldSyncNow = config('smartlife.sync_enabled') && (!$isOnlinePayment || $order->is_paid);
+        
+        if ($shouldSyncNow) {
             try {
                 $smartLifeService = app(\App\Services\SmartLifeErpService::class);
                 $invoiceId = $smartLifeService->submitOrder($order);
@@ -547,12 +565,12 @@ class WhatsappStoreController extends Controller
             }
         }
 
-        // Generate Thawani Session if needed
+        // Generate Thawani Session only for online payment
         if ($validated['Payment_Method'] == 'Thawani') {
             return $this->generateThawaniSession($order, $user);
         }
 
-        // For non-Thawani (e.g., COD), trigger Print App and Push Notifications
+        // For COD, Bank Transfer, In-Store Pickup: trigger notifications
         event(new \App\Events\OrderCreated($order));
 
         return response()->json([
@@ -683,11 +701,18 @@ class WhatsappStoreController extends Controller
                 ]);
 
                 $paymentUrl = config('services.thawani.pay_url') . $sessionId . "?key=" . config('services.thawani.public_key');
+
+                // Dispatch a delayed reminder job (fires after 30 min, only if still PENDING)
+                // This avoids interrupting customers who are currently completing their payment.
+                \App\Jobs\SendPendingThawaniReminderJob::dispatch($order->id, $paymentUrl)
+                    ->delay(now()->addMinutes(5));
+
                 return response()->json([
                     'message' => 'Payment session created',
+                    'order_id' => $order->id,
                     'order_number' => $order->Order_Number,
                     'grand_total' => $order->Grand_Total,
-                    'payment_method' => 'Thawani',
+                    'payment_method' => 'thawani',
                     'url' => $paymentUrl,
                     'language' => app()->getLocale(),
                     'invoice_pdf_url' => route('api.whatsapp.invoice_pdf', ['id' => $order->id, 'lang' => app()->getLocale()])
@@ -752,5 +777,41 @@ class WhatsappStoreController extends Controller
                 'invoice_pdf_url' => route('api.whatsapp.invoice_pdf', ['id' => $order->id])
             ]
         ]);
+    }
+
+    /**
+     * Handle actions from WhatsApp bot (e.g. Convert to COD, Cancel Order)
+     */
+    public function handleOrderAction(\Illuminate\Http\Request $request)
+    {
+        $validated = $request->validate([
+            'order_id' => 'required|integer|exists:orders,id',
+            'action' => 'required|string|in:convert_to_cod,cancel_order',
+        ]);
+
+        $order = \App\Models\Admin\Order::find($validated['order_id']);
+
+        if ($validated['action'] === 'convert_to_cod') {
+            if (strtoupper($order->Payment_Method) === 'THAWANI' && $order->Payment_Status === 'PENDING') {
+                $order->Payment_Method = 'COD';
+                // Using 2 as ORDER_PROCESSING constant might not be loaded if helper isn't included, so use literal or constant
+                $order->Order_Status = defined('ORDER_PROCESSING') ? ORDER_PROCESSING : 2;
+                $order->save();
+
+                // Trigger standard notification
+                app(\App\Http\Controllers\Frontend\CheckoutController::class)->sendOrderNotification($order->id);
+
+                return response()->json(['message' => 'Order converted to COD and notification sent.']);
+            }
+            return response()->json(['message' => 'Order cannot be converted. Status might be paid or already COD.'], 400);
+        }
+
+        if ($validated['action'] === 'cancel_order') {
+            // Delete order
+            $order->delete();
+            return response()->json(['message' => 'Order cancelled and deleted successfully.']);
+        }
+
+        return response()->json(['message' => 'Invalid action'], 400);
     }
 }

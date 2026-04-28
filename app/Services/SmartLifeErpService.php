@@ -201,7 +201,12 @@ class SmartLifeErpService
                 'has_cookie' => !empty($cookieString)
             ]);
 
-            return $method === 'GET' ? $request->get($url, $data) : $request->post($url, $data);
+            if (strtoupper($method) === 'GET') {
+                return $request->get($url, $data);
+            }
+            return $request->send($method, $url, [
+                'json' => $data
+            ]);
         };
 
         $response = $makeRequest($session);
@@ -224,7 +229,11 @@ class SmartLifeErpService
                         'status' => $response->status(),
                         'body_preview' => $bodyPreviewAfter
                     ]);
+                    return null; // Don't return HTML response as a valid API response
                 }
+            } else {
+                // If refresh failed, return null if original was HTML
+                if ($this->isHtmlResponse($response)) return null;
             }
         }
 
@@ -579,6 +588,68 @@ class SmartLifeErpService
     {
         Cache::forget('smartlife_access_token');
         Cache::forget('smartlife_session');
+    }
+
+    /**
+     * Delete a sale from SmartLife ERP
+     *
+     * @param string $saleId  The SmartLife invoice ID
+     * @param array  $items   Optional: array of items to return. If empty, a full return is assumed.
+     * @return bool
+     */
+    public function deleteSale($saleId, array $items = [])
+    {
+        return $this->cancelSaleViaReturn($saleId, $items);
+    }
+
+    /**
+     * Cancel/Return a sale in SmartLife ERP using the return_sale API.
+     * SmartLife does NOT have a delete endpoint — the correct approach is to
+     * create a full "return" which voids the sale and restores stock.
+     *
+     * API: POST /sales/return_sale/{id}
+     *
+     * @param string $saleId
+     * @param array  $items   Optional line items to return. Empty = full return.
+     * @return bool
+     */
+    public function cancelSaleViaReturn($saleId, array $items = [])
+    {
+        try {
+            Log::info("SmartLife ERP: Cancelling sale #{$saleId} via return_sale");
+
+            $payload = [];
+
+            // If specific items are not provided, we send an empty payload
+            // which tells SmartLife to do a full return of all items.
+            if (!empty($items)) {
+                $payload['items'] = $items;
+            }
+
+            $response = $this->request('POST', "sales/return_sale/{$saleId}", $payload);
+
+            if ($response && $response->successful()) {
+                $data = $response->json();
+                // SmartLife returns {"success":true, ...} on success
+                if (isset($data['success']) && $data['success'] === true) {
+                    Log::info('SmartLife ERP: Sale cancelled successfully via return_sale', ['sale_id' => $saleId, 'response' => $data]);
+                    return true;
+                }
+                Log::warning('SmartLife ERP: return_sale responded but success=false', ['sale_id' => $saleId, 'response' => $data]);
+                return false;
+            }
+
+            Log::error('SmartLife ERP: return_sale request failed', [
+                'sale_id'     => $saleId,
+                'http_status' => $response ? $response->status() : 'null',
+                'body'        => $response ? substr($response->body(), 0, 500) : 'null',
+            ]);
+            return false;
+
+        } catch (Exception $e) {
+            Log::error('SmartLife ERP: cancelSaleViaReturn exception', ['sale_id' => $saleId, 'error' => $e->getMessage()]);
+            return false;
+        }
     }
 
     /**

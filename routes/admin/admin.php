@@ -357,6 +357,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'is_admin'], '
     Route::post('/faq-store', [CustomerServiceController::class, 'faqStore'])->name('faq_store')->middleware(['permission:cms-create', 'isDemo']);
     Route::get('/faq-delete/{id}', [CustomerServiceController::class, 'faqDelete'])->name('faq_delete')->middleware(['permission:cms-delete', 'isDemo']);
 
+    Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create')->middleware(['permission:order-create']);
+    Route::post('/orders/store', [OrderController::class, 'store'])->name('orders.store')->middleware(['permission:order-create', 'isDemo']);
     Route::get('/orders/{status}', [OrderController::class, 'orders'])->name('orders')->middleware(['permission:order-list|order-create|order-edit|order-delete']);
     Route::post('/order-details', [OrderController::class, 'order_details'])->name('order.details')->middleware(['permission:order-list']);
     Route::get('/order-print/{id}', [OrderController::class, 'order_print'])->name('order.print')->middleware(['permission:order-list']);

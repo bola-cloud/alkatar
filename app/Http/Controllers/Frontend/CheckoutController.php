@@ -220,15 +220,20 @@ class CheckoutController extends Controller
 
         // dd($request->all(), $isLoggedIn, Auth::user()->is_admin, $user_id);
 
+        $isPickup = $request->collection_method === 'store_pickup';
+        
         // Validation
         $validationRules = [
+            'collection_method' => 'required|in:delivery,store_pickup',
+            'payment' => 'required',
             'billing_name' => 'required',
             'billing_email' => 'nullable|email',
             'billing_street_address' => 'nullable',
             'billing_zipcode' => 'required',
             'billing_country' => 'required',
-            'billing_city' => 'required',
-            'billing_area' => 'required',
+            'billing_city' => $isPickup ? 'nullable' : 'required',
+            'billing_area' => $isPickup ? 'nullable' : 'required',
+            'billing_state' => $isPickup ? 'nullable' : 'required',
             "billing_phone" => 'required|regex:/^\+?[0-9]{8,15}$/',
         ];
 
@@ -444,19 +449,19 @@ class CheckoutController extends Controller
                 ];
             }
 
-            $billing_address['state_en'] = $shipping_state->name_en;
-            $billing_address['state_ar'] = $shipping_state->name_ar;
-            $billing_address['city_en'] = $shipping_city->name_en;
-            $billing_address['city_ar'] = $shipping_city->name_ar;
+            $billing_address['state_en'] = $shipping_state->name_en ?? '';
+            $billing_address['state_ar'] = $shipping_state->name_ar ?? '';
+            $billing_address['city_en'] = $shipping_city->name_en ?? '';
+            $billing_address['city_ar'] = $shipping_city->name_ar ?? '';
             $billing_address['area_en'] = $shipping_area->name_en ?? '';
             $billing_address['area_ar'] = $shipping_area->name_ar ?? '';
             $phoneNumber = $request->billing_phone ?? $request->phone_number;
             $billing_address['phone_number'] = $phoneNumber;
 
-            $shipping_address['state_en'] = $shipping_state->name_en;
-            $shipping_address['state_ar'] = $shipping_state->name_ar;
-            $shipping_address['city_en'] = $shipping_city->name_en;
-            $shipping_address['city_ar'] = $shipping_city->name_ar;
+            $shipping_address['state_en'] = $shipping_state->name_en ?? '';
+            $shipping_address['state_ar'] = $shipping_state->name_ar ?? '';
+            $shipping_address['city_en'] = $shipping_city->name_en ?? '';
+            $shipping_address['city_ar'] = $shipping_city->name_ar ?? '';
             $shipping_address['area_en'] = $shipping_area->name_en ?? '';
             $shipping_address['area_ar'] = $shipping_area->name_ar ?? '';
             $shipping_address['phone_number'] = $phoneNumber;
@@ -465,6 +470,7 @@ class CheckoutController extends Controller
             Session::put('billing_address', $billing_address);
             Session::put('shipping_address', $shipping_address);
             Session::put('checkout_email', $billing_address['email']);
+            Session::put('collection_method', $request->collection_method);
 
             if ($isLoggedIn && is_null($admin_id)) {
                 Session::put('billing_id', $billing_create->id);
@@ -630,6 +636,15 @@ class CheckoutController extends Controller
                         ]);
                         $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, "THAWANI", "PENDING", $buy_for, false);
 
+                        // Fetch the created order to dispatch a delayed reminder
+                        // The job fires after 30 minutes, but ONLY if the order is still PENDING.
+                        // This avoids interrupting customers who are currently completing their payment.
+                        $createdOrder = Order::where('Order_Number', $order_number)->first();
+                        if ($createdOrder) {
+                            \App\Jobs\SendPendingThawaniReminderJob::dispatch($createdOrder->id, $paymentUrl)
+                                ->delay(now()->addMinutes(5));
+                        }
+
 
                         // if ($admin_id) {
                         //     $order = Order::where('Order_Number', $order_number)->where('admin_id', $admin_id)->where('User_Id', $user_id)->first();
@@ -681,6 +696,9 @@ class CheckoutController extends Controller
                         ];
                         return redirect()->route('checkout')->with('order_error_modal', $modal);
                     }
+
+                case 'store_pickup':
+                    return $this->orderCreateCall($order_number, $shipping_charge, $tax, $subtotal, $this->discount, $this->grand_total, 'STORE_PICKUP');
 
                 default:
                     $modal = [
@@ -983,9 +1001,52 @@ class CheckoutController extends Controller
         }
     }
 
+    public function sendPendingThawaniNotification($id, $paymentUrl)
+    {
+        $order = Order::query()
+            ->with('order_details', 'user', 'coupon', 'order_details.product', 'billing', 'shipping')
+            ->find($id);
+
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'Order not found']);
+        }
+
+        $pdfUrl = route('api.whatsapp.invoice_pdf', ['id' => $order->id, 'lang' => app()->getLocale()]);
+        $phoneNumber = $order->billing_address['phone_number'] ?? $order->user->Number ?? '';
+        $name = $order->billing_address['name'] ?? $order->user->name ?? 'Customer';
+
+        try {
+            $payload = [
+                'phone_number' => str_starts_with($phoneNumber, '+') ? $phoneNumber : '+' . $phoneNumber,
+                'name' => $name,
+                'booking_id' => $order->id,
+                'order_id' => $order->id,
+                'pdf' => $pdfUrl,
+                'payment_url' => $paymentUrl
+            ];
+
+            Log::info('WhatsApp Pending Thawani Notification request', ['payload' => $payload]);
+
+            $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/pending/payment', $payload);
+
+            Log::info('WhatsApp Pending Thawani Notification response', [
+                'order' => $order->Order_Number,
+                'response' => $response->json(),
+                'phone' => $phoneNumber,
+                'pdf_url_sent' => $pdfUrl
+            ]);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $ex) {
+            Log::error('Error sending WhatsApp pending Thawani notification: ' . $ex->getMessage());
+            return response()->json(['success' => false, 'message' => $ex->getMessage()]);
+        }
+    }
+
     public function paymentStatus($payment_method)
     {
-        if ($payment_method == STRIPE || $payment_method == PAYPAL) {
+        // These methods are considered immediately paid
+        if (in_array(strtoupper($payment_method), [STRIPE, PAYPAL, BANK_TRANSFER, 'STORE_PICKUP'])) {
             return PAYMENT_SUCCESS;
         }
         return PAYMENT_PENDING;
@@ -1045,8 +1106,10 @@ class CheckoutController extends Controller
                 'Is_Order_Completed' => false,
                 'Payment_Method' => $payment_method,
                 'Payment_Status' => $payment_status,
+                'collection_method' => Session::get('collection_method'),
                 'Order_Status' => $initial_order_status,
                 'txn' => $txn != null ? $txn : randomString(8),
+                'order_source' => 'web',
             ]);
 
 
@@ -1077,7 +1140,11 @@ class CheckoutController extends Controller
                 }
 
                 // Sync Order to Smart ERP immediately as UNPAID (Two-step sync approach)
-                if (config('smartlife.sync_enabled')) {
+                // However, do NOT sync online payments (Thawani, Stripe, etc.) if they are not paid yet.
+                $isOnlinePayment = in_array(strtolower($payment_method), ['thawani', 'stripe', 'paypal']);
+                $shouldSyncNow = config('smartlife.sync_enabled') && (!$isOnlinePayment || $order->is_paid);
+                
+                if ($shouldSyncNow) {
                     try {
                         $smartLifeService = app(\App\Services\SmartLifeErpService::class);
                         $invoiceId = $smartLifeService->submitOrder($order);
@@ -1087,7 +1154,7 @@ class CheckoutController extends Controller
                             $order->save();
                         }
                     } catch (\Exception $e) {
-                        \Illuminate\Support\Facades\Log::error('SmartLife sync failed in Web Checkout (orederCreate)', ['error' => $e->getMessage()]);
+                        \Illuminate\Support\Facades\Log::error('SmartLife sync failed in Web Checkout (orderCreate)', ['error' => $e->getMessage()]);
                     }
                 }
 
@@ -1107,8 +1174,10 @@ class CheckoutController extends Controller
                 $data['data'] = $order;
                 $data['success'] = true;
             }
-            // WhatsApp notification for COD
-            $this->sendOrderNotification($order->id);
+            // WhatsApp notification (Exclude pending Thawani orders, they have a special flow)
+            if (!(strtoupper($payment_method) == 'THAWANI' && $payment_status == 'PENDING')) {
+                $this->sendOrderNotification($order->id);
+            }
 
             return $data;
         } catch (\Exception $e) {
@@ -1365,9 +1434,8 @@ class CheckoutController extends Controller
         $order->is_paid = 1;
 
         $order->save();
-
         event(new \App\Events\OrderCreated($order));
-
+        
         // Two-Step Sync: Update the existing SmartLife invoice to "Paid"
         if (config('smartlife.sync_enabled')) {
             try {

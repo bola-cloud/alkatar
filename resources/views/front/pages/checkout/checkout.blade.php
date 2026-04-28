@@ -192,6 +192,29 @@
                             </div>
 
                             <div class="mt-8">
+                                <h2 class="text-3xl lg:text-4xl font-bold mb-4">{{ langConverter('Collection Method', 'طريقة الاستلام') }}</h2>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between p-3 lg:p-4 border rounded">
+                                        <div class="flex gap-2 mt-2">
+                                            <input class="form-check-input" type="radio" name="collection_method"
+                                                id="delivery" value="delivery" checked />
+                                            <label class="form-check-label text-lg lg:text-2xl"
+                                                for="delivery">{{ langConverter('Delivery', 'توصيل') }}</label>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 lg:p-4 border rounded">
+                                        <div class="flex gap-2 mt-2">
+                                            <input class="form-check-input" type="radio" name="collection_method"
+                                                id="store_pickup" value="store_pickup" />
+                                            <label class="form-check-label text-lg lg:text-2xl"
+                                                for="store_pickup">{{ langConverter('In-Store Pickup', 'استلام من المحل') }}</label>
+                                        </div>
+                                    </div>
+                                    @error('collection_method')<div class="text-red-500 text-lg d-block">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
+
+                            <div class="mt-8">
                                 <h2 class="text-3xl lg:text-4xl font-bold mb-4">{{ __('Payment Method') }}</h2>
                                 <div class="space-y-4">
                                     @foreach ($paymentPlatforms as $payment)
@@ -639,6 +662,31 @@
                         });
                     }
                 });
+
+                // Toggle required fields based on collection method
+                $('input[name="collection_method"]').on('change', function() {
+                    const isPickup = $(this).val() === 'store_pickup';
+                    const fields = ['#billing_country', '#city', '#area'];
+                    
+                    fields.forEach(selector => {
+                        if (isPickup) {
+                            $(selector).removeAttr('required');
+                        } else {
+                            $(selector).attr('required', 'required');
+                        }
+                    });
+                    
+                    // Toggle delivery charge
+                    if (isPickup) {
+                        $('#delivery-charge-curr').text('0.000 OMR');
+                    } else {
+                        if ($('#area').val()) {
+                            $('#area').trigger('change');
+                        }
+                    }
+                });
+                // Trigger once on load
+                $('input[name="collection_method"]:checked').trigger('change');
             });
         </script>
     @endpush

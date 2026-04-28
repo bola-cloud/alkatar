@@ -44,9 +44,11 @@ class CheckoutController extends Controller
         // Prefer per-country Tax table (admin) if available, otherwise fallback to global tax percentage
         $country = $validated['billing_country'] ?? null;
         $tax = tax_amount($subtotal, $country);
-        $shipping_charge = delivery_charge($validated['billing_city'] ?? $validated['billing_state'] ?? $validated['billing_country']);
-        $shipping_charge = delivery_charge($validated['billing_city'] ?? $validated['billing_state'] ?? $validated['billing_country']);
-        $weight_charge = $this->calculateExtraWeightFees($validated['cart_items']);
+        $collection_method = $request->Collection_Method ?? 'Delivery';
+        $isPickup = in_array(strtolower($collection_method), ['store_pickup', 'store_pickup']);
+        
+        $shipping_charge = $isPickup ? 0 : delivery_charge($validated['billing_city'] ?? $validated['billing_state'] ?? $validated['billing_country']);
+        $weight_charge = $isPickup ? 0 : $this->calculateExtraWeightFees($validated['cart_items']);
         $grandTotal = $subtotal + $shipping_charge + $weight_charge + $tax;
 
         // Apply coupon discount if available
@@ -109,7 +111,7 @@ class CheckoutController extends Controller
         }
 
         $initial_status = ORDER_PENDING;
-        if (strtoupper($payment_method) == 'COD') {
+        if (strtoupper($payment_method) == 'COD' || $isPickup) {
             $initial_status = ORDER_PROCESSING;
         }
 
@@ -130,7 +132,9 @@ class CheckoutController extends Controller
             'Is_Free_Delivery' => false,
             'Is_Order_Completed' => false,
             'Payment_Method' => $payment_method,
+            'collection_method' => strtolower($collection_method),
             'Order_Status' => $initial_status,
+            'order_source' => 'app',
         ]);
         if ($order) {
             foreach ($validated['cart_items'] as $item) {
@@ -186,7 +190,11 @@ class CheckoutController extends Controller
             }
 
             // Sync Order to Smart ERP immediately as UNPAID (Two-step sync approach)
-            if (config('smartlife.sync_enabled')) {
+            // However, do NOT sync online payments (Thawani, Stripe, etc.) if they are not paid yet.
+            $isOnlinePayment = in_array(strtolower($payment_method), ['thawani', 'stripe', 'paypal']);
+            $shouldSyncNow = config('smartlife.sync_enabled') && (!$isOnlinePayment || $order->is_paid);
+            
+            if ($shouldSyncNow) {
                 try {
                     $smartLifeService = app(\App\Services\SmartLifeErpService::class);
                     $invoiceId = $smartLifeService->submitOrder($order);

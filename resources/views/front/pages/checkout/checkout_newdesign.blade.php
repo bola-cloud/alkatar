@@ -205,6 +205,29 @@
 
                         <div class="card mb-3 shadow-sm">
                             <div class="card-body">
+                                <h5 class="card-title mb-3">{{ langConverter('Collection Method', 'طريقة الاستلام') }}</h5>
+                                <div class="mb-3">
+                                    <div class="flex items-center justify-between p-3 border rounded mb-3">
+                                        <div class="flex items-center gap-3">
+                                            <input type="radio" name="collection_method" id="delivery" value="delivery" checked>
+                                            <label for="delivery">{{ langConverter('Delivery', 'توصيل') }}</label>
+                                        </div>
+                                        <i class="fas fa-truck fa-2x text-secondary"></i>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 border rounded mb-3">
+                                        <div class="flex items-center gap-3">
+                                            <input type="radio" name="collection_method" id="store_pickup" value="store_pickup">
+                                            <label for="store_pickup">{{ langConverter('In-Store Pickup', 'استلام من المحل') }}</label>
+                                        </div>
+                                        <i class="fas fa-store fa-2x text-primary"></i>
+                                    </div>
+                                    @error('collection_method')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-body">
                                 <h5 class="card-title mb-3">{{ __('Payment Method') }}</h5>
                                 <div class="mb-3">
                                     @foreach ($paymentPlatforms as $payment)
@@ -221,7 +244,7 @@
                                     @endforeach
 
                                     @if (env('COD_STATUS') == '1')
-                                        <div class="flex items-center justify-between p-3 border rounded">
+                                        <div class="flex items-center justify-between p-3 border rounded mb-3">
                                             <div class="flex items-center gap-3">
                                                 <input type="radio" name="payment" id="COD" value="COD">
                                                 <label
@@ -231,6 +254,7 @@
                                                 class="h-10">
                                         </div>
                                     @endif
+
 
                                     <div class="form-check mb-3">
                                         <input class="form-check-input" type="checkbox" id="agree" required>
@@ -466,6 +490,33 @@
                     });
                 }
             });
+
+            // Toggle required fields based on collection method
+            $('input[name="collection_method"]').on('change', function() {
+                const isPickup = $(this).val() === 'store_pickup';
+                const fields = ['#billing_country', '#city', '#area'];
+                
+                fields.forEach(selector => {
+                    if (isPickup) {
+                        $(selector).removeAttr('required');
+                        $(selector).prev('label').find('.text-danger').hide();
+                    } else {
+                        $(selector).attr('required', 'required');
+                        $(selector).prev('label').find('.text-danger').show();
+                    }
+                });
+                
+                // Toggle delivery charge
+                if (isPickup) {
+                    $('#delivery-charge-curr').text($('#delivery-charge-curr').data('zero') || '0.00');
+                } else {
+                    if ($('#area').val()) {
+                        $('#area').trigger('change');
+                    }
+                }
+            });
+            // Trigger once on load
+            $('input[name="collection_method"]:checked').trigger('change');
         });
     </script>
 @endpush

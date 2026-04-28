@@ -44,14 +44,14 @@ class DashboardController extends Controller
             $sales = "";
             for ($i = 0; $i < 30; $i++) {
                 $days .= "'" . date("d M", strtotime('-' . $i . ' days')) . "',";
-                $sales .= "'" . Order::where('Order_Status', '=', ORDER_DELIVERED)->whereDate('created_at', '=', date("Y-m-d", strtotime('-' . $i . ' days')))->count() . "',";
+                $sales .= "'" . Order::where('is_paid', 1)->whereNotIn('Order_Status', [ORDER_CANCELLED, ORDER_RETURN])->whereDate('created_at', '=', date("Y-m-d", strtotime('-' . $i . ' days')))->count() . "',";
             }
 
             $earning_month = "";
             $incomes = "";
             for ($i = 0; $i < 12; $i++) {
                 $earning_month .= "'" . date("M Y", strtotime('-' . $i . ' months')) . "',";
-                $incomes .= "'" . Order::where('Order_Status', '=', ORDER_DELIVERED)->whereDate('created_at', '=', date("Y-m-d", strtotime('-' . $i . ' days')))->count() . "',";
+                $incomes .= "'" . Order::where('is_paid', 1)->whereNotIn('Order_Status', [ORDER_CANCELLED, ORDER_RETURN])->whereDate('created_at', '=', date("Y-m-d", strtotime('-' . $i . ' days')))->sum('Grand_Total') . "',";
             }
 
             $data['orderPie'] = $this->repository->getOrderPie();
@@ -63,7 +63,8 @@ class DashboardController extends Controller
             $data['earning_days'] = $earning_month;
             $data['total_incomess'] = $incomes;
             $data['title'] = __('Dashboard');
-            $data['totalOrders'] = $this->repository->getTotalOrders();
+            $data['totalOrders'] = $this->repository->getTotalSuccessfulOrders();
+            $data['allTotalOrders'] = $this->repository->getTotalOrders();
             // $data['alltotalOrders'] = $this->repository->getAllTotalOrders();
             $data['pendingOrders'] = $this->repository->getPendingOrders();
             $data['deliveredOrders'] = $this->repository->getDeliveredOrders();

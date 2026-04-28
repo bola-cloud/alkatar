@@ -24,6 +24,217 @@ class OrderController extends Controller
     {
         $this->paymentController = $paymentController;
     }
+
+    public function create()
+    {
+        $users = \App\Models\User::orderBy('id', 'desc')->get();
+        $products = \App\Models\Admin\Product::orderBy('id', 'desc')->get();
+        $states = \App\Models\State::all();
+        return view('admin.pages.orders.create', compact('users', 'products', 'states'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required',
+            'guest_name' => 'required_if:user_id,guest',
+            'guest_phone' => 'required_if:user_id,guest',
+            'state_id' => 'required_unless:payment_method,STORE_PICKUP|nullable|exists:states,id',
+            'city_id' => 'required_unless:payment_method,STORE_PICKUP|nullable|exists:cities,id',
+            'area_id' => 'required_unless:payment_method,STORE_PICKUP|nullable|exists:areas,id',
+            'street_address' => 'required_unless:payment_method,STORE_PICKUP|nullable|string',
+            'products' => 'required|array',
+            'products.*.id' => 'required|exists:products,id',
+            'products.*.quantity' => 'required|integer|min:1',
+            'payment_method' => 'required|string',
+            'shipping_charge' => 'nullable|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0',
+        ]);
+
+        $userId = $request->user_id === 'guest' ? null : $request->user_id;
+        
+        // Generate Order Number (Sequential 10000+ pattern as in Checkout)
+        $maxId = Order::max('id') ?? 0;
+        $nextNumber = 10000 + ($maxId + 1);
+        $order_number = (string) $nextNumber;
+        while (Order::where('Order_Number', $order_number)->exists()) {
+            $nextNumber++;
+            $order_number = (string) $nextNumber;
+        }
+
+        $subtotal = 0;
+        foreach ($request->products as $item) {
+            $product = \App\Models\Admin\Product::find($item['id']);
+            $price = $product->Price;
+            if ($product->Discount) {
+                $price -= ($product->Discount / 100) * $price;
+            }
+            $subtotal += $price * $item['quantity'];
+        }
+
+        $shipping_charge = floatval($request->shipping_charge ?? 0);
+        $discount = floatval($request->discount ?? 0);
+        $grand_total = $subtotal + $shipping_charge - $discount;
+
+        // Resolve Address Names
+        $state = \App\Models\State::find($request->state_id);
+        $city = \App\Models\City::find($request->city_id);
+        $area = \App\Models\Area::find($request->area_id);
+
+        $customerName = $request->guest_name;
+        $customerPhone = str_replace('+', '', $request->guest_phone);
+        
+        // Normalize phone number: add 968 if it's 8 digits and missing the prefix
+        if ($customerPhone && !str_starts_with($customerPhone, '968') && strlen($customerPhone) == 8) {
+            $customerPhone = '968' . $customerPhone;
+        }
+        $customerEmail = $request->guest_email;
+
+        if ($userId) {
+            $user = \App\Models\User::find($userId);
+            $customerName = $user->name;
+            $customerPhone = $user->Number;
+            $customerEmail = $user->email;
+        }
+
+        $order = new Order();
+        $order->Order_Number = $order_number;
+        $order->User_Id = $userId;
+        $order->admin_id = auth()->id();
+        
+        $billing = [
+            'name' => $customerName,
+            'email' => $customerEmail,
+            'phone_number' => $customerPhone,
+            'street' => $request->street_address,
+            'state' => $request->state_id,
+            'state_en' => $state->name_en ?? '',
+            'state_ar' => $state->name_ar ?? '',
+            'city' => $request->city_id,
+            'city_en' => $city->name_en ?? '',
+            'city_ar' => $city->name_ar ?? '',
+            'area' => $request->area_id,
+            'area_en' => $area->name_en ?? '',
+            'area_ar' => $area->name_ar ?? '',
+            'zipcode' => '',
+            'country' => 'Oman',
+        ];
+
+        if ($userId) {
+            \App\Models\Admin\Billing::updateOrCreate(['User_Id' => $userId], [
+                'Name' => $customerName,
+                'Email' => $customerEmail,
+                'Street' => $request->street_address,
+                'State' => $request->state_id,
+                'City' => $request->city_id,
+            ]);
+        }
+        
+        $order->billing_address = $billing;
+        $order->shipping_address = $billing;
+        $order->Sub_Total = $subtotal;
+        $order->Delivery_Charge = $shipping_charge;
+        $order->Coupon_Amount = $discount;
+        $order->Tax = 0;
+        $order->Grand_Total = $grand_total;
+        $order->Payment_Method = $request->payment_method;
+        
+        $collection_method = $request->collection_method ?? 'delivery';
+        
+        // Payment Status logic:
+        // - COD: pending (will be paid on delivery)
+        // - BANK_TRANSFER / OTHER: paid (admin confirms transfer before creating order)
+        if ($request->payment_method === 'COD') {
+            $order->Payment_Status = PAYMENT_PENDING;
+            $order->is_paid = 0;
+        } else {
+            // BANK_TRANSFER or any other paid method
+            $order->Payment_Status = PAYMENT_SUCCESS;
+            $order->is_paid = 1;
+        }
+        
+        $order->collection_method = strtolower($collection_method);
+        $order->order_source = 'admin';
+        
+        if (strtoupper($collection_method) === 'STORE_PICKUP') {
+            // No delivery charge for in-store pickup
+            $order->Delivery_Charge = 0;
+            $grand_total = $subtotal - $discount;
+            $order->Grand_Total = $grand_total;
+        }
+        
+        $order->Order_Status = ORDER_PENDING;
+        $order->order_source = 'admin';
+        $order->txn = 'ADMIN-'.time();
+        $order->save();
+
+        foreach ($request->products as $item) {
+            $product = \App\Models\Admin\Product::find($item['id']);
+            $price = $product->Price;
+            if ($product->Discount) {
+                $price -= ($product->Discount / 100) * $price;
+            }
+            OrderDetails::create([
+                'Order_Id' => $order->id,
+                'Product_Id' => $product->id,
+                'Product_Name' => $product->en_Product_Name,
+                'Price' => $price,
+                'Quantity' => $item['quantity'],
+                'Total_Price' => $price * $item['quantity'],
+            ]);
+
+            // Deduct Stock (Same logic as Checkout)
+            $this->subQtyProduct($product->id, $item['quantity']);
+        }
+
+        // Dispatch OrderCreated Event (Triggers notifications, etc.)
+        try {
+            event(new \App\Events\OrderCreated($order));
+        } catch (\Exception $e) {
+            \Log::error('Admin OrderCreated Event Error: ' . $e->getMessage());
+        }
+
+        // Sync with SmartLife ERP
+        if (config('smartlife.sync_enabled')) {
+            try {
+                app(\App\Services\SmartLifeErpService::class)->submitOrder($order);
+            } catch (\Exception $e) {
+                \Log::error('Admin SmartLife Sync Error: ' . $e->getMessage());
+            }
+        }
+
+        // Send WhatsApp Notification
+        try {
+            app(\App\Http\Controllers\Frontend\CheckoutController::class)->sendOrderNotification($order->id);
+        } catch (\Exception $e) {
+            \Log::error('Admin Order WhatsApp Notification failed', ['error' => $e->getMessage()]);
+        }
+
+        return redirect()->route('admin.orders', 'all')->with('success', __('Order created successfully and WhatsApp notification sent.'));
+    }
+
+    /**
+     * Replicated from CheckoutController to ensure stock consistency.
+     */
+    private function subQtyProduct($product_id, $qty)
+    {
+        $product = \App\Models\Admin\Product::with('comboItems')->whereId($product_id)->first();
+        if (!$product) return;
+
+        if (($product->product_type === 'Combo' || $product->product_type === 'تجميعي') && $product->comboItems && $product->comboItems->isNotEmpty()) {
+            foreach ($product->comboItems as $component) {
+                $qtyToDeduct = $component->pivot->quantity * $qty;
+                $componentObj = \App\Models\Admin\Product::find($component->id);
+                if ($componentObj) {
+                    $new_comp_qty = max(0, $componentObj->Quantity - $qtyToDeduct);
+                    $componentObj->update(['Quantity' => $new_comp_qty]);
+                }
+            }
+        } else {
+            $new_qty = max(0, $product->Quantity - $qty);
+            $product->update(['Quantity' => $new_qty]);
+        }
+    }
     public function orders(Request $request, $status)
     {
         if ($request->ajax()) {
@@ -52,7 +263,9 @@ class OrderController extends Controller
                     if (in_array($data->Order_Status, [ORDER_PENDING, ORDER_CANCELLED])) {
                         $btn = $btn . '<a href="' . route('admin.order_send_to_whatsapp', encrypt($data->id)) . '" class="btn-action send-to-whatsapp" style="padding: 6px 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><i class="fa-brands fa-whatsapp"></i></a>';
                     }
-                    $btn = $btn . '<a href="' . route('admin.order_delete', encrypt($data->id)) . '" class="btn-action delete" style="padding: 6px 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><i class="fas fa-trash-alt"></i></a>';
+                    if ($data->is_paid == 0 && strtoupper($data->Payment_Method) != 'COD') {
+                        $btn = $btn . '<a href="' . route('admin.order_delete', encrypt($data->id)) . '" class="btn-action delete" style="padding: 6px 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><i class="fas fa-trash-alt"></i></a>';
+                    }
                     $btn = $btn . '</div>';
                     return $btn;
                 })
@@ -117,17 +330,17 @@ class OrderController extends Controller
                     // return date('h:i A', strtotime($data->created_at));
                 })
                 ->addColumn('Payment_Method', function ($data) {
-                    $payment_method = $data->Payment_Method;
+                    $payment_method = strtolower($data->Payment_Method);
                     
                     // If Thawani and not paid yet, show "لم يتم الدفع" as requested by client
                     if (strtoupper($payment_method) === 'THAWANI' && ($data->is_paid == 0 || $data->Payment_Status === 'Unpaid')) {
-                        return '<span style="color:red; font-weight: bold;">لم يتم الدفع</span>';
+                        return '<span style="color:red; font-weight: bold;">' . __('لم يتم الدفع') . '</span>';
                     }
 
-                    if ($payment_method === 'COD') {
-                        return '<span style="color:green; font-weight: bold;">' . $payment_method . '</span>';
+                    if ($payment_method === 'cod') {
+                        return '<span style="color:green; font-weight: bold;">' . strtoupper($payment_method) . '</span>';
                     } else {
-                        return '<span style="color:blue; font-weight: bold;">' . $payment_method . '</span>';
+                        return '<span style="color:blue; font-weight: bold;">' . ucfirst($payment_method) . '</span>';
                     }
                 })
                 ->addColumn('types', function ($data) {
@@ -159,7 +372,17 @@ class OrderController extends Controller
                 //     }
                 // })
                 ->addColumn('order_source', function ($data) {
-                    return $data->order_source ?? 'الموقع الكتروني';
+                    $source = $data->order_source ?? 'web';
+                    if ($source == 'web') return __('Web');
+                    if ($source == 'whatsapp') return __('WhatsApp');
+                    if ($source == 'app') return __('App');
+                    if ($source == 'admin') return __('Admin');
+                    return __($source);
+                })
+                ->addColumn('collection_method', function ($data) {
+                    $method = $data->collection_method ?? 'delivery';
+                    if ($method == 'store_pickup') return __('Store Pickup');
+                    return __('Delivery');
                 })
                 ->addColumn('Status', function ($data) {
                     $html = '';
@@ -249,6 +472,21 @@ class OrderController extends Controller
                 }
             }
 
+            // Cancellation sync with SmartLife removed as per user request to keep records permanent
+            /*
+            if ($request->Order_Status == ORDER_CANCELLED && config('smartlife.sync_enabled') && $order->smartlife_invoice_id) {
+                try {
+                    $smartLifeService = new \App\Services\SmartLifeErpService();
+                    $cancelled = $smartLifeService->cancelSaleViaReturn($order->smartlife_invoice_id);
+                    if ($cancelled) {
+                        Log::info('SmartLife Sync: Order cancelled via Return API', ['order' => $order->Order_Number, 'invoice_id' => $order->smartlife_invoice_id]);
+                    }
+                } catch (\Exception $e) {
+                    Log::error('SmartLife Sync Cancellation Error: ' . $e->getMessage());
+                }
+            }
+            */
+
             $update = $order->update([
                 'Order_Status' => $request->Order_Status,
             ]);
@@ -297,17 +535,24 @@ class OrderController extends Controller
             return redirect()->back()->with('error', __('Please select orders and a status.'));
         }
 
-        $updated = Order::whereIn('id', $orderIds)->update(['Order_Status' => $newStatus]);
-
-        if ($updated) {
-            // Send status change emails
-            $orders = Order::whereIn('id', $orderIds)->get();
-            // foreach ($orders as $order) {
-            //     $this->statusChangeEmail($order, $newStatus);
-            // }
-
-            return redirect()->back()->with('success', __('Orders status updated successfully.'));
+        $orders = Order::whereIn('id', $orderIds)->get();
+        foreach ($orders as $order) {
+            // Update individual order status
+            $order->update(['Order_Status' => $newStatus]);
+            
+            /*
+            if ($newStatus == ORDER_CANCELLED && config('smartlife.sync_enabled') && $order->smartlife_invoice_id) {
+                try {
+                    $smartLifeService = new \App\Services\SmartLifeErpService();
+                    $smartLifeService->cancelSaleViaReturn($order->smartlife_invoice_id);
+                } catch (\Exception $e) {
+                    Log::error('SmartLife Bulk Cancellation Error: ' . $e->getMessage());
+                }
+            }
+            */
         }
+
+        return redirect()->back()->with('success', __('Orders status updated successfully.'));
 
         return redirect()->back()->with('error', __('Failed to update orders status.'));
     }
@@ -328,7 +573,17 @@ class OrderController extends Controller
     public function orderDelete($id)
     {
         $id = decrypt($id);
-        $delete = Order::whereId($id)->delete();
+        $order = Order::find($id);
+        if (!$order) {
+            return redirect()->back()->with('error', __('Order not found!'));
+        }
+
+        // Prevent deletion of Paid or COD orders
+        if ($order->is_paid == 1 || strtoupper($order->Payment_Method) == 'COD') {
+            return redirect()->back()->with('error', __('Paid or COD orders cannot be deleted!'));
+        }
+
+        $delete = $order->delete();
         if (!empty($delete)) {
             OrderDetails::where('Order_Id', $id)->delete();
             return redirect()->back()->with('success', __('Successfully Deleted!'));

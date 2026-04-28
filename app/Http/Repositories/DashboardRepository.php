@@ -19,6 +19,13 @@ class DashboardRepository
         return Order::count();
     }
 
+    public function getTotalSuccessfulOrders()
+    {
+        return Order::where('is_paid', 1)
+                    ->whereNotIn('Order_Status', [ORDER_CANCELLED, ORDER_RETURN])
+                    ->count();
+    }
+
     public function getPendingOrders()
     {
         return Order::where('Order_Status', ORDER_PENDING)->count();
@@ -36,7 +43,9 @@ class DashboardRepository
 
     public function getTotalProductSale()
     {
-        $orders = Order::where('Payment_Method', 'thawani')->with('order_details')->get();
+        $orders = Order::where('is_paid', 1)
+                    ->whereNotIn('Order_Status', [ORDER_CANCELLED, ORDER_RETURN])
+                    ->with('order_details')->get();
         $total_items_qty = 0;
         foreach ($orders as $order) {
             foreach ($order->order_details as $od) {
@@ -49,7 +58,10 @@ class DashboardRepository
     public function getTotalTodayProductOrder()
     {
         $current_date = Carbon::now();
-        $orders = Order::where('Payment_Method', 'thawani')->whereDate('created_at', '=', $current_date)->with('order_details')->count();
+        $orders = Order::where('is_paid', 1)
+            ->whereNotIn('Order_Status', [ORDER_CANCELLED, ORDER_RETURN])
+            ->whereDate('created_at', '=', $current_date)
+            ->with('order_details')->count();
         // $total_items_qty = 0;
         // foreach($orders as $order) {
         //     foreach($order->order_details as $od) {
@@ -66,7 +78,11 @@ class DashboardRepository
         $explode[0] = '1';
         $implode = implode("-", $explode);
         $first_day = Carbon::parse($implode);
-        $orders = Order::where('Payment_Method', 'thawani')->whereDate('created_at', '>=', $first_day)->whereDate('created_at', '<=', $current_date)->with('order_details')->count();
+        $orders = Order::where('is_paid', 1)
+            ->whereNotIn('Order_Status', [ORDER_CANCELLED, ORDER_RETURN])
+            ->whereDate('created_at', '>=', $first_day)
+            ->whereDate('created_at', '<=', $current_date)
+            ->with('order_details')->count();
 
         // $total_items_qty = 0;
         // foreach ($orders as $order) {
@@ -83,7 +99,11 @@ class DashboardRepository
         $explode = explode('-', $current_date->format('d-m-Y'));
         $explode[0] = '1';
         $year = date('Y-m-d', strtotime('today - 365 days'));
-        $orders = Order::where('Payment_Method', 'thawani')->whereDate('created_at', '>=', $year)->whereDate('created_at', '<=', $current_date)->with('order_details')->count();
+        $orders = Order::where('is_paid', 1)
+            ->whereNotIn('Order_Status', [ORDER_CANCELLED, ORDER_RETURN])
+            ->whereDate('created_at', '>=', $year)
+            ->whereDate('created_at', '<=', $current_date)
+            ->with('order_details')->count();
         // $total_items_qty = 0;
         // foreach ($orders as $order) {
         //     foreach ($order->order_details as $od) {
@@ -95,27 +115,40 @@ class DashboardRepository
 
     public function getTotalEarning()
     {
-        $earnings = Order::where('Payment_Method', 'thawani')->sum('Grand_Total');
+        $earnings = Order::where('is_paid', 1)
+            ->whereNotIn('Order_Status', [ORDER_CANCELLED, ORDER_RETURN])
+            ->sum('Grand_Total');
         return number_format($earnings, 3);
     }
 
 
     public function getEarningFromWeb()
     {
-        $earnings = Order::where('Payment_Method', 'thawani')->where('order_source', null)->sum('Grand_Total');
+        $earnings = Order::where('is_paid', 1)
+            ->whereNotIn('Order_Status', [ORDER_CANCELLED, ORDER_RETURN])
+            ->where(function($q) {
+                $q->where('order_source', '!=', 'whatsapp')->orWhereNull('order_source');
+            })
+            ->sum('Grand_Total');
         return number_format($earnings, 3);
     }
 
     public function getEarningFromWhatsapp()
     {
-        $earnings = Order::where('Payment_Method', 'thawani')->where('order_source', 'whatsapp')->sum('Grand_Total');
+        $earnings = Order::where('is_paid', 1)
+            ->whereNotIn('Order_Status', [ORDER_CANCELLED, ORDER_RETURN])
+            ->where('order_source', 'whatsapp')
+            ->sum('Grand_Total');
         return number_format($earnings, 3);
     }
 
     public function getTodayEarning()
     {
         $current_date = Carbon::now();
-        $earnings = Order::where('Order_Status', ORDER_DELIVERED)->whereDate('created_at', '=', $current_date)->sum('Grand_Total');
+        $earnings = Order::where('is_paid', 1)
+            ->whereNotIn('Order_Status', [ORDER_CANCELLED, ORDER_RETURN])
+            ->whereDate('created_at', '=', $current_date)
+            ->sum('Grand_Total');
         return number_format($earnings, 3);
     }
 
@@ -126,7 +159,11 @@ class DashboardRepository
         $explode[0] = '1';
         $implode = implode("-", $explode);
         $first_day = Carbon::parse($implode);
-        $earnings = Order::where('Order_Status', ORDER_DELIVERED)->whereDate('created_at', '>=', $first_day)->whereDate('created_at', '<=', $current_date)->sum('Grand_Total');
+        $earnings = Order::where('is_paid', 1)
+            ->whereNotIn('Order_Status', [ORDER_CANCELLED, ORDER_RETURN])
+            ->whereDate('created_at', '>=', $first_day)
+            ->whereDate('created_at', '<=', $current_date)
+            ->sum('Grand_Total');
         return number_format($earnings, 3);
     }
 
@@ -136,7 +173,11 @@ class DashboardRepository
         $explode = explode('-', $current_date->format('d-m-Y'));
         $explode[0] = '1';
         $year = date('Y-m-d', strtotime('today - 365 days'));
-        $earnings = Order::whereDate('created_at', '>=', $year)->whereDate('created_at', '<=', $current_date)->where('Payment_Method', 'thawani')->sum('Grand_Total');
+        $earnings = Order::where('is_paid', 1)
+            ->whereNotIn('Order_Status', [ORDER_CANCELLED, ORDER_RETURN])
+            ->whereDate('created_at', '>=', $year)
+            ->whereDate('created_at', '<=', $current_date)
+            ->sum('Grand_Total');
         return number_format($earnings, 3);
     }
 
@@ -162,32 +203,35 @@ class DashboardRepository
 
     public function getTotalOnlineTransaction()
     {
-        $earnings = Order::where('Order_Status', ORDER_DELIVERED)->where('Payment_Method', '!=', COD)->sum('Grand_Total');
-        return number_format($earnings, 2);
+        $earnings = Order::where('is_paid', 1)
+            ->whereNotIn('Order_Status', [ORDER_CANCELLED, ORDER_RETURN])
+            ->where('Payment_Method', '!=', COD)
+            ->sum('Grand_Total');
+        return number_format($earnings, 3);
     }
 
     public function getTotalPaypalTransaction()
     {
         $earnings = Order::where('Order_Status', ORDER_DELIVERED)->where('Payment_Method', '==', PAYPAL)->sum('Grand_Total');
-        return number_format($earnings, 2);
+        return number_format($earnings, 3);
     }
 
     public function getTotalStripeTransaction()
     {
         $earnings = Order::where('Order_Status', ORDER_DELIVERED)->where('Payment_Method', '==', STRIPE)->sum('Grand_Total');
-        return number_format($earnings, 2);
+        return number_format($earnings, 3);
     }
 
     public function getTotalRazorpayTransaction()
     {
         $earnings = Order::where('Order_Status', ORDER_DELIVERED)->where('Payment_Method', '==', RAZORPAY)->sum('Grand_Total');
-        return number_format($earnings, 2);
+        return number_format($earnings, 3);
     }
 
     public function getTotalBankTransaction()
     {
         $earnings = Order::where('Order_Status', ORDER_DELIVERED)->where('Payment_Method', '==', BANK_TRANSFER)->sum('Grand_Total');
-        return number_format($earnings, 2);
+        return number_format($earnings, 3);
     }
 
     public function getTotalReviews()
@@ -214,12 +258,14 @@ class DashboardRepository
         $stripe = $orders->where('Payment_Method', STRIPE)->count();
         $razorpay = $orders->where('Payment_Method', RAZORPAY)->count();
         $bank_transfer = $orders->where('Payment_Method', BANK_TRANSFER)->count();
+        $thawani = $orders->where('Payment_Method', 'thawani')->count();
 
         $cod_percent = $order_count == 0 ? 0 : ($cod / $order_count) * 100;
         $paypal_percent = $order_count == 0 ? 0 : ($paypal / $order_count) * 100;
         $stripe_percent = $order_count == 0 ? 0 : ($stripe / $order_count) * 100;
         $razorpay_percent = $order_count == 0 ? 0 : ($razorpay / $order_count) * 100;
-        $bank_transfer_percent = $order_count == 0 ? 0 : ($bank_transfer * $order_count) * 100;
+        $bank_transfer_percent = $order_count == 0 ? 0 : ($bank_transfer / $order_count) * 100;
+        $thawani_percent = $order_count == 0 ? 0 : ($thawani / $order_count) * 100;
 
         $trans_array = [
             $cod_percent,
@@ -227,9 +273,9 @@ class DashboardRepository
             $stripe_percent,
             $razorpay_percent,
             $bank_transfer_percent,
+            $thawani_percent,
         ];
         return $trans_array;
-
     }
 
 
@@ -238,18 +284,16 @@ class DashboardRepository
         $orders = Order::get();
         $order_count = $orders->count();
         $whatsapp = $orders->where('order_source', "whatsapp")->count();
-        $website = $orders->where('order_source', null)->count();
-
+        $website = $order_count - $whatsapp; 
+        
         $whatsapp_percent = $order_count == 0 ? 0 : ($whatsapp / $order_count) * 100;
         $website_percent = $order_count == 0 ? 0 : ($website / $order_count) * 100;
-
 
         $trans_array = [
             $website_percent,
             $whatsapp_percent,
         ];
         return $trans_array;
-
     }
 
 

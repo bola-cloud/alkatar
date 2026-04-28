@@ -89,6 +89,10 @@
                     name: "order_source",
                 },
                 {
+                    data: "collection_method",
+                    name: "collection_method",
+                },
+                {
                     data: "Payment_Method",
                     name: "Payment_Method",
                 },
@@ -130,10 +134,11 @@
                 { width: "80px", targets: 11 },  // Total Amount
                 { width: "60px", targets: 12 },  // Coupon Code
                 { width: "80px", targets: 13 },  // Order source
-                { width: "80px", targets: 14 },  // Payment Method
-                { width: "60px", targets: 15 },  // Is Paid
-                { width: "80px", targets: 16 },  // Status
-                { width: "120px", targets: 17 }, // Action
+                { width: "100px", targets: 14 }, // Collection Method
+                { width: "80px", targets: 15 },  // Payment Method
+                { width: "60px", targets: 16 },  // Is Paid
+                { width: "80px", targets: 17 },  // Status
+                { width: "120px", targets: 18 }, // Action
             ],
             scrollX: true,
             responsive: false,

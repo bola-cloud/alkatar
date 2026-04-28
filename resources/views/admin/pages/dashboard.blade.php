@@ -25,7 +25,7 @@
     <div class="col-lg-3 col-md-6 col-sm-6">
         <div class="status__box-3 bg-style">
             <div class="item__left">
-                <h2>{{"عدد المبيعات المدفوعة"}}</h2>
+                <h2>{{"إجمالي المبيعات المدفوعة"}}</h2>
                 <div class="status__box__data">
                     <h2>{{$totalOrders}}</h2>
                 </div>
@@ -42,7 +42,7 @@
     <div class="col-lg-3 col-md-6 col-sm-6">
             <div class="status__box-3 bg-style">
                 <div class="item__left">
-                    <h2>طلبات اليوم</h2>
+                    <h2>مبيعات اليوم المدفوعة</h2>
                     <div class="status__box__data">
                         <h2>{{ $todayProductOrder }}</h2>
                     </div>
@@ -58,7 +58,7 @@
     <div class="col-lg-3 col-md-6 col-sm-6">
         <div class="status__box-3 bg-style">
             <div class="item__left">
-                <h3>{{\Carbon\Carbon::now()->locale('ar')->format('F') . "  عدد المبيعات المدفوعة في " }}</h3>
+                <h3>{{ "إجمالي المبيعات المدفوعة في " . \Carbon\Carbon::now()->locale('ar')->format('F') }}</h3>
                 <div class="status__box__data">
                     <h2>{{$totalCurrentMonthProductSale}}</h2>
                 </div>
@@ -73,7 +73,7 @@
     <div class="col-lg-3 col-md-6 col-sm-6">
         <div class="status__box-3 bg-style">
             <div class="item__left">
-                <h2>عدد المبيعات المدفوعة سنوياً</h2>
+                <h2>إجمالي المبيعات المدفوعة سنوياً</h2>
                 <div class="status__box__data">
                     <h2>{{$totalLatYearProductSale}}</h2>
                 </div>
@@ -188,7 +188,7 @@
     <div class="col-lg-3 col-md-6 col-sm-6">
         <div class="status__box-3 bg-style">
             <div class="item__left">
-                <h2>اجمالي المبيعات</h2>
+                <h2>إجمالي أرباح المبيعات</h2>
                 <div class="status__box__data">
                     <h2>{{__('OMR ') . $totalEarning}}</h2>
                 </div>
@@ -205,7 +205,7 @@
     <div class="col-lg-3 col-md-6 col-sm-6">
         <div class="status__box-3 bg-style">
             <div class="item__left">
-                <h2>اجمالي المبيعات المدفوعة سنوياً</h2>
+                <h2>إجمالي أرباح المبيعات سنوياً</h2>
                 <div class="status__box__data">
                     <h2>{{__('OMR ') . $yearEarning}}</h2>
                 </div>

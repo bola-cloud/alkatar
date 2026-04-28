@@ -42,7 +42,7 @@
                 <div class="customers__table">
                     <form action="{{ route('admin.orders.bulk_status_update') }}" method="POST" id="bulk-action-form">
                         @csrf
-                        <div class="bulk-action-wrapper mb-3" style="display: flex; align-items: center; gap: 10px">
+                        <div class="bulk-action-wrapper mb-3" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                             <h1 style="font-size: 1rem;">{{ __('Change Status:') }}</h1>
                             <select name="bulk_status" id="bulk-status-select" class="form-control d-inline-block mr-2"
                                 style="width: 250px;">
@@ -55,6 +55,9 @@
                                 <option value="{{ ORDER_RETURN }}">{{ __('Returned') }}</option>
                             </select>
                             <button type="submit" class="btn btn-primary" id="bulk-apply-btn">{{ __('Apply') }}</button>
+                            <a href="{{ route('admin.orders.create') }}" class="btn btn-success ms-auto">
+                                <i class="fas fa-plus-circle mr-1"></i> {{ __('Create Order for Customer') }}
+                            </a>
                         </div>
 
 
@@ -77,6 +80,7 @@
                                     <th>{{ __('Total Amount') }}</th>
                                     <th>{{ __('Coupon Code') }}</th>
                                     <th>{{ __('order source') }}</th>
+                                    <th>{{ __('Collection Method') }}</th>
                                     <th>{{ __('Payment Method') }}</th>
                                     <th>{{ __('Is Paid') }}</th>
                                     <!-- <th>{{ __('Digital Goods') }}</th> -->

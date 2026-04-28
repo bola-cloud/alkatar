@@ -207,7 +207,7 @@ curl --location 'https://hispeed.om/api/whatsapp/checkout' \
     "billing_street_address": "Street 123",
     "billing_zipcode": "123",
     "order_source": "whatsapp",
-    "Payment_Method": "Thawani",
+    "Payment_Method": "Thawani", // Options: Thawani, CashOnDelivery, BANK_TRANSFER, STORE_PICKUP
     "cart_items": [
         {
             "product_id": 50,
@@ -219,10 +219,34 @@ curl --location 'https://hispeed.om/api/whatsapp/checkout' \
 }'
 ```
 
-### Expected Response (Success - 200)
+### Expected Response (Thawani - 200)
+If `Payment_Method` is `Thawani`, returns a redirect URL to the payment gateway:
 ```json
 {
     "url": "https://checkout.thawani.om/session/ss_abc123_xyz?key=pk_test_..."
 }
 ```
-*Action: Redirect the user to the provided `url` to complete payment.*
+
+### Expected Response (COD / BANK_TRANSFER / STORE_PICKUP - 200)
+For offline or pre-paid methods, returns order details immediately:
+```json
+{
+    "message": "Order created successfully",
+    "order_number": "10050",
+    "grand_total": 25.500,
+    "payment_method": "STORE_PICKUP",
+    "language": "en",
+    "receipt_url": "https://hispeed.om/order/print/123",
+    "invoice_pdf_url": "https://hispeed.om/api/v1/whatsapp/invoice/pdf/123"
+}
+```
+
+### Payment Logic Notes:
+- **Thawani**: Order is created as `PENDING` payment. Bot must redirect user to the `url`.
+- **CashOnDelivery (COD)**: Order is created as `PROCESSING`.
+- **BANK_TRANSFER**: Order is created as `PROCESSING` and marked as `PAID` (Admin confirms transfer).
+- **STORE_PICKUP**:
+    - **Shipping Fee**: Automatically set to `0.000` regardless of location.
+    - **Status**: Created as `PROCESSING` and marked as `PAID` (Customer pays in-store).
+    - **Logic**: Use this when customer chooses to collect from shop.
+
