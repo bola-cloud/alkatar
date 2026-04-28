@@ -1,9 +1,10 @@
 @extends('admin.master', ['menu' => 'order'])
 @section('title', __('Create Order'))
-@push('post_css')
+@push('post_styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
 <style>
     .iti { width: 100%; }
+    .iti__country-list { z-index: 1000 !important; }
 </style>
 @endpush
 @section('content')
@@ -83,25 +84,20 @@
 
                 <!-- Guest Fields (Toggled via JS) -->
                 <div class="row guest-fields" style="display:none;">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="input__group mb-25">
                             <label for="guest_name">{{ __('Customer Name') }}</label>
                             <input type="text" name="guest_name" id="guest_name" class="form-control" placeholder="{{ __('Name') }}">
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="input__group mb-25">
                             <label for="guest_phone_display">{{ __('Customer Phone (WhatsApp)') }}</label>
                             <input type="tel" id="guest_phone_display" class="form-control" placeholder="XXXXXXXX">
                             <input type="hidden" name="guest_phone" id="guest_phone">
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="input__group mb-25">
-                            <label for="guest_email">{{ __('Customer Email (Optional)') }}</label>
-                            <input type="email" name="guest_email" id="guest_email" class="form-control" placeholder="{{ __('Email') }}">
-                        </div>
-                    </div>
+
                 </div>
 
                 <!-- Section 2: Delivery Address -->
@@ -325,7 +321,7 @@
                 iti.setNumber(phone.startsWith('+') ? phone : '+' + (phone.startsWith('968') ? '' : '968') + phone);
                 updateHiddenPhone();
                 
-                $('#guest_email').val(selected.data('email'));
+                // $('#guest_email').val(selected.data('email'));
             }
         });
 
