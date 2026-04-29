@@ -23,9 +23,12 @@
                 <option value="{{ ORDER_DELIVERED }}"
                     {{ $order->Order_Status == ORDER_DELIVERED ? 'selected disabled' : '' }}>
                     {{ __('Delivered') }}</option>
+                <option value="{{ ORDER_CANCELLED }}"
+                    {{ $order->Order_Status == ORDER_CANCELLED ? 'selected disabled' : '' }}>
+                    {{ __('Cancel Order') }}</option>
                 <option value="{{ ORDER_RETURN }}"
                     {{ $order->Order_Status == ORDER_RETURN ? 'selected disabled' : '' }}>
-                    {{ __('Returned') }}</option>
+                    {{ __('Cancel Order (Returned)') }}</option>
             </select>
         </div>
     </div>

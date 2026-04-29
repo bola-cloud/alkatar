@@ -248,6 +248,8 @@ class OrderController extends Controller
                 $data = Order::where('Order_Status', ORDER_DELIVERED);
             } elseif ($status == 'returned') {
                 $data = Order::where('Order_Status', ORDER_RETURN);
+            } elseif ($status == 'cancelled') {
+                $data = Order::where('Order_Status', ORDER_CANCELLED);
             } elseif ($status == 'all') {
                 $data = Order::query();
             }
@@ -395,9 +397,9 @@ class OrderController extends Controller
                     } elseif ($data->Order_Status == ORDER_DELIVERED) {
                         $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-check-circle mr-1"></i>' . __('Delivered') . '</span>';
                     } elseif ($data->Order_Status == ORDER_CANCELLED) {
-                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-times-circle mr-1"></i>' . __('Canceled') . '</span>';
+                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-times-circle mr-1"></i>' . __('Cancel Order') . '</span>';
                     } elseif ($data->Order_Status == ORDER_RETURN) {
-                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-undo mr-1"></i>' . __('Returned') . '</span>';
+                        $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-undo mr-1"></i>' . __('Cancel Order') . '</span>';
                     } elseif ($data->Order_Status == ORDER_NOT_PAYMENT_YET) {
                         $html = '<span class="badge badge-pill" style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap; border-radius: 50rem;"><i class="fas fa-money-bill-wave mr-1"></i>' . __('Not Payment Yet') . '</span>';
                     } elseif ($data->Order_Status == ORDER_DELIVERED_FAILED) {

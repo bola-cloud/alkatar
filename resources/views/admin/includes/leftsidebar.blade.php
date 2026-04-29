@@ -212,6 +212,13 @@
                             <span class="badge bg-info text-white">{{ orderCount(ORDER_DELIVERED) }}</span>
                         </a>
                     </li>
+                    <li class="{{ isset($submenu) && $submenu == 'orders_cancelled' ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.orders', 'cancelled') }}">
+                            <i class="fa fa-circle"></i>
+                            <span>{{ __('Cancelled Orders') }}</span>
+                            <span class="badge bg-info text-white">{{ orderCount(ORDER_CANCELLED) }}</span>
+                        </a>
+                    </li>
                     <li class="{{ isset($submenu) && $submenu == 'orders_returned' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.orders', 'returned') }}">
                             <i class="fa fa-circle"></i>
