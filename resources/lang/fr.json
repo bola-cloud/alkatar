@@ -885,5 +885,6 @@
     "Order status updated successfully and WhatsApp notification sent.": "تم تحديث حالة الطلب وإرسال إشعار واتساب بنجاح.",
     "Order converted to COD and notification sent.": "تم تحويل الطلب إلى COD وإرسال إشعار.",
     "Order cannot be converted. Status might be paid or already COD.": "لا يمكن تحويل الطلب. قد تكون الحالة مدفوعة أو COD بالفعل.",
-    "Order cancelled and deleted successfully.": "تم إلغاء الطلب وحذفه بنجاح."
+    "Order cancelled and deleted successfully.": "تم إلغاء الطلب وحذفه بنجاح.",
+    "This order is for Warehouse Pickup and cannot be assigned to a delivery man": "This order is for Warehouse Pickup and cannot be assigned to a delivery man"
 }
