@@ -20,6 +20,11 @@ class DeliveryOrderController extends Controller
             ->where('Order_Status', ORDER_PROCESSING)
             ->whereNull('delivery_man_id')
             ->where(function ($query) {
+                // Only show orders that are NOT for store pickup
+                $query->where('collection_method', '!=', 'store_pickup')
+                      ->orWhereNull('collection_method');
+            })
+            ->where(function ($query) {
                 // Show all non-thawani orders (like COD) OR paid Thawani orders
                 $query->where('Payment_Method', '!=', THAWANI)
                     ->orWhere('is_paid', 1);
@@ -46,6 +51,10 @@ class DeliveryOrderController extends Controller
 
         if (!$order) {
             return response()->json(['success' => false, 'message' => __('Order not found')], 404);
+        }
+
+        if ($order->collection_method == 'store_pickup') {
+            return response()->json(['success' => false, 'message' => __('This order is for Warehouse Pickup and cannot be assigned to a delivery man')], 403);
         }
 
         // Normalize the input phone number

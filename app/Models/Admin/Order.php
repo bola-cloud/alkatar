@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     use HasFactory;
+    protected $appends = [
+        'collection_method_label',
+        'collection_method_ar',
+    ];
     protected $fillable = [
         'Order_Number',
         'User_Id',
@@ -221,5 +225,17 @@ class Order extends Model
             $details['city_ar'] ?? $details['city_en'] ?? null,
             $details['state_ar'] ?? $details['state_en'] ?? null,
         ]));
+    }
+
+    public function getCollectionMethodLabelAttribute()
+    {
+        $method = $this->collection_method ?? 'delivery';
+        return $method == 'delivery' ? 'Delivery' : 'Warehouse Pickup';
+    }
+
+    public function getCollectionMethodArAttribute()
+    {
+        $method = $this->collection_method ?? 'delivery';
+        return $method == 'delivery' ? 'توصيل' : 'استلام من المخزن';
     }
 }
