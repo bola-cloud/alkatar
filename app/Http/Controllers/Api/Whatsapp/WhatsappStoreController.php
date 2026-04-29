@@ -784,44 +784,52 @@ class WhatsappStoreController extends Controller
      */
     public function handleOrderAction(\Illuminate\Http\Request $request)
     {
-        \Illuminate\Support\Facades\Log::info('WhatsApp Order Action Received', $request->all());
+        \Illuminate\Support\Facades\Log::info('WhatsApp Order Action Received', ['data' => $request->all()]);
 
-        $validated = $request->validate([
-            'order_id' => 'required|integer|exists:orders,id',
-            'action' => 'required|string|in:convert_to_cod,cancel_order',
-        ]);
+        try {
+            $validated = $request->validate([
+                'order_id' => 'required|integer|exists:orders,id',
+                'action' => 'required|string|in:convert_to_cod,cancel_order',
+            ]);
 
-        $order = \App\Models\Admin\Order::find($validated['order_id']);
+            $order = \App\Models\Admin\Order::find($validated['order_id']);
 
-        if ($validated['action'] === 'convert_to_cod') {
-            if (strtoupper($order->Payment_Method) === 'THAWANI' && $order->Payment_Status === 'PENDING') {
-                $order->Payment_Method = 'COD';
-                $order->Order_Status = defined('ORDER_PROCESSING') ? ORDER_PROCESSING : 2;
+            if ($validated['action'] === 'convert_to_cod') {
+                if (strtoupper($order->Payment_Method) === 'THAWANI' && $order->Payment_Status === 'PENDING') {
+                    $order->Payment_Method = 'COD';
+                    $order->Order_Status = defined('ORDER_PROCESSING') ? ORDER_PROCESSING : 2;
+                    $order->save();
+
+                    \Illuminate\Support\Facades\Log::info('Order converted to COD via WhatsApp', ['order_id' => $order->id]);
+
+                    // Trigger standard notification
+                    app(\App\Http\Controllers\Frontend\CheckoutController::class)->sendOrderNotification($order->id);
+
+                    return response()->json(['message' => 'Order converted to COD and notification sent.']);
+                }
+                return response()->json(['message' => 'Order cannot be converted. Status might be paid or already COD.'], 400);
+            }
+
+            if ($validated['action'] === 'cancel_order') {
+                if ($order->is_paid == 1) {
+                    \Illuminate\Support\Facades\Log::warning('WhatsApp Cancel Attempt Failed: Order already paid', ['order_id' => $order->id]);
+                    return response()->json(['message' => 'Paid orders cannot be cancelled via WhatsApp. Please contact support.'], 400);
+                }
+
+                $cancelledStatus = defined('ORDER_CANCELLED') ? ORDER_CANCELLED : 5;
+                $order->Order_Status = $cancelledStatus;
                 $order->save();
 
-                \Illuminate\Support\Facades\Log::info('Order converted to COD via WhatsApp', ['order_id' => $order->id]);
+                \Illuminate\Support\Facades\Log::info('Order cancelled via WhatsApp', ['order_id' => $order->id]);
 
-                // Trigger standard notification
-                app(\App\Http\Controllers\Frontend\CheckoutController::class)->sendOrderNotification($order->id);
-
-                return response()->json(['message' => 'Order converted to COD and notification sent.']);
+                return response()->json(['message' => 'Order cancelled successfully.']);
             }
-            return response()->json(['message' => 'Order cannot be converted. Status might be paid or already COD.'], 400);
-        }
-
-        if ($validated['action'] === 'cancel_order') {
-            if ($order->is_paid == 1) {
-                return response()->json(['message' => 'Paid orders cannot be cancelled via WhatsApp. Please contact support.'], 400);
-            }
-            // Instead of deleting, we change status to Cancelled (usually 5 or similar)
-            // Let's check the constant or use a standard value
-            $cancelledStatus = defined('ORDER_CANCELLED') ? ORDER_CANCELLED : 5;
-            $order->Order_Status = $cancelledStatus;
-            $order->save();
-            
-            \Illuminate\Support\Facades\Log::info('Order cancelled via WhatsApp', ['order_id' => $order->id]);
-            
-            return response()->json(['message' => 'Order cancelled successfully.']);
+        } catch (\Illuminate\Validation\ValidationException $ve) {
+            \Illuminate\Support\Facades\Log::error('WhatsApp Order Action Validation Error', ['errors' => $ve->errors(), 'data' => $request->all()]);
+            return response()->json(['message' => 'Validation failed', 'errors' => $ve->errors()], 422);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('WhatsApp Order Action Exception', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['message' => 'Server error occurred'], 500);
         }
 
         return response()->json(['message' => 'Invalid action'], 400);
