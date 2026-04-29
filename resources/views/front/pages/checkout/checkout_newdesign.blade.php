@@ -217,7 +217,7 @@
                                     <div class="flex items-center justify-between p-3 border rounded mb-3">
                                         <div class="flex items-center gap-3">
                                             <input type="radio" name="collection_method" id="store_pickup" value="store_pickup">
-                                            <label for="store_pickup">{{ langConverter('In-Store Pickup', 'استلام من المحل') }}</label>
+                                            <label for="store_pickup">{{ langConverter('Warehouse Pickup', 'استلام من المخزن') }}</label>
                                         </div>
                                         <i class="fas fa-store fa-2x text-primary"></i>
                                     </div>

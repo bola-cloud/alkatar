@@ -1021,6 +1021,7 @@ class CheckoutController extends Controller
                 'name' => $name,
                 'booking_id' => $order->id,
                 'order_id' => $order->id,
+                'pdf' => $pdfUrl,
                 'payment_url' => $paymentUrl
             ];
 
