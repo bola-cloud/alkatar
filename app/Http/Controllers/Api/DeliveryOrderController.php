@@ -20,11 +20,6 @@ class DeliveryOrderController extends Controller
             ->where('Order_Status', ORDER_PROCESSING)
             ->whereNull('delivery_man_id')
             ->where(function ($query) {
-                // Only show orders that are NOT for store pickup
-                $query->where('collection_method', '!=', 'store_pickup')
-                      ->orWhereNull('collection_method');
-            })
-            ->where(function ($query) {
                 // Show all non-thawani orders (like COD) OR paid Thawani orders
                 $query->where('Payment_Method', '!=', THAWANI)
                     ->orWhere('is_paid', 1);
