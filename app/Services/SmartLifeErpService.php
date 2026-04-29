@@ -195,11 +195,11 @@ class SmartLifeErpService
                 'Cookie' => $cookieString,
             ], $headers));
 
-            Log::debug("SmartLife ERP Request Details", [
-                'endpoint' => $endpoint,
-                'method' => $method,
-                'has_cookie' => !empty($cookieString)
-            ]);
+            // Log::debug("SmartLife ERP Request Details", [
+            //     'endpoint' => $endpoint,
+            //     'method' => $method,
+            //     'has_cookie' => !empty($cookieString)
+            // ]);
 
             if (strtoupper($method) === 'GET') {
                 return $request->get($url, $data);

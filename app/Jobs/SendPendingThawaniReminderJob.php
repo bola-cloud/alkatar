@@ -48,7 +48,7 @@ class SendPendingThawaniReminderJob implements ShouldQueue
         // ✅ Order already paid or cancelled — do nothing
         if (
             strtoupper($order->Payment_Method) !== 'THAWANI' ||
-            strtoupper($order->Payment_Status) !== 'PENDING'
+            $order->Payment_Status != PAYMENT_PENDING
         ) {
             Log::info("SendPendingThawaniReminderJob: order #{$this->orderId} is no longer pending ({$order->Payment_Status}) — skipping notification.");
             return;

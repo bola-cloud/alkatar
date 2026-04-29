@@ -476,7 +476,7 @@ class SyncSmartLifeProducts extends Command
 
                 if (!empty($syncSizes)) {
                     $product->sizes()->sync($syncSizes);
-                    Log::info('Synced sizes/options for product', ['product_id' => $product->id, 'count' => count($syncSizes)]);
+                    // Log::info('Synced sizes/options for product', ['product_id' => $product->id, 'count' => count($syncSizes)]);
                 }
             }
 

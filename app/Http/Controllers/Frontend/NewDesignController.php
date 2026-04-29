@@ -78,7 +78,7 @@ class NewDesignController extends Controller
         // Featured Categories to show as individual product sections (marked by admin)
         $featuredCategories = $allCategories->where('show_on_home', 1);
 
-        \Log::info("Home: All active categories: " . $allCategories->count() . ", Featured: " . $featuredCategories->count());
+        // \Log::info("Home: All active categories: " . $allCategories->count() . ", Featured: " . $featuredCategories->count());
 
         // Manual lazy load products per featured category
         foreach ($featuredCategories as $cat) {

@@ -1021,7 +1021,6 @@ class CheckoutController extends Controller
                 'name' => $name,
                 'booking_id' => $order->id,
                 'order_id' => $order->id,
-                'pdf' => $pdfUrl,
                 'payment_url' => $paymentUrl
             ];
 
@@ -1175,7 +1174,7 @@ class CheckoutController extends Controller
                 $data['success'] = true;
             }
             // WhatsApp notification (Exclude pending Thawani orders, they have a special flow)
-            if (!(strtoupper($payment_method) == 'THAWANI' && $payment_status == 'PENDING')) {
+            if (!(strtoupper($payment_method) == 'THAWANI' && ($payment_status == PAYMENT_PENDING || $payment_status == 'PENDING'))) {
                 $this->sendOrderNotification($order->id);
             }
 
