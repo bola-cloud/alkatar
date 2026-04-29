@@ -784,6 +784,8 @@ class WhatsappStoreController extends Controller
      */
     public function handleOrderAction(\Illuminate\Http\Request $request)
     {
+        \Illuminate\Support\Facades\Log::info('WhatsApp Order Action Received', $request->all());
+
         $validated = $request->validate([
             'order_id' => 'required|integer|exists:orders,id',
             'action' => 'required|string|in:convert_to_cod,cancel_order',
@@ -794,9 +796,10 @@ class WhatsappStoreController extends Controller
         if ($validated['action'] === 'convert_to_cod') {
             if (strtoupper($order->Payment_Method) === 'THAWANI' && $order->Payment_Status === 'PENDING') {
                 $order->Payment_Method = 'COD';
-                // Using 2 as ORDER_PROCESSING constant might not be loaded if helper isn't included, so use literal or constant
                 $order->Order_Status = defined('ORDER_PROCESSING') ? ORDER_PROCESSING : 2;
                 $order->save();
+
+                \Illuminate\Support\Facades\Log::info('Order converted to COD via WhatsApp', ['order_id' => $order->id]);
 
                 // Trigger standard notification
                 app(\App\Http\Controllers\Frontend\CheckoutController::class)->sendOrderNotification($order->id);
@@ -807,9 +810,15 @@ class WhatsappStoreController extends Controller
         }
 
         if ($validated['action'] === 'cancel_order') {
-            // Delete order
-            $order->delete();
-            return response()->json(['message' => 'Order cancelled and deleted successfully.']);
+            // Instead of deleting, we change status to Cancelled (usually 5 or similar)
+            // Let's check the constant or use a standard value
+            $cancelledStatus = defined('ORDER_CANCELLED') ? ORDER_CANCELLED : 5;
+            $order->Order_Status = $cancelledStatus;
+            $order->save();
+            
+            \Illuminate\Support\Facades\Log::info('Order cancelled via WhatsApp', ['order_id' => $order->id]);
+            
+            return response()->json(['message' => 'Order cancelled successfully.']);
         }
 
         return response()->json(['message' => 'Invalid action'], 400);
