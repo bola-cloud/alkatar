@@ -352,12 +352,12 @@ class CheckoutController extends Controller
                     ->latest()
                     ->first();
 
-                \Log::info('Checkout Subscription Check', [
-                    'user_id' => $user_id,
-                    'found' => $activeSubscription ? true : false,
-                    'sub_id' => $activeSubscription ? $activeSubscription->id : null,
-                    'status' => $activeSubscription ? $activeSubscription->status : 'N/A'
-                ]);
+                // \Log::info('Checkout Subscription Check', [
+                //     'user_id' => $user_id,
+                //     'found' => $activeSubscription ? true : false,
+                //     'sub_id' => $activeSubscription ? $activeSubscription->id : null,
+                //     'status' => $activeSubscription ? $activeSubscription->status : 'N/A'
+                // ]);
 
                 if ($activeSubscription && $activeSubscription->subscription) {
                     if ($activeSubscription->subscription->discount_percent > 0) {
