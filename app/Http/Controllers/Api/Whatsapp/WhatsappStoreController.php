@@ -810,6 +810,9 @@ class WhatsappStoreController extends Controller
         }
 
         if ($validated['action'] === 'cancel_order') {
+            if ($order->is_paid == 1) {
+                return response()->json(['message' => 'Paid orders cannot be cancelled via WhatsApp. Please contact support.'], 400);
+            }
             // Instead of deleting, we change status to Cancelled (usually 5 or similar)
             // Let's check the constant or use a standard value
             $cancelledStatus = defined('ORDER_CANCELLED') ? ORDER_CANCELLED : 5;

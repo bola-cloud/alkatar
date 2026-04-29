@@ -456,6 +456,11 @@ class OrderController extends Controller
         }
         $order = Order::whereId($id)->with('user')->first();
         if (!empty($order)) {
+            // Prevent cancelling paid orders
+            if ($request->Order_Status == ORDER_CANCELLED && $order->is_paid == 1) {
+                return redirect()->back()->with('error', __('Paid orders cannot be cancelled!'));
+            }
+
             // Check if status is changed to DELIVERED and it is a COD order
             if ($request->Order_Status == ORDER_DELIVERED && $order->Payment_Method == COD) {
                 $order->is_paid = 1;
