@@ -226,7 +226,7 @@
             <tr>
                 <th style="text-align: left;"><span>Collection Method</span></th>
                 <td style="text-align: right;">
-                    {{ ucfirst($order->collection_method) }}
+                    {{ $order->collection_method == 'delivery' ? 'Delivery' : 'Warehouse Pickup' }}
                 </td>
             </tr>
             @endif

@@ -111,6 +111,9 @@
                     <p>{{ __('Date') }}: {{ date('d/m/Y', strtotime($order->created_at)) }}</p>
                     <p>{{ __('Time') }}: {{ $order->created_at->timezone('Asia/Muscat')->format('h:i A') }}</p>
                     <p>{{ __('Payment') }}: {{ $order->Payment_Method }}</p>
+                    @if($order->collection_method)
+                        <p>{{ __('Collection Method') }}: {{ $order->collection_method == 'delivery' ? __('Delivery') : __('Warehouse Pickup') }}</p>
+                    @endif
                 </td>
             </tr>
         </table>

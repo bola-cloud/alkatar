@@ -139,7 +139,7 @@
                 <p>رقم الطلب: {{ $order->Order_Number }}</p>
                 <p>طريقة الدفع: {{ $order->Payment_Method }}</p>
                 @if($order->collection_method)
-                    <p>طريقة التحصيل: {{ ucfirst($order->collection_method) }}</p>
+                    <p>نوع الاستلام: {{ $order->collection_method == 'delivery' ? 'توصيل' : 'استلام من المخزن' }}</p>
                 @endif
                 <p>طريقة الشحن: مصاريف الشحن</p>
             </div>

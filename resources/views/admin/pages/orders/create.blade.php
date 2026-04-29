@@ -76,7 +76,7 @@
                             <label for="collection_method">{{ __('Collection Method') }} <span class="text-danger">*</span></label>
                             <select name="collection_method" id="collection_method" class="form-control" required>
                                 <option value="delivery">{{ __('Delivery') }}</option>
-                                <option value="store_pickup">{{ __('In-Store Pickup') }}</option>
+                                <option value="store_pickup">{{ __('Warehouse Pickup') }}</option>
                             </select>
                         </div>
                     </div>

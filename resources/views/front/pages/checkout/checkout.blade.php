@@ -207,7 +207,7 @@
                                             <input class="form-check-input" type="radio" name="collection_method"
                                                 id="store_pickup" value="store_pickup" />
                                             <label class="form-check-label text-lg lg:text-2xl"
-                                                for="store_pickup">{{ langConverter('In-Store Pickup', 'استلام من المحل') }}</label>
+                                                for="store_pickup">{{ langConverter('Warehouse Pickup', 'استلام من المخزن') }}</label>
                                         </div>
                                     </div>
                                     @error('collection_method')<div class="text-red-500 text-lg d-block">{{ $message }}</div>@enderror

@@ -161,6 +161,9 @@
                         </p>
                         <p style="line-height: 1.5;">رقم الطلب: {{ $order->Order_Number }}</p>
                         <p style="line-height: 1.5;">طريقة الدفع: {{ $order->Payment_Method }}</p>
+                        @if($order->collection_method)
+                            <p style="line-height: 1.5;">نوع الاستلام: {{ $order->collection_method == 'delivery' ? 'توصيل' : 'استلام من المخزن' }}</p>
+                        @endif
                         <p style="line-height: 1.5;">طريقة الشحن: مصاريف الشحن</p>
                     </td>
                 </tr>

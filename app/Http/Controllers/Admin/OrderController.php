@@ -381,7 +381,7 @@ class OrderController extends Controller
                 })
                 ->addColumn('collection_method', function ($data) {
                     $method = $data->collection_method ?? 'delivery';
-                    if ($method == 'store_pickup') return __('Store Pickup');
+                    if ($method == 'store_pickup') return __('Warehouse Pickup');
                     return __('Delivery');
                 })
                 ->addColumn('Status', function ($data) {
