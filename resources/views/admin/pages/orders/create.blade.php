@@ -68,6 +68,7 @@
                             <select name="payment_method" id="payment_method" class="form-control" required>
                                 <option value="COD">{{ __('Cash on Delivery (COD)') }}</option>
                                 <option value="BANK_TRANSFER">{{ __('Bank Transfer') }}</option>
+                                <option value="thawani">{{ __('Card Payment (WhatsApp Link)') }}</option>
                             </select>
                         </div>
                     </div>
@@ -101,7 +102,7 @@
                 </div>
 
                 <!-- Section 2: Delivery Address -->
-                <div class="row mt-4">
+                <div class="row mt-4" id="delivery_section">
                     <div class="col-md-12">
                         <div class="section-title mb-20">
                             <h4><i class="fas fa-truck me-2"></i>{{ __('Delivery Details') }}</h4>
@@ -284,12 +285,14 @@
             const locationFields = ['#state_id', '#city_id', '#area_id', '#street_address'];
             
             if (isPickup) {
+                $('#delivery_section').hide();
                 $('#shipping_charge').val('0.000').prop('readonly', true);
                 locationFields.forEach(selector => {
                     $(selector).removeAttr('required');
                     $(selector).prev('label').find('.text-danger').hide();
                 });
             } else {
+                $('#delivery_section').show();
                 $('#shipping_charge').prop('readonly', false);
                 locationFields.forEach(selector => {
                     $(selector).attr('required', 'required');
@@ -368,7 +371,8 @@
         // Area Change -> Get Shipping Charge
         $('#area_id').on('change', function() {
             let areaId = $(this).val();
-            if (areaId) {
+            const isPickup = $('#collection_method').val() === 'store_pickup';
+            if (areaId && !isPickup) {
                 $.ajax({
                     url: '/get-area-charge/' + areaId,
                     type: "GET",
@@ -379,6 +383,8 @@
                         }
                     }
                 });
+            } else if (isPickup) {
+                $('#shipping_charge').val('0.000').trigger('input');
             }
         });
 

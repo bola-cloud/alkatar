@@ -811,9 +811,9 @@ class WhatsappStoreController extends Controller
             }
 
             if ($validated['action'] === 'cancel_order') {
-                if ($order->is_paid == 1) {
-                    \Illuminate\Support\Facades\Log::warning('WhatsApp Cancel Attempt Failed: Order already paid', ['order_id' => $order->id]);
-                    return response()->json(['message' => 'Paid orders cannot be cancelled via WhatsApp. Please contact support.'], 400);
+                if ($order->is_paid == 1 || $order->Payment_Method == 'COD') {
+                    \Illuminate\Support\Facades\Log::warning('WhatsApp Cancel Attempt Failed: Order already paid or COD', ['order_id' => $order->id]);
+                    return response()->json(['message' => 'Paid or COD orders cannot be cancelled via WhatsApp. Please contact support.'], 400);
                 }
 
                 $cancelledStatus = defined('ORDER_CANCELLED') ? ORDER_CANCELLED : 5;
