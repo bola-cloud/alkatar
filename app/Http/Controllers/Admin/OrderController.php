@@ -542,6 +542,14 @@ class OrderController extends Controller
                 return redirect()->back()->with('error', __('Paid or COD orders cannot be cancelled!'));
             }
 
+            // Delete unpaid Thawani orders completely upon cancellation
+            if ($request->Order_Status == ORDER_CANCELLED && strtolower($order->Payment_Method) === 'thawani' && $order->is_paid == 0) {
+                \App\Models\Admin\OrderDetails::where('Order_Id', $order->id)->delete();
+                $order->delete();
+                Log::info('Admin deleted unpaid Thawani order via cancellation', ['order_id' => $order->id]);
+                return redirect()->back()->with('success', __('Order deleted successfully because it was an unpaid Thawani order!'));
+            }
+
             // Check if status is changed to DELIVERED and it is a COD order
             if ($request->Order_Status == ORDER_DELIVERED && $order->Payment_Method == COD) {
                 $order->is_paid = 1;

@@ -816,6 +816,13 @@ class WhatsappStoreController extends Controller
                     return response()->json(['message' => 'Paid or COD orders cannot be cancelled via WhatsApp. Please contact support.'], 400);
                 }
 
+                if (strtolower($order->Payment_Method) === 'thawani' && $order->is_paid == 0) {
+                    \App\Models\Admin\OrderDetails::where('Order_Id', $order->id)->delete();
+                    $order->delete();
+                    \Illuminate\Support\Facades\Log::info('Order deleted via WhatsApp because it was unpaid thawani', ['order_id' => $order->id]);
+                    return response()->json(['message' => 'Order deleted successfully.']);
+                }
+
                 $cancelledStatus = defined('ORDER_CANCELLED') ? ORDER_CANCELLED : 5;
                 $order->Order_Status = $cancelledStatus;
                 $order->save();
