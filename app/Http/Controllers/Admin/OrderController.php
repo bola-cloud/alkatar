@@ -39,10 +39,10 @@ class OrderController extends Controller
             'user_id' => 'required',
             'guest_name' => 'required_if:user_id,guest',
             'guest_phone' => 'required_if:user_id,guest',
-            'state_id' => 'required_unless:payment_method,STORE_PICKUP|nullable|exists:states,id',
-            'city_id' => 'required_unless:payment_method,STORE_PICKUP|nullable|exists:cities,id',
-            'area_id' => 'required_unless:payment_method,STORE_PICKUP|nullable|exists:areas,id',
-            'street_address' => 'required_unless:payment_method,STORE_PICKUP|nullable|string',
+            'state_id' => 'required_unless:collection_method,store_pickup|nullable|exists:states,id',
+            'city_id' => 'required_unless:collection_method,store_pickup|nullable|exists:cities,id',
+            'area_id' => 'required_unless:collection_method,store_pickup|nullable|exists:areas,id',
+            'street_address' => 'required_unless:collection_method,store_pickup|nullable|string',
             'products' => 'required|array',
             'products.*.id' => 'required|exists:products,id',
             'products.*.quantity' => 'required|integer|min:1',
@@ -142,9 +142,9 @@ class OrderController extends Controller
         $collection_method = $request->collection_method ?? 'delivery';
         
         // Payment Status logic:
-        // - COD: pending (will be paid on delivery)
+        // - COD / THAWANI: pending (unpaid initially)
         // - BANK_TRANSFER / OTHER: paid (admin confirms transfer before creating order)
-        if ($request->payment_method === 'COD') {
+        if ($request->payment_method === 'COD' || $request->payment_method === 'thawani') {
             $order->Payment_Status = PAYMENT_PENDING;
             $order->is_paid = 0;
         } else {
@@ -192,6 +192,87 @@ class OrderController extends Controller
             event(new \App\Events\OrderCreated($order));
         } catch (\Exception $e) {
             \Log::error('Admin OrderCreated Event Error: ' . $e->getMessage());
+        }
+
+        // Handle Thawani payment session creation and WhatsApp link
+        if ($request->payment_method === 'thawani') {
+            try {
+                $checkoutProduct = [];
+                $discountAmount = $discount;
+                foreach ($request->products as $item) {
+                    $product = \App\Models\Admin\Product::find($item['id']);
+                    $price = $product->Price;
+                    if ($product->Discount) {
+                        $price -= ($product->Discount / 100) * $price;
+                    }
+                    
+                    if ($subtotal > 0) {
+                        $itemTotalPrice = $price * $item['quantity'];
+                        $itemDiscount = ($itemTotalPrice / $subtotal) * $discountAmount;
+                        $newUnitAmount = $price - ($itemDiscount / $item['quantity']);
+                    } else {
+                        $newUnitAmount = $price;
+                    }
+
+                    $cleanName = preg_replace('/[^A-Za-z0-9\s\x{0600}-\x{06FF}]/u', '', $product->en_Product_Name);
+                    $checkoutProduct[] = [
+                        'name' => \Illuminate\Support\Str::limit($cleanName, 35),
+                        'quantity' => $item['quantity'],
+                        'unit_amount' => number_format($newUnitAmount, 3) * 1000,
+                    ];
+                }
+                if ($shipping_charge > 0) {
+                    $checkoutProduct[] = [
+                        'name' => 'Shipping Charge',
+                        'quantity' => 1,
+                        'unit_amount' => number_format($shipping_charge, 3) * 1000,
+                    ];
+                }
+
+                $response = Http::withHeaders([
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                    'thawani-api-key' => config('services.thawani.secret_key'),
+                ])->post(config('services.thawani.checkout_url') . '/checkout/session', [
+                    'client_reference_id' => $order_number,
+                    'mode' => 'payment',
+                    'products' => $checkoutProduct,
+                    'success_url' => route('thawani.success', ['order_number' => $order_number]),
+                    'cancel_url' => route('thawani.cancel', ['order_number' => $order_number]),
+                    'metadata' => [
+                        'order_number' => $order_number,
+                        'shipping_charge' => $shipping_charge,
+                        'subtotal' => $subtotal,
+                        'discount' => $discount,
+                        'grand_total' => $grand_total,
+                        'tax' => 0,
+                    ]
+                ]);
+
+                if ($response->successful()) {
+                    $paymentJsonData = $response->json();
+                    
+                    $payment = [
+                        'session_id' => $paymentJsonData['data']['session_id'],
+                        'user_id' => $userId,
+                        'admin_id' => auth()->id(),
+                        'order_number' => $order_number,
+                        'amount' => $grand_total,
+                        'status' => 'CREATED',
+                    ];
+                    $paymentRequest = new \Illuminate\Http\Request($payment);
+                    $this->paymentController->createPayment($paymentRequest);
+
+                    $paymentUrl = config('services.thawani.pay_url') . $paymentJsonData['data']['session_id'] . '?key=' . config('services.thawani.public_key');
+                    
+                    // Dispatch the WhatsApp job
+                    \App\Jobs\SendPendingThawaniReminderJob::dispatch($order->id, $paymentUrl);
+                } else {
+                    \Log::error('Thawani Session Creation Failed for Admin Order', ['response' => $response->body()]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Thawani Admin Order Exception: ' . $e->getMessage());
+            }
         }
 
         // Sync with SmartLife ERP
