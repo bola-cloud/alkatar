@@ -305,11 +305,13 @@ class OrderController extends Controller
             }
         }
 
-        // Send WhatsApp Notification
-        try {
-            app(\App\Http\Controllers\Frontend\CheckoutController::class)->sendOrderNotification($order->id);
-        } catch (\Exception $e) {
-            \Log::error('Admin Order WhatsApp Notification failed', ['error' => $e->getMessage()]);
+        // Send WhatsApp Notification (Exclude pending Thawani orders, they have a special flow)
+        if (strtolower($request->payment_method) !== 'thawani') {
+            try {
+                app(\App\Http\Controllers\Frontend\CheckoutController::class)->sendOrderNotification($order->id);
+            } catch (\Exception $e) {
+                \Log::error('Admin Order WhatsApp Notification failed', ['error' => $e->getMessage()]);
+            }
         }
 
         return redirect()->route('admin.orders', 'all')->with('success', __('Order created successfully and WhatsApp notification sent.'));

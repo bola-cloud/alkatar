@@ -109,6 +109,13 @@ class PaymentCallbackController extends Controller
                             $smartLifeService = app(\App\Services\SmartLifeErpService::class);
                             $smartLifeService->submitOrder($order);
                         }
+
+                        try {
+                            app(CheckoutController::class)->sendOrderNotification($order->id);
+                        } catch (\Exception $e) {
+                            Log::error('Fallback callback: WhatsApp notification failed', ['error' => $e->getMessage()]);
+                        }
+
                         
                         Cart::destroy();
                         session()->forget(['pending_token', 'payment_session_id', 'thawani_session_id']);
