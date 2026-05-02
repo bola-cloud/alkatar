@@ -265,8 +265,29 @@ class OrderController extends Controller
 
                     $paymentUrl = config('services.thawani.pay_url') . $paymentJsonData['data']['session_id'] . '?key=' . config('services.thawani.public_key');
                     
-                    // Dispatch the WhatsApp job
-                    \App\Jobs\SendPendingThawaniReminderJob::dispatch($order->id, $paymentUrl);
+                    // Send WhatsApp message via new endpoint for Admin created orders
+                    try {
+                        $pdfUrl = url("api/whatsapp/order-invoice/{$order->id}/invoice.pdf?lang=" . (app()->getLocale() ?? 'ar'));
+                        $phoneNumber = str_starts_with($customerPhone, '+') ? $customerPhone : '+' . $customerPhone;
+                        
+                        $payload = [
+                            'phone_number' => $phoneNumber,
+                            'pdf' => $pdfUrl,
+                            'payment_url' => $paymentUrl
+                        ];
+                        
+                        \Log::info('Admin WhatsApp Thawani Notification Request', ['payload' => $payload]);
+                        
+                        $whatsappResponse = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/payment_with_pdf', $payload);
+                        
+                        \Log::info('Admin WhatsApp Thawani Notification Response', [
+                            'order' => $order->Order_Number,
+                            'response' => $whatsappResponse->json(),
+                            'phone' => $phoneNumber
+                        ]);
+                    } catch (\Exception $ex) {
+                        \Log::error('Admin WhatsApp Thawani Notification Error: ' . $ex->getMessage());
+                    }
                 } else {
                     \Log::error('Thawani Session Creation Failed for Admin Order', ['response' => $response->body()]);
                 }
