@@ -63,6 +63,15 @@ class Order extends Model
         return $value == 0 ? 0 : (float)$value;
     }
 
+    /**
+     * Override date serialization for JSON/Arrays to fix 4-hour timezone offset 
+     * (UTC conversion) issue in the mobile app.
+     */
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->setTimezone(new \DateTimeZone('Asia/Muscat'))->format('Y-m-d h:i A');
+    }
+
     public function order_details()
     {
         return $this->hasMany(OrderDetails::class, 'Order_Id');

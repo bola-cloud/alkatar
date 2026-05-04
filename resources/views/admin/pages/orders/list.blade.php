@@ -2,19 +2,6 @@
 @section('title', isset($title) ? $title : '')
 @section('content')
 
-    <style>
-        #AdvertiseTable {
-            table-layout: fixed;
-            width: 100%;
-        }
-
-        #AdvertiseTable th,
-        #AdvertiseTable td {
-            word-wrap: break-word;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-    </style>
 
     <div id="table-url" data-url="{{ route('admin.orders', $status_prefix) }}"></div>
     <div class="row">

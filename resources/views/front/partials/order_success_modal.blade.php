@@ -1,8 +1,8 @@
 @php
     $modalData = session('order_success_modal');
     $showModal = !empty($modalData);
-    $titleLine1 = $modalData['line1'] ?? __('THANK YOU FOR CHOSSINg Hi Speed');
-    $titleLine2 = $modalData['line2'] ?? __('YOUR ORDER WILL BE READY IN 60 MIN');
+    $titleLine1 = $modalData['line1'] ?? __('THANK YOU FOR CHOOSING Hi Speed');
+    $titleLine2 = $modalData['line2'] ?? __('Orders arriving at 7 PM will be delivered the following day.');
     $orderNumber = $modalData['order_number'] ?? null;
 @endphp
 

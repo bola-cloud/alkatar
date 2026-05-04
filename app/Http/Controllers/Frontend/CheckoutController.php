@@ -933,8 +933,8 @@ class CheckoutController extends Controller
             Cart::destroy();
             // Prepare modal data to show on home page
             $modal = [
-                'line1' => __('THANK YOU FOR CHOSSINg Hi Speed'),
-                'line2' => __('YOUR ORDER WILL BE READY IN 60 MIN'),
+                'line1' => __('THANK YOU FOR CHOOSING Hi Speed'),
+                'line2' => __('Orders arriving at 7 PM will be delivered the following day.'),
                 'order_number' => $order['data']->Order_Number ?? session('order_number') ?? null,
             ];
             return redirect()->route('front')->with(['order_success_modal' => $modal, 'success' => 'Order successfully created!']);
@@ -1477,8 +1477,8 @@ class CheckoutController extends Controller
         }
         // Show success modal on homepage
         $modal = [
-            'line1' => __('THANK YOU FOR CHOSSINg Hi Speed'),
-            'line2' => __('YOUR ORDER WILL BE READY IN 60 MIN'),
+            'line1' => __('THANK YOU FOR CHOOSING Hi Speed'),
+            'line2' => __('Orders arriving at 7 PM will be delivered the following day.'),
             'order_number' => $order->Order_Number ?? null,
         ];
         return redirect()->route('front')->with(['order_success_modal' => $modal, 'success' => 'Order successfully created!']);
