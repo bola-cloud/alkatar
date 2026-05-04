@@ -95,7 +95,7 @@
                                                             <input type="text" class="form-control" name="en_button_url" value="{{ old('en_button_url', data_get($content_en,'button.url','#')) }}">
                                                         </div>
                                                         <div class="input__group mb-2">
-                                                            <label>{{ __('Banner Image') }}</label>
+                                                            <label>{{ __('Banner Image') }} <span class="text-danger" style="font-size: 12px; margin-right: 10px;">(المقاس المفضل: 1920x400 بيكسل)</span></label>
                                                             <input type="file" class="form-control" name="image">
                                                             @php
                                                                 $bannerImg = null;
@@ -128,7 +128,7 @@
                                                             <textarea class="form-control" name="en_description_two">{{ old('en_description_two', is_array($content_en['points'] ?? null) ? implode("\n", $content_en['points']) : ($content_en['points'] ?? '')) }}</textarea>
                                                         </div>
                                                         <div class="input__group mb-2">
-                                                            <label>{{ __('Image') }}</label>
+                                                            <label>{{ __('Image') }} <span class="text-danger" style="font-size: 12px; margin-right: 10px;">(المقاس المفضل: 800x800 بيكسل)</span></label>
                                                             <input type="file" class="form-control" name="image">
                                                             @php
                                                                 $whyImg = null;

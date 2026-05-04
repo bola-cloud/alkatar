@@ -137,7 +137,11 @@
                 <p>تاريخ الشراء: {{ date('d/m/Y', strtotime($order->created_at)) }}</p>
                 <p>وقت الشراء: {{ $order->created_at->timezone('Asia/Muscat')->format('h:i A') }}</p>
                 <p>رقم الطلب: {{ $order->Order_Number }}</p>
-                <p>طريقة الدفع: {{ $order->Payment_Method }}</p>
+                @if(strtolower($order->Payment_Method) === 'thawani' && $order->is_paid == 0)
+                    <p>طريقة الدفع: لم يتم الدفع</p>
+                @else
+                    <p>طريقة الدفع: {{ $order->Payment_Method }}</p>
+                @endif
                 @if($order->collection_method)
                     <p>نوع الاستلام: {{ $order->collection_method == 'delivery' ? 'توصيل' : 'استلام من المخزن' }}</p>
                 @endif
