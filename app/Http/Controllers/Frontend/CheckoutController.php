@@ -182,10 +182,10 @@ class CheckoutController extends Controller
                         }
                     }
                     session()->flash('success', ('تم اضافة منتج مجاني من العروض'));
-                    return view('front.pages.checkout.checkout_newdesign', $data);
+                    return view('front.home.checkout', $data);
                 }
             }
-            return view('front.pages.checkout.checkout_newdesign', $data);
+            return view('front.home.checkout', $data);
         } else {
             return redirect()->route('front')->with('toast_warning', 'Cart is Empty');
         }
@@ -983,16 +983,16 @@ class CheckoutController extends Controller
                 'pdf' => $pdfUrl,
             ];
 
-            Log::info('WhatsApp Order Notification request', ['payload' => $payload]);
+            Log::info('WhatsApp Order Notification request (BYPASSED)', ['payload' => $payload]);
 
-            $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/success/payment', $payload);
+            // $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/success/payment', $payload);
 
-            Log::info('WhatsApp Order Notification response', [
-                'order' => $order->Order_Number,
-                'response' => $response->json(),
-                'phone' => $phoneNumber,
-                'pdf_url_sent' => $pdfUrl
-            ]);
+            // Log::info('WhatsApp Order Notification response', [
+            //     'order' => $order->Order_Number,
+            //     'response' => $response->json(),
+            //     'phone' => $phoneNumber,
+            //     'pdf_url_sent' => $pdfUrl
+            // ]);
 
             return response()->json(['success' => true]);
         } catch (\Exception $ex) {
@@ -1025,16 +1025,16 @@ class CheckoutController extends Controller
                 'payment_url' => $paymentUrl
             ];
 
-            Log::info('WhatsApp Pending Thawani Notification request', ['payload' => $payload]);
+            Log::info('WhatsApp Pending Thawani Notification request (BYPASSED)', ['payload' => $payload]);
 
-            $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/pending/payment', $payload);
+            // $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/pending/payment', $payload);
 
-            Log::info('WhatsApp Pending Thawani Notification response', [
-                'order' => $order->Order_Number,
-                'response' => $response->json(),
-                'phone' => $phoneNumber,
-                'pdf_url_sent' => $pdfUrl
-            ]);
+            // Log::info('WhatsApp Pending Thawani Notification response', [
+            //     'order' => $order->Order_Number,
+            //     'response' => $response->json(),
+            //     'phone' => $phoneNumber,
+            //     'pdf_url_sent' => $pdfUrl
+            // ]);
 
             return response()->json(['success' => true]);
         } catch (\Exception $ex) {

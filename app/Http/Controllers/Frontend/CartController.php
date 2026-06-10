@@ -112,20 +112,7 @@ class CartController extends Controller
 
     public function cartContent()
     {
-        $content = Cart::content();
-        $data['content'] = $content;
-        $seo = SeoSetting::where('slug', 'cart')->first();
-        $data['title'] = $seo->title;
-        $data['description'] = $seo->description;
-        $data['keywords'] = $seo->keywords;
-        $data['users'] = User::where(['is_admin' => 0, 'status' => 1])
-            ->select('id', 'name', 'number')
-            ->get();
-
-        if ($content->count()) {
-            return view('front.pages.new-cart.cart-content', $data);
-        }
-        return view('front.pages.new-cart.cart-content', $data);
+        return redirect()->route('front.cart');
     }
     public function cartDelete(Request $request)
     {

@@ -89,7 +89,14 @@
                                                 <label class="form-check-label" for="status">{{ __('Active') }}</label>
                                             </div>
                                         </div>
-                                        <input type="hidden" name="location" value="{{ request('location', 'hero') }}">
+                                        <div class="input__group mb-25">
+                                            <label for="location">{{ __('Location / Page') }}</label>
+                                            <select class="form-control" name="location" id="location">
+                                                <option value="hero" {{ request('location') == 'hero' ? 'selected' : '' }}>{{ __('Homepage Hero Slider') }}</option>
+                                                <option value="coffee_crops" {{ request('location') == 'coffee_crops' ? 'selected' : '' }}>{{ __('Coffee Crops Slider') }}</option>
+                                                <option value="technical_tools" {{ request('location') == 'technical_tools' ? 'selected' : '' }}>{{ __('Technical Tools Slider') }}</option>
+                                            </select>
+                                        </div>
                                         <div class="input__button">
                                             <button type="submit" class="btn btn-blue">{{ __('Add')}}</button>
                                         </div>

@@ -18,7 +18,9 @@ class HomePageController extends Controller
     {
         if ($request->ajax()) {
             // prefer homepage_sections if available
-            $data = HomepageSection::orderBy('display_order')->get();
+            $data = HomepageSection::whereNotIn('section_key', ['newdesign_brands', 'newdesign_sale_banner'])
+                ->orderBy('display_order')
+                ->get();
             if ($data->isEmpty()) {
                 $data = Homepage::latest()->orderBy('id', 'DESC')->get();
             }
@@ -58,7 +60,9 @@ class HomePageController extends Controller
         $section = HomepageSection::find($id);
         // pass all sections so the edit page can render each section as a separate card
         try {
-            $data['sections'] = HomepageSection::orderBy('display_order')->get();
+            $data['sections'] = HomepageSection::whereNotIn('section_key', ['newdesign_brands', 'newdesign_sale_banner'])
+                ->orderBy('display_order')
+                ->get();
         } catch (\Exception $e) {
             $data['sections'] = collect();
         }
@@ -107,6 +111,37 @@ class HomePageController extends Controller
                 }
                 $section->content_en = ['items' => $items_en];
                 $section->content_fr = ['items' => $items_fr];
+                $ok = $section->save();
+                if ($ok) {
+                    return redirect()->route('admin.home.page.site.content.edit', $section->id)->with('success', __('Successfully Updated !'));
+                }
+                return redirect()->route('admin.home.page.site.content.edit', $section->id)->with('error', __('Does not Updated !'));
+            }
+
+            // Special handling for stats section (edit four stats only)
+            if ($section->section_key === 'newdesign_stats') {
+                $stats_en = [];
+                $stats_fr = [];
+                for ($i = 1; $i <= 4; $i++) {
+                    $stats_en[] = [
+                        'val' => $request->input('en_stat_' . $i . '_val', ''),
+                        'lbl' => $request->input('en_stat_' . $i . '_lbl', ''),
+                    ];
+                    $stats_fr[] = [
+                        'val' => $request->input('fr_stat_' . $i . '_val', ''),
+                        'lbl' => $request->input('fr_stat_' . $i . '_lbl', ''),
+                    ];
+                }
+                $section->content_en = [
+                    'title' => $request->en_title,
+                    'lead' => $request->en_description_one,
+                    'stats' => $stats_en
+                ];
+                $section->content_fr = [
+                    'title' => $request->fr_title,
+                    'lead' => $request->fr_description_one,
+                    'stats' => $stats_fr
+                ];
                 $ok = $section->save();
                 if ($ok) {
                     return redirect()->route('admin.home.page.site.content.edit', $section->id)->with('success', __('Successfully Updated !'));

@@ -34,6 +34,7 @@
                                     <th>{{ __('User Name') }}</th>
                                     <th>{{ __('Email') }}</th>
                                     <th>{{ __('Phone') }}</th>
+                                    <th>{{ __('Paid Amount') }}</th>
                                     <th>{{ __('Start Date') }}</th>
                                     <th>{{ __('End Date') }}</th>
                                     <th>{{ __('Status') }}</th>
@@ -42,16 +43,22 @@
                             <tbody>
                                 @foreach($users as $userSub)
                                     <tr>
-                                        <td>{{ $userSub->user->name ?? 'N/A' }}</td>
-                                        <td>{{ $userSub->user->email ?? 'N/A' }}</td>
-                                        <td>{{ $userSub->user->phone ?? 'N/A' }}</td>
-                                        <td>{{ $userSub->start_at->format('Y-m-d') }}</td>
-                                        <td>{{ $userSub->end_at->format('Y-m-d') }}</td>
+                                        <td>{{ $userSub->user->name ?? '--' }}</td>
+                                        <td>{{ $userSub->user->email ?? '--' }}</td>
+                                        <td>{{ $userSub->user->Number ?? $userSub->user->phone ?? '--' }}</td>
+                                        <td>{{ currencyConverter($userSub->paid_amount ?? 0) }}</td>
+                                        <td>{{ $userSub->start_at ? \Carbon\Carbon::parse($userSub->start_at)->format('Y-m-d') : '--' }}</td>
+                                        <td>{{ $userSub->end_at ? \Carbon\Carbon::parse($userSub->end_at)->format('Y-m-d') : '--' }}</td>
                                         <td>
-                                            @if($userSub->status)
+                                            @php
+                                                $isExpired = $userSub->end_at && \Carbon\Carbon::parse($userSub->end_at)->isPast();
+                                            @endphp
+                                            @if($userSub->status === 'active' && !$isExpired)
                                                 <span class="badge badge-pill badge-success">{{ __('Active') }}</span>
+                                            @elseif($userSub->status === 'pending')
+                                                <span class="badge badge-pill badge-warning">{{ __('Pending') }}</span>
                                             @else
-                                                <span class="badge badge-pill badge-danger">{{ __('Inactive') }}</span>
+                                                <span class="badge badge-pill badge-danger">{{ __('Expired') }}</span>
                                             @endif
                                         </td>
                                     </tr>

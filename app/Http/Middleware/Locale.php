@@ -23,7 +23,7 @@ class  Locale
         // Fallback to the common locales list if DB is unavailable.
         try {
             $dbLocales = Language::pluck('locale')->toArray();
-            $avail_able_locales = !empty($dbLocales) ? $dbLocales : ['en', 'fr', 'ar'];
+            $avail_able_locales = !empty($dbLocales) ? array_merge($dbLocales, ['ar', 'en']) : ['en', 'fr', 'ar'];
         } catch (\Throwable $e) {
             $avail_able_locales = ['en', 'fr', 'ar'];
         }

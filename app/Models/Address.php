@@ -17,8 +17,49 @@ class Address extends Model
         'is_default', 'address_type', 'latitude', 'longitude'
     ];
 
+    protected $appends = ['building', 'apartment', 'notes', 'type', 'title', 'street', 'building_no'];
+
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function getBuildingAttribute()
+    {
+        $data = json_decode($this->address_line2, true);
+        return is_array($data) ? ($data['building'] ?? '') : '';
+    }
+
+    public function getApartmentAttribute()
+    {
+        $data = json_decode($this->address_line2, true);
+        return is_array($data) ? ($data['apartment'] ?? '') : '';
+    }
+
+    public function getNotesAttribute()
+    {
+        $data = json_decode($this->address_line2, true);
+        return is_array($data) ? ($data['notes'] ?? '') : ($this->address_line2 ?? '');
+    }
+
+    public function getTypeAttribute()
+    {
+        $data = json_decode($this->address_line2, true);
+        return is_array($data) ? ($data['type'] ?? 'home') : 'home';
+    }
+
+    public function getTitleAttribute()
+    {
+        return $this->label;
+    }
+
+    public function getStreetAttribute()
+    {
+        return $this->address_line1;
+    }
+
+    public function getBuildingNoAttribute()
+    {
+        return $this->building;
     }
 }

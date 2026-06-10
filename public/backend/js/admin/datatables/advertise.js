@@ -21,6 +21,10 @@
                     name: 'subtitle'
                 },
                 {
+                    data: 'location',
+                    name: 'location'
+                },
+                {
                     data: 'action',
                     name: 'action',
                     orderable: false

@@ -326,5 +326,10 @@
     "Size/Weight": "Size/Weight",
     "Oman": "Oman",
     "Commercial Register": "Commercial Register",
-    "Register Name": "Register Name"
+    "Register Name": "Register Name",
+    "new_design.coffee_crops.country_brazil": "Brazil",
+    "new_design.coffee_crops.country_ethiopia": "Ethiopia",
+    "new_design.coffee_crops.country_colombia": "Colombia",
+    "new_design.coffee_crops.country_yemen": "Yemen",
+    "new_design.coffee_crops.country_costa_rica": "Costa Rica"
 }

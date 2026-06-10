@@ -14,7 +14,6 @@ use App\Http\Controllers\Frontend\CouponController;
 use App\Http\Controllers\Frontend\ProductController;
 use App\Http\Controllers\Frontend\CheckoutController;
 use App\Http\Controllers\Frontend\WishlistController;
-use App\Http\Controllers\Frontend\ContactUsController;
 use App\Http\Controllers\Frontend\SubscribeController;
 use App\Http\Controllers\Frontend\CompareListController;
 use App\Http\Controllers\Frontend\UserProfileController;
@@ -40,6 +39,21 @@ Route::get('currency-symbol', [CartController::class, 'currencySymbol'])->name('
 Route::group(['middleware' => ['is_user']], function () {
     Route::get('/olddesign', [HomeController::class, 'index'])->name('front.olddesign');
     Route::get('/', [NewDesignController::class, 'index'])->name('front');
+    Route::get('/store', [NewDesignController::class, 'store'])->name('front.store');
+    Route::get('/wholesale-orders', [NewDesignController::class, 'wholesale'])->name('wholesale.orders');
+    Route::get('/become-partner', [NewDesignController::class, 'become_partner'])->name('become.partner');
+    Route::get('/social-responsibility', [NewDesignController::class, 'social_responsibility'])->name('social.responsibility');
+    Route::get('/trial-boxes', [NewDesignController::class, 'trial_boxes'])->name('trial.boxes');
+    Route::get('/coffee-crops', [NewDesignController::class, 'coffee_crops'])->name('coffee.crops');
+    Route::get('/technical-tools', [NewDesignController::class, 'technical_tools'])->name('technical.tools');
+    Route::get('/experts', [NewDesignController::class, 'experts'])->name('experts');
+    Route::get('/monthly-offers', [NewDesignController::class, 'monthly_offers'])->name('monthly.offers');
+    Route::get('/gift-cards', [NewDesignController::class, 'gift_cards'])->name('gift.cards');
+    Route::get('/contact-us', [NewDesignController::class, 'contact_us'])->name('contact.us');
+    Route::get('/login', [NewDesignController::class, 'login'])->name('login');
+    Route::get('/register', [NewDesignController::class, 'register'])->name('user.sign.up');
+    Route::get('/product-details', [NewDesignController::class, 'product_details'])->name('front.product_details');
+    Route::get('/cart', [NewDesignController::class, 'cart'])->name('front.cart');
     Route::get('/theme-set/{theme}', [HomeController::class, 'theme_set']);
     Route::get('locale/{lang}', [HomeController::class, 'localeSwitch'])->name('locale.switch');
     Route::get('currency/{amount}', [HomeController::class, 'currencySwitch'])->name('currency.switch');
@@ -50,10 +64,6 @@ Route::group(['middleware' => ['is_user']], function () {
     Route::get('get_session', [SubscribeSessionController::class, 'doNotSubscribeGet']);
     Route::get('remove_session', [SubscribeSessionController::class, 'doNotSubscribeRemove']);
 
-    Route::group(['prefix' => 'contact-us'], function () {
-        Route::get('/', [ContactUsController::class, 'contactUs'])->name('contact.us');
-        Route::post('store', [ContactUsController::class, 'contactUsStore'])->name('contact.us.store')->middleware(['isDemo']);
-    });
     Route::group(['prefix' => 'blog'], function () {
         Route::get('/', [BlogController::class, 'index'])->name('blog');
         Route::get('/blog-details/{id}', [BlogController::class, 'blogDetails'])->name('blog.details');
@@ -68,14 +78,14 @@ Route::group(['middleware' => ['is_user']], function () {
 
     Route::group(['prefix' => 'user/'], function () {
         //User Sign-in and Sign-up
-        Route::get('sign-in', [AuthController::class, 'userSignIn'])->name('login');
+        // Route::get('sign-in', [AuthController::class, 'userSignIn'])->name('login'); // Replaced with NewDesignController
         Route::post('sign-in', [AuthController::class, 'userSignInPost'])->name('user.sign.in.post');
         Route::post('otp', [AuthController::class, 'otpSignInPost'])->name("user.sign.otp");
         Route::get('otp-verify', [AuthController::class, 'otpVerify'])->name("user.otp.verify.get");
         Route::post('otp-verify', [AuthController::class, 'otpVerifyPost'])->name("user.otp.verify");
         Route::get("complete-registration", [AuthController::class, 'completeRegistration'])->name("user.complete.registration");
         Route::post('login-modal', [AuthController::class, 'loginModal'])->name('user.sign.modal');
-        Route::get('sign-up', [AuthController::class, 'userSignUp'])->name('user.sign.up');
+        // Route::get('sign-up', [AuthController::class, 'userSignUp'])->name('user.sign.up'); // Replaced with NewDesignController
         Route::post('sign-up', [AuthController::class, 'userSignUpPost'])->name('user.sign.up.post');
         Route::get('auth/google', [AuthController::class, 'redirectToGoogle'])->name('user.redirect_google');
         Route::get('auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('user.handle_google_callback');
@@ -96,15 +106,17 @@ Route::group(['middleware' => ['is_user']], function () {
         Route::post('reset-password', [AuthController::class, 'submitResetPasswordForm'])->name('reset.password.post')->middleware(['isDemo']);
 
         //User Profile
+        Route::get('profile', [NewDesignController::class, 'profile'])->name('user.profile');
 
         Route::group(['middleware' => 'auth'], function () {
-            Route::get('profile', [UserProfileController::class, 'userProfile'])->name('user.profile');
-            Route::get('profile-edit', [UserProfileController::class, 'userProfileEdit'])->name('user.profile.edit');
-            Route::post('profile-update', [UserProfileController::class, 'userProfileUpdate'])->name('user.profile.update')->middleware(['isDemo']);
-            Route::get('my-order', [UserProfileController::class, 'myOrder'])->name('user.profile.myOrder');
-            Route::get('my-review', [UserProfileController::class, 'myReview'])->name('user.profile.myReview');
-            Route::post('review-store', [UserProfileController::class, 'reviewStore'])->name('user.profile.review_store')->middleware(['isDemo']);
-            Route::get('track-my-order/{id}', [UserProfileController::class, 'trackMyOrder'])->name('user.profile.track.my.order');
+            Route::post('profile-update', [\App\Http\Controllers\Frontend\ProfileSettingsController::class, 'update'])->name('user.profile.update')->middleware(['isDemo']);
+            Route::post('orders/{orderNumber}/reorder', [\App\Http\Controllers\Frontend\ProfileOrdersController::class, 'reorder'])->name('user.profile.orders.reorder');
+            Route::post('review-store', [\App\Http\Controllers\Frontend\ProfileReviewsController::class, 'store'])->name('user.profile.review_store')->middleware(['isDemo']);
+
+            // User Addresses CRUD
+            Route::post('addresses', [\App\Http\Controllers\Frontend\ProfileAddressController::class, 'store'])->name('user.profile.addresses.store');
+            Route::put('addresses/{id}', [\App\Http\Controllers\Frontend\ProfileAddressController::class, 'update'])->name('user.profile.addresses.update');
+            Route::delete('addresses/{id}', [\App\Http\Controllers\Frontend\ProfileAddressController::class, 'destroy'])->name('user.profile.addresses.destroy');
 
             // Subscription Payment
             Route::post('subscription/pay', [\App\Http\Controllers\Frontend\SubscriptionPaymentController::class, 'initiatePayment'])->name('user.subscription.pay');
@@ -136,6 +148,13 @@ Route::group(['middleware' => ['is_user']], function () {
         });
         Route::get('compare/add', [CompareListController::class, 'add'])->name('compare.add')->middleware(['isDemo']);
         Route::get('wishlist/add', [WishlistController::class, 'add'])->name('wishlist.add')->middleware(['isDemo']);
+    });
+
+    Route::group(['middleware' => 'auth'], function () {
+        Route::post('profile/addresses', [\App\Http\Controllers\Frontend\ProfileAddressController::class, 'store'])->name('profile.addresses.store');
+        Route::put('profile/addresses/{id}', [\App\Http\Controllers\Frontend\ProfileAddressController::class, 'update'])->name('profile.addresses.update');
+        Route::delete('profile/addresses/{id}', [\App\Http\Controllers\Frontend\ProfileAddressController::class, 'destroy'])->name('profile.addresses.destroy');
+        Route::post('profile/orders/{orderNumber}/reorder', [\App\Http\Controllers\Frontend\ProfileOrdersController::class, 'reorder'])->name('profile.orders.reorder');
     });
 
     Route::group(['prefix' => 'cart'], function () {

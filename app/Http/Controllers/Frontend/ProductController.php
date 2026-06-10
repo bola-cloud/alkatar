@@ -42,11 +42,13 @@ class ProductController extends Controller
                 ])
                 ->orderByRaw('TRIM(fr_Product_Name) COLLATE utf8mb4_unicode_ci ASC')
                 ->first();
+            $data['product'] = $products;
             $data['products'] = $products;
+            $data['related'] = $data['similar_product'];
             $data['title'] = $products->en_Product_Name;
             $data['description'] = $products->en_Product_Nam;
             $data['keywords'] = $products->en_Product_Nam;
-            return view('front.pages.product.single_product', $data);
+            return view('front.home.product_details', $data);
         }
         return redirect()->back()->with('error', __('Product Not Found!'));
     }
@@ -111,10 +113,11 @@ class ProductController extends Controller
                 ->first();
 
             $data['product'] = $products;
+            $data['products'] = $products;
             $data['related'] = $related;
             $data['title'] = $products->en_Product_Name;
 
-            return view('front.pages.product_newdesign', $data);
+            return view('front.home.product_details', $data);
         }
         return redirect()->back()->with('error', __('Product Not Found!'));
     }

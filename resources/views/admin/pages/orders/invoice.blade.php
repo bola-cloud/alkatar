@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ in_array(app()->getLocale(), ['ar', 'fr']) ? 'rtl' : 'ltr' }}">
 
 <head>
     <meta charset="UTF-8">
@@ -87,7 +87,7 @@
         td {
             border: 1px solid #ddd;
             padding: 6px;
-            text-align: right;
+            text-align: {{ in_array(app()->getLocale(), ['ar', 'fr']) ? 'right' : 'left' }};
         }
 
         th {
@@ -121,7 +121,7 @@
     <div class="invoice-container">
         <div class="invoice-header">
             <img src="{{ asset(IMG_LOGO_PATH . allsetting()['main_logo']) }}" alt="Logo" class="invoice-logo">
-            <span class="invoice-title">الفاتورة</span>
+            <span class="invoice-title">{{ __('Invoice') }}</span>
         </div>
 
         <div class="invoice-details">
@@ -134,18 +134,18 @@
                 <p>{{ url('/') }}</p>
             </div>
             <div>
-                <p>تاريخ الشراء: {{ date('d/m/Y', strtotime($order->created_at)) }}</p>
-                <p>وقت الشراء: {{ $order->created_at->timezone('Asia/Muscat')->format('h:i A') }}</p>
-                <p>رقم الطلب: {{ $order->Order_Number }}</p>
+                <p>{{ __('Purchase Date') }}: {{ $order->created_at->timezone('Asia/Muscat')->format('d/m/Y') }}</p>
+                <p>{{ __('Purchase Time') }}: {{ $order->created_at->timezone('Asia/Muscat')->format('h:i A') }}</p>
+                <p>{{ __('Order Number') }}: {{ $order->Order_Number }}</p>
                 @if(strtolower($order->Payment_Method) === 'thawani' && $order->is_paid == 0)
-                    <p>طريقة الدفع: لم يتم الدفع</p>
+                    <p>{{ __('Payment Method') }}: {{ __('Unpaid') }}</p>
                 @else
-                    <p>طريقة الدفع: {{ $order->Payment_Method }}</p>
+                    <p>{{ __('Payment Method') }}: {{ $order->Payment_Method }}</p>
                 @endif
                 @if($order->collection_method)
-                    <p>نوع الاستلام: {{ $order->collection_method == 'delivery' ? 'توصيل' : 'استلام من المخزن' }}</p>
+                    <p>{{ __('Collection Method') }}: {{ $order->collection_method == 'delivery' ? __('Delivery') : __('Store Pickup') }}</p>
                 @endif
-                <p>طريقة الشحن: مصاريف الشحن</p>
+                <p>{{ __('Shipping Method') }}: {{ __('Delivery Charge') }}</p>
             </div>
         </div>
 
@@ -157,16 +157,16 @@
                 if ($phone && preg_match('/^\+?(\d{3})(\d+)/', $phone, $matches)) {
                     $formattedUserPhone = "({$matches[1]}) {$matches[2]}";
                 } else {
-                    $formattedUserPhone = 'N/A';
+                    $formattedUserPhone = '--';
                 }
             @endphp
             <div class="address-box">
-                <div class="address-title">الفاتورة الى</div>
-                <p>اسم العميل: {{ $order->billing_address['name'] ?? 'N/A' }}</p>
-                <p>البريد الاكتروني: {{ $order->billing_address['email'] ?? 'N/A' }}</p>
-                <p>رقم الهاتف: 
+                <div class="address-title">{{ __('Invoice To') }}</div>
+                <p>{{ __('Customer Name') }}: {{ $order->billing_address['name'] ?? '--' }}</p>
+                <p>{{ __('Email') }}: {{ $order->billing_address['email'] ?? '--' }}</p>
+                <p>{{ __('Phone Number') }}: 
                     <span dir="ltr" style="unicode-bidi: plaintext">
-                        {{ $order->billing_address['phone_number'] ?? ($order->user->Number ?? 'N/A') }}
+                        {{ $order->billing_address['phone_number'] ?? ($order->user->Number ?? '--') }}
                     </span>
                 </p>
             </div>
@@ -176,16 +176,16 @@
                 if ($phone && preg_match('/^\+?(\d{3})(\d+)/', $phone, $matches)) {
                     $formattedPhone = "({$matches[1]}) {$matches[2]}";
                 } else {
-                    $formattedPhone = 'N/A';
+                    $formattedPhone = '--';
                 }
             @endphp
             <div class="address-box">
-                <div class="address-title">الشحن الى</div>
-                <p>العنوان: {{ $order->billing_address['street'] ?? 'N/A' }}</p>
-                <p>المحافظة: {{ $order->billing_address['state_ar'] ?? 'N/A' }}</p>
-                <p>المدينة: {{ $order->billing_address['city_ar'] ?? 'N/A' }}</p>
-                <p>الدولة: سلطنة عمان</p>
-                <p>رقم الهاتف:
+                <div class="address-title">{{ __('Ship To') }}</div>
+                <p>{{ __('Address') }}: {{ $order->billing_address['street'] ?? '--' }}</p>
+                <p>{{ __('State') }}: {{ $order->billing_address['state_ar'] ?? '--' }}</p>
+                <p>{{ __('City') }}: {{ $order->billing_address['city_ar'] ?? '--' }}</p>
+                <p>{{ __('Country') }}: سلطنة عمان</p>
+                <p>{{ __('Phone Number') }}:
                     <span dir="ltr" style="unicode-bidi: plaintext">
                         {{ $formattedPhone  }}
                     </span>
@@ -198,11 +198,11 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>الاسم</th>
-                    <th>الكمية</th>
-                    <th>الحجم</th>
-                    <th>السعر</th>
-                    <th>الإجمالي</th>
+                    <th>{{ __('Item') }}</th>
+                    <th>{{ __('Quantity') }}</th>
+                    <th>{{ __('Size') }}</th>
+                    <th>{{ __('Price') }}</th>
+                    <th>{{ __('Total') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -217,45 +217,45 @@
                             @php
                                 $size = json_decode($od->Size); 
                             @endphp
-                            <td>{{ is_null($size?->weight) ? 'N/A' : $size?->weight }} جرام</td>
+                            <td>{{ is_null($size?->weight) ? __('--') : $size?->weight . ' ' . __('grams') }}</td>
                         @endif
                         <td class="nowrap">{{ $od->Price }}</td>
-                        <td class="nowrap">{{ $od->Total_Price }} OMR</td>
+                        <td class="nowrap">{{ $od->Total_Price }} {{ __('OMR') }}</td>
                     </tr>
                 @endforeach
                 <tr class="total-row">
-                    <td colspan="5">الإجمالي قبل النهائي</td>
-                    <td class="nowrap">{{ $order->Sub_Total }} OMR</td>
+                    <td colspan="5">{{ __('Subtotal') }}</td>
+                    <td class="nowrap">{{ $order->Sub_Total }} {{ __('OMR') }}</td>
                 </tr>
                 <tr>
-                    <td colspan="5">مصاريف الشحن</td>
-                    <td class="nowrap">{{ $order->Delivery_Charge }} OMR</td>
+                    <td colspan="5">{{ __('Delivery Charge') }}</td>
+                    <td class="nowrap">{{ $order->Delivery_Charge }} {{ __('OMR') }}</td>
                 </tr>
                 @if ($order->Coupon_Amount > 0)
                     <tr>
-                        <td colspan="5">الخصم</td>
+                        <td colspan="5">{{ __('Discount') }}</td>
                         <td class="nowrap">{{ $order->Coupon_Amount }}</td>
                     </tr>
                     <tr>
-                        <td colspan="5">الإجمالي بعد الخصم</td>
-                        <td class="nowrap">{{ $order->Sub_Total - $order->Coupon_Amount}} OMR</td>
+                        <td colspan="5">{{ __('Total After Discount') }}</td>
+                        <td class="nowrap">{{ $order->Sub_Total - $order->Coupon_Amount}} {{ __('OMR') }}</td>
                     </tr>
                 @endif
                 <tr class="total-row">
-                    <td colspan="5">المجموع النهائي:</td>
-                    <td class="nowrap">{{ $order->Sub_Total - $order->Coupon_Amount + $order->Delivery_Charge }} OMR</td>
+                    <td colspan="5">{{ __('Grand Total') }}:</td>
+                    <td class="nowrap">{{ $order->Sub_Total - $order->Coupon_Amount + $order->Delivery_Charge }} {{ __('OMR') }}</td>
                 </tr>
             </tbody>
         </table>
 
         <div class="invoice-footer">
-            <p><strong>الملاحظات:</strong></p>
+            <p><strong>{{ __('Notes') }}:</strong></p>
         </div>
 
         <div style="text-align: center; margin-top: 20px;">
             @php
                 $billingAddress = $order->billing_address;
-                $phoneNumber = is_array($billingAddress) ? ($billingAddress['phone_number'] ?? 'N/A') : ($order->user->Number ?? 'N/A');
+                $phoneNumber = is_array($billingAddress) ? ($billingAddress['phone_number'] ?? '--') : ($order->user->Number ?? '--');
                 $qrData = "Order:" . $order->id . " | Phone:" . $phoneNumber;
 
                 $qrCodeString = (string) QrCode::size(100)->generate($qrData);

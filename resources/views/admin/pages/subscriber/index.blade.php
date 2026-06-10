@@ -35,10 +35,16 @@
                             @foreach ($subscribers as $item)
                                 <tr>
                                     <td>{{ $item->Subscribe }}</td>
-                                    <td><a href="javascript:void(0)" class="btn-action btn-sm" title="{{ __('Promotion') }}"
-                                            data-bs-toggle="modal" data-bs-target="#viewModal{{ $item->id }}"><i
-                                                class="fab fa-telegram-plane"></i></a></td>
-                                </tr>
+                                    <td>
+                                         <a href="javascript:void(0)" class="btn-action btn-sm" title="{{ __('Promotion') }}"
+                                             data-bs-toggle="modal" data-bs-target="#viewModal{{ $item->id }}">
+                                             <i class="fab fa-telegram-plane"></i>
+                                         </a>
+                                         <a href="{{ route('admin.subscribe.delete', $item->id) }}" class="btn-action delete btn-sm" title="{{ __('Delete') }}" onclick="return confirm('{{ __('Are you sure you want to delete this subscriber?') }}')">
+                                             <i class="fas fa-trash-alt"></i>
+                                         </a>
+                                    </td>
+                                 </tr>
                             @endforeach
                         </tbody>
                     </table>

@@ -23,11 +23,15 @@
                 <option value="{{ ORDER_DELIVERED }}"
                     {{ $order->Order_Status == ORDER_DELIVERED ? 'selected disabled' : '' }}>
                     {{ __('Delivered') }}</option>
-                @if($order->is_paid != 1 && $order->Payment_Method != COD)
                 <option value="{{ ORDER_CANCELLED }}"
                     {{ $order->Order_Status == ORDER_CANCELLED ? 'selected disabled' : '' }}>
                     {{ __('Cancel Order') }}</option>
-                @endif
+                <option value="{{ ORDER_RETURN }}"
+                    {{ $order->Order_Status == ORDER_RETURN ? 'selected disabled' : '' }}>
+                    {{ __('Returned') }}</option>
+                <option value="{{ ORDER_DELIVERED_FAILED }}"
+                    {{ $order->Order_Status == ORDER_DELIVERED_FAILED ? 'selected disabled' : '' }}>
+                    {{ __('Delivery Failed') }}</option>
             </select>
         </div>
     </div>

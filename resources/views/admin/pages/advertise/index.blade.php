@@ -37,6 +37,7 @@
                             <th>{{ __('Image')}}</th>
                             <th>{{ __('Title')}}</th>
                             <th>{{ __('Subtitle')}}</th>
+                            <th>{{ __('Location')}}</th>
                             <th>{{ __('Action')}}</th>
                         </tr>
                         </thead>

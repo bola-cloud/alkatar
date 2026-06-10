@@ -110,11 +110,11 @@ class PaymentCallbackController extends Controller
                             $smartLifeService->submitOrder($order);
                         }
 
-                        try {
-                            app(CheckoutController::class)->sendOrderNotification($order->id);
-                        } catch (\Exception $e) {
-                            Log::error('Fallback callback: WhatsApp notification failed', ['error' => $e->getMessage()]);
-                        }
+                        // try {
+                        //     app(CheckoutController::class)->sendOrderNotification($order->id);
+                        // } catch (\Exception $e) {
+                        //     Log::error('Fallback callback: WhatsApp notification failed', ['error' => $e->getMessage()]);
+                        // }
 
                         
                         Cart::destroy();

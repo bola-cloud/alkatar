@@ -47,7 +47,10 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SitemapController;
 use App\Http\Controllers\Admin\AIController;
 use App\Http\Controllers\Admin\Reports\OrdersReportController;
+use App\Http\Controllers\Admin\Reports\DeliveryMenReportController;
 use App\Http\Controllers\Admin\ProductReviewController;
+use App\Http\Controllers\Admin\LocationController;
+
 
 Route::get('/admin/login', [AuthController::class, 'login'])->name('admin.login')->middleware('guest:admin');
 Route::post('/admin/login', [AuthController::class, 'LoginDashboard'])->name('login.post');
@@ -69,6 +72,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'is_admin'], '
         // NOTE: Middleware already applied in parent group (auth + is_admin). Replace 'is_admin' if your admin guard differs.
         Route::get('/orders', [OrdersReportController::class, 'index'])->name('reports.orders.index');
         Route::get('/orders/pdf', [OrdersReportController::class, 'pdf'])->name('reports.orders.pdf');
+        Route::get('/delivery-men', [DeliveryMenReportController::class, 'index'])->name('reports.delivery_men.index');
+        Route::get('/delivery-men/pdf', [DeliveryMenReportController::class, 'pdf'])->name('reports.delivery_men.pdf');
     });
 
     Route::get('/chat', [AIController::class, 'show_chat'])->name('ai.chat.show');
@@ -99,6 +104,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'is_admin'], '
         Route::post('/create', [AdvertiseController::class, 'advertiseStore'])->name('advertise.store')->middleware(['permission:advertise-create', 'isDemo']);
         // Bulk upload endpoint for AJAX multi-file uploads from homepage edit
         Route::post('/bulk-store', [AdvertiseController::class, 'advertiseBulkStore'])->name('advertise.bulk_store')->middleware(['permission:advertise-create']);
+        Route::post('/delete-section-image', [AdvertiseController::class, 'deleteSectionImage'])->name('homepage_section.delete_image')->middleware(['permission:advertise-create']);
         Route::get('/edit/{id}', [AdvertiseController::class, 'advertiseEdit'])->name('advertise.edit')->middleware(['permission:advertise-edit']);
         Route::post('/update', [AdvertiseController::class, 'advertiseUpdate'])->name('advertise.update')->middleware(['permission:advertise-edit', 'isDemo']);
         Route::get('/delete/{id}', [AdvertiseController::class, 'advertiseDelete'])->name('advertise.delete')->middleware(['permission:advertise-delete', 'isDemo']);
@@ -376,6 +382,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'is_admin'], '
     // Note: Uses existing admin middleware (auth + is_admin) applied on the group.
     Route::get('/reports/orders', [OrdersReportController::class, 'index'])->name('reports.orders.index');
     Route::get('/reports/orders/pdf', [OrdersReportController::class, 'pdf'])->name('reports.orders.pdf');
+    Route::get('/reports/delivery-men', [DeliveryMenReportController::class, 'index'])->name('reports.delivery_men.index');
+    Route::get('/reports/delivery-men/pdf', [DeliveryMenReportController::class, 'pdf'])->name('reports.delivery_men.pdf');
 
     //Manage Pages
     Route::get('/pages', [PageController::class, 'pages'])->name('pages')->middleware(['permission:menu-list|menu-create|menu-edit|menu-delete']);
@@ -424,6 +432,27 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'is_admin'], '
     // New route for managing areas of a specific city
     Route::get('/delivery-charge/city/{city_id}/areas', [EcommerceController::class, 'cityAreas'])->name('city_areas');
     Route::post('/delivery-charge/city/areas/update', [EcommerceController::class, 'updateCityAreaCharges'])->name('city_areas_update')->middleware(['permission:delivery-charge-create', 'isDemo']);
+
+    // Location Management (Governorates, Wilayats, Areas)
+    Route::group(['prefix' => 'location', 'as' => 'location.'], function () {
+        // States (Governorates)
+        Route::get('/states', [LocationController::class, 'stateList'])->name('state.list');
+        Route::post('/states/store', [LocationController::class, 'stateStore'])->name('state.store')->middleware('isDemo');
+        Route::post('/states/update/{id}', [LocationController::class, 'stateUpdate'])->name('state.update')->middleware('isDemo');
+        Route::get('/states/delete/{id}', [LocationController::class, 'stateDestroy'])->name('state.destroy')->middleware('isDemo');
+
+        // Cities (Wilayats)
+        Route::get('/cities', [LocationController::class, 'cityList'])->name('city.list');
+        Route::post('/cities/store', [LocationController::class, 'cityStore'])->name('city.store')->middleware('isDemo');
+        Route::post('/cities/update/{id}', [LocationController::class, 'cityUpdate'])->name('city.update')->middleware('isDemo');
+        Route::get('/cities/delete/{id}', [LocationController::class, 'cityDestroy'])->name('city.destroy')->middleware('isDemo');
+
+        // Areas
+        Route::get('/areas', [LocationController::class, 'areaList'])->name('area.list');
+        Route::post('/areas/store', [LocationController::class, 'areaStore'])->name('area.store')->middleware('isDemo');
+        Route::post('/areas/update/{id}', [LocationController::class, 'areaUpdate'])->name('area.update')->middleware('isDemo');
+        Route::get('/areas/delete/{id}', [LocationController::class, 'areaDestroy'])->name('area.destroy')->middleware('isDemo');
+    });
 
     //SEO Management
     Route::get('/manage-seo/{slug}', [SeoController::class, 'manageSeo'])->name('manage_seo')->middleware(['permission:cms-create|cms-edit']);

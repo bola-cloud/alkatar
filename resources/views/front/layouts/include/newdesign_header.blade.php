@@ -1,478 +1,170 @@
-<div class="navbar-header sticky-header bg-white border-bottom" style="overflow-x: clip;">
-  <style>
-    /* Global header/logo adjustments for mobile visibility and scaling */
-    .logo-spanning {
-      max-height: 60px;
-      max-width: 120px;
-      width: auto;
-      object-fit: contain;
-      display: block;
+@php
+    $isRtl = app()->getLocale() != 'en';
+    $dir = $isRtl ? 'rtl' : 'ltr';
+    $searchText = $isRtl ? 'ابحث هنا' : 'Search here';
+@endphp
+
+<style>
+    .desktop-store-btn {
+        display: none !important;
     }
-
-    @media(max-width:991px) {
-      .logo-spanning {
-        max-height: 45px;
-        max-width: 90px;
-      }
+    @media (min-width: 768px) {
+        .desktop-store-btn {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
     }
-  </style>
-  <div class="container-fluid px-4">
-    <div class="d-flex align-items-stretch">
-      <!-- Logo spanning both rows (left side) - Hidden on mobile, shown on desktop -->
-      <div class="logo-container d-none d-lg-flex align-items-center pe-4">
-        <a href="{{ url('/') }}" class="d-flex align-items-center">
-          @php
-            $logoPath = (isset($allsettings['main_logo']) && $allsettings['main_logo']) ? asset(IMG_LOGO_PATH . $allsettings['main_logo']) : 'https://c.animaapp.com/mhnmip5wa2i9Oh/img/hi-speed--4-send---final--06-3.png';
-          @endphp
-          <img src="{{ $logoPath }}" alt="{{ $allsettings['app_title'] ?? config('app.name', 'Logo') }}"
-            class="logo-spanning">
-        </a>
-      </div>
+</style>
 
-      <!-- Right content: header row + navbar row stacked -->
-      <div class="flex-grow-1" style="min-width: 0;">
-        {{-- Mobile-only centered logo row --}}
-        <div class="d-flex d-lg-none justify-content-center py-2 mb-1">
-          <a href="{{ url('/') }}">
-            <img src="{{ $logoPath }}" alt="{{ $allsettings['app_title'] ?? config('app.name', 'Logo') }}"
-              style="max-height: 50px; width: auto; object-fit: contain;">
-          </a>
-        </div>
-        <!-- Header top row: location + search + actions -->
-        <header class="header-top-row d-flex align-items-center py-2">
-          <div class="d-none d-md-flex align-items-center text-muted small me-auto">
-            <i class="bi bi-geo-alt me-2"></i>
-            @php
-              $displayLocale = session('HTML_LANG', app()->getLocale() ?? 'en');
-              $addressEN = $allsettings['address_en'] ?? $allsettings['address'] ?? null;
-              $addressAR = $allsettings['address_ar'] ?? null;
-              if (in_array($displayLocale, ['ar', 'fr'])) {
-                $addressToShow = $addressAR ?? $addressEN ?? '';
-              } else {
-                $addressToShow = $addressEN ?? $addressAR ?? '';
-              }
-            @endphp
-            <span>{{ __('Address') }}: {{ $addressToShow }}</span>
-          </div>
-          <div class="flex-grow-1 text-center mx-3">
-            <!-- Search in header -->
-            <form class="d-flex justify-content-center search-form-header" onsubmit="return false;">
-              <div class="input-group position-relative" style="max-width: 500px;">
-                <input id="header-search-input" class="form-control" type="search" placeholder="{{ __('Search Here') }}"
-                  aria-label="Search" autocomplete="off">
-                <button class="btn btn-success" type="submit">
-                  <i class="bi bi-search"></i>
-                </button>
-
-                <div id="header-search-results" class="list-group position-absolute"
-                  style="z-index:2000; top:100%; left:0; right:0; display:none; max-height:360px; overflow:auto;"></div>
-              </div>
-            </form>
-          </div>
-          <div class="d-flex align-items-center gap-3">
-            <div class="dropdown">
-              @php
-                // Load languages and ensure unique locales to avoid duplicate entries
-                $availableLangs = languageList() instanceof \Illuminate\Support\Collection ? languageList()->unique('locale')->values() : collect(languageList())->unique('locale')->values();
-                // Use display locale (HTML_LANG) from session for UI rendering. This keeps
-                // backend DB locale (APP_LOCALE / app()->getLocale()) intact while
-                // showing labels in the user's chosen display language.
-                $displayLocale = session('HTML_LANG', app()->getLocale() ?? 'en');
-                $currentLocale = $displayLocale;
-              @endphp
-              <button class="btn btn-sm dropdown-toggle border-0" type="button" data-bs-toggle="dropdown">
-                <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/vector-4.svg" alt="Flag" style="width: 20px;">
-                {{ getLanguage($currentLocale)->name ?? strtoupper($currentLocale) }}
-              </button>
-              <ul class="dropdown-menu" style="z-index: 100000 !important;">
-                @foreach($availableLangs as $langItem)
-                  @if($langItem->status == 1)
-                    <li>
-                      <a class="dropdown-item {{ $currentLocale == $langItem->locale ? 'active' : '' }}"
-                        href="{{ route('locale.switch', $langItem->locale) }}">{{ $langItem->name }}</a>
-                    </li>
-                  @endif
-                @endforeach
-              </ul>
-            </div>
-          </div>
-        </header>
-
-        <!-- Navigation row: menu + icons -->
-        <nav class="navbar navbar-expand-lg navbar-light p-0 w-100 d-flex justify-content-between align-items-center">
-          {{-- Icons and Action Buttons (Moved outside collapse for mobile visibility) --}}
-          <div class="d-flex align-items-center gap-2 gap-md-3 order-1 order-lg-last">
-            <a href="{{ route('wishlist') }}" class="text-dark position-relative wishlist-btn header-btn">
-              <i class="bi bi-heart fs-5"></i>
-              <span class="badge bg-warning position-absolute top-0 start-100 translate-middle">
-                <span class="count wishListCuntFromController">{{ auth()->check() ? wishlistCount() : '0' }}</span>
-              </span>
-            </a>
-            <a href="{{ route('cart.content') }}" class="text-dark position-relative cart-btn header-btn">
-              <i class="bi bi-bag fs-5"></i>
-              <span class="badge bg-warning position-absolute top-0 start-100 translate-middle">
-                <span class="count totalCountItem">{{ cartCountItem() }}</span>
-              </span>
-            </a>
-            @if(auth()->check())
-              <div class="dropdown">
-                <a class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" href="#"
-                  id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="bi bi-person-circle fs-5"></i>
-                  <span class="ms-2 d-none d-md-inline">{{ auth()->user()->name }}</span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                  <li><a class="dropdown-item"
-                      href="{{ route('user.profile') }}">{{ __('Profile', [], $displayLocale) }}</a></li>
-                  <li>
-                    <hr class="dropdown-divider">
-                  </li>
-                  <li><a class="dropdown-item text-danger"
-                      href="{{ route('user.logout') }}">{{ __('Logout', [], $displayLocale) }}</a></li>
-                </ul>
-              </div>
-            @endif
-            <a href="{{ route('user.profile') }}#subscription" class="ms-2">
-              <button class="btn btn-success rounded-pill px-3 px-md-4 py-1 py-md-2" style="font-size: 0.9rem;">
-                {{ __('Subscribe', [], $displayLocale) }}
-                <i class="bi bi-arrow-right ms-1 ms-md-2"></i>
-              </button>
-            </a>
-          </div>
-
-          <button class="navbar-toggler order-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-
-          <div class="collapse navbar-collapse order-3 order-lg-1" id="navbarNav">
-            <ul
-              class="navbar-nav {{ in_array($displayLocale ?? app()->getLocale(), ['ar', 'fr']) ? 'ms-auto' : 'me-auto' }} mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('front') ? 'active text-success fw-semibold' : '' }}"
-                  href="{{ route('front') }}">{{ __('Home', [], $displayLocale) }}</a>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#"
-                  data-bs-toggle="dropdown">{{ __('Categories', [], $displayLocale) }}</a>
-                <ul class="dropdown-menu dropdown-menu-scrollable" style="max-height: 400px; overflow-y: auto;">
-                  @php
-                    $isAr = in_array($displayLocale ?? app()->getLocale(), ['ar', 'fr']);
-                    // Sync sorting with pills: prioritize 'order' then fallback to 'id'
-                    $headerCategories = \App\Models\Admin\Category::where('Status', 1)->orderBy('order', 'asc')->orderBy('id', 'asc')->get();
-                  @endphp
-                  {{-- All Products item matching the pills --}}
-                  <li>
-                    <a class="dropdown-item d-flex align-items-center py-2" href="{{ route('categories.show') }}">
-                      <i class="bi bi-grid-3x3-gap-fill me-2 ms-2 text-success" style="font-size: 1.1rem;"></i>
-                      <span class="fw-bold">{{ __('All Products', [], $displayLocale) }}</span>
-                    </a>
-                  </li>
-                  <li>
-                    <hr class="dropdown-divider my-1">
-                  </li>
-                  @foreach($headerCategories as $cat)
-                    @php
-                      $catName = $isAr ? ($cat->fr_Category_Name ?? $cat->en_Category_Name) : ($cat->en_Category_Name ?? $cat->fr_Category_Name);
-                    @endphp
-                    <li>
-                      <a class="dropdown-item d-flex align-items-center py-2"
-                        href="{{ route('categories.show', ['slug' => $cat->en_Category_Slug]) }}">
-                        @if($cat->Category_Icon)
-                          <img src="{{ asset(CategoryImage() . $cat->Category_Icon) }}" alt=""
-                            style="width: 22px; height: 22px; object-fit: contain;" class="me-2 ms-2"
-                            onerror="this.style.display='none'">
-                        @else
-                          <i class="bi bi-tag me-2 ms-2 text-muted"></i>
-                        @endif
-                        <span>{{ $catName }}</span>
-                      </a>
-                    </li>
-                  @endforeach
-                  <li>
-                    <hr class="dropdown-divider">
-                  </li>
-                  <li><a class="dropdown-item fw-bold text-success text-center py-2"
-                      href="{{ route('categories.show') }}">{{ __('See All', [], $displayLocale) }}</a></li>
-                </ul>
-                <script>
-                  document.addEventListener('DOMContentLoaded', function () {
-                    const input = document.getElementById('header-search-input');
-                    const resultsBox = document.getElementById('header-search-results');
-                    const searchUrl = '{{ route('search.suggest') }}';
-                    const productBase = '{{ url('product/single-new') }}';
-
-                    let timer = null;
-                    function hideResults() {
-                      resultsBox.style.display = 'none';
-                      resultsBox.innerHTML = '';
-                    }
-
-                    function showResults(items) {
-                      if (!items || items.length === 0) {
-                        hideResults();
-                        return;
-                      }
-                      resultsBox.innerHTML = '';
-                      items.forEach(function (it) {
-                        // Priority based on current locale (fr_Product_Name is used for Arabic here)
-                        const name = (locale === 'ar' || locale === 'fr') 
-                          ? (it.fr_Product_Name || it.en_Product_Name || '')
-                          : (it.en_Product_Name || it.fr_Product_Name || '');
-                        
-                        const slug = it.en_Product_Slug || '';
-                        const itemEl = document.createElement('a');
-                        itemEl.href = productBase + '/' + encodeURIComponent(slug);
-                        itemEl.className = 'list-group-item list-group-item-action d-flex align-items-center';
-                        itemEl.style.gap = '12px';
-                        
-                        const img = document.createElement('img');
-                        // Use pre-resolved and secure Primary_Image from controller, or global fallback
-                        img.src = it.Primary_Image ? it.Primary_Image : '{{ asset("new-design/images/special-offer.png") }}';
-                        img.alt = name;
-                        img.style.width = '48px';
-                        img.style.height = '48px';
-                        img.style.objectFit = 'contain';
-                        img.className = 'rounded border bg-light';
-
-                        const txt = document.createElement('div');
-                        txt.innerHTML = '<div class="fw-semibold text-truncate" style="max-width: 250px;">' + name + '</div>';
-
-                        itemEl.appendChild(img);
-                        itemEl.appendChild(txt);
-                        resultsBox.appendChild(itemEl);
-                      });
-                      resultsBox.style.display = 'block';
-                    }
-
-                    input.addEventListener('input', function (e) {
-                      const q = e.target.value.trim();
-                      if (timer) clearTimeout(timer);
-                      if (q.length < 2) {
-                        hideResults();
-                        return;
-                      }
-                      timer = setTimeout(function () {
-                        fetch(searchUrl + '?query=' + encodeURIComponent(q))
-                          .then(function (res) { return res.json(); })
-                          .then(function (data) {
-                            showResults(data || []);
-                          })
-                          .catch(function (err) { console.error(err); hideResults(); });
-                      }, 250);
-                    });
-
-                    document.addEventListener('click', function (e) {
-                      if (!resultsBox.contains(e.target) && e.target !== input) {
-                        hideResults();
-                      }
-                    });
-                  });
-                </script>
-              <li class="nav-item"><a class="nav-link" href="{{ route('faq') }}">{{ __('FAQ', [], $displayLocale) }}</a>
-              </li>
-              <li class="nav-item"><a class="nav-link"
-                  href="{{ route('about.us') }}">{{ __('About Us', [], $displayLocale) }}</a></li>
-              <li class="nav-item"><a class="nav-link"
-                  href="{{ route('contact.us') }}">{{ __('Contact Us', [], $displayLocale) }}</a></li>
-            </ul>
-          </div>
-        </nav>
-        @if(request()->routeIs('categories.show'))
-          <style>
-            .sub-nav {
-              border-top: 1px solid rgba(0, 0, 0, 0.04);
-              background: #fff;
-              position: relative;
-              width: 100%;
-              border-bottom: 1px solid rgba(0, 0, 0, 0.02);
-            }
-
-            .category-pills-wrapper {
-              position: relative;
-              display: flex;
-              align-items: center;
-              flex-grow: 1;
-              overflow: hidden;
-              min-width: 0;
-            }
-
-            .category-pills-wrapper::after {
-              content: "";
-              position: absolute;
-              top: 0;
-              right: 0;
-              bottom: 0;
-              width: 50px;
-              background: linear-gradient(to right, rgba(255, 255, 255, 0), #fff);
-              pointer-events: none;
-              z-index: 2;
-            }
-
-            [dir="rtl"] .category-pills-wrapper::after {
-              left: 0;
-              right: auto;
-              background: linear-gradient(to left, rgba(255, 255, 255, 0), #fff);
-            }
-
-            .category-pills {
-              display: flex;
-              gap: 8px;
-              align-items: center;
-              overflow-x: auto;
-              -webkit-overflow-scrolling: touch;
-              scrollbar-width: none;
-              flex-grow: 1;
-              padding-right: 50px;
-              flex-wrap: nowrap;
-              min-width: 0;
-            }
-
-            [dir="rtl"] .category-pills {
-              padding-right: 0;
-              padding-left: 50px;
-            }
-
-            .category-pills::-webkit-scrollbar {
-              display: none;
-            }
-
-            .category-pill {
-              display: inline-block;
-              padding: 6px 14px;
-              border-radius: 24px;
-              background: #fff;
-              color: #222 !important;
-              border: 1px solid rgba(0, 0, 0, 0.1);
-              font-weight: 700;
-              white-space: nowrap;
-              transition: all 0.2s;
-              text-decoration: none;
-              flex-shrink: 0;
-              font-size: 14px;
-            }
-
-            .category-pill:hover {
-              border-color: #000;
-              background: #f8f9fa;
-              color: #000 !important;
-            }
-
-            .category-pill.active {
-              background: #000 !important;
-              color: #fff !important;
-              border-color: #000 !important;
-            }
-
-            .category-pill-more {
-              background: #000 !important;
-              color: #fff !important;
-              border-color: #000 !important;
-              margin-inline-end: 8px;
-              flex-shrink: 0;
-            }
-
-            @media(max-width:767px) {
-              .navbar-header .container-fluid {
-                padding-inline: 10px !important;
-              }
-
-              .category-pill {
-                padding: 5px 12px;
-                font-size: 12px;
-              }
-
-              .sub-nav .container {
-                padding-inline: 5px !important;
-              }
-            }
-
-            .hover-bg-light:hover {
-              background-color: #f8f9fa;
-              border-color: #000 !important;
-            }
-          </style>
-
-          <div class="sub-nav navbar-light">
-            <div class="container d-flex align-items-center justify-content-start py-2">
-              <div class="category-pills-wrapper">
-                {{-- More toggler always at the front for easy access --}}
-                <a href="javascript:void(0)" class="category-pill category-pill-more" data-bs-toggle="offcanvas"
-                  data-bs-target="#categoryOffcanvas">
-                  <i class="bi bi-grid-3x3-gap-fill"></i>
-                </a>
-
-                <div class="category-pills">
-                  @php
-                    $locale = session('HTML_LANG', app()->getLocale() ?? 'en');
-                    $currentSlug = request()->route('slug') ?? request()->segment(2) ?? null;
-
-                    if (empty($cats)) {
-                      $cats = \App\Models\Admin\Category::where('Status', 1)->orderBy('order')->orderBy('id')->get();
-                    }
-                  @endphp
-
-                  {{-- All Products pill --}}
-                  <a href="{{ url('/categories') }}"
-                    class="category-pill {{ (request()->routeIs('categories.show') && empty($currentSlug)) ? 'active' : '' }}">{{ __('All Products', [], $locale) }}</a>
-
-                  @foreach($cats->take(20) as $cat)
-                    @php
-                      $dbPrefix = in_array($locale, ['ar', 'fr']) ? 'fr' : $locale;
-                      $label = $cat->{"{$dbPrefix}_Category_Name"} ?? $cat->en_Category_Name ?? $cat->name ?? 'Category';
-                      $enSlug = $cat->en_Category_Slug ?? $cat->slug ?? '';
-                      $isActive = $currentSlug && $enSlug && (strtolower(trim($currentSlug)) === strtolower(trim($enSlug)));
-                      $href = $enSlug ? route('categories.show', $enSlug) : '#';
-                    @endphp
-                    <a href="{{ $href }}" class="category-pill {{ $isActive ? 'active' : '' }}">{{ $label }}</a>
-                  @endforeach
+<!-- Top Header (Categories Showcase Background Image) -->
+<div class="relative py-3 lg:py-4 shadow-sm" dir="{{ $dir }}" style="background-image: url('{{ asset('assets/elketar/Section - Categories Showcase.png') }}'); background-size: cover; background-position: center; background-blend-mode: overlay;" x-data="{ mobileMenu: false }">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between gap-4">
+            
+            <!-- Right/Left: Search Bar (Hidden on Mobile, shown in menu) -->
+            <div class="hidden lg:flex w-1/3 justify-start">
+                <div class="relative w-full max-w-xs">
+                    <input type="text" placeholder="{{ $searchText }}" class="w-full bg-white border border-gray-200 rounded-full py-2 px-10 text-sm focus:outline-none focus:ring-1 focus:ring-[#1A4231]">
+                    <svg class="w-4 h-4 absolute {{ $isRtl ? 'right-4' : 'left-4' }} top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
-              </div>
             </div>
-          </div>
+            
+            <!-- Center: Logo -->
+            <div class="w-1/2 lg:w-1/3 flex justify-start lg:justify-center">
+                <a href="{{ route('front') }}">
+                    <img src="{{ isset($allsettings['main_logo']) ? asset(IMG_LOGO_PATH . $allsettings['main_logo']) : asset('assets/elketar/logo.png') }}" alt="Logo" class="h-10 lg:h-14 object-contain">
+                </a>
+            </div>
+            
+            <!-- Left/Right: Actions & Hamburger -->
+            <div class="w-1/2 lg:w-1/3 flex justify-end items-center gap-2 lg:gap-3">
+                <div class="hidden sm:flex gap-2 items-center">
+                    <!-- Language Switcher Button -->
+                    @if($isRtl)
+                        <a href="{{ route('locale.switch', 'en') }}" class="bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-full text-[12px] lg:text-sm font-bold hover:bg-gray-50 transition-colors whitespace-nowrap">English</a>
+                    @else
+                        <a href="{{ route('locale.switch', 'fr') }}" class="bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-full text-[12px] lg:text-sm font-bold hover:bg-gray-50 transition-colors whitespace-nowrap">العربية</a>
+                    @endif
 
-          <!-- All Categories Offcanvas -->
-          <div class="offcanvas offcanvas-bottom" tabindex="-1" id="categoryOffcanvas"
-            style="height: 70vh; border-top-left-radius: 20px; border-top-right-radius: 20px;">
-            <div class="offcanvas-header border-bottom py-3">
-              <h5 class="offcanvas-title fw-bold">{{ __('All Categories', [], $locale) }}</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    @if(auth()->check())
+                        <!-- Logged In User Dropdown -->
+                        <div class="relative" x-data="{ userMenu: false }">
+                            <button @click="userMenu = !userMenu" @click.away="userMenu = false" class="bg-[#1A4231] text-white px-4 lg:px-6 py-2 rounded-full text-[12px] lg:text-sm font-bold hover:opacity-90 transition-opacity whitespace-nowrap flex items-center gap-2">
+                                @if(auth()->user()->image)
+                                    <img src="{{ str_starts_with(auth()->user()->image, 'http') ? auth()->user()->image : asset('uploaded_files/admin_profile/' . auth()->user()->image) }}" class="w-6 h-6 rounded-full object-cover border border-white/20">
+                                @else
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                @endif
+                                <span>{{ auth()->user()->name }}</span>
+                                <svg class="w-3 h-3 transition-transform" :class="userMenu ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+                            <!-- Dropdown Menu -->
+                            <div x-show="userMenu" 
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                 class="absolute {{ $isRtl ? 'left-0' : 'right-0' }} mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-50 {{ $isRtl ? 'text-right' : 'text-left' }}" style="display: none;">
+                                <a href="{{ route('user.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#1A4231] font-semibold transition-colors flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                    <span>{{ $isRtl ? 'حسابي' : 'My Profile' }}</span>
+                                </a>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <a href="{{ route('user.logout') }}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-semibold transition-colors flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                                    <span>{{ $isRtl ? 'تسجيل الخروج' : 'Logout' }}</span>
+                                </a>
+                            </div>
+                        </div>
+                    @else
+                        <a href="{{ route('login') }}" class="bg-[#1A4231] text-white px-4 lg:px-8 py-2 rounded-full text-[12px] lg:text-sm font-bold hover:opacity-90 transition-opacity whitespace-nowrap">{{ __('new_design.menu.login') }}</a>
+                    @endif
+                    <a href="{{ route('front.store') }}" class="bg-white text-gray-700 border border-gray-300 px-4 lg:px-6 py-2 rounded-full text-[12px] lg:text-sm font-bold hover:bg-gray-50 hover:text-[#1A4231] transition-colors whitespace-nowrap desktop-store-btn">{{ __('new_design.menu.store') }}</a>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button @click="mobileMenu = !mobileMenu" class="lg:hidden p-2 text-[#1A4231]">
+                    <svg x-show="!mobileMenu" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    <svg x-show="mobileMenu" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
-            <div class="offcanvas-body p-4">
-              <div class="row g-3">
-                @foreach($cats as $cat)
-                  @php
-                    $dbPrefix = ($locale === 'ar') ? 'fr' : $locale;
-                    $label = $cat->{"{$dbPrefix}_Category_Name"} ?? $cat->en_Category_Name ?? $cat->name ?? 'Category';
-                    $enSlug = $cat->en_Category_Slug ?? $cat->slug ?? '';
-                    $href = $enSlug ? route('categories.show', $enSlug) : '#';
-                  @endphp
-                  <div class="col-6 col-md-4 col-lg-3">
-                    <a href="{{ $href }}"
-                      class="d-flex align-items-center p-3 border rounded text-decoration-none text-dark hover-bg-light transition-all h-100">
-                      <span class="fw-semibold text-truncate">{{ $label }}</span>
+        </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div x-show="mobileMenu" x-transition class="lg:hidden mt-4 pb-4 border-t border-gray-200">
+            <div class="mt-4 flex flex-col gap-4">
+                <div class="relative w-full">
+                    <input type="text" placeholder="{{ $searchText }}" class="w-full bg-white border border-gray-200 rounded-full py-2.5 px-10 text-sm">
+                    <svg class="w-4 h-4 absolute {{ $isRtl ? 'right-4' : 'left-4' }} top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+                <nav class="flex flex-col gap-1 text-start max-h-[60vh] overflow-y-auto px-2">
+                    <!-- Mobile Language Switcher -->
+                    <a href="{{ route('locale.switch', $isRtl ? 'en' : 'fr') }}" class="text-[#387C5F] font-black py-4 border-b border-gray-100 flex items-center justify-between">
+                        <span>{{ $isRtl ? 'English' : 'العربية' }}</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path></svg>
                     </a>
-                  </div>
-                @endforeach
-              </div>
+                    
+                    <a href="{{ route('front') }}" class="text-[#1A4231] font-bold py-3 border-b border-gray-100">{{ __('new_design.menu.home') }}</a>
+                    <a href="{{ route('front.store') }}" class="text-[#1A4231] font-bold py-3 border-b border-gray-100">{{ __('new_design.menu.store') }}</a>
+                    <a href="{{ route('coffee.crops') }}" class="text-gray-600 font-bold py-3 border-b border-gray-100">{{ __('new_design.menu.coffee_crops') }}</a>
+                    <a href="{{ route('technical.tools') }}" class="text-gray-600 font-bold py-3 border-b border-gray-100">{{ __('new_design.menu.technical_tools') }}</a>
+                    <a href="{{ route('wholesale.orders') }}" class="text-gray-600 font-bold py-3 border-b border-gray-100">{{ __('new_design.menu.wholesale_orders') }}</a>
+                    <a href="{{ route('trial.boxes') }}" class="text-gray-600 font-bold py-3 border-b border-gray-100">{{ __('new_design.menu.experience_boxes') }}</a>
+                    <a href="{{ route('experts') }}" class="text-gray-600 font-bold py-3 border-b border-gray-100">{{ __('new_design.menu.experts') }}</a>
+                    <a href="{{ route('social.responsibility') }}" class="text-gray-600 font-bold py-3 border-b border-gray-100">{{ __('new_design.menu.social_responsibility') }}</a>
+                    <a href="{{ route('monthly.offers') }}" class="text-gray-600 font-bold py-3 border-b border-gray-100">{{ __('new_design.menu.monthly_offers') }}</a>
+                    <a href="{{ route('become.partner') }}" class="text-gray-600 font-bold py-3 border-b border-gray-100">{{ __('new_design.menu.become_partner') }}</a>
+                    <a href="{{ route('about.us') }}" class="text-gray-600 font-bold py-3 border-b border-gray-100">{{ __('new_design.menu.about_us') }}</a>
+                    <a href="{{ route('gift.cards') }}" class="text-gray-600 font-bold py-3 border-b border-gray-100">{{ __('new_design.menu.gifts') }}</a>
+                    <a href="{{ route('contact.us') }}" class="text-gray-600 font-bold py-3 border-b border-gray-100">{{ __('new_design.menu.contact_us') }}</a>
+                    @if(auth()->check())
+                        <div class="border-t border-gray-100 my-2"></div>
+                        <div class="px-2 py-3">
+                            <p class="text-[12px] font-bold text-gray-400 mb-2">{{ $isRtl ? 'مرحباً،' : 'Welcome,' }} {{ auth()->user()->name }}</p>
+                            <div class="flex flex-col gap-2">
+                                <a href="{{ route('user.profile') }}" class="text-[#1A4231] font-bold py-2 flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                    <span>{{ $isRtl ? 'حسابي' : 'My Profile' }}</span>
+                                </a>
+                                <a href="{{ route('user.logout') }}" class="text-red-600 font-bold py-2 flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                                    <span>{{ $isRtl ? 'تسجيل الخروج' : 'Logout' }}</span>
+                                </a>
+                            </div>
+                        </div>
+                    @else
+                        <a href="{{ route('login') }}" class="text-[#1A4231] font-black py-4">{{ __('new_design.menu.login') }}</a>
+                    @endif
+                </nav>
             </div>
-          </div>
-          <script>
-            document.addEventListener('DOMContentLoaded', function () {
-              const activePill = document.querySelector('.category-pill.active');
-              if (activePill) {
-                // Short delay to ensure browser has finished initial layout/rendering
-                setTimeout(() => {
-                  activePill.scrollIntoView({
-                    behavior: 'smooth',
-                    inline: 'center',
-                    block: 'nearest'
-                  });
-                }, 200);
-              }
-            });
-          </script>
-        @endif
-      </div>
+        </div>
     </div>
-  </div>
 </div>
+
+<!-- Secondary Navigation (Hidden on Mobile) -->
+<style>
+    .no-scrollbar::-webkit-scrollbar {
+        display: none !important;
+    }
+</style>
+<nav class="hidden lg:block py-3.5" dir="{{ $dir }}" style="background: linear-gradient(to right, #1A4231, #387C5F);">
+    <div class="container mx-auto px-4">
+        <ul class="flex items-center justify-start lg:justify-center gap-4 lg:gap-6 text-white font-medium overflow-x-auto no-scrollbar" style="font-family: 'Cairo', sans-serif; font-size: 18px; line-height: 27px; scrollbar-width: none; -ms-overflow-style: none;">
+            <li><a href="{{ route('front') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.home') }}</a></li>
+            <li><a href="{{ route('coffee.crops') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.coffee_crops') }}</a></li>
+            <li><a href="{{ route('technical.tools') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.technical_tools') }}</a></li>
+            <li><a href="{{ route('wholesale.orders') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.wholesale_orders') }}</a></li>
+            <li><a href="{{ route('trial.boxes') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.experience_boxes') }}</a></li>
+            <li><a href="{{ route('experts') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.experts') }}</a></li>
+            <li><a href="{{ route('social.responsibility') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.social_responsibility') }}</a></li>
+            <li><a href="{{ route('monthly.offers') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.monthly_offers') }}</a></li>
+            <li><a href="{{ route('become.partner') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.become_partner') }}</a></li>
+            <li><a href="{{ route('about.us') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.about_us') }}</a></li>
+            <li><a href="{{ route('gift.cards') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.gifts') }}</a></li>
+            <li><a href="{{ route('contact.us') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.contact_us') }}</a></li>
+        </ul>
+    </div>
+</nav>

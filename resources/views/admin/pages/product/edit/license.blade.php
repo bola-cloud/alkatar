@@ -40,9 +40,9 @@
                                             <input type="hidden" name="id" value="{{ $product->id }}">
                                             <input type="hidden" id="qty" name="qty" value="10000">
                                             <input type="hidden" name="en_shippingreturn" id="en_shippingreturn"
-                                                value="N/A">
+                                                value="--">
                                             <input type="hidden" name="fr_shippingreturn" id="fr_shippingreturn"
-                                                value="N/A">
+                                                value="--">
                                             <div class="input__group mb-25">
                                                 <label for="en-product-name">{{ __('Product Name') }}</label>
                                                     <input type="text" class="form-control" id="en-product-name"

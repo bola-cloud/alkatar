@@ -42,4 +42,11 @@ class SubscribeController extends Controller
         Mail::to($request->email)->send(new SendMail($dt));
         return redirect()->back()->with('success', __('Message Sent Successfully!'));
     }
+
+    public function subscribeDelete($id)
+    {
+        $subscriber = Subscribe::findOrFail($id);
+        $subscriber->delete();
+        return redirect()->back()->with('success', __('Subscriber deleted successfully!'));
+    }
 }

@@ -34,9 +34,8 @@ class ProductController extends Controller
                     $btn = '<div class="action__buttons" style="display: flex; gap: 8px; justify-content: start;">';
 
                     // View + Edit buttons
-                    // For SmartLife products, show "Complete Data" instead of standard "Edit"
-                    $editTitle = $data->synced_from_smartlife ? __('Complete Data') : __('Edit');
-                    $editIcon = $data->synced_from_smartlife ? 'fa-file-signature' : 'fa-pen-to-square';
+                    $editTitle = __('Edit');
+                    $editIcon = 'fa-pen-to-square';
                     $btnStyle = 'font-size: 1.1rem; padding: 6px 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);';
 
                     if ($data->type == PRODUCT_PHYSICAL) {
@@ -55,9 +54,7 @@ class ProductController extends Controller
                         $btn = $btn . '<a href="' . route('admin.product.active', $data->id) . '" class="btn-action" style="' . $btnStyle . '"><i class="fas fa-toggle-off text-secondary"></i></a>';
                     }
 
-                    if ($data->product_type == 'Combo' || $data->product_type == 'تجميعي') {
-                        $btn = $btn . '<button type="button" class="btn-action btn-stock-check" data-id="' . $data->id . '" title="' . __('Check Stock') . '" style="' . $btnStyle . '"><i class="fas fa-cubes text-info"></i></button>';
-                    }
+
 
                     $btn = $btn . '</div>';
                     return $btn;
@@ -80,29 +77,7 @@ class ProductController extends Controller
                 })
                 ->addColumn('Type', function ($data) {
                     $html = '';
-                    if ($data->product_type == 'Combo' || $data->product_type == 'تجميعي') {
-                        $html .= '<span class="badge badge-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.4rem 0.8rem; font-size: 0.85rem;"><i class="fas fa-layer-group mr-1"></i>' . __('Combo') . '</span>';
-                        if ($data->comboItems->count() > 0) {
-                            $html .= '<div class="mt-2" style="background: #f8f9fa; padding: 0.4rem 0.6rem; border-radius: 4px; border-left: 3px solid #667eea;">';
-                            $html .= '<div class="small text-muted font-weight-bold mb-1">' . __('Components:') . '</div>';
-                            $html .= '<ul class="list-unstyled small mb-0">';
-                            foreach ($data->comboItems as $item) {
-                                $html .= '<li style="padding: 2px 0;"><i class="fas fa-cube text-info" style="font-size: 0.7rem;"></i> ' . $item->localized_name . ' <span class="badge badge-secondary badge-sm">×' . floatval($item->pivot->quantity) . '</span></li>';
-                            }
-                            $html .= '</ul></div>';
-                        }
-                    } else {
-                        $html .= '<span class="badge badge-lg" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 0.4rem 0.8rem; font-size: 0.85rem;"><i class="fas fa-box mr-1"></i>' . __('Standard') . '</span>';
-                        if ($data->parentCombos->count() > 0) {
-                            $html .= '<div class="mt-2" style="background: #fff3cd; padding: 0.4rem 0.6rem; border-radius: 4px; border-left: 3px solid #ffc107;">';
-                            $html .= '<div class="small text-muted font-weight-bold mb-1">' . __('Part of Combo:') . '</div>';
-                            $html .= '<ul class="list-unstyled small mb-0">';
-                            foreach ($data->parentCombos as $combo) {
-                                $html .= '<li style="padding: 2px 0;"><i class="fas fa-arrow-up text-warning"></i> ' . $combo->localized_name . '</li>';
-                            }
-                            $html .= '</ul></div>';
-                        }
-                    }
+                    $html .= '<span class="badge badge-lg" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 0.4rem 0.8rem; font-size: 0.85rem;"><i class="fas fa-box mr-1"></i>' . __('Standard') . '</span>';
                     return $html;
                 })
                 ->editColumn('Price', function ($data) {
@@ -692,13 +667,7 @@ class ProductController extends Controller
             'license_key',
             'affiliate_link',
         ]);
-        // If product is synced from SmartLife, prevent changing SmartLife-controlled fields
-        if (!empty($product) && ($product->synced_from_smartlife || !empty($product->smartlife_id))) {
-            $data['price'] = $product->Price;
-            // keep SmartLife id and barcode unchanged
-            $data['smartlife_id'] = $product->smartlife_id;
-            $data['barcode'] = $product->barcode ?? null;
-        }
+
         if (!empty($request->primary_image)) {
             $data['primary_image'] = fileUpload($request['primary_image'], ProductImage());
         } else {

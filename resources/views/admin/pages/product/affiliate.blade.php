@@ -36,8 +36,8 @@
                                             </div>
                                             <input type="hidden" name="product_type" value="{{PRODUCT_AFFILIATE}}">
                                             <input type="hidden" id="qty" name="qty" value="10000">
-                                            <input type="hidden" name="en_shippingreturn" id="en_shippingreturn" value="N/A">
-                                            <input type="hidden" name="fr_shippingreturn" id="fr_shippingreturn" value="N/A">
+                                            <input type="hidden" name="en_shippingreturn" id="en_shippingreturn" value="--">
+                                            <input type="hidden" name="fr_shippingreturn" id="fr_shippingreturn" value="--">
                                             <div class="input__group mb-25">
                                                 <label for="en-product-name">{{ __('Product Name')}}</label>
                                                 <input type="text" class="form-control" id="en-product-name" name="en_product_name">

@@ -59,23 +59,24 @@ class AuthController extends Controller
             $user->code = $otp;
             $user->save();
 
-            // Send OTP via WhatsApp
-            try {
-                $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
-                    'phone_number' => $user->Number,
-                    'otp' => $otp,
-                    'language' => app()->getLocale() == 'fr' ? 'ar' : app()->getLocale()
-                ]); 
-                
-                if (!$response->successful()) {
-                    \Illuminate\Support\Facades\Log::error('WhatsApp Login OTP sending failed', [
-                        'status' => $response->status(),
-                        'body' => $response->body()
-                    ]);
-                }
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('WhatsApp Login OTP sending exception: ' . $e->getMessage());
-            }
+            // Send OTP via WhatsApp (Bypassed)
+            // try {
+            //     $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
+            //         'phone_number' => $user->Number,
+            //         'otp' => $otp,
+            //         'language' => app()->getLocale() == 'fr' ? 'ar' : app()->getLocale()
+            //     ]); 
+            //     
+            //     if (!$response->successful()) {
+            //         \Illuminate\Support\Facades\Log::error('WhatsApp Login OTP sending failed', [
+            //             'status' => $response->status(),
+            //             'body' => $response->body()
+            //         ]);
+            //     }
+            // } catch (\Exception $e) {
+            //     \Illuminate\Support\Facades\Log::error('WhatsApp Login OTP sending exception: ' . $e->getMessage());
+            // }
+            \Illuminate\Support\Facades\Log::info("WhatsApp Login OTP (BYPASSED) for {$user->Number}: {$otp}");
 
             session(['verify_target' => $user->Number]);
             session(['verification_method' => 'whatsapp']);
@@ -163,23 +164,24 @@ class AuthController extends Controller
             session(['verification_method' => 'whatsapp']);
             session(['verify_target' => $full_phone]);
 
-            // Send OTP via WhatsApp
-            try {
-                $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
-                    'phone_number' => $full_phone,
-                    'otp' => $otp,
-                    'language' => app()->getLocale() == 'fr' ? 'ar' : app()->getLocale()
-                ]);
-                
-                if (!$response->successful()) {
-                    \Illuminate\Support\Facades\Log::error('WhatsApp Registration OTP sending failed', [
-                        'status' => $response->status(),
-                        'body' => $response->body()
-                    ]);
-                }
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('WhatsApp Registration OTP sending exception: ' . $e->getMessage());
-            }
+            // Send OTP via WhatsApp (Bypassed)
+            // try {
+            //     $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
+            //         'phone_number' => $full_phone,
+            //         'otp' => $otp,
+            //         'language' => app()->getLocale() == 'fr' ? 'ar' : app()->getLocale()
+            //     ]);
+            //     
+            //     if (!$response->successful()) {
+            //         \Illuminate\Support\Facades\Log::error('WhatsApp Registration OTP sending failed', [
+            //             'status' => $response->status(),
+            //             'body' => $response->body()
+            //         ]);
+            //     }
+            // } catch (\Exception $e) {
+            //     \Illuminate\Support\Facades\Log::error('WhatsApp Registration OTP sending exception: ' . $e->getMessage());
+            // }
+            \Illuminate\Support\Facades\Log::info("WhatsApp Registration OTP (BYPASSED) for {$full_phone}: {$otp}");
 
             return redirect()->route('user.verify.email')->with('success', __('Sign Up Successfully! Please verify your account with the OTP sent to your WhatsApp.'));
         } else {
@@ -263,11 +265,12 @@ class AuthController extends Controller
                     $message->subject($appName . ' - Email Verification OTP');
                 });
             } else {
-                Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
-                    'phone_number' => $target,
-                    'otp' => $otp,
-                    'language' => app()->getLocale() == 'fr' ? 'ar' : app()->getLocale()
-                ]);
+                // Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
+                //     'phone_number' => $target,
+                //     'otp' => $otp,
+                //     'language' => app()->getLocale() == 'fr' ? 'ar' : app()->getLocale()
+                // ]);
+                \Illuminate\Support\Facades\Log::info("WhatsApp Resend OTP (BYPASSED) for {$target}: {$otp}");
             }
             return redirect()->back()->with('success', __('OTP has been resent.'));
         } catch (\Exception $e) {
@@ -460,22 +463,24 @@ class AuthController extends Controller
         $phone_without_plus = ltrim($request->input('full_phone'), '+');
 
 
-        // Send OTP via WhatsApp
-        $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
-            'phone_number' => $phone_without_plus,
-            'otp' => $otp,
-            'language' => app()->getLocale()
-        ]);
+        // Send OTP via WhatsApp (Bypassed)
+        // $response = Http::asForm()->post('https://whatsapi.hispeed.om/api/v1/whatsapp/send_otp', [
+        //     'phone_number' => $phone_without_plus,
+        //     'otp' => $otp,
+        //     'language' => app()->getLocale()
+        // ]);
 
-        if ($response->successful()) {
+        \Illuminate\Support\Facades\Log::info("WhatsApp OTP Signin (BYPASSED) for {$phone_without_plus}: {$otp}");
+
+        // if ($response->successful()) {
             return redirect()->route('user.otp.verify.get', [
                 'phone_number' => $request->input('full_phone'),
                 'name' => $request->input('name'),
                 'country_code' => $request->input('country_code')
             ]);
-        } else {
-            return redirect()->back()->with('error', 'Failed to send OTP. Please try again.');
-        }
+        // } else {
+        //     return redirect()->back()->with('error', 'Failed to send OTP. Please try again.');
+        // }
     }
 
     public function otpVerify(Request $request)

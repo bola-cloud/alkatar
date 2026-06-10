@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-@include('front.layouts.include.head')
+@include('front.layouts.include.newdesign_head')
 @stack('post_css')
 <body class="{{session()->has('lang_dir') && session()->get('lang_dir') == 'rtl' ? 'direction-rtl' : 'direction-ltr'}}">
 <!-- Preloader Area Start -->

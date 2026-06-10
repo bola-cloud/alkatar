@@ -165,8 +165,8 @@
                                             $price -= ($product->Discount / 100) * $price;
                                         }
                                     @endphp
-                                    <option value="{{ $product->id }}" data-name="{{ $product->en_Product_Name }}" data-price="{{ $price }}">
-                                        {{ $product->en_Product_Name }} 
+                                    <option value="{{ $product->id }}" data-name="{{ $product->localized_name }}" data-price="{{ $price }}">
+                                        {{ $product->en_Product_Name }} / {{ $product->fr_Product_Name }} 
                                         @if($product->Status != 1)
                                             <span class="text-danger">({{ __('Deactivated') }})</span>
                                         @endif

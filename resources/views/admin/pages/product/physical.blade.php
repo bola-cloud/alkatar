@@ -59,7 +59,7 @@
                                                 <select class="form-control" id="en_category_name" name="en_category_name">
                                                     @foreach ($category as $item)
                                                         <option value="{{ $item->id }}">
-                                                            {{ $item?->fr_Category_Name ?? "N/A" }}
+                                                            {{ $item?->fr_Category_Name ?? "--" }}
                                                         </option>
                                                     @endforeach
                                                 </select>

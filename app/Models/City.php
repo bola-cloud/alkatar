@@ -20,4 +20,14 @@ class City extends Model
     {
         return $this->belongsTo(State::class);
     }
+
+    public function getNameArAttribute()
+    {
+        return $this->name_fr;
+    }
+
+    public function setNameArAttribute($value)
+    {
+        $this->attributes['name_fr'] = $value;
+    }
 }

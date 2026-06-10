@@ -107,6 +107,7 @@ class AdvertiseController extends Controller
     }
 
     /**
+    /**
      * AJAX bulk upload endpoint for multiple brand images.
      * Accepts files in `images[]` and creates Advertise rows with location=company_logo.
      * Returns JSON { success: true, created: [...] } or JSON error.
@@ -132,9 +133,10 @@ class AdvertiseController extends Controller
             }
 
             $created = [];
+            $sectionKey = $request->input('section_key', 'newdesign_brands');
             // use HomepageSection to store brand images as part of the home page CMS
             $section = HomepageSection::firstOrCreate(
-                ['section_key' => 'newdesign_brands'],
+                ['section_key' => $sectionKey],
                 ['content_en' => [], 'content_fr' => [], 'display_order' => 0, 'status' => 1]
             );
             foreach ($files as $file) {
@@ -160,6 +162,39 @@ class AdvertiseController extends Controller
         } catch (\Exception $e) {
             \Log::error('Advertise bulk upload failed: ' . $e->getMessage(), ['exception' => $e]);
             return response()->json(['success' => false, 'message' => 'Server error', 'detail' => $e->getMessage()], 500);
+        }
+    }
+
+    public function deleteSectionImage(Request $request)
+    {
+        try {
+            $sectionKey = $request->input('section_key');
+            $imagePath = $request->input('image');
+            if (empty($sectionKey) || empty($imagePath)) {
+                return response()->json(['success' => false, 'message' => 'Invalid parameters'], 422);
+            }
+            $section = HomepageSection::where('section_key', $sectionKey)->first();
+            if ($section) {
+                $content = $section->content_en ?? [];
+                if (isset($content['images']) && is_array($content['images'])) {
+                    // Remove the image from the array
+                    $content['images'] = array_values(array_filter($content['images'], function($img) use ($imagePath) {
+                        return $img !== $imagePath;
+                    }));
+                    $section->content_en = $content;
+                    $section->save();
+                    
+                    // Also delete the file from disk if it exists
+                    $fullPath = public_path($imagePath);
+                    if (file_exists($fullPath)) {
+                        @unlink($fullPath);
+                    }
+                    return response()->json(['success' => true]);
+                }
+            }
+            return response()->json(['success' => false, 'message' => 'Section or image not found'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 

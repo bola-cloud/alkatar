@@ -39,4 +39,13 @@ class UserAuthRequest extends FormRequest
             'country_code' => 'required|numeric',
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'full_phone.unique' => __('new_design.auth.phone_taken'),
+            'phone.required' => __('new_design.auth.phone_required'),
+            'name.required' => __('new_design.auth.name_required'),
+        ];
+    }
 }

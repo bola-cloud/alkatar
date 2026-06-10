@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
+<html lang="{{ app()->getLocale() }}" dir="{{ in_array(app()->getLocale(), ['ar', 'fr']) ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -12,8 +12,8 @@
             margin: 0;
             padding: 0;
             font-size: 11px;
-            direction: {{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }};
-            text-align: {{ app()->getLocale() == 'ar' ? 'right' : 'left' }};
+            direction: {{ in_array(app()->getLocale(), ['ar', 'fr']) ? 'rtl' : 'ltr' }};
+            text-align: {{ in_array(app()->getLocale(), ['ar', 'fr']) ? 'right' : 'left' }};
         }
         .invoice-container {
             padding: 20px;
@@ -82,7 +82,7 @@
         <!-- Header -->
         <table class="header-table">
             <tr>
-                <td class="{{ app()->getLocale() == 'ar' ? 'text-right' : 'text-left' }}">
+                <td class="{{ in_array(app()->getLocale(), ['ar', 'fr']) ? 'text-right' : 'text-left' }}">
                     @php
                         $logoPath = public_path('uploaded_files/logo/' . allsetting()['main_logo']);
                     @endphp
@@ -106,9 +106,9 @@
                     <p>{{ __('Commercial Register') }}: 1275107</p>
                     <p>{{ __('Register Name') }}: Al Akeed Lil Injaz</p>
                 </td>
-                <td width="50%" class="{{ app()->getLocale() == 'ar' ? 'text-left' : 'text-right' }}">
+                <td width="50%" class="{{ in_array(app()->getLocale(), ['ar', 'fr']) ? 'text-left' : 'text-right' }}">
                     <p>{{ __('Order Number') }}: {{ $order->Order_Number }}</p>
-                    <p>{{ __('Date') }}: {{ date('d/m/Y', strtotime($order->created_at)) }}</p>
+                    <p>{{ __('Date') }}: {{ $order->created_at->timezone('Asia/Muscat')->format('d/m/Y') }}</p>
                     <p>{{ __('Time') }}: {{ $order->created_at->timezone('Asia/Muscat')->format('h:i A') }}</p>
                     <p>{{ __('Payment') }}: {{ $order->Payment_Method }}</p>
                     @if($order->collection_method)
@@ -123,19 +123,19 @@
             <tr>
                 <td class="address-box">
                     <div class="address-title">{{ __('Bill To') }}:</div>
-                    <p>{{ $order->billing_address['name'] ?? 'N/A' }}</p>
-                    <p>{{ $order->billing_address['email'] ?? 'N/A' }}</p>
-                    <p dir="ltr">{{ $order->billing_address['phone_number'] ?? ($order->user->Number ?? 'N/A') }}</p>
+                    <p>{{ $order->billing_address['name'] ?? '--' }}</p>
+                    <p>{{ $order->billing_address['email'] ?? '--' }}</p>
+                    <p dir="ltr">{{ $order->billing_address['phone_number'] ?? ($order->user->Number ?? '--') }}</p>
                 </td>
                 <td width="4%"></td> <!-- Spacer -->
                 <td class="address-box">
                     <div class="address-title">{{ __('Ship To') }}:</div>
-                    <p>{{ $order->billing_address['street'] ?? 'N/A' }}</p>
+                    <p>{{ $order->billing_address['street'] ?? '--' }}</p>
                     <p>
-                        @if(app()->getLocale() == 'ar')
-                            {{ $order->billing_address['city_ar'] ?? 'N/A' }}, {{ $order->billing_address['state_ar'] ?? 'N/A' }}
+                        @if(in_array(app()->getLocale(), ['ar', 'fr']))
+                            {{ $order->billing_address['city_ar'] ?? '--' }}, {{ $order->billing_address['state_ar'] ?? '--' }}
                         @else
-                            {{ $order->billing_address['city_en'] ?? $order->billing_address['city_ar'] ?? 'N/A' }}, {{ $order->billing_address['state_en'] ?? $order->billing_address['state_ar'] ?? 'N/A' }}
+                            {{ $order->billing_address['city_en'] ?? $order->billing_address['city_ar'] ?? '--' }}, {{ $order->billing_address['state_en'] ?? $order->billing_address['state_ar'] ?? '--' }}
                         @endif
                     </p>
                     <p>{{ __('Oman') }}</p>
@@ -148,7 +148,7 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th class="{{ app()->getLocale() == 'ar' ? 'text-right' : 'text-left' }}">{{ __('Product') }}</th>
+                    <th class="{{ in_array(app()->getLocale(), ['ar', 'fr']) ? 'text-right' : 'text-left' }}">{{ __('Product') }}</th>
                     <th>{{ __('Quantity') }}</th>
                     <th>{{ __('Size/Weight') }}</th>
                     <th>{{ __('Price') }}</th>
@@ -159,7 +159,7 @@
                 @foreach ($order->order_details as $od)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
-                        <td class="{{ app()->getLocale() == 'ar' ? 'text-right' : 'text-left' }}">
+                        <td class="{{ in_array(app()->getLocale(), ['ar', 'fr']) ? 'text-right' : 'text-left' }}">
                             @if($od->product)
                                 {{ langConverter($od->product->en_Product_Name, $od->product->fr_Product_Name) }}
                             @else
@@ -172,10 +172,10 @@
                                 {{ $od->Size }}
                             @else
                                 @php $size = json_decode($od->Size); @endphp
-                                @if(app()->getLocale() == 'ar')
-                                    {{ is_null($size?->weight) ? 'N/A' : $size?->weight . ' جرام' }}
+                                @if(in_array(app()->getLocale(), ['ar', 'fr']))
+                                    {{ is_null($size?->weight) ? '--' : $size?->weight . ' جرام' }}
                                 @else
-                                    {{ is_null($size?->weight) ? 'N/A' : $size?->weight . ' Grams' }}
+                                    {{ is_null($size?->weight) ? '--' : $size?->weight . ' Grams' }}
                                 @endif
                             @endif
                         </td>
@@ -186,21 +186,21 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="5" class="{{ app()->getLocale() == 'ar' ? 'text-left' : 'text-right' }}">{{ __('Subtotal') }}:</td>
+                    <td colspan="5" class="{{ in_array(app()->getLocale(), ['ar', 'fr']) ? 'text-left' : 'text-right' }}">{{ __('Subtotal') }}:</td>
                     <td class="nowrap">{{ number_format($order->Sub_Total, 3) }} OMR</td>
                 </tr>
                 <tr>
-                    <td colspan="5" class="{{ app()->getLocale() == 'ar' ? 'text-left' : 'text-right' }}">{{ __('Shipping Cost') }}:</td>
+                    <td colspan="5" class="{{ in_array(app()->getLocale(), ['ar', 'fr']) ? 'text-left' : 'text-right' }}">{{ __('Shipping Cost') }}:</td>
                     <td class="nowrap">{{ number_format($order->Delivery_Charge, 3) }} OMR</td>
                 </tr>
                 @if ($order->Coupon_Amount > 0)
                     <tr>
-                        <td colspan="5" class="{{ app()->getLocale() == 'ar' ? 'text-left' : 'text-right' }}">{{ __('Discount') }}:</td>
+                        <td colspan="5" class="{{ in_array(app()->getLocale(), ['ar', 'fr']) ? 'text-left' : 'text-right' }}">{{ __('Discount') }}:</td>
                         <td class="nowrap">{{ number_format($order->Coupon_Amount, 3) }} OMR</td>
                     </tr>
                 @endif
                 <tr class="total-row">
-                    <td colspan="5" class="{{ app()->getLocale() == 'ar' ? 'text-left' : 'text-right' }}">{{ __('Grand Total') }}:</td>
+                    <td colspan="5" class="{{ in_array(app()->getLocale(), ['ar', 'fr']) ? 'text-left' : 'text-right' }}">{{ __('Grand Total') }}:</td>
                     <td class="nowrap">{{ number_format($order->Grand_Total, 3) }} OMR</td>
                 </tr>
             </tfoot>
@@ -210,7 +210,7 @@
         <div class="footer">
             @php
                 $billingAddress = $order->billing_address;
-                $phoneNumber = is_array($billingAddress) ? ($billingAddress['phone_number'] ?? 'N/A') : ($order->user->Number ?? 'N/A');
+                $phoneNumber = is_array($billingAddress) ? ($billingAddress['phone_number'] ?? '--') : ($order->user->Number ?? '--');
                 $qrData = "Order:" . $order->id . " | Phone:" . $phoneNumber;
             @endphp
             <div style="margin-bottom: 5px;">

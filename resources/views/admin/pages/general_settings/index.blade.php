@@ -37,7 +37,7 @@
                                             action="{{ route('admin.general.settings.update_settings') }}">
                                             @csrf
                                             <div class="input__group mb-25">
-                                                <label for="title">{{ __('App Title') }}</label>
+                                                <label for="app_title">{{ __('App Title') }}</label>
                                                 <input type="text" class="form-control" id="app_title" name="app_title"
                                                     value="{{ @$allsettings['app_title'] }}" required="">
                                             </div>
@@ -47,51 +47,25 @@
                                                     value="{{ @$allsettings['title'] }}" required="">
                                             </div>
                                             <div class="input__group mb-25">
-                                                <label for="title">{{ __('Footer Title') }}</label>
+                                                <label for="footer_title">{{ __('Footer Title') }}</label>
                                                 <input type="text" class="form-control" id="footer_title"
                                                     name="footer_title" value="{{ @$allsettings['footer_title'] }}"
                                                     required="">
                                             </div>
                                             <div class="input__group mb-25">
-                                                <label for="title">{{ __('Contact Number') }}</label>
+                                                <label for="call_us">{{ __('Contact Number / WhatsApp') }}</label>
                                                 <input type="text" class="form-control" id="call_us" name="call_us"
                                                     value="{{ @$allsettings['call_us'] }}" required="">
                                             </div>
                                             <div class="input__group mb-25">
-                                                <label for="title">{{ __('Email') }}</label>
-                                                <input type="text" class="form-control" id="email" name="email"
-                                                    value="{{ @$allsettings['email'] }}" required="">
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <label for="title">{{ __('Address (English)') }}</label>
+                                                <label for="address_en">{{ __('Address (English)') }}</label>
                                                 <input type="text" class="form-control" id="address_en" name="address_en"
                                                     value="{{ @$allsettings['address_en'] ?? @$allsettings['address'] }}">
                                             </div>
                                             <div class="input__group mb-25">
-                                                <label for="title">{{ __('Address (Arabic)') }}</label>
+                                                <label for="address_ar">{{ __('Address (Arabic)') }}</label>
                                                 <input type="text" class="form-control" id="address_ar" name="address_ar"
                                                     value="{{ @$allsettings['address_ar'] }}">
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <label for="title">{{ __('Legacy Address (fallback)') }}</label>
-                                                <input type="text" class="form-control" id="address" name="address"
-                                                    value="{{ @$allsettings['address'] }}">
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <label for="title">{{ __('State') }}</label>
-                                                <input type="text" class="form-control" id="state" name="state"
-                                                    value="{{ @$allsettings['state'] }}" required="">
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <label for="title">{{ __('Country') }}</label>
-                                                <input type="text" class="form-control" id="country" name="country"
-                                                    value="{{ @$allsettings['country'] }}" required="">
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <label for="title">{{ __('News Letter') }}</label>
-                                                <input type="text" class="form-control" id="news_letter"
-                                                    name="news_letter" value="{{ @$allsettings['news_letter'] }}"
-                                                    required="">
                                             </div>
                                             <div class="input__group mb-25 ">
                                                 <label for="default_currency">{{ __('Default Currency') }}</label>
@@ -117,27 +91,16 @@
                                                 </select>
                                             </div>
                                             <div class="input__group mb-25">
-                                                <label for="title">{{ __('Estimating Delivery') }}</label>
+                                                <label for="estimating_delivery">{{ __('Estimating Delivery') }}</label>
                                                 <input type="text" class="form-control" id="estimating_delivery"
                                                     name="estimating_delivery"
                                                     value="{{ @$allsettings['estimating_delivery'] }}" required="">
                                             </div>
-                                            {{-- <div class="input__group mb-25">
-                                                <label for="title">{{ __('Shipping Free') }}</label>
-                                                <input type="text" class="form-control" id="shipping_free_text"
-                                                    name="shipping_free_text"
-                                                    value="{{ @$allsettings['shipping_free_text'] }}">
-                                            </div> --}}
                                             <div class="input__group mb-25">
-                                                <label for="title">{{ __('Shipping Charge') }}</label>
+                                                <label for="shipping_charge">{{ __('Shipping Charge') }}</label>
                                                 <input type="number" class="form-control" id="shipping_charge"
                                                     name="shipping_charge" value="{{ @$allsettings['shipping_charge'] }}"
                                                     required="">
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <label for="printer_app_password">{{ __('Printer App Password') }}</label>
-                                                <input type="text" class="form-control" id="printer_app_password"
-                                                    name="printer_app_password" value="{{ @$allsettings['printer_app_password'] }}">
                                             </div>
                                             <div class="input__button">
                                                 <button type="submit" class="btn btn-blue">{{ __('Update') }}</button>
@@ -154,47 +117,40 @@
                                             action="{{ route('admin.general.settings.update_settings') }}">
                                             @csrf
                                             <div class="input__group mb-25">
-                                                <label for="exampleInputEmail1">{{ __('Main Logo') }}</label>
+                                                <label for="main_logo">{{ __('Main Logo') }}</label>
                                                 <input type="file" class="form-control putImage1" name="main_logo"
                                                     id="main_logo">
                                                 <img src="{{ asset(IMG_LOGO_PATH . @$allsettings['main_logo']) }}"
                                                     id="target1" alt="{{ __('Image') }}" class="admin_image mt-3" />
                                             </div>
                                             <div class="input__group mb-25">
-                                                <label for="exampleInputEmail1">{{ __('Footer Logo') }}</label>
+                                                <label for="footer_logo">{{ __('Footer Logo') }}</label>
                                                 <input type="file" class="form-control putImage2" name="footer_logo"
                                                     id="footer_logo">
                                                 <img src="{{ asset(IMG_LOGO_PATH . @$allsettings['footer_logo']) }}"
                                                     id="target2" alt="{{ __('Image') }}" class="admin_image mt-3" />
                                             </div>
                                             <div class="input__group mb-25">
-                                                <label for="exampleInputEmail1">{{ __('Favicon') }}</label>
+                                                <label for="favicon">{{ __('Favicon') }}</label>
                                                 <input type="file" class="form-control putImage3" name="favicon"
                                                     id="favicon">
                                                 <img src="{{ asset(IMG_FAVICON_PATH . @$allsettings['favicon']) }}"
                                                     id="target3" alt="{{ __('Image') }}" class="admin_image mt-3" />
                                             </div>
                                             <div class="input__group mb-25">
-                                                <label for="exampleInputEmail1">{{ __('Preloader') }}</label>
+                                                <label for="preloader">{{ __('Preloader') }}</label>
                                                 <input type="file" class="form-control putImage4" name="preloader"
                                                     id="preloader">
                                                 <img src="{{ asset(IMG_PRELOADER_PATH . @$allsettings['preloader']) }}"
                                                     id="target4" alt="{{ __('Image') }}" class="admin_image mt-3" />
                                             </div>
-                                            <div class="input__group mb-25">
-                                                <label for="exampleInputEmail1">{{ __('Popup Image') }}</label>
-                                                <input type="file" class="form-control putImage6" name="popup_image"
-                                                    id="popup_image">
-                                                <img src="{{ asset(IMG_ADVERTISE_PATH . @$allsettings['popup_image']) }}"
-                                                    id="target6" alt="{{ __('Image') }}" class="admin_image mt-3" />
-                                            </div>
-                                            {{-- Home design images moved to Home Page settings (Advertise / Home Page CMS) --}}
                                             <div class="input__button">
                                                 <button type="submit" class="btn btn-blue">{{ __('Update') }}</button>
                                             </div>
                                         </form>
                                     </div>
                                 </div>
+                                
                                 {{-- <div class="col-md-6">
                                     <div class="form-vertical__item bg-style">
                                         <div class="item-top mb-30">

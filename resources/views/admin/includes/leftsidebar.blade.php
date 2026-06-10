@@ -103,12 +103,12 @@
                     <span>{{ __('Products') }}</span>
                 </a>
                 <ul>
-                    {{-- <li class="{{ isset($submenu) && $submenu == 'product' ? 'mm-active' : '' }}">
+                    <li class="{{ isset($submenu) && $submenu == 'product' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.physical.product.create') }}">
                             <i class="fa fa-circle"></i>
                             <span>{{ __('Add Product') }}</span>
                         </a>
-                    </li> --}}
+                    </li>
                     <li class="{{ isset($submenu) && $submenu == 'product_list' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.product') }}">
                             <i class="fa fa-circle"></i>
@@ -230,7 +230,12 @@
                         <a href="{{ route('admin.reports.orders.index') }}">
                             <i class="fa fa-circle"></i>
                             <span>{{ __('Orders Report') }}</span>
-                            {{-- Insert this item where you want the report to appear in the sidebar. --}}
+                        </a>
+                    </li>
+                    <li class="{{ isset($submenu) && $submenu == 'delivery_men_report' ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.reports.delivery_men.index') }}">
+                            <i class="fa fa-circle"></i>
+                            <span>{{ __('Delivery Men Report') }}</span>
                         </a>
                     </li>
                 </ul>
@@ -254,10 +259,36 @@
         @endcanany
         @canany(['delivery-charge-list'])
             <li class="{{ isset($menu) && $menu == 'delivery_charge' ? 'mm-active' : '' }}">
-                <a href="{{ route('admin.country_dc_list') }}">
+                <a class="has-arrow" href="#">
                     <i class="fas fa-shipping-fast"></i>
                     <span>{{ __('Delivery Charge') }}</span>
                 </a>
+                <ul>
+                    <li class="{{ isset($submenu) && $submenu == 'delivery_charge_list' ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.country_dc_list') }}">
+                            <i class="fa fa-circle"></i>
+                            <span>{{ __('Delivery Charge List') }}</span>
+                        </a>
+                    </li>
+                    <li class="{{ isset($submenu) && $submenu == 'governorates' ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.location.state.list') }}">
+                            <i class="fa fa-circle"></i>
+                            <span>{{ __('Governorates') }}</span>
+                        </a>
+                    </li>
+                    <li class="{{ isset($submenu) && $submenu == 'wilayats' ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.location.city.list') }}">
+                            <i class="fa fa-circle"></i>
+                            <span>{{ __('Wilayats') }}</span>
+                        </a>
+                    </li>
+                    <li class="{{ isset($submenu) && $submenu == 'areas' ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.location.area.list') }}">
+                            <i class="fa fa-circle"></i>
+                            <span>{{ __('Areas') }}</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
         @endcanany
         {{-- @canany(['currency-list'])--}}
@@ -358,13 +389,13 @@
                             <span>{{ __('Contact Us') }}</span>
                         </a>
                     </li>
-                    {{-- <li class="{{ isset($submenu) && $submenu == 'subscribers' ? 'mm-active' : '' }}">--}}
-                        {{-- <a href="{{ route('admin.subscribe.index') }}">--}}
-                            {{-- <i class="fa fa-circle"></i>--}}
-                            {{-- <span>{{ __('Subscribers') }}</span>--}}
-                            {{-- </a>--}}
-                        {{-- </li>--}}
                 </ul>
+            </li>
+            <li class="{{ isset($menu) && $menu == 'subscribers' ? 'mm-active' : '' }}">
+                <a href="{{ route('admin.subscribe.index') }}">
+                    <i class="fas fa-envelope"></i>
+                    <span>{{ __('Subscribers') }}</span>
+                </a>
             </li>
         @endcanany
         @canany(['user-list'])

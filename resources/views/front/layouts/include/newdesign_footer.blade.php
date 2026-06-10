@@ -1,217 +1,96 @@
-<!-- New-design footer include (extracted from new-design/index.html) -->
-<footer class="footer">
-  <div class="footer-top" style="background:#EDF2EE;">
-    <style>
-      /* Footer social icons: default outline, green on hover */
-      .footer-top .social-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        color: #2b2b2b;
-        transition: all .12s ease-in-out;
-        background: transparent;
-        text-decoration: none;
-      }
+@php
+    $isRtl = app()->getLocale() != 'en';
+    $dir = $isRtl ? 'rtl' : 'ltr';
+    $socialLinks = getSocialLink();
+@endphp
 
-      .footer-top .social-icon i {
-        font-size: 14px;
-      }
+<footer class="relative overflow-hidden text-white py-16 mt-0" dir="{{ $dir }}" style="background-image: url('{{ asset('assets/elketar/fotter_image.png') }}'); background-size: cover; background-position: center; background-color: #1A4231; background-blend-mode: multiply;">
+    <!-- Absolute dark green semi-transparent overlay to ensure stunning Figma contrast -->
+    <div class="absolute inset-0 z-0"></div>
 
-      .footer-top .social-icon:hover {
-        background: #9fc23a;
-        color: #fff;
-        border-color: transparent;
-        text-decoration: none;
-      }
-    </style>
-    <div class="container d-flex align-items-center justify-content-between py-3">
-      <div>
-        @php
-          $logoPath = (isset($allsettings['footer_logo']) && $allsettings['footer_logo']) ? asset(IMG_LOGO_PATH . $allsettings['footer_logo']) : (isset($allsettings['main_logo']) && $allsettings['main_logo'] ? asset(IMG_LOGO_PATH . $allsettings['main_logo']) : 'https://c.animaapp.com/mhnmip5wa2i9Oh/img/hi-speed--4-send---final--06-3.png');
-        @endphp
-        <img src="{{ $logoPath }}" alt="Logo" style="height:48px">
-      </div>
-      <div class="d-flex gap-3">
-        @php
-          $social = getSocialLink();
-          function absUrl($url)
-          {
-            if (!$url)
-              return null;
-            $url = trim($url);
-            if (strpos($url, 'http://') === 0 || strpos($url, 'https://') === 0 || strpos($url, '//') === 0) {
-              return $url;
-            }
-            return 'https://' . ltrim($url, '/');
-          }
-        @endphp
-
-        {{-- Order: Instagram, Twitter, Facebook (display only if set) --}}
-        @if($social && $social->Instagram)
-          <a href="{{ absUrl($social->Instagram) }}" target="_blank" rel="noopener" class="social-icon"
-            aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-        @endif
-        @if($social && $social->Twitter)
-          <a href="{{ absUrl($social->Twitter) }}" target="_blank" rel="noopener" class="social-icon"
-            aria-label="Twitter"><i class="bi bi-twitter"></i></a>
-        @endif
-        @if($social && $social->Facebook)
-          <a href="{{ absUrl($social->Facebook) }}" target="_blank" rel="noopener" class="social-icon"
-            aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-        @endif
-      </div>
-    </div>
-  </div>
-
-  <div class="footer-main text-white" style="background:#002603 !important;">
-    <div class="container py-5">
-      <div class="row g-4 mb-5">
-        <div class="col-lg-4 col-12 d-none d-lg-block">
-          <h5 class="mb-3 fw-semibold mt-4">{{ __('About Hi Speed') }}</h5>
-          <p class="text-muted mb-3">
-            {{ langConverter(
-                isset($allsettings['footer_about_en']) && !empty($allsettings['footer_about_en']) ? $allsettings['footer_about_en'] : 'It is a leading e-commerce platform in Muscat, specializing in delivering fresh and traditional produce directly from the farm to your doorstep, with a focus on quality and modern packaging.',
-                isset($allsettings['footer_about_fr']) && !empty($allsettings['footer_about_fr']) ? $allsettings['footer_about_fr'] : 'هي منصة إلكترونية رائدة في مسقط، متخصصة في توفير المنتجات الطازجة والتقليدية من المزرعة إلى عتبة المنزل مباشرة، مع التركيز على الجودة والتغليف العصري.'
-            ) }}
-          </p>
-        </div>
-        <div class="col-lg-2 col-6">
-          <h5 class="mb-3 fw-semibold">{{ __('My Account') }}</h5>
-          <ul class="list-unstyled">
-            @php
-              $accountLinks = [
-                ['label' => __('My Account'), 'route' => 'user.profile'],
-                ['label' => __('Order History'), 'route' => 'user.profile.myOrder'],
-                ['label' => __('Shopping Cart'), 'route' => 'cart.content'],
-                ['label' => __('Wishlist'), 'route' => 'wishlist'],
-                ['label' => __('Settings'), 'route' => 'settings']
-              ];
-            @endphp
-            @foreach($accountLinks as $ln)
-              @if(!empty($ln['route']) && Route::has($ln['route']))
-                <li class="mb-2"><a href="{{ route($ln['route']) }}"
-                    class="text-muted text-decoration-none hover-link">{{ $ln['label'] }}</a></li>
-              @endif
-            @endforeach
-          </ul>
-        </div>
-        <div class="col-lg-2 col-6">
-          <h5 class="mb-3 fw-semibold">{{ __('Helps') }}</h5>
-          <ul class="list-unstyled">
-            @php
-              $helpLinks = [
-                ['label' => __('Contact'), 'route' => 'contact.us'],
-                ['label' => __('FAQ'), 'route' => 'faq'],
-                // Prefer new-design terms/privacy if available
-                ['label' => __('Terms & Condition'), 'route' => (Route::has('terms.conditions.new') ? 'terms.conditions.new' : 'terms.conditions')],
-                ['label' => __('Privacy Policy'), 'route' => (Route::has('privacy.policy.new') ? 'privacy.policy.new' : 'privacy.policy')],
-                ['label' => __('Shipping & Return'), 'route' => (Route::has('shipping.return.new') ? 'shipping.return.new' : 'shipping.return')],
-              ];
-            @endphp
-            @foreach($helpLinks as $ln)
-              @if(!empty($ln['route']) && Route::has($ln['route']))
-                <li class="mb-2"><a href="{{ route($ln['route']) }}"
-                    class="text-muted text-decoration-none hover-link">{{ $ln['label'] }}</a></li>
-              @endif
-            @endforeach
-          </ul>
-        </div>
-        <div class="col-lg-2 col-6">
-          <h5 class="mb-3 fw-semibold">{{ __('Proxy') }}</h5>
-          <ul class="list-unstyled">
-            @php
-              $proxyLinks = [
-                ['label' => __('About Us'), 'route' => 'about.us'],
-                ['label' => __('Shop'), 'route' => 'all.product'],
-                ['label' => __('Product'), 'route' => 'all.product'],
-                ['label' => __('Products Details'), 'route' => 'single.product'],
-                ['label' => __('Track order'), 'route' => 'checkout.order_track'],
-              ];
-            @endphp
-            @foreach($proxyLinks as $ln)
-              @if(!empty($ln['route']) && Route::has($ln['route']))
-                @php
-                  try {
-                    $url = route($ln['route']);
-                  } catch (\Throwable $e) {
-                    // route requires parameters or failed to generate; fallback to safe pages
-                    if (Route::has('all.product')) {
-                      $url = route('all.product');
-                    } elseif (Route::has('categories.show')) {
-                      $url = route('categories.show');
-                    } else {
-                      $url = url('/');
-                    }
-                  }
-                @endphp
-                <li class="mb-2"><a href="{{ $url }}"
-                    class="text-muted text-decoration-none hover-link">{{ $ln['label'] }}</a></li>
-              @endif
-            @endforeach
-          </ul>
-        </div>
-        <div class="col-lg-2 col-6">
-          <h5 class="mb-3 fw-semibold">{{ __('Categories') }}</h5>
-          <ul class="list-unstyled">
-            @php
-              try {
-                if (class_exists('\\App\\Models\\Admin\\Category')) {
-                  $footerCats = \App\Models\Admin\Category::where('Status', 1)->orderBy('order')->take(6)->get();
-                } elseif (class_exists('\\App\\Models\\Category')) {
-                  $footerCats = \App\Models\Category::where('Status', 1)->orderBy('order')->take(6)->get();
-                } else {
-                  $footerCats = collect();
-                }
-              } catch (\Throwable $e) {
-                $footerCats = collect();
-              }
-            @endphp
-
-            @if($footerCats->isNotEmpty())
-              @foreach($footerCats as $fc)
-                @php
-                  $slug = $fc->localized_slug;
-                  try {
-                    $url = Route::has('categories.show') ? route('categories.show', $slug) : url('/categories');
-                  } catch (\Throwable $e) {
-                    $url = url('/categories');
-                  }
-                  $label = $fc->localized_name;
-                @endphp
-                <li class="mb-2"><a href="{{ $url }}" class="text-muted text-decoration-none hover-link">{{ $label }}</a>
-                </li>
-              @endforeach
-            @else
-              @php $categoryUrl = Route::has('categories.show') ? route('categories.show') : url('/categories'); @endphp
-              <li class="mb-2"><a href="{{ $categoryUrl }}"
-                  class="text-muted text-decoration-none hover-link">{{ __('All Products') }}</a></li>
-            @endif
-          </ul>
-        </div>
-      </div>
-
-      <div class="border-top border-secondary py-3 mt-3">
-        <div class="row align-items-center">
-          <div class="col-md-4 d-none d-md-block"></div>
-          <div class="col-12 col-md-4 text-center mb-2 mb-md-0">
-            <p class="text-muted mb-0">{{ __('HiSpeed © :year. All Rights Reserved', ['year' => date('Y')]) }}</p>
-          </div>
-          <div class="col-12 col-md-4">
-            <div class="d-flex justify-content-center justify-content-md-end align-items-center gap-3">
-              <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/applepay.svg" alt="Apple Pay" style="height: 32px;">
-              <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/visa-logo.svg" alt="Visa" style="height: 32px;">
-              <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/discover-1.png" alt="Discover" style="height: 32px;">
-              <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/mastercard-1.png" alt="Mastercard"
-                style="height: 32px;">
-              <span class="text-muted ms-2">{{ __('Secure Payment') }}</span>
+    <div class="container mx-auto px-4 relative z-10">
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-12 lg:gap-16 items-start text-start">
+            
+            <!-- Column 1: Logo -->
+            <div class="flex flex-col items-center md:items-start justify-center md:justify-start">
+                <a href="{{ route('front') }}" class="block mb-6">
+                    <img src="{{ isset($allsettings['footer_logo']) ? asset(IMG_LOGO_PATH . $allsettings['footer_logo']) : asset('assets/elketar/logo-footer.png') }}" class="h-24 lg:h-28 w-auto object-contain" alt="El Katar Logo">
+                </a>
             </div>
-          </div>
+
+            <!-- Column 2: Explore -->
+            <div>
+                <h4 class="text-lg lg:text-xl font-bold text-white mb-6">{{ __('new_design.footer.explore') }}</h4>
+                <ul class="space-y-4 font-semibold text-white/80">
+                    <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.about') }}</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.farms') }}</a></li>
+                    <li><a href="{{ route('about.us') }}" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.about_us') }}</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.methods') }}</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.tools') }}</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 3: Support -->
+            <div>
+                <h4 class="text-lg lg:text-xl font-bold text-white mb-6">{{ __('new_design.footer.support') }}</h4>
+                <ul class="space-y-4 font-semibold text-white/80">
+                    <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.faq') }}</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.shipping') }}</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.track') }}</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.contact') }}</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 4: Follow Us -->
+            <div>
+                <h4 class="text-lg lg:text-xl font-bold text-white mb-6">{{ __('new_design.footer.follow') }}</h4>
+                <div class="flex gap-6 items-center">
+                    @if($socialLinks)
+                        @if($socialLinks->Facebook)
+                            <!-- Facebook (with white circular background) -->
+                            <a href="{{ $socialLinks->Facebook }}" target="_blank" class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#1A4231] hover:bg-[#FBF0D8] transition-colors shadow-md">
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                    <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
+                                </svg>
+                            </a>
+                        @endif
+                        @if($socialLinks->Twitter)
+                            <!-- Twitter -->
+                            <a href="{{ $socialLinks->Twitter }}" target="_blank" class="text-white hover:text-[#FBF0D8] transition-colors">
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                </svg>
+                            </a>
+                        @endif
+                        @if($socialLinks->Instagram)
+                            <!-- Instagram -->
+                            <a href="{{ $socialLinks->Instagram }}" target="_blank" class="text-white hover:text-[#FBF0D8] transition-colors">
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                                </svg>
+                            </a>
+                        @endif
+                        @if($socialLinks->Linkedin)
+                            <!-- LinkedIn -->
+                            <a href="{{ $socialLinks->Linkedin }}" target="_blank" class="text-white hover:text-[#FBF0D8] transition-colors">
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                                </svg>
+                            </a>
+                        @endif
+                    @endif
+                </div>
+            </div>
+
         </div>
-      </div>
+
+        <!-- Divider Line and Copyright -->
+        <div class="border-t border-white/20 mt-16 pt-8 text-center relative z-10">
+            <p class="text-white/60 text-xs lg:text-sm font-semibold">
+                {{ $allsettings['footer_title'] ?? __('new_design.footer.copyright') }}
+            </p>
+        </div>
+
     </div>
-  </div>
 </footer>

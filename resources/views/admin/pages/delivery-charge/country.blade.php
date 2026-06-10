@@ -24,18 +24,12 @@
     <div class="row">
         <div class="col-md-12">
             <div class="customers__area bg-style mb-30">
-                <div class="item-title">
-                    <div class="col-xs-6">
-                        <button data-bs-toggle="modal" data-bs-target="#createModal1"
-                            class="btn btn-md btn-info">{{ __('Add Delivery Charge')}}</button>
-                    </div>
-                </div>
                 <div class="customers__table">
                     <table id="BlogTable" class="row-border data-table-filter table-style">
                         <thead>
                             <tr>
-                                <th>{{ __('State')}}</th>
-                                <th>{{ __('City')}}</th>
+                                <th>{{ __('Governorate')}}</th>
+                                <th>{{ __('Wilayat')}}</th>
                                 <th>{{ __('Status')}}</th>
                                 <th>{{ __('Action')}}</th>
                             </tr>
@@ -44,55 +38,6 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="createModal1" tabindex="-1" role="dialog" aria-labelledby="createModalTitle1"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-success">
-                    <h5 class="modal-title text-white" id="editModalLongTitle">{{__('Add Delivery Charge')}}</h5>
-                    <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <form enctype="multipart/form-data" method="POST" action="{{route('admin.country_dc_store')}}">
-                    <div class="modal-body">
-                        @csrf
-                        <input type="hidden" name="country" value="Oman" />
-
-                        <div class="input__group mb-25">
-                            <label for="state">{{__('State')}}</label>
-                            <select name="state_id" id="state" required>
-                                <option value="">{{__('---Select State---')}}</option>
-                                @foreach ($states as $state)
-                                    <option value="{{$state->id}}">{{$state->name_en}}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="input__group mb-25">
-                            <label for="city">{{__('City')}}</label>
-                            <select name="city_id" id="city" required>
-                                <option value="">{{__('---Select City---')}}</option>
-                            </select>
-                        </div>
-                        <input type="hidden" name="area_id" value="">
-                        <div class="input__group mb-25">
-                            <label for="charge">{{ __('Charge')}}</label>
-                            <input type="number" min="0" step="0.001" name="charge" id="charge"
-                                placeholder="{{__('Delivery Charge')}}" required>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-danger me-2" data-bs-dismiss="modal">{{__('Close')}}</button>
-                        <button type="submit" class="btn btn-primary">{{ __('Add')}}</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 
     @foreach ($delivery_charges as $dc)
         <div class="modal fade" id="editModal{{$dc->id}}" tabindex="-1" role="dialog"
@@ -111,9 +56,9 @@
                             @csrf
                             <input type="hidden" name="country" value="Oman" />
                             <div class="input__group mb-25">
-                                <label for="state_edit">{{__('State')}}</label>
+                                <label for="state_edit">{{__('Governorate')}}</label>
                                 <select name="state_id" id="state_edit_{{$dc->id}}" required>
-                                    <option value="">{{__('---Select State---')}}</option>
+                                    <option value="">{{__('---Select Governorate---')}}</option>
                                     @foreach ($states as $state)
                                         <option value="{{$state->id}}" {{$dc->state_id == $state->id ? 'selected' : ''}}>
                                             {{$state->name_en}}
@@ -122,10 +67,10 @@
                                 </select>
                             </div>
                             <div class="input__group mb-25">
-                                <label for="city_edit">{{__('City')}}</label>
+                                <label for="city_edit">{{__('Wilayat')}}</label>
                                 <select name="city_id" id="city_edit_{{$dc->id}}" required>
                                     <option value="{{$dc->city_id}}">
-                                        {{ langConverter(optional($dc->city)->name_en, null, optional($dc->city)->name_ar) }}
+                                        {{ langConverter(optional($dc->city)->name_en, optional($dc->city)->name_fr) }}
                                     </option>
                                 </select>
                             </div>
@@ -168,23 +113,23 @@
                             dataType: "json",
                             success: function (data) {
                                 $(citySelectId).empty();
-                                $(citySelectId).append('<option value="">---Select City---</option>');
+                                $(citySelectId).append('<option value="">{{ __("---Select Wilayat---") }}</option>');
                                 $.each(data, function (key, value) {
                                     $(citySelectId).append('<option value="' + value.id + '">' + value.name_en + '</option>');
                                 });
                                 // Reset Area
                                 if (areaSelectId) {
                                     $(areaSelectId).empty();
-                                    $(areaSelectId).append('<option value="">---Select Area---</option>');
+                                    $(areaSelectId).append('<option value="">{{ __("---Select Area---") }}</option>');
                                 }
                             }
                         });
                     } else {
                         $(citySelectId).empty();
-                        $(citySelectId).append('<option value="">---Select City---</option>');
+                        $(citySelectId).append('<option value="">{{ __("---Select Wilayat---") }}</option>');
                         if (areaSelectId) {
                             $(areaSelectId).empty();
-                            $(areaSelectId).append('<option value="">---Select Area---</option>');
+                            $(areaSelectId).append('<option value="">{{ __("---Select Area---") }}</option>');
                         }
                     }
                 }
@@ -198,7 +143,7 @@
                             dataType: "json",
                             success: function (data) {
                                 $(areaSelectId).empty();
-                                $(areaSelectId).append('<option value="">---Select Area---</option>');
+                                $(areaSelectId).append('<option value="">{{ __("---Select Area---") }}</option>');
                                 $.each(data, function (key, value) {
                                     $(areaSelectId).append('<option value="' + value.id + '">' + value.name_en + '</option>');
                                 });
@@ -206,7 +151,7 @@
                         });
                     } else {
                         $(areaSelectId).empty();
-                        $(areaSelectId).append('<option value="">---Select Area---</option>');
+                        $(areaSelectId).append('<option value="">{{ __("---Select Area---") }}</option>');
                     }
                 }
 

@@ -1,4 +1,17 @@
 {
+    "Successfully Updated!": "تم التحديث بنجاح!",
+    "Successfully Updated": "تم التحديث بنجاح!",
+    "Something Went Wrong!": "حدث خطأ ما! يرجى المحاولة مرة أخرى.",
+    "Something went wrong!": "حدث خطأ ما!",
+    "Address created successfully": "تم إنشاء العنوان بنجاح",
+    "Address updated successfully": "تم تحديث العنوان بنجاح",
+    "Address deleted successfully": "تم حذف العنوان بنجاح",
+    "Please login first": "يرجى تسجيل الدخول أولاً",
+    "Order not found": "الطلب غير موجود",
+    "Order items added to cart!": "تمت إضافة منتجات الطلب إلى السلة!",
+    "No items could be added to the cart.": "تعذر إضافة أي عناصر إلى السلة.",
+    "Your review is successfully updated!": "تم تحديث تقييمك بنجاح!",
+    "Review submitted successfully!": "تم إرسال التقييم بنجاح!",
     "Category": "الاقسام",
     "Browse Categories": "تصفح الفئات",
     "View Products": "عرض المنتجات",
@@ -314,6 +327,8 @@
     "Size Options": "خيارات الحجم",
     "Select Size for Product": "اختر الحجم للمنتج",
     "Product Added to Cart Successfully": "تمت إضافة المنتج إلى السلة بنجاح",
+    "Product Added to Wishlist Successfully": "تمت إضافة المنتج إلى قائمة الرغبات بنجاح",
+    "Rating System Coming Soon": "نظام التقييم قريباً",
     "Returning buyer? Please login:": "عميل حالي؟ الرجاء تسجيل الدخول:",
     "Checkout Page": "صفحة الدفع",
     "Product Image": "صورة المنتج",
@@ -892,5 +907,10 @@
     "Cancel Order (Returned)": "الغاء الطلب (مرتجع)",
     "Returned": "مرتجع",
     "Canceled": "ملغي",
-    "Cancelled": "ملغي"
+    "Cancelled": "ملغي",
+    "new_design.coffee_crops.country_brazil": "البرازيل",
+    "new_design.coffee_crops.country_ethiopia": "إثيوبيا",
+    "new_design.coffee_crops.country_colombia": "كولومبيا",
+    "new_design.coffee_crops.country_yemen": "اليمن",
+    "new_design.coffee_crops.country_costa_rica": "كوستاريكا"
 }

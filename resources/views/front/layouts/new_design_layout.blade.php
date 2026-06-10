@@ -1,164 +1,180 @@
 <!DOCTYPE html>
-@php
-  // Use `HTML_LANG` for the HTML lang attribute when present (ensures correct
-  // `lang` and `dir` even if the application uses a legacy DB locale like 'fr')
-  $htmlLocale = session('HTML_LANG', session('APP_LOCALE', app()->getLocale() ?? 'en'));
-  // Compute direction from the HTML locale directly to avoid stale session values
-  $dir = ($htmlLocale == 'ar') ? 'rtl' : 'ltr';
-@endphp
-<html lang="{{ $htmlLocale }}" dir="{{ $dir }}">
-
-@include('front.layouts.include.newdesign_head')
-
-<style>
-  html,
-  body {
-    direction:
-      {{ $dir == 'rtl' ? 'rtl !important' : 'ltr !important' }}
-    ;
-  }
-</style>
-
-<body>
-  @include('front.layouts.include.newdesign_header')
-
-  <main>
-    @yield('content')
-  </main>
-
-  @include('front.layouts.include.newdesign_footer')
-
-  {{-- Order success modal (shows after a successful checkout when session flag set) --}}
-  @include('front.partials.order_success_modal')
-
-  {{-- preserve frontend JS hooks and routes (required for add-to-cart / wishlist / compare) --}}
-  <div id="AddToCompareItemUrl" data-url="{{ route('compare.add') }}"></div>
-  <div id="AddToCartIntoSession" data-url="{{ route('add.to.cart') }}"></div>
-  <div id="productWishlistUrl" data-url="{{ route('wishlist.add') }}"></div>
-  <div id="currency-price-url" data-url="{{ route('currency_price') }}"></div>
-  <div id="currency-symbol-url" data-url="{{ route('currency_symbol') }}"></div>
-  <div id="productImgAsset" data-url="{{ asset(ProductImage()) }}"></div>
-
-  <!-- Login Modal (same as master layout) -->
-  <div class="modal fade common-modal" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2 class="modal-title" id="">{{ __('Login') }}</h2>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form action="{{ route('user.sign.modal') }}" method="POST">
-            @csrf
-            <div class="mb-3">
-              <label for="email" class="form-label">{{ __('Email') }}</label>
-              <input type="email" class="form-control" id="email" name="email" placeholder="{{ __('Email') }}">
-            </div>
-            <div class="mb-3">
-              <label for="password" class="form-label">{{ __('Password') }}</label>
-              <input type="password" class="form-control" id="password" name="password"
-                placeholder="{{ __('Password') }}" autocomplete="current-password">
-            </div>
-
-            <div class="modal-btn-wrap text-end">
-              <button type="submit" class="primary-btn">{{ __('Submit') }}</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Size Selection Modal (same as master layout) -->
-  <div class="modal fade" id="sizeModal" tabindex="-1" aria-labelledby="sizeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header flex items-center justify-between">
-          <h5 class="modal-title" id="sizeModalLabel">{{ __('Select Size and Additions') }}</h5>
-          <div>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-        </div>
-        <div class="modal-body">
-          <!-- Unit Display & Amount Section -->
-          <div class="mb-3" id="unitDisplaySection" style="display: none !important;">
-          </div>
-
-          <div class="mb-3" id="sizeOptionsSection">
-            <h6>{{ __("Product Options") }}:</h6>
-            <div id="sizeOptionsContainer" class="d-flex flex-wrap gap-2">
-              <!-- Size options will be injected here -->
-            </div>
-          </div>
-
-          <div class="mb-3" id="weightOptionsSection">
-            <h6>{{ __("Weight Options") }}:</h6>
-            <div id="weightOptionsContainer" class="d-flex flex-wrap gap-2">
-              <!-- Weight options will be injected here -->
-            </div>
-          </div>
-
-          <div class="mb-3" id="additionOptionsSection">
-            <h6>{{ __("Addition Options") }}:</h6>
-            <div id="additionOptionsContainer" class="d-flex flex-wrap gap-2">
-              <!-- Addition options will be injected here -->
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" id="submitSelection">
-            {{ __('Add To Cart') }}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="DoNotSubscribe" data-url="{{ route('do.not.subscribe') }}"></div>
-  <div id="SubscribeStore" data-url="{{ route('admin.subscribe.store') }}"></div>
-
-  {{-- localized text used by frontend JS (matching master layout) --}}
-  <script>
-    var localizedText = {
-      productAddedToCart: @json(__('Product Added to Cart Successfully')),
-      selectSize: @json(__('Select Size for Product')),
-      grams: @json(__('Grams')),
-    };
-
-    // locale used by frontend JS - matches global app logic (detecting AR/FR correctly)
-    var locale = '{{ session("HTML_LANG", session("APP_LOCALE", app()->getLocale() ?? "en")) }}';
-
-    // Hide the submit button initially using plain JS so this runs before jQuery is loaded
-    document.addEventListener('DOMContentLoaded', function () {
-      try {
-        var el = document.getElementById('submitSelection');
-        if (el) el.style.display = 'none';
-      } catch (e) { }
-    });
-  </script>
-
-  {{-- include the shared frontend scripts so old JS behaviors (addCart, MyWishList, CompareList, cart count updates)
-  work --}}
-  @include('front.layouts.include.script')
-  <script>
-    // jQuery-dependent helpers for the size modal. Placed after jQuery is loaded.
-    (function ($) {
-      $(document).on('click', '.size-option', function () {
-        var weightCount = $('#weightOptionsContainer').children().length;
-        if (weightCount === 0) {
-          $('#submitSelection').show();
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() != 'en' ? 'rtl' : 'ltr' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title', ($allsettings['title'] ?? 'بن القطار | Al-Katar'))</title>
+    
+    <!-- Google Fonts: Cairo for Arabic, Inter for English -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    @if(app()->getLocale() != 'en')
+        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+        <style>body { font-family: 'Cairo', sans-serif; }</style>
+    @else
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+        <style>body { font-family: 'Inter', sans-serif; }</style>
+    @endif
+    <link rel="icon" href="{{ isset($allsettings['favicon']) ? asset(IMG_FAVICON_PATH . $allsettings['favicon']) : asset('assets/elketar/logo.png') }}">
+    <!-- Tailwind CSS (Direct Asset) -->
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Premium Toastr Styles Overrides (White Theme) -->
+    <style>
+        #toast-container {
+            z-index: 999999 !important;
         }
-      });
-
-      $(document).on('keydown', '#sizeModal', function (e) {
-        if (e.key === 'Enter') {
-          $('#submitSelection').trigger('click');
+        #toast-container > .toast {
+            background-color: #FFFFFF !important;
+            color: #1A4231 !important;
+            border: 1px solid rgba(26, 66, 49, 0.08) !important;
+            border-radius: 16px !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.03) !important;
+            font-family: 'Cairo', 'Inter', sans-serif !important;
+            font-size: 15px !important;
+            font-weight: 700 !important;
+            opacity: 1 !important;
+            padding: 18px 24px 18px 56px !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            letter-spacing: 0.01em;
+            background-size: 24px !important;
         }
-      });
-    })(jQuery);
-  </script>
-  @stack('scripts')
+        #toast-container > .toast.rtl {
+            padding: 18px 56px 18px 24px !important;
+        }
+        #toast-container > .toast-success {
+            border-left: 6px solid #1A4231 !important;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231A4231'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E") !important;
+        }
+        #toast-container > .toast-success.rtl {
+            border-left: none !important;
+            border-right: 6px solid #1A4231 !important;
+        }
+        #toast-container > .toast-error {
+            border-left: 6px solid #EF4444 !important;
+            color: #EF4444 !important;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23EF4444'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'/%3E%3C/svg%3E") !important;
+        }
+        #toast-container > .toast-error.rtl {
+            border-left: none !important;
+            border-right: 6px solid #EF4444 !important;
+        }
+        #toast-container > .toast-info {
+            border-left: 6px solid #3B82F6 !important;
+            color: #3B82F6 !important;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%233B82F6'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'/%3E%3C/svg%3E") !important;
+        }
+        #toast-container > .toast-info.rtl {
+            border-left: none !important;
+            border-right: 6px solid #3B82F6 !important;
+        }
+        .toast-progress {
+            background-color: #1A4231 !important;
+            opacity: 0.25 !important;
+            height: 4px !important;
+        }
+        .toast-error .toast-progress {
+            background-color: #EF4444 !important;
+        }
+        .toast-info .toast-progress {
+            background-color: #3B82F6 !important;
+        }
+        .toast-close-button {
+            color: #94A3B8 !important;
+            opacity: 0.8 !important;
+            text-shadow: none !important;
+            transition: all 0.2s ease !important;
+        }
+        .toast-close-button:hover {
+            color: #1A4231 !important;
+            opacity: 1 !important;
+        }
+    </style>
+</head>
+<body class="bg-katar-cream text-katar-dark font-arabic overflow-x-hidden">
+    
+    @if(request()->routeIs('front.store') || request()->routeIs('front.cart') || request()->routeIs('checkout') || request()->routeIs('checkout.thankyou_page') || request()->routeIs('front.product_details') || request()->routeIs('single.product.new') || request()->routeIs('single.product') || request()->routeIs('user.profile') || (isset($isStorePage) && $isStorePage))
+        @include('front.layouts.include.store_header')
+    @else
+        @include('front.layouts.include.newdesign_header')
+    @endif
+
+    <main class="min-h-screen">
+        @yield('content')
+    </main>
+
+    @include('front.layouts.include.newdesign_footer')
+
+    <!-- jQuery and Toastr (Static) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    
+    <script>
+        // Configure premium toast settings
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "{{ app()->getLocale() != 'en' ? 'toast-top-left' : 'toast-top-right' }}",
+            "timeOut": "3000",
+            "extendedTimeOut": "1000",
+            "showDuration": "200",
+            "hideDuration": "600",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut",
+            "rtl": {{ app()->getLocale() != 'en' ? 'true' : 'false' }}
+        };
+
+        // Display session flash messages
+        @if(session('success'))
+            toastr.success("{{ session('success') }}");
+        @endif
+        @if(session('error'))
+            toastr.error("{{ session('error') }}");
+        @endif
+
+        function addToCart(productId, price) {
+            $.ajax({
+                url: "{{ route('add.to.cart') }}",
+                type: "POST",
+                data: {
+                    product_id: productId,
+                    quantity: 1,
+                    price: price,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(data) {
+                    if (typeof window.showCartSuccess === 'function') {
+                        window.showCartSuccess(data);
+                    } else {
+                        toastr.success("{{ __('Product Added to Cart Successfully') }}");
+                        $(".totalCountItem").html(data[0]);
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.error) {
+                        toastr.error(xhr.responseJSON.error);
+                    } else {
+                        toastr.error("{{ __('Failed to add product to cart') }}");
+                    }
+                }
+            });
+        }
+
+        function addToWishlist(id) {
+            toastr.info("{{ __('Product Added to Wishlist Successfully') }}");
+        }
+
+        function openRatingModal(id) {
+            toastr.info("{{ __('Rating System Coming Soon') }}");
+        }
+    </script>
+
+    @stack('scripts')
 </body>
-
 </html>

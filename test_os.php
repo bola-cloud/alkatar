@@ -1,1 +1,0 @@
-<?php require 'vendor/autoload.php'; \ = require_once 'bootstrap/app.php'; \ = \->make(\Illuminate\Contracts\Console\Kernel::class); \->bootstrap(); \ = new \App\Models\Admin\Order(['Order_Number' => 'TEST-' . rand(1000, 9999), 'id' => 99999]); event(new \App\Events\OrderCreated(\)); echo 'Dispatched event!'; ?>

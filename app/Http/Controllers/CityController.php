@@ -97,7 +97,9 @@ class CityController extends Controller
         $cities = City::where('state_id', $state_id)->get();
         if (app()->getLocale() == 'fr') {
             foreach ($cities as $city) {
-                $city->name_en = $city->name_ar;
+                if (!empty($city->name_ar)) {
+                    $city->name_en = $city->name_ar;
+                }
             }
         }
         return response()->json($cities);
@@ -108,7 +110,9 @@ class CityController extends Controller
         $areas = \App\Models\Area::where('city_id', $city_id)->get();
         if (app()->getLocale() == 'fr') {
             foreach ($areas as $area) {
-                $area->name_en = $area->name_ar;
+                if (!empty($area->name_ar)) {
+                    $area->name_en = $area->name_ar;
+                }
             }
         }
         return response()->json($areas);

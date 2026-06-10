@@ -140,7 +140,7 @@
     <div class="invoice-container">
         <div class="invoice-header">
             <img src="{{ asset(IMG_LOGO_PATH . allsetting()['main_logo']) }}" alt="Logo" class="invoice-logo">
-            <span class="invoice-title">الفاتورة</span>
+            <span class="invoice-title">{{ __('Invoice') }}</span>
         </div>
 
         <div class="invoice-details" style="margin-bottom: 20px;">
@@ -154,21 +154,21 @@
                         <p style="line-height: 1.5;">{{ url('/') }}</p>
                     </td>
                     <td style="text-align: right;">
-                        <p style="line-height: 1.5;">تاريخ الشراء: {{ date('d/m/Y', strtotime($order->created_at)) }}
+                        <p style="line-height: 1.5;">{{ __('Purchase Date') }}: {{ $order->created_at->timezone('Asia/Muscat')->format('d/m/Y') }}
                         </p>
-                        <p style="line-height: 1.5;">وقت الشراء:
+                        <p style="line-height: 1.5;">{{ __('Purchase Time') }}:
                             {{ $order->created_at->timezone('Asia/Muscat')->format('h:i A') }}
                         </p>
-                        <p style="line-height: 1.5;">رقم الطلب: {{ $order->Order_Number }}</p>
+                        <p style="line-height: 1.5;">{{ __('Order Number') }}: {{ $order->Order_Number }}</p>
                         @if(strtolower($order->Payment_Method) === 'thawani' && $order->is_paid == 0)
-                            <p style="line-height: 1.5;">طريقة الدفع: لم يتم الدفع</p>
+                            <p style="line-height: 1.5;">{{ __('Payment Method') }}: {{ __('Unpaid') }}</p>
                         @else
-                            <p style="line-height: 1.5;">طريقة الدفع: {{ $order->Payment_Method }}</p>
+                            <p style="line-height: 1.5;">{{ __('Payment Method') }}: {{ $order->Payment_Method }}</p>
                         @endif
                         @if($order->collection_method)
-                            <p style="line-height: 1.5;">نوع الاستلام: {{ $order->collection_method == 'delivery' ? 'توصيل' : 'استلام من المخزن' }}</p>
+                            <p style="line-height: 1.5;">{{ __('Collection Method') }}: {{ $order->collection_method == 'delivery' ? __('Delivery') : __('Store Pickup') }}</p>
                         @endif
-                        <p style="line-height: 1.5;">طريقة الشحن: مصاريف الشحن</p>
+                        <p style="line-height: 1.5;">{{ __('Shipping Method') }}: {{ __('Delivery Charge') }}</p>
                     </td>
                 </tr>
             </table>
@@ -178,23 +178,23 @@
             <table width="100%" style="border: 1px solid #ddd; border-collapse: collapse;">
                 <tr>
                     <td style="text-align: right; border: 1px solid #ddd;">
-                        <div class="address-title" style="font-weight: bold;">الفاتورة الى</div>
-                        <p style="line-height: 1.5;">اسم العميل: {{ $order->billing_address['name'] ?? 'N/A' }}</p>
-                        <p style="line-height: 1.5;">البريد الاكتروني: {{ $order->billing_address['email'] ?? 'N/A' }}
+                        <div class="address-title" style="font-weight: bold;">{{ __('Invoice To') }}</div>
+                        <p style="line-height: 1.5;">{{ __('Customer Name') }}: {{ $order->billing_address['name'] ?? '--' }}</p>
+                        <p style="line-height: 1.5;">{{ __('Email') }}: {{ $order->billing_address['email'] ?? '--' }}
                         </p>
                         @if ($order->user)
-                            <p style="line-height: 1.5;">رقم الهاتف:
-                                {{ $order->user->code . $order->user->Number ?? 'N/A' }}
+                            <p style="line-height: 1.5;">{{ __('Phone Number') }}:
+                                {{ $order->user->code . $order->user->Number ?? '--' }}
                             </p>
                         @endif
                     </td>
                     <td style="text-align: right; vertical-align: top; padding: 10px; border: 1px solid #ddd;">
-                        <div class="address-title" style="font-weight: bold;">الشحن الى</div>
-                        <p style="line-height: 1.5;">العنوان: {{ $order->billing_address['street'] ?? 'N/A' }}</p>
-                        <p style="line-height: 1.5;">المحافظة: {{ $order->billing_address['state_ar'] ?? 'N/A' }}</p>
-                        <p style="line-height: 1.5;">المدينة: {{ $order->billing_address['city_ar'] ?? 'N/A' }}</p>
-                        <p style="line-height: 1.5;">الدولة: سلطنة عمان</p>
-                        <p style="line-height: 1.5;">رقم الهاتف: {{ $order->billing_address['phone_number'] ?? 'N/A' }}
+                        <div class="address-title" style="font-weight: bold;">{{ __('Ship To') }}</div>
+                        <p style="line-height: 1.5;">{{ __('Address') }}: {{ $order->billing_address['street'] ?? '--' }}</p>
+                        <p style="line-height: 1.5;">{{ __('State') }}: {{ $order->billing_address['state_ar'] ?? '--' }}</p>
+                        <p style="line-height: 1.5;">{{ __('City') }}: {{ $order->billing_address['city_ar'] ?? '--' }}</p>
+                        <p style="line-height: 1.5;">{{ __('Country') }}: سلطنة عمان</p>
+                        <p style="line-height: 1.5;">{{ __('Phone Number') }}: {{ $order->billing_address['phone_number'] ?? '--' }}
                         </p>
                     </td>
                 </tr>
@@ -205,11 +205,11 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>الاسم</th>
-                    <th>الكمية</th>
-                    <th>الحجم</th>
-                    <th>السعر</th>
-                    <th>الإجمالي</th>
+                    <th>{{ __('Item') }}</th>
+                    <th>{{ __('Quantity') }}</th>
+                    <th>{{ __('Size') }}</th>
+                    <th>{{ __('Price') }}</th>
+                    <th>{{ __('Total') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -218,36 +218,36 @@
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $od->product->fr_Product_Name }}</td>
                         <td class="nowrap">{{ $od->Quantity }}</td>
-                        {{-- <td>{{ is_null($od->Size) ? 'N/A' : $od->Size }}</td> --}}
+                        {{-- <td>{{ is_null($od->Size) ? '--' : $od->Size }}</td> --}}
                         @if ($order->order_source == 'whatsapp')
                             <td>{{ $od->Size }}</td>
                         @else
                             @php
                                 $size = json_decode($od->Size);
                             @endphp
-                            <td>{{ is_null($size?->weight) ? 'N/A' : $size?->weight }} جرام</td>
+                            <td>{{ is_null($size?->weight) ? '--' : $size?->weight }} جرام</td>
                         @endif
                         <td class="nowrap">{{ $od->Price }}</td>
                         <td class="nowrap">{{ $od->Total_Price }} OMR</td>
                     </tr>
                 @endforeach
                 <tr class="total-row">
-                    <td colspan="5">الإجمالي قبل النهائي</td>
+                    <td colspan="5">{{ __('Subtotal') }}</td>
                     <td class="nowrap">{{ $order->Sub_Total }} OMR</td>
                 </tr>
                 <tr>
-                    <td colspan="5">مصاريف الشحن</td>
+                    <td colspan="5">{{ __('Delivery Charge') }}</td>
                     <td class="nowrap">{{ $order->Delivery_Charge }} OMR</td>
                 </tr>
                 <tr class="total-row">
-                    <td colspan="5">المجموع النهائي:</td>
+                    <td colspan="5">{{ __('Grand Total') }}:</td>
                     <td class="nowrap">{{ $order->Grand_Total }} OMR</td>
                 </tr>
             </tbody>
         </table>
 
         <div class="invoice-footer">
-            <p><strong>الملاحظات:</strong></p>
+            <p><strong>{{ __('Notes') }}:</strong></p>
 
         </div>
     </div>

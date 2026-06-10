@@ -301,8 +301,10 @@ class SyncSmartLifeProducts extends Command
 
             // Handle images: download remote image into public/uploaded_files/product_image
             if (!empty($smartLifeProduct->image)) {
-                // Only set if product has no Primary_Image or if the value is a remote URL
-                $shouldSaveImage = empty($product->Primary_Image) || filter_var($product->Primary_Image, FILTER_VALIDATE_URL);
+                // Only set if product has no Primary_Image, if the value is a remote URL, or if the file does not exist on disk
+                $shouldSaveImage = empty($product->Primary_Image) 
+                    || filter_var($product->Primary_Image, FILTER_VALIDATE_URL)
+                    || !File::exists(public_path('uploaded_files/product_image/' . $product->Primary_Image));
 
                 if ($shouldSaveImage) {
                     try {

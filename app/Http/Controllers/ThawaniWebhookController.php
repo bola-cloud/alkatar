@@ -293,16 +293,16 @@ class ThawaniWebhookController extends Controller
                 // Don't fail webhook - email can be resent manually
             }
 
-            try {
-                // Send WhatsApp success message upon payment confirmation
-                app(CheckoutController::class)->sendOrderNotification($order->id);
-                Log::info('WhatsApp success notification triggered via webhook', ['order_id' => $order->id]);
-            } catch (\Exception $e) {
-                Log::error('Failed to send WhatsApp success notification via webhook', [
-                    'error' => $e->getMessage(),
-                    'order_id' => $order->id,
-                ]);
-            }
+            // try {
+            //     // Send WhatsApp success message upon payment confirmation
+            //     app(CheckoutController::class)->sendOrderNotification($order->id);
+            //     Log::info('WhatsApp success notification triggered via webhook', ['order_id' => $order->id]);
+            // } catch (\Exception $e) {
+            //     Log::error('Failed to send WhatsApp success notification via webhook', [
+            //         'error' => $e->getMessage(),
+            //         'order_id' => $order->id,
+            //     ]);
+            // }
 
             return response()->json([
                 'status' => 'success',

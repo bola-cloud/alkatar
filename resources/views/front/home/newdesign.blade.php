@@ -1,653 +1,619 @@
 @extends('front.layouts.new_design_layout')
 
-@section('title', isset($title) ? $title : __('HiSpeed — New Design'))
-@section('description', isset($description) ? $description : '')
-@section('keywords', isset($keywords) ? $keywords : '')
-
 @section('content')
-  <!-- Hero Carousel -->
-  <section class="hero-section py-4">
-    <div class="container-fluid px-4">
-      @php
-        $slides = \App\Models\Admin\Advertise::where('location','hero')->where('status',1)->orderBy('display_order')->orderBy('id')->get();
-      @endphp
 
-      <link rel="stylesheet" href="{{ asset('admin/css/swiper-bundle.min.css') }}">
-      
-      <div class="swiper hero-swiper">
-        <div class="swiper-wrapper">
-          @foreach($slides as $i => $slide)
-            @php
-
-              $imgUrl = null;
-              if (!empty($slide->image)) {
-                 $imgUrl = asset($slide->image);
-                 // Fallback to PromotionImage path if not full path, but avoiding file_exists check
-                 // We assume the data is correct or let it break (or use client-side onerror if needed)
-                 if (!str_contains($slide->image, 'uploaded_files')) {
-                     $imgUrl = asset(PromotionImage() . $slide->image);
-                 }
-              } else {
-                $imgUrl = 'https://c.animaapp.com/mhnmip5wa2i9Oh/img/bannar-big-2.png';
-              }
-
-              // localized title, subtitle and small description: prefer display locale (session HTML_LANG)
-              $locale = session('HTML_LANG', app()->getLocale() ?? 'en');
-              if (in_array($locale, ['ar', 'fr'])) {
-                $title = $slide->ar_title ?? $slide->fr_title ?? $slide->en_title ?? __('Fresh & Healthy');
-                $subtitle = $slide->ar_subtitle ?? $slide->fr_subtitle ?? $slide->en_subtitle ?? '';
-                $smallDescription = $slide->ar_small_description ?? '';
-              } else {
-                $title = $slide->en_title ?? $slide->ar_title ?? $slide->fr_title ?? __('Fresh & Healthy');
-                $subtitle = $slide->en_subtitle ?? $slide->ar_subtitle ?? $slide->fr_subtitle ?? '';
-                $smallDescription = $slide->en_small_description ?? '';
-              }
-            @endphp
-
-            <div class="swiper-slide">
-              <div class="hero-banner d-flex align-items-center" style="background: linear-gradient(108deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%), url({{ $imgUrl }}) center/cover;">
-                <div class="container container-hero-peek">
-                  <div class="row">
-                    <div class="col-lg-10">
-                      <h1 class="display-3 fw-bold text-white mb-4">{!! $title !!}@if($subtitle)<br>{!! $subtitle !!}@endif</h1>
-                      <div class="d-flex align-items-center mb-3">
-                        <div class="bg-success" style="width: 3px; height: 60px;"></div>
-                        <div class="ms-3">
-                          @php $saleLines = preg_split('/\r?\n/', trim($smallDescription ?? ''));
-                          @endphp
-                          @if(!empty($saleLines) && count(array_filter($saleLines)) > 0)
-                            <p class="text-white mb-1">{!! $saleLines[0] ?? '' !!}</p>
-                            @if(isset($saleLines[1]) && trim($saleLines[1]) !== '')
-                              <p class="text-white-50 small mb-0">{!! $saleLines[1] !!}</p>
-                            @endif
-                          @else
-                            <p class="text-white mb-1">{{ __('Sale up to') }} <span class="badge bg-success fs-6">{{ __('30% OFF') }}</span></p>
-                            <p class="text-white-50 small mb-0">{{ __('Free shipping on all your order.') }}</p>
-                          @endif
-                        </div>
-                      </div>
-                      <a href="{{ $slide->link ?? '#' }}" class="btn btn-light btn-lg rounded-pill px-5 mt-3" target="_blank">
-                        {{ __('Shop Now') }} <i class="bi bi-arrow-right ms-2"></i>
-                      </a>
-                    </div> <!-- col-lg-10 -->
-                  </div> <!-- row -->
-                </div> <!-- container -->
-              </div> <!-- hero-banner -->
-            </div> <!-- swiper-slide -->
-          @endforeach
-        </div>
-        <div class="swiper-pagination hero-pagination mt-4"></div>
-      </div>
-    </div>
-  </section>
-
-
-  <!-- Categories Section -->
-  <section class="category-section py-5 bg-white border-bottom">
-    <div class="container">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">{{ __('Browse Categories') }}</h2>
-        <a href="{{ Route::has('categories.show') ? route('categories.show') : url('/categories') }}" class="btn btn-link text-warning text-decoration-none p-0">
-          {{ __('View All') }} <i class="bi bi-arrow-right"></i>
-        </a>
-      </div>
-      <div class="row">
-        <div class="col-12">
-          @include('front.home.partials._category_carousel', ['categories' => $allCategories])
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Today Special Offers -->
-  <section class="special-offers py-5 bg-light position-relative">
-    <div class="left-decorative" aria-hidden="true"></div>
-    {{-- Decorative grass at top-right --}}
-    <img src="{{ asset('new-design/images/grass.png') }}" alt="decorative grass" class="position-absolute" style="top:18px; right:24px; width:110px; max-width:18%; pointer-events:none; z-index:2; opacity:0.98;">
-
-    <div class="container">
-        <div class="text-center mb-5">
-        <h2 class="display-5 fw-bold">
-          @if(in_array(app()->getLocale(), ['ar','fr']))
-            {!! __('Today Special Offers') !!}
-          @else
-            {{ __('Today') }} <span class="text-success">{{ __('Special') }}</span> {{ __('Offers') }}
-          @endif
-        </h2>
-        <p class="text-muted">{{ __('Lorem Ipsum Is Simply Dummy Text Of The Printing And Typesetting Industry.') }}</p>
-      </div>
-
-      {{-- Render dynamic product carousel partial --}}
-      <div class="row">
-        <div class="col-12">
-          {{-- Use the controller-provided $products collection (Today Special or latest 5 fallback) --}}
-          @include('front.home.partials._product_carousel', ['products' => $products, 'carouselId' => 'specialOffersCarousel'])
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Best Seller Products -->
-  <section class="best-sellers py-5">
-    <div class="container">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">{{ __('Best Seller Products') }}</h2>
-        <a href="{{ Route::has('categories.show') ? route('categories.show') : url('/categories') }}" class="btn btn-link text-warning text-decoration-none">
-          {{ __('View All') }} <i class="bi bi-arrow-right"></i>
-        </a>
-      </div>
-
-      <div class="row">
-        <div class="col-12">
-          @if(isset($bestSellers) && $bestSellers->count())
-            @include('front.home.partials._product_carousel', ['products' => $bestSellers, 'carouselId' => 'bestSellersCarousel'])
-          @else
-            {{-- as controller provides fallback latest 5, this path should rarely run, but keep graceful fallback --}}
-            <p class="text-muted">{{ __('No best seller products available.') }}</p>
-          @endif
-        </div>
-      </div>
-    </div>
-  </section>
-
-  {{-- Dynamic Featured Categories Sections --}}
-  @php
-    $allFeatured = $featuredCategories;
-    $mainFeatured = $allFeatured->slice(0, -1);
-    $lastFeatured = $allFeatured->last();
-  @endphp
-
-  @foreach($mainFeatured as $featCat)
     @php
-      $catName = langConverter($featCat->en_Category_Name, $featCat->fr_Category_Name);
-      $catSlug = $featCat->en_Category_Slug;
-      $catProducts = $featCat->products;
+        $isRtl = app()->getLocale() != 'en';
+        $dir = $isRtl ? 'rtl' : 'ltr';
     @endphp
-    @if($catProducts->count() > 0)
-      <section class="featured-category-section py-5">
-        <div class="container">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold">{{ $catName }}</h2>
-            <a href="{{ route('categories.show', ['slug' => $featCat->en_Category_Slug]) }}" class="btn btn-link text-warning text-decoration-none">
-              {{ __('View All') }} <i class="bi bi-arrow-right"></i>
-            </a>
-          </div>
 
-          <div class="row">
-            <div class="col-12">
-              @include('front.home.partials._product_carousel', [
-                'products' => $catProducts, 
-                'carouselId' => 'catCarousel_' . $featCat->id
-              ])
-            </div>
-          </div>
-        </div>
-      </section>
-    @endif
-  @endforeach
+    <!-- White Separator Above -->
+    <div class="h-10 bg-white"></div>
 
-  <!-- Sale Banner -->
-  <section class="sale-banner py-5">
-    <div class="container-fluid px-4">
-      @php
-        // Prefer settings-based JSON value, fallback to Homepage row
-        $saleImg = null;
-        $displayLocale = session('HTML_LANG', app()->getLocale() ?? 'en');
-
-        $settingJson = null;
-        try {
-            $settingJson = DB::table('settings')->where('slug', 'home_newdesign_sale_banner')->value('value');
-        } catch (\Exception $e) {
-            $settingJson = null;
-        }
-
-        $saleData = null;
-        if ($settingJson) {
-            $decoded = json_decode($settingJson, true);
-            if (is_array($decoded)) {
-                if (isset($decoded[$displayLocale])) {
-                    $saleData = $decoded[$displayLocale];
-                } elseif (isset($decoded['en'])) {
-                    $saleData = $decoded['en'];
+    <!-- Hero Section (Exact Figma Match via Single Banner Image or Dynamic Content) -->
+    <section class="w-full h-auto bg-[#EDEAE3] relative">
+        @php
+            $heroImg = asset('assets/elketar/ddd.png');
+            if (!empty($heroSection) && !empty($heroSection->image)) {
+                if (file_exists(public_path($heroSection->image))) {
+                    $heroImg = asset($heroSection->image);
+                } elseif (file_exists(public_path(PromotionImage() . $heroSection->image))) {
+                    $heroImg = asset(PromotionImage() . $heroSection->image);
+                } else {
+                    $heroImg = asset(PromotionImage() . $heroSection->image);
                 }
             }
-        }
-
-        if (!$saleData) {
-          // Prefer homepage_sections table if present
-          $section = \App\Models\Admin\SiteContent\HomepageSection::where('section_key', 'newdesign_sale_banner')->first();
-          if ($section) {
-            $sdata = $section->content_en ?? [];
-            $sdata_fr = $section->content_fr ?? [];
-            if ($displayLocale === 'ar' && !empty($sdata_fr)) {
-              $saleData = $sdata_fr;
-            } elseif (!empty($sdata)) {
-              $saleData = $sdata;
-            }
-            if (empty($saleData)) {
-              $saleData = ['title'=>'','lead'=>'','button'=>['text'=>'','url'=>'#'],'image'=>$section->image ?? null];
-            } else {
-              $saleData['image'] = $section->image ?? ($saleData['image'] ?? null);
-            }
-          } else {
-            $saleRow = \App\Models\Admin\SiteContent\Homepage::where('Location', 'newdesign_sale_banner')->first();
-            if ($saleRow) {
-              $saleData = [
-                'title' => $saleRow->en_Title ?? $saleRow->fr_Title ?? '',
-                'lead' => $saleRow->en_Description_One ?? $saleRow->fr_Description_One ?? '',
-                'button' => [ 'text' => $saleRow->en_button_text ?? $saleRow->fr_button_text ?? '', 'url' => $saleRow->en_button_url ?? $saleRow->fr_button_url ?? '#' ],
-                'image' => $saleRow->image ?? null
-              ];
-              // if displayLocale is non-en, prefer localized fields from row if exist
-              if ($displayLocale === 'ar') {
-                $saleData['title'] = $saleRow->fr_Title ?? $saleRow->en_Title ?? $saleData['title'];
-                $saleData['lead'] = $saleRow->fr_Description_One ?? $saleRow->en_Description_One ?? $saleData['lead'];
-                $saleData['button']['text'] = $saleRow->fr_button_text ?? $saleRow->en_button_text ?? $saleData['button']['text'];
-                $saleData['button']['url'] = $saleRow->fr_button_url ?? $saleRow->en_button_url ?? $saleData['button']['url'];
-              }
-            }
-          }
-        }
-
-          // ensure we always have an array to avoid "offset on value of type null" errors
-          if (!is_array($saleData)) {
-            $saleData = [
-              'title' => '',
-              'lead' => '',
-              'button' => ['text' => '', 'url' => '#'],
-              'image' => null,
-            ];
-          }
-
-        // resolve image from either settings or row
-        $candidate = $saleData['image'] ?? null;
-        if ($candidate) {
-          if (stripos($candidate, 'http://') === 0 || stripos($candidate, 'https://') === 0) {
-            $saleImg = $candidate;
-          } elseif (file_exists(public_path($candidate))) {
-            $saleImg = asset($candidate);
-          } elseif (file_exists(public_path(PromotionImage() . $candidate))) {
-            $saleImg = asset(PromotionImage() . $candidate);
-          } elseif (strpos($candidate, 'uploaded_files') !== false) {
-            $saleImg = asset($candidate);
-          }
-        }
-
-        $saleTitle = $saleData['title'] ?? '';
-        $saleDesc = $saleData['lead'] ?? '';
-        $saleBtnText = $saleData['button']['text'] ?? '';
-        $saleBtnUrl = $saleData['button']['url'] ?? '#';
-      @endphp
-
-      <div class="row align-items-center rounded-3 p-4 best-deals" style="background: {{ $saleImg ? 'url(' . $saleImg . ') center/cover' : 'linear-gradient(90deg,#ffc107,#ff8a00)' }};">
-        <div class="col-12 text-center text-white py-5">
-          <h2 class="fw-bold">{!! $saleTitle ?: __('Sale of the Month') !!}</h2>
-          <p class="mb-3">{!! $saleDesc ?: __('Best deals and limited time offers. Don\'t miss out!') !!}</p>
-          @if($saleBtnText)
-            <a href="{{ $saleBtnUrl }}" class="btn btn-light rounded-pill px-4" target="_blank">{!! $saleBtnText !!} <i class="bi bi-arrow-right ms-2"></i></a>
-          @endif
-        </div>
-      </div>
-    </div>
-  </section>
-
-  {{-- The last featured category displayed between banners per Figma design --}}
-  @if($lastFeatured && $lastFeatured->products->count() > 0)
-    @php
-      $featCat = $lastFeatured;
-      $catName = langConverter($featCat->en_Category_Name, $featCat->fr_Category_Name);
-      $catSlug = $featCat->en_Category_Slug;
-      $catProducts = $featCat->products;
-    @endphp
-    <section class="featured-category-section py-5 second-featured-section">
-      <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <h2 class="fw-bold">{{ $catName }}</h2>
-          <a href="{{ route('categories.show', ['slug' => $catSlug]) }}" class="btn btn-link text-warning text-decoration-none">
-            {{ __('View All') }} <i class="bi bi-arrow-right"></i>
-          </a>
-        </div>
-
-        <div class="row">
-          <div class="col-12">
-            @include('front.home.partials._product_carousel', [
-              'products' => $catProducts, 
-              'carouselId' => 'catCarousel_' . $featCat->id
-            ])
-          </div>
-        </div>
-      </div>
-    </section>
-  @endif
-
-  <!-- Why Choose Us -->
-  <section class="why-choose-us py-5 bg-light">
-    <div class="container">
-      <div class="row align-items-center">
-        <div class="col-lg-6 mb-4 mb-lg-0">
-              @php
-                  // Prefer settings-based JSON (home_newdesign_why_choose) then fallback to Homepage row
-                  $heroUrl = null;
-                  $whyData = null;
-                  try {
-                      $whySetting = DB::table('settings')->where('slug', 'home_newdesign_why_choose')->value('value');
-                  } catch (\Exception $e) {
-                      $whySetting = null;
-                  }
-                  if ($whySetting) {
-                      $decoded = json_decode($whySetting, true);
-                      if (is_array($decoded)) {
-                          if (isset($decoded[session('HTML_LANG', app()->getLocale() ?? 'en')])) {
-                              $whyData = $decoded[session('HTML_LANG', app()->getLocale() ?? 'en')];
-                          } elseif (isset($decoded['en'])) {
-                              $whyData = $decoded['en'];
-                          }
-                      }
-                  }
-
-                    if (!$whyData) {
-                      // prefer homepage_sections table
-                      $section = \App\Models\Admin\SiteContent\HomepageSection::where('section_key','newdesign_why_choose')->first();
-                      if ($section) {
-                        $decoded_en = $section->content_en ?? [];
-                        $decoded_fr = $section->content_fr ?? [];
-                        $curLocale = session('HTML_LANG', app()->getLocale() ?? 'en');
-                        if ($curLocale === 'ar' && !empty($decoded_fr)) {
-                          $whyData = $decoded_fr;
-                        } elseif (!empty($decoded_en)) {
-                          $whyData = $decoded_en;
-                        }
-                        // Ensure image key exists: prefer inline content image, otherwise use section image
-                        if (!is_array($whyData)) $whyData = [];
-                        if (empty($whyData['image'])) {
-                          $whyData['image'] = $section->image ?? null;
-                        }
-                        $whyData = $whyData ?: ['title'=>'','lead'=>'','points'=>[],'button'=>['text'=>'','url'=>'#'],'image'=>$section->image ?? null];
-                      } else {
-                        $why = \App\Models\Admin\SiteContent\Homepage::where('Location', 'newdesign_why_choose')->first();
-                        if ($why) {
-                          $whyData = [
-                            'title' => $why->en_Title ?? $why->fr_Title ?? '',
-                            'lead' => $why->en_Description_One ?? $why->fr_Description_One ?? '',
-                            'points' => preg_split('/\r?\n/', trim($why->en_Description_Two ?? $why->fr_Description_Two ?? '')),
-                            'button' => ['text' => $why->en_button_text ?? $why->fr_button_text ?? '', 'url' => $why->en_button_url ?? $why->fr_button_url ?? '#'],
-                            'image' => $why->image ?? null
-                          ];
-                          if (session('HTML_LANG', app()->getLocale() ?? 'en') === 'ar') {
-                            $whyData['title'] = $why->fr_Title ?? $whyData['title'];
-                            $whyData['lead'] = $why->fr_Description_One ?? $whyData['lead'];
-                            $whyData['points'] = preg_split('/\r?\n/', trim($why->fr_Description_Two ?? $why->en_Description_Two ?? ''));
-                            $whyData['button']['text'] = $why->fr_button_text ?? $whyData['button']['text'];
-                            $whyData['button']['url'] = $why->fr_button_url ?? $whyData['button']['url'];
-                          }
-                        }
-                      }
-                    }
-
-                    // ensure whyData is an array before using offsets
-                    if (!is_array($whyData)) {
-                      $whyData = ['title' => '', 'lead' => '', 'points' => [], 'button' => ['text' => '', 'url' => '#'], 'image' => null];
-                    }
-                    $candidate = $whyData['image'] ?? null;
-                  if ($candidate) {
-                    if (stripos($candidate, 'http://') === 0 || stripos($candidate, 'https://') === 0) {
-                      $heroUrl = $candidate;
-                    } elseif (file_exists(public_path($candidate))) {
-                      $heroUrl = asset($candidate);
-                    } elseif (file_exists(public_path(PromotionImage() . $candidate))) {
-                      $heroUrl = asset(PromotionImage() . $candidate);
-                    } elseif (strpos($candidate, 'uploaded_files') !== false) {
-                      $heroUrl = asset($candidate);
-                    }
-                  }
-
-                  $whyTitle = $whyData['title'] ?? '';
-                  $whyLead = $whyData['lead'] ?? '';
-                  $whyPoints = is_array($whyData['points']) ? implode("\n", $whyData['points']) : ($whyData['points'] ?? '');
-                  $whyBtnText = $whyData['button']['text'] ?? '';
-                  $whyBtnUrl = $whyData['button']['url'] ?? '#';
-              @endphp
-              @if($heroUrl)
-                  <div class="intro-image text-center md:text-right">
-                      <img src="{{ $heroUrl }}" alt="hero" class="inline-block max-w-full" />
-                  </div>
-              @endif
-        </div>
-        <div class="col-lg-6">
-          <h2 class="fw-bold mb-4">{!! nl2br(e($whyTitle ?: __('100% Trusted\nOrganic Food Store'))) !!}</h2>
-          <div class="mb-4">
-            @php
-              $points = preg_split('/\r?\n/', trim($whyPoints ?? ''));
-            @endphp
-            @if(!empty($points) && count(array_filter($points)) > 0)
-              @foreach($points as $p)
-                @if(trim($p) === '') @continue @endif
-                <div class="d-flex align-items-start mb-3">
-                  <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/check.png" alt="Check" class="me-3" style="width: 30px;">
-                  <div>
-                    <h5 class="fw-semibold">{!! $p !!}</h5>
-                  </div>
-                </div>
-              @endforeach
-            @else
-              <div class="d-flex align-items-start mb-3">
-                <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/check.png" alt="Check" class="me-3" style="width: 30px;">
-                <div>
-                  <h5 class="fw-semibold">{{ __('Healthy & natural food for lovers of healthy food.') }}</h5>
-                  <p class="text-muted">{{ __('Ut quis tempus erat. Phasellus euismod bibendum magna non tristique.') }}</p>
-                </div>
-              </div>
-              <div class="d-flex align-items-start mb-3">
-                <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/check-1.png" alt="Check" class="me-3" style="width: 30px;">
-                <div>
-                  <h5 class="fw-semibold">{{ __('Every day fresh and quality products for you.') }}</h5>
-                  <p class="text-muted">{{ __('Maecenas vehicula a justo quis laoreet. Sed in placerat nibh.') }}</p>
-                </div>
-              </div>
-            @endif
-          </div>
-          @if($whyBtnText)
-            <a href="{{ $whyBtnUrl }}" class="btn btn-success rounded-pill px-4" target="_blank">{!! $whyBtnText !!} <i class="bi bi-arrow-right ms-2"></i></a>
-          @else
-            <button class="btn btn-success rounded-pill px-4">{{ __('Shop Now') }} <i class="bi bi-arrow-right ms-2"></i></button>
-          @endif
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Features -->
-  <section class="features py-5">
-    <div class="container">
-      <div class="row g-4">
-        @php
-          $featuresSection = \App\Models\Admin\SiteContent\HomepageSection::where('section_key','newdesign_features')->first();
-          $displayLocale = session('HTML_LANG', app()->getLocale() ?? 'en');
-          $items = [];
-          if ($featuresSection) {
-              $data = $displayLocale === 'ar' ? ($featuresSection->content_fr ?? []) : ($featuresSection->content_en ?? []);
-              if (isset($data['items']) && is_array($data['items'])) {
-                  $items = $data['items'];
-              }
-          }
         @endphp
+        <img src="{{ $heroImg }}" alt="Hero Banner" class="w-full h-auto block">
+    </section>
 
-        @if(!empty($items))
-          @php
-            // static icons to use for features (old static set)
-            $staticIcons = [
-              'https://c.animaapp.com/mhnmip5wa2i9Oh/img/delivery-truck-1.svg',
-              'https://c.animaapp.com/mhnmip5wa2i9Oh/img/headphones-1.svg',
-              'https://c.animaapp.com/mhnmip5wa2i9Oh/img/shopping-bag.svg',
-              'https://c.animaapp.com/mhnmip5wa2i9Oh/img/package.svg'
-            ];
-          @endphp
-          @foreach($items as $it)
-            @php $icon = $staticIcons[$loop->index % count($staticIcons)]; @endphp
-            <div class="col-6 col-md-6 col-lg-3">
-              <div class="feature-card h-100 w-100 d-flex align-items-center p-4 bg-white rounded shadow-sm">
-                <img src="{{ $icon }}" alt="feature-icon" class="me-3" style="width: 45px;">
-                <div>
-                  <h6 class="mb-1 fw-semibold">{!! $it['title'] ?? '' !!}</h6>
-                  <p class="text-muted small mb-0">{!! $it['desc'] ?? '' !!}</p>
+    <!-- White Separator Above -->
+    <div class="h-10 bg-white"></div>
+
+    <!-- Features Section (ما الذي يميز قطار القهوة؟) -->
+    <section class="py-16 lg:py-24 relative overflow-hidden" dir="{{ $dir }}">
+
+        <!-- Background Image: saaa.png -->
+        <div class="absolute inset-0">
+            <img src="{{ asset('assets/elketar/Intro Section (Notion Style).png') }}" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-[#1A4231]/60"></div>
+        </div>
+
+        <div class="container mx-auto px-4 relative z-10">
+
+            <!-- 2-Column Layout on Desktop: Text & Cards (Right), Hand (Left) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+
+                <!-- Right Column: Text & Cards (First in DOM -> Right side in RTL, Left in LTR) -->
+                <div class="lg:col-span-8 flex flex-col gap-10 lg:gap-16 text-start">
+
+                    <!-- Text Content -->
+                    <div class="text-center lg:text-start">
+                        @php
+                            $whyTitle = $isRtl ? ($whyChoose->content_fr['title'] ?? '') : ($whyChoose->content_en['title'] ?? '');
+                            $whyDesc = $isRtl ? ($whyChoose->content_fr['lead'] ?? '') : ($whyChoose->content_en['lead'] ?? '');
+                            
+                            $featuresContent = $isRtl ? ($features->content_fr ?? []) : ($features->content_en ?? []);
+                            $featureItems = $featuresContent['items'] ?? [];
+                        @endphp
+                        <h2 class="text-3xl lg:text-5xl font-black text-white leading-tight mb-6">
+                            {{ !empty($whyTitle) ? $whyTitle : __('new_design.home.why_title') }}
+                        </h2>
+                        <!-- Text and Vertical Line -->
+                        <div class="flex flex-col lg:flex-row items-center lg:items-start gap-6">
+                            <p class="text-white/90 text-base lg:text-lg leading-relaxed font-medium max-w-2xl text-center lg:text-start">
+                                {{ !empty($whyDesc) ? $whyDesc : __('new_design.home.why_desc') }}
+                            </p>
+                            <!-- Line (Second in DOM -> Left of text in RTL) -->
+                            <div class="w-1 h-24 bg-white/40 hidden lg:block rounded-full"></div>
+                        </div>
+                    </div>
+
+                    <!-- 3 Cards Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+                        @forelse($featureItems as $index => $it)
+                            <!-- Box {{ $index + 1 }} -->
+                            <div class="bg-[#FBF0D8] p-6 lg:p-8 rounded-2xl text-start shadow-xl hover:-translate-y-2 transition-transform duration-300 border-b-4 border-[#1A4231] flex flex-col items-start">
+                                <div class="text-[#1A4231] mb-5">
+                                    @if(!empty($it['icon']))
+                                        {!! $it['icon'] !!}
+                                    @else
+                                        @if($index === 0)
+                                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                                        @elseif($index === 1)
+                                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                        @else
+                                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        @endif
+                                    @endif
+                                </div>
+                                <h3 class="text-lg lg:text-xl font-bold text-[#1A4231] mb-3">{{ $it['title'] ?? '' }}</h3>
+                                <p class="text-sm text-gray-600 leading-relaxed font-semibold">
+                                    {{ $it['desc'] ?? '' }}
+                                </p>
+                            </div>
+                        @empty
+                            <!-- Box 1 -->
+                            <div class="bg-[#FBF0D8] p-6 lg:p-8 rounded-2xl text-start shadow-xl hover:-translate-y-2 transition-transform duration-300 border-b-4 border-[#1A4231] flex flex-col items-start">
+                                <div class="text-[#1A4231] mb-5">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                                </div>
+                                <h3 class="text-lg lg:text-xl font-bold text-[#1A4231] mb-3">{{ __('new_design.home.feat_roast_title') }}</h3>
+                                <p class="text-sm text-gray-600 leading-relaxed font-semibold">
+                                    {{ __('new_design.home.feat_roast_desc') }}
+                                </p>
+                            </div>
+                            <!-- Box 2 -->
+                            <div class="bg-[#FBF0D8] p-6 lg:p-8 rounded-2xl text-start shadow-xl hover:-translate-y-2 transition-transform duration-300 border-b-4 border-[#1A4231] flex flex-col items-start">
+                                <div class="text-[#1A4231] mb-5">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                </div>
+                                <h3 class="text-lg lg:text-xl font-bold text-[#1A4231] mb-3">{{ __('new_design.home.feat_trade_title') }}</h3>
+                                <p class="text-sm text-gray-600 leading-relaxed font-semibold">
+                                    {{ __('new_design.home.feat_trade_desc') }}
+                                </p>
+                            </div>
+                            <!-- Box 3 -->
+                            <div class="bg-[#FBF0D8] p-6 lg:p-8 rounded-2xl text-start shadow-xl hover:-translate-y-2 transition-transform duration-300 border-b-4 border-[#1A4231] flex flex-col items-start">
+                                <div class="text-[#1A4231] mb-5">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                </div>
+                                <h3 class="text-lg lg:text-xl font-bold text-[#1A4231] mb-3">{{ __('new_design.home.feat_quality_title') }}</h3>
+                                <p class="text-sm text-gray-600 leading-relaxed font-semibold">
+                                    {{ __('new_design.home.feat_quality_desc') }}
+                                </p>
+                            </div>
+                        @endforelse
+                    </div>
                 </div>
-              </div>
-            </div>
-          @endforeach
-        @else
-          <div class="col-6 col-md-6 col-lg-3">
-            <div class="feature-card h-100 w-100 d-flex align-items-center p-4 bg-white rounded shadow-sm">
-              <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/delivery-truck-1.svg" alt="{{ __('Delivery') }}" class="me-3" style="width: 45px;">
-              <div>
-                <h6 class="mb-1 fw-semibold">{{ __('Fast delivery within the same day') }}</h6>
-                <!-- <p class="text-muted small mb-0">{{ __('Free shipping on all your order.') }}</p> -->
-              </div>
-            </div>
-          </div>
-          <div class="col-6 col-md-6 col-lg-3">
-            <div class="feature-card h-100 w-100 d-flex align-items-center p-4 bg-white rounded shadow-sm">
-              <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/headphones-1.svg" alt="{{ __('Support') }}" class="me-3" style="width: 45px;">
-              <div>
-                <h6 class="mb-1 fw-semibold">{{ __('Customer Support 24/7') }}</h6>
-                <!-- <p class="text-muted small mb-0">{{ __('Instant access to Support') }}</p> -->
-              </div>
-            </div>
-          </div>
-          <div class="col-6 col-md-6 col-lg-3">
-            <div class="feature-card h-100 w-100 d-flex align-items-center p-4 bg-white rounded shadow-sm">
-              <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/shopping-bag.svg" alt="{{ __('Payment') }}" class="me-3" style="width: 45px;">
-              <div>
-                <h6 class="mb-1 fw-semibold">{{ __('100% Secure Payment') }}</h6>
-                <!-- <p class="text-muted small mb-0">{{ __('We ensure your money is safe') }}</p> -->
-              </div>
-            </div>
-          </div>
-          <div class="col-6 col-md-6 col-lg-3">
-            <div class="feature-card h-100 w-100 d-flex align-items-center p-4 bg-white rounded shadow-sm">
-              <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/package.svg" alt="{{ __('Guarantee') }}" class="me-3" style="width: 45px;">
-              <div>
-                <h6 class="mb-1 fw-semibold">{{ __('Money-Back Guarantee') }}</h6>
-                <!-- <p class="text-muted small mb-0">{{ __('30 Days Money-Back Guarantee') }}</p> -->
-              </div>
-            </div>
-          </div>
-        @endif
-      </div>
-    </div>
-  </section>
 
-  <!-- Testimonials -->
-  <section class="testimonials py-5">
-    <div class="container">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <p class="text-success text-uppercase small mb-1">{{ __('TESTIMONIAL') }}</p>
-          <h2 class="fw-bold">{{ __('What Our Customer Says') }}</h2>
-        </div>
-      </div>
-
-      <div class="row g-4">
-        <div class="col-12">
-          <div class="swiper testimonials-swiper">
-            <div class="swiper-wrapper">
-              @if(isset($reviews) && $reviews->isNotEmpty())
-                @foreach($reviews as $r)
-                  <div class="swiper-slide">
-                    <div class="card border-0 shadow-sm h-100">
-                      <div class="card-body">
-                        <i class="bi bi-quote text-success fs-1"></i>
-                        <p class="card-text text-muted my-3">{{ \Illuminate\Support\Str::limit($r->feedback, 220) }}</p>
-                        <div class="d-flex align-items-center justify-content-between">
-                          <div class="d-flex align-items-center">
-                            <img src="{{ isset($r->user->image) ? asset(AdminProfilePicture().$r->user->image) : Avatar::create($r->user->name ?? 'Customer')->toBase64() }}" alt="{{ $r->user->name ?? __('Customer') }}" class="rounded-circle me-3" style="width: 50px; height: 50px;">
-                            <div>
-                              <h6 class="mb-0">{{ $r->user->name ?? __('Customer') }}</h6>
-                              <small class="text-muted">{{ __('Customer') }}</small>
-                            </div>
-                          </div>
-                          @php
-                            $rating = intval($r->rating ?? 0);
-                            $stars = str_repeat('★', $rating) . str_repeat('☆', max(0, 5 - $rating));
-                          @endphp
-                          <span class="text-warning">{!! $stars !!}</span>
-                        </div>
-                      </div>
+                <!-- Left Column: Hand Image (Second in DOM -> Left side in RTL, Right in LTR) -->
+                <div class="lg:col-span-4 flex items-center justify-center lg:justify-end">
+                    <div class="relative w-full max-w-sm">
+                        @php
+                            $whyChooseImg = asset('assets/elketar/65646 1.png');
+                            if (!empty($whyChoose) && !empty($whyChoose->image)) {
+                                if (file_exists(public_path($whyChoose->image))) {
+                                    $whyChooseImg = asset($whyChoose->image);
+                                } elseif (file_exists(public_path(PromotionImage() . $whyChoose->image))) {
+                                    $whyChooseImg = asset(PromotionImage() . $whyChoose->image);
+                                } else {
+                                    $whyChooseImg = asset(PromotionImage() . $whyChoose->image);
+                                }
+                            }
+                        @endphp
+                        <img src="{{ $whyChooseImg }}" alt="Why Choose" class="w-full h-auto drop-shadow-2xl object-contain">
                     </div>
-                  </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- White Separator Below -->
+    <div class="h-10 bg-white"></div>
+
+    <!-- Browse Our World (تصفح عالمنا) -->
+    <section class="py-24 relative" dir="{{ $dir }}" style="background-image: url('{{ asset('assets/elketar/Section - Categories Showcase.png') }}'); background-size: cover; background-position: center;">
+
+        <div class="container mx-auto px-4 relative z-10">
+            <!-- Section Title -->
+            <div class="flex flex-col items-center mb-16 lg:mb-20">
+                <h2 class="text-3xl lg:text-5xl font-black text-[#1A4231] text-center mb-4">{{ __('new_design.home.browse_title') }}</h2>
+                <div class="w-24 h-1.5 bg-[#1A4231] rounded-full"></div>
+            </div>
+
+            <!-- 4 Ovals Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+
+                <!-- Card 1: المحاصيل -->
+                <div class="relative overflow-hidden rounded-[120px] lg:rounded-[200px] aspect-[2/3] shadow-xl group">
+                    <img src="{{ asset('assets/elketar/محاصيل القهوة.png') }}" alt="المحاصيل" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 right-0 p-8 flex flex-col items-center text-center text-white">
+                        <h3 class="text-2xl lg:text-3xl font-extrabold mb-3 drop-shadow-md">{{ __('new_design.home.cat_crops_title') }}</h3>
+                        <p class="text-xs lg:text-sm font-medium mb-5 text-white/90 leading-relaxed">
+                            {{ __('new_design.home.cat_crops_desc') }}
+                        </p>
+                        <a href="{{ route('coffee.crops') }}" class="inline-flex items-center gap-2 text-sm font-bold text-white hover:text-gray-200 transition-colors">
+                            {{ __('new_design.home.learn_more') }}
+                            <svg class="w-4 h-4 {{ $isRtl ? '' : 'rotate-180' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Card 2: الأدوات -->
+                <div class="relative overflow-hidden rounded-[120px] lg:rounded-[200px] aspect-[2/3] shadow-xl group">
+                    <img src="{{ asset('assets/elketar/أدوات تحضير القهوة.png') }}" alt="الأدوات" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 right-0 p-8 flex flex-col items-center text-center text-white">
+                        <h3 class="text-2xl lg:text-3xl font-extrabold mb-3 drop-shadow-md">{{ __('new_design.home.cat_tools_title') }}</h3>
+                        <p class="text-xs lg:text-sm font-medium mb-5 text-white/90 leading-relaxed">
+                            {{ __('new_design.home.cat_tools_desc') }}
+                        </p>
+                        <a href="{{ route('technical.tools') }}" class="inline-flex items-center gap-2 text-sm font-bold text-white hover:text-gray-200 transition-colors">
+                            {{ __('new_design.home.learn_more') }}
+                            <svg class="w-4 h-4 {{ $isRtl ? '' : 'rotate-180' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Card 3: صناديق التجربة -->
+                <div class="relative overflow-hidden rounded-[120px] lg:rounded-[200px] aspect-[2/3] shadow-xl group">
+                    <img src="{{ asset('assets/elketar/صناديق التجارب.png') }}" alt="صناديق التجربة" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 right-0 p-8 flex flex-col items-center text-center text-white">
+                        <h3 class="text-2xl lg:text-3xl font-extrabold mb-3 drop-shadow-md">{{ __('new_design.home.cat_boxes_title') }}</h3>
+                        <p class="text-xs lg:text-sm font-medium mb-5 text-white/90 leading-relaxed">
+                            {{ __('new_design.home.cat_boxes_desc') }}
+                        </p>
+                        <a href="{{ route('trial.boxes') }}" class="inline-flex items-center gap-2 text-sm font-bold text-white hover:text-gray-200 transition-colors">
+                            {{ __('new_design.home.learn_more') }}
+                            <svg class="w-4 h-4 {{ $isRtl ? '' : 'rotate-180' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Card 4: استشر خبيراً -->
+                <div class="relative overflow-hidden rounded-[120px] lg:rounded-[200px] aspect-[2/3] shadow-xl group">
+                    <img src="{{ asset('assets/elketar/استشر خبيراً.png') }}" alt="استشر خبيراً" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 right-0 p-8 flex flex-col items-center text-center text-white">
+                        <h3 class="text-2xl lg:text-3xl font-extrabold mb-3 drop-shadow-md">{{ __('new_design.home.cat_expert_title') }}</h3>
+                        <p class="text-xs lg:text-sm font-medium mb-5 text-white/90 leading-relaxed">
+                            {{ __('new_design.home.cat_expert_desc') }}
+                        </p>
+                        <a href="{{ route('experts') }}" class="inline-flex items-center gap-2 text-sm font-bold text-white hover:text-gray-200 transition-colors">
+                            {{ __('new_design.home.book_appointment') }}
+                            <svg class="w-4 h-4 {{ $isRtl ? '' : 'rotate-180' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- White Separator Above -->
+    <div class="h-10 bg-white"></div>
+
+    <!-- Complete Packages (باقات متكاملة) Section -->
+    @if(isset($packages) && $packages->count() > 0)
+    <section class="py-16 lg:py-24 bg-white text-[#1A4231]" dir="{{ $dir }}" style="font-family: 'Cairo', sans-serif;">
+        <div class="container mx-auto px-4 max-w-[1360px]">
+            
+            <!-- Section Header -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-6 mb-12 lg:mb-16">
+                <!-- Heading & Subheading -->
+                <div class="text-center sm:text-start flex flex-col gap-2">
+                    <h2 class="text-3xl lg:text-[40px] font-black text-[#1A4231] tracking-wide leading-tight">
+                        {{ $isRtl ? 'باقات متكاملة' : 'Complete Bundles' }}
+                    </h2>
+                    <p class="text-sm lg:text-base font-bold text-gray-500">
+                        {{ $isRtl ? 'ابدأ رحلتك فوراً مع مجموعاتنا المختارة بعناية' : 'Start your journey immediately with our carefully selected collections' }}
+                    </p>
+                </div>
+
+                <!-- Link/Button on Left (RTL) / Right (LTR) -->
+                <a href="{{ route('front.store') }}?category=packages" class="text-sm lg:text-base font-extrabold hover:underline flex items-center gap-1 hover:gap-2 transition-all">
+                    <span>{{ $isRtl ? 'عرض جميع الباقات' : 'View all packages' }}</span>
+                    <svg class="w-4 h-4 {{ $isRtl ? '' : 'rotate-180' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                </a>
+            </div>
+
+            <!-- Packages Grid (2 Columns) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
+                @foreach($packages as $index => $package)
+                    @php
+                        // First card: dark green, second card: white (and repeat)
+                        $isDark = $index % 2 === 0;
+                        $cardBg = $isDark ? 'bg-[#1A4231] text-white border-transparent' : 'bg-[#FDFBF7] text-[#1A4231] border-gray-200/65';
+                        
+                        $badgeBg = $isDark ? 'bg-[#FBF0D8] text-[#1A4231]' : 'bg-[#EAECE9] text-[#1A4231]/80';
+                        $btnBg = $isDark ? 'bg-[#FDF9F0] text-[#1A4231] hover:bg-white' : 'bg-[#1A4231] text-white hover:bg-[#2A5E47]';
+                        
+                        $priceColor = $isDark ? 'text-white' : 'text-[#1A4231]';
+                        $originalPriceColor = $isDark ? 'text-white/60' : 'text-gray-400';
+                        $subPriceColor = $isDark ? 'text-[#FBF0D8]' : 'text-gray-500';
+                        
+                        // Image formatting
+                        $prodImg = $package->Primary_Image;
+                        $imgSrc = (strpos($prodImg, 'http') === 0) ? $prodImg : asset(ProductImage().$prodImg);
+                    @endphp
+
+                    <!-- Package Card -->
+                    <div class="relative rounded-[32px] overflow-hidden p-8 lg:p-10 flex flex-col md:flex-row justify-between gap-8 shadow-xl transition-all duration-300 hover:scale-[1.01] border {{ $cardBg }}">
+                        
+                        <!-- Decorative Watermark (for the dark card) -->
+                        @if($isDark)
+                            <div class="absolute right-0 bottom-0 opacity-5 pointer-events-none translate-x-12 translate-y-12">
+                                <svg class="w-80 h-80" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"/></svg>
+                            </div>
+                        @else
+                            <div class="absolute right-0 bottom-0 opacity-5 pointer-events-none translate-x-12 translate-y-12">
+                                <svg class="w-80 h-80 text-[#1A4231]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"/></svg>
+                            </div>
+                        @endif
+
+                        <!-- Right/Info Column -->
+                        <div class="flex-1 flex flex-col justify-between items-start gap-6 relative z-10 text-start">
+                            <div class="flex flex-col items-start gap-4">
+                                <!-- Tag/Badge -->
+                                @if($package->ItemTag)
+                                    <span class="inline-block text-[11px] font-black tracking-wide px-4 py-1.5 rounded-full {{ $badgeBg }}">
+                                        {{ $package->ItemTag == 'Beginner' ? ($isRtl ? 'الأكثر مبيعاً' : 'Best Seller') : ($isRtl ? 'باقة المحترفين' : 'Pro Package') }}
+                                    </span>
+                                @endif
+
+                                <!-- Title -->
+                                <h3 class="text-2xl lg:text-3xl font-black leading-tight">
+                                    {{ $package->localized_name }}
+                                </h3>
+
+                                <!-- Description/Contents -->
+                                <p class="text-xs lg:text-sm font-semibold opacity-90 leading-relaxed">
+                                    {{ $package->localized_about }}
+                                </p>
+                            </div>
+
+                            <!-- CTA/Order Button -->
+                            <button onclick="addToCart({{ $package->id }}, {{ $package->Discount > 0 ? ($package->Price - ($package->Price * $package->Discount / 100)) : $package->Price }})"
+                                    class="px-8 py-3.5 rounded-full text-sm font-extrabold transition-all duration-300 shadow-md transform hover:scale-[1.02] active:scale-[0.98] {{ $btnBg }}">
+                                {{ $isRtl ? 'اطلب الباقة الآن' : 'Order package now' }}
+                            </button>
+                        </div>
+
+                        <!-- Left/Price and Image Column -->
+                        <div class="flex flex-col justify-between items-end gap-6 relative z-10 md:min-w-[160px]">
+                            <!-- Price Area -->
+                            <div class="flex flex-col items-end gap-1">
+                                <span class="text-[11px] font-extrabold tracking-wide uppercase opacity-75 {{ $subPriceColor }}">
+                                    {{ $isRtl ? 'سعر حصري' : 'EXCLUSIVE PRICE' }}
+                                </span>
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-2xl lg:text-3xl font-black {{ $priceColor }}">
+                                        {{ floatval($package->Discount > 0 ? ($package->Price - ($package->Price * $package->Discount / 100)) : $package->Price) }}
+                                        <span class="text-xs font-bold">{{ $isRtl ? 'ر.س' : 'SAR' }}</span>
+                                    </span>
+                                    @if($package->Discount > 0)
+                                        <span class="text-xs font-bold line-through {{ $originalPriceColor }}">
+                                            {{ floatval($package->Price) }} {{ $isRtl ? 'ر.س' : 'SAR' }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <!-- Small Package Image preview -->
+                            <div class="w-24 h-24 rounded-2xl overflow-hidden border border-white/10 shadow-lg shrink-0">
+                                <img src="{{ $imgSrc }}" alt="{{ $package->localized_name }}" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+
+                    </div>
                 @endforeach
-              @else
-                {{-- Fallback static slides --}}
-                {{-- @for($i=0;$i<3;$i++)
-                  <div class="swiper-slide">
-                    <div class="card border-0 shadow-sm h-100">
-                      <div class="card-body">
-                        <i class="bi bi-quote text-success fs-1"></i>
-                        <p class="card-text text-muted my-3">{{ __('Pellentesque eu nibh eget mauris congue mattis mattis nec tellus. Phasellus imperdiet elit eu magna dictum.') }}</p>
-                        <div class="d-flex align-items-center justify-content-between">
-                          <div class="d-flex align-items-center">
-                            <img src="https://c.animaapp.com/mhnmip5wa2i9Oh/img/image.png" alt="{{ __('Customer') }}" class="rounded-circle me-3" style="width: 50px; height: 50px;">
-                            <div>
-                              <h6 class="mb-0">{{ ['Robert Fox','Dianne Russell','Eleanor Pena'][$i] }}</h6>
-                              <small class="text-muted">{{ __('Customer') }}</small>
-                            </div>
-                          </div>
-                          <span class="text-warning">★★★★★</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                @endfor --}}
-              @endif
             </div>
-          </div>
-        </div>
-      </div>
-      <script src="{{ asset('admin/js/swiper-bundle.min.js') }}"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      // Hero Swiper
-      new Swiper('.hero-swiper', {
-        slidesPerView: 1.1,
-        centeredSlides: true,
-        spaceBetween: 10,
-        loop: true,
-        autoplay: {
-          delay: 5000,
-          disableOnInteraction: false,
-        },
-        pagination: {
-          el: '.hero-pagination',
-          clickable: true,
-        },
-        breakpoints: {
-          768: {
-            slidesPerView: 1.2,
-            spaceBetween: 24,
-          },
-          1200: {
-            slidesPerView: 1.25,
-            spaceBetween: 32,
-          }
-        }
-      });
 
-      // Testimonials Swiper
-      new Swiper('.testimonials-swiper', {
-        slidesPerView: 4,
-        spaceBetween: 24,
-        loop: true,
-        autoplay: {
-          delay: 3000,
-          disableOnInteraction: false,
+        </div>
+    </section>
+    @endif
+
+    <!-- White Separator Above -->
+    <div class="h-10 bg-white"></div>
+
+    <!-- Stats Section (خطوات ملموسة) -->
+    <section class="h-[220px] lg:h-[260px] w-full relative overflow-hidden bg-[#1A4231] flex flex-col justify-center" dir="{{ $dir }}" style="background-image: url('{{ asset('assets/elketar/Impact Numbers Section.png') }}'); background-size: cover; background-position: center;">
+
+        <!-- Floating Right Image (Loose Beans) -->
+        <div class="absolute {{ $isRtl ? 'right-0' : 'left-0' }} bottom-0 w-44 md:w-60 lg:w-[340px] z-0 pointer-events-none opacity-40 lg:opacity-100 flex items-end justify-end">
+            <img src="{{ asset('assets/elketar/istockphoto-1128469742-612x612 1.png') }}" class="w-full h-auto drop-shadow-2xl translate-y-8 {{ $isRtl ? 'translate-x-2 lg:translate-x-4' : '-translate-x-2 lg:-translate-x-4' }}" alt="Coffee Beans">
+        </div>
+
+        <!-- Floating Left Image (Hand with scoop) -->
+        <div class="absolute {{ $isRtl ? 'left-0' : 'right-0' }} bottom-0 w-44 md:w-60 lg:w-[340px] z-0 pointer-events-none opacity-40 lg:opacity-100 flex items-end justify-start">
+            <img src="{{ asset('assets/elketar/65646 1.png') }}" class="w-full h-auto drop-shadow-2xl translate-y-6 lg:translate-y-10 {{ $isRtl ? '-translate-x-2 lg:-translate-x-4' : 'translate-x-2 lg:translate-x-4' }}" alt="Hand Scooping">
+        </div>
+
+        <div class="container mx-auto px-4 relative z-10 w-full">
+            @php
+                $statsTitle = $isRtl ? ($statsSection->content_fr['title'] ?? '') : ($statsSection->content_en['title'] ?? '');
+                $statsLead = $isRtl ? ($statsSection->content_fr['lead'] ?? '') : ($statsSection->content_en['lead'] ?? '');
+                
+                $statsContent = $isRtl ? ($statsSection->content_fr ?? []) : ($statsSection->content_en ?? []);
+                $statsItems = $statsContent['stats'] ?? [];
+            @endphp
+
+            <!-- Section Title -->
+            <div class="flex flex-col items-center mb-4 lg:mb-6">
+                <span class="text-[#FBF0D8] text-[10px] lg:text-xs font-bold mb-1 opacity-90">
+                    {{ !empty($statsLead) ? $statsLead : __('new_design.home.impact_subtitle') }}
+                </span>
+                <h2 class="text-white text-center text-xl lg:text-2xl font-black drop-shadow-lg">
+                    {{ !empty($statsTitle) ? $statsTitle : __('new_design.home.impact_title') }}
+                </h2>
+            </div>
+
+            <!-- 4 Stats Grid -->
+            <div class="grid grid-cols-4 gap-2 lg:gap-4 text-center text-white max-w-4xl mx-auto">
+                @if(!empty($statsItems) && count($statsItems) >= 4)
+                    @foreach($statsItems as $index => $item)
+                        <div class="flex flex-col items-center justify-center">
+                            <span class="text-2xl lg:text-4xl font-extrabold block mb-1 text-[#FBF0D8] drop-shadow-md">{{ $item['val'] ?? '' }}</span>
+                            <span class="text-[9px] lg:text-xs font-bold text-white/90 leading-tight">{!! $item['lbl'] ?? '' !!}</span>
+                        </div>
+                    @endforeach
+                @else
+                    <!-- Stat 1 -->
+                    <div class="flex flex-col items-center justify-center">
+                        <span class="text-2xl lg:text-4xl font-extrabold block mb-1 text-[#FBF0D8] drop-shadow-md">{{ __('new_design.home.stat_water_val') }}</span>
+                        <span class="text-[9px] lg:text-xs font-bold text-white/90 leading-tight">{!! __('new_design.home.stat_water_lbl') !!}</span>
+                    </div>
+
+                    <!-- Stat 2 -->
+                    <div class="flex flex-col items-center justify-center">
+                        <span class="text-2xl lg:text-4xl font-extrabold block mb-1 text-[#FBF0D8] drop-shadow-md">{{ __('new_design.home.stat_tools_val') }}</span>
+                        <span class="text-[9px] lg:text-xs font-bold text-white/90 leading-tight">{!! __('new_design.home.stat_tools_lbl') !!}</span>
+                    </div>
+
+                    <!-- Stat 3 -->
+                    <div class="flex flex-col items-center justify-center">
+                        <span class="text-2xl lg:text-4xl font-extrabold block mb-1 text-[#FBF0D8] drop-shadow-md">{{ __('new_design.home.stat_trees_val') }}</span>
+                        <span class="text-[9px] lg:text-xs font-bold text-white/90 leading-tight">{!! __('new_design.home.stat_trees_lbl') !!}</span>
+                    </div>
+
+                    <!-- Stat 4 -->
+                    <div class="flex flex-col items-center justify-center">
+                        <span class="text-2xl lg:text-4xl font-extrabold block mb-1 text-[#FBF0D8] drop-shadow-md">{{ __('new_design.home.stat_energy_val') }}</span>
+                        <span class="text-[9px] lg:text-xs font-bold text-white/90 leading-tight">{!! __('new_design.home.stat_energy_lbl') !!}</span>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </section>
+
+    <!-- White Separator Below -->
+    <div class="h-10 bg-white"></div>
+
+    <!-- Roasting Section (اكتشف عالم التحميص) -->
+    <section class="py-24 relative overflow-hidden text-white" dir="{{ $dir }}">
+        <!-- Background Image: saaa.png -->
+        <div class="absolute inset-0">
+            <img src="{{ asset('assets/elketar/saaa.png') }}" class="w-full h-full object-cover">
+            <!-- Warm Sepia/Dark Gold Overlay -->
+            <div class="absolute inset-0 backdrop-blur-[1px]"></div>
+        </div>
+
+        <div class="container mx-auto px-4 relative z-10">
+            <!-- Top Block: Title, Description, and Left Divider -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mb-16">
+
+                <!-- Text content -->
+                <div class="lg:col-span-11 text-start">
+                    <h2 class="text-3xl lg:text-5xl font-black mb-6 drop-shadow-md text-[#FBF0D8]">{{ __('new_design.home.roast_title') }}</h2>
+                    <div class="max-w-4xl space-y-4">
+                        <p class="text-base lg:text-lg font-medium leading-relaxed opacity-95">
+                            {{ __('new_design.home.roast_desc1') }}
+                        </p>
+                        <p class="text-base lg:text-lg font-medium leading-relaxed opacity-95">
+                            {{ __('new_design.home.roast_desc2') }}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Decorative vertical line -->
+                <div class="hidden lg:flex lg:col-span-1 justify-end">
+                    <div class="w-1.5 h-32 bg-white/80 rounded-full"></div>
+                </div>
+
+            </div>
+
+            <!-- 3 Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
+
+                <!-- Card 1 -->
+                <div class="bg-[#FBF0D8] p-8 lg:p-10 rounded-[32px] text-center shadow-2xl transform hover:-translate-y-2 transition-all duration-300 flex flex-col items-center border border-[#1A4231]/10">
+                    <div class="text-[#1A4231] mb-6 bg-[#1A4231]/10 p-4 rounded-full">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                    </div>
+                    <h3 class="text-xl lg:text-2xl font-black text-[#1A4231] mb-4">{{ __('new_design.home.feat_roast_title') }}</h3>
+                    <p class="text-sm lg:text-base text-gray-700 leading-relaxed font-semibold">
+                        {{ __('new_design.home.feat_roast_desc') }}
+                    </p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-[#FBF0D8] p-8 lg:p-10 rounded-[32px] text-center shadow-2xl transform hover:-translate-y-2 transition-all duration-300 flex flex-col items-center border border-[#1A4231]/10">
+                    <div class="text-[#1A4231] mb-6 bg-[#1A4231]/10 p-4 rounded-full">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    </div>
+                    <h3 class="text-xl lg:text-2xl font-black text-[#1A4231] mb-4">{{ __('new_design.home.feat_trade_title') }}</h3>
+                    <p class="text-sm lg:text-base text-gray-700 leading-relaxed font-semibold">
+                        {{ __('new_design.home.feat_trade_desc') }}
+                    </p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-[#FBF0D8] p-8 lg:p-10 rounded-[32px] text-center shadow-2xl transform hover:-translate-y-2 transition-all duration-300 flex flex-col items-center border border-[#1A4231]/10">
+                    <div class="text-[#1A4231] mb-6 bg-[#1A4231]/10 p-4 rounded-full">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <h3 class="text-xl lg:text-2xl font-black text-[#1A4231] mb-4">{{ __('new_design.home.feat_quality_title') }}</h3>
+                    <p class="text-sm lg:text-base text-gray-700 leading-relaxed font-semibold">
+                        {{ __('new_design.home.feat_quality_desc') }}
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- White Separator Below -->
+    <div class="h-10 bg-white"></div>
+
+    <!-- Newsletter Section (كن أول من يعرف عنا) -->
+    <section class="py-16 relative overflow-hidden bg-cover bg-center" dir="{{ $dir }}" style="background-image: url('{{ asset('assets/elketar/fff.png') }}');">
+        <div class="container mx-auto px-4 relative z-10">
+
+            <!-- Dark Green Inner Card -->
+            <div class="relative max-w-5xl mx-auto rounded-[40px] overflow-hidden bg-[#1A4231] shadow-2xl py-12 lg:py-16 px-6 lg:px-12 text-center" style="background-image: url('{{ asset('assets/elketar/Section - Why Partner With Us.png') }}'); background-size: cover; background-position: center;">
+
+                <!-- Inner soft overlay for text readability, keeping the pattern crisp -->
+                <div class="absolute inset-0 bg-[#1A4231]/30 z-0"></div>            
+                <div class="relative z-10 flex flex-col items-center">
+                    <!-- Envelope Icon -->
+                    <div class="text-[#FBF0D8] mb-4 bg-white/10 p-3.5 rounded-2xl backdrop-blur-sm">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    </div>
+
+                    <!-- Title & Subtitle -->
+                    <h2 class="text-white text-3xl lg:text-4xl font-black mb-3">{{ __('new_design.home.newsletter_title') }}</h2>
+                    <p class="text-[#FBF0D8] text-sm lg:text-base font-semibold opacity-90 mb-8 max-w-md">
+                        {{ __('new_design.home.newsletter_subtitle') }}
+                    </p>
+
+                    <!-- Form -->
+                    <form id="newsletter-form" action="{{ route('subscribe') }}" method="POST" class="w-full max-w-xl flex flex-col sm:flex-row gap-4 items-center justify-center">
+                        @csrf
+                        <!-- Input Field -->
+                        <div class="relative w-full sm:flex-1">
+                            <input type="email" name="subscribe" required placeholder="{{ __('new_design.home.newsletter_placeholder') }}" class="w-full bg-white/10 border border-white/20 rounded-full px-6 py-4 text-white placeholder-white/60 text-start focus:outline-none focus:ring-2 focus:ring-[#FBF0D8] transition-all duration-300">
+                        </div>
+                        <!-- Submit Button -->
+                        <button type="submit" class="bg-white hover:bg-white/90 text-[#1A4231] font-black rounded-full px-10 py-4 transition-all duration-300 shadow-lg transform hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto shrink-0">
+                            {{ __('new_design.home.newsletter_btn') }}
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- White Separator Below -->
+    <div class="h-10 bg-white"></div>
+
+
+@push('scripts')
+<script>
+function addToCart(productId, price) {
+    $.ajax({
+        url: "{{ route('add.to.cart') }}",
+        type: "POST",
+        data: {
+            product_id: productId,
+            quantity: 1,
+            price: price,
+            _token: "{{ csrf_token() }}"
         },
-        breakpoints: {
-          0: { slidesPerView: 1 },
-          576: { slidesPerView: 1 },
-          768: { slidesPerView: 2 },
-          992: { slidesPerView: 3 },
-          1200: { slidesPerView: 4 }
+        success: function(data) {
+            window.showCartSuccess(data);
+        },
+        error: function(xhr) {
+            if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.error) {
+                toastr.error(xhr.responseJSON.error);
+            } else {
+                toastr.error("{{ __('Failed to add product to cart') }}");
+            }
         }
-      });
     });
-  </script>
+}
+
+$(document).ready(function() {
+    $('#newsletter-form').on('submit', function(e) {
+        e.preventDefault();
+        
+        var form = $(this);
+        var emailInput = form.find('input[name="subscribe"]');
+        var submitBtn = form.find('button[type="submit"]');
+        var originalBtnText = submitBtn.text();
+        
+        submitBtn.prop('disabled', true).text("{{ __('Subscribing...') }}");
+        
+        $.ajax({
+            url: form.attr('action'),
+            method: 'POST',
+            data: form.serialize(),
+            success: function(response) {
+                toastr.success(response.message || "{{ __('Subscription successful!') }}");
+                emailInput.val('');
+                submitBtn.prop('disabled', false).text(originalBtnText);
+            },
+            error: function(xhr) {
+                submitBtn.prop('disabled', false).text(originalBtnText);
+                if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                    var errors = xhr.responseJSON.errors;
+                    var firstError = Object.values(errors)[0][0];
+                    toastr.error(firstError);
+                } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                    toastr.error(xhr.responseJSON.message);
+                } else {
+                    toastr.error("{{ __('Something went wrong. Please try again.') }}");
+                }
+            }
+        });
+    });
+});
+</script>
+@endpush
+
 @endsection

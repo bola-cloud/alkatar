@@ -19,6 +19,9 @@ export default {
             colors: {
                 "primary-red": "#942326",
                 "secondary-red": "#EA4B48",
+                "katar-green": "#1A4231",
+                "katar-cream": "#EDEAE3",
+                "katar-dark": "#111111",
             },
         },
     },

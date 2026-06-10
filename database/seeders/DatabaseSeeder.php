@@ -22,14 +22,13 @@ class DatabaseSeeder extends Seeder
         $this->call(GeneralSettingsTableSeeder::class);
         $this->call(BlogTableSeeder::class);
         $this->call(TagTableSeeder::class);
-        $this->call(CategoryTableSeeder::class);
+        $this->call(StoreMasterSeeder::class);
         $this->call(BrandTableSeeder::class);
         $this->call(ProductTagListsTableSeeder::class);
         $this->call(ItemTagsTableSeeder::class);
         $this->call(ImageGallerySeeder::class);
         $this->call(ColorTableSeeder::class);
         $this->call(SizeTableSeeder::class);
-        $this->call(ProductTableSeeder::class);
         $this->call(ProductTagTableSeeder::class);
         $this->call(CustomerServiceTableSeeder::class);
         $this->call(CompanyStoryTableSeeder::class);
@@ -53,5 +52,8 @@ class DatabaseSeeder extends Seeder
         $this->call(SpecialOfferTableSeeder::class);
         $this->call(BannerSeeder::class);
         $this->call(OmanStatesSeeder::class);
+        $this->call(UserProfileDataSeeder::class);
+        $this->call(CoffeeCropsSeeder::class);
+        $this->call(PageAdvertiseSeeder::class);
     }
 }
