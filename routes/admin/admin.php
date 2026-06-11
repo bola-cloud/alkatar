@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\ProductTagController;
 use App\Http\Controllers\Admin\TestimonilController;
 use App\Http\Controllers\Admin\ThemeController;
 use App\Http\Controllers\Admin\AdminProfileController;
+use App\Http\Controllers\Admin\OffersPackagesController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\CompanyStroyController;
 use App\Http\Controllers\Admin\ImageGalleryController;
@@ -116,6 +117,18 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'is_admin'], '
         Route::post('send/reply', [ContactUsController::class, 'sendReply'])->name('send.reply')->middleware(['permission:crm-create', 'isDemo']);
         Route::get('/delete/{id}', [ContactUsController::class, 'contactUsDelete'])->name('contact.us.delete')->middleware(['permission:crm-delete', 'isDemo']);
         ;
+    });
+
+    Route::group(['prefix' => 'wholesale'], function () {
+        Route::get('/index', [\App\Http\Controllers\Admin\WholesaleRequestController::class, 'index'])->name('wholesale.index')->middleware(['permission:wholesale-list']);
+        Route::post('/update-status/{id}', [\App\Http\Controllers\Admin\WholesaleRequestController::class, 'updateStatus'])->name('wholesale.update_status')->middleware(['permission:wholesale-edit']);
+        Route::get('/delete/{id}', [\App\Http\Controllers\Admin\WholesaleRequestController::class, 'destroy'])->name('wholesale.delete')->middleware(['permission:wholesale-delete']);
+    });
+
+    Route::group(['prefix' => 'expert-requests'], function () {
+        Route::get('/index', [\App\Http\Controllers\Admin\ExpertRequestController::class, 'index'])->name('expert-requests.index')->middleware(['permission:expert-request-list']);
+        Route::post('/update-status/{id}', [\App\Http\Controllers\Admin\ExpertRequestController::class, 'updateStatus'])->name('expert-requests.update_status')->middleware(['permission:expert-request-edit']);
+        Route::get('/delete/{id}', [\App\Http\Controllers\Admin\ExpertRequestController::class, 'destroy'])->name('expert-requests.delete')->middleware(['permission:expert-request-delete']);
     });
     Route::group(['prefix' => 'general-settings'], function () {
         Route::get('', [GeneralSettingsController::class, 'GeneralSettings'])->name('general.settings')->middleware(['permission:cms-list|cms-create|cms-edit|cms-delete']);
@@ -311,9 +324,16 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'is_admin'], '
         Route::get('/free/Shipping/inactive', [offersController::class, 'freeShippingInActive'])->name('offers.freeShippingInActive');
 
         Route::get('/active/{id}', [offersController::class, 'offersActive'])->name('offers.active');
-        Route::get('/inactive/{id}', [offersController::class, 'offersInactive'])->name('offers.inactive');
+    });
 
-
+    Route::group(['prefix' => 'offers-packages'], function () {
+        Route::get('', [OffersPackagesController::class, 'index'])->name('offers-packages.index');
+        Route::get('/create', [OffersPackagesController::class, 'create'])->name('offers-packages.create');
+        Route::post('/store', [OffersPackagesController::class, 'store'])->name('offers-packages.store');
+        Route::get('/edit/{id}', [OffersPackagesController::class, 'edit'])->name('offers-packages.edit');
+        Route::post('/update/{id}', [OffersPackagesController::class, 'update'])->name('offers-packages.update');
+        Route::get('/delete/{id}', [OffersPackagesController::class, 'delete'])->name('offers-packages.delete');
+        Route::get('/status/{id}', [OffersPackagesController::class, 'toggleStatus'])->name('offers-packages.status');
     });
 
 

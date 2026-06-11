@@ -9,6 +9,6 @@ class Contactus extends Model
 {
     use HasFactory;
     protected $fillable=[
-        'FirstName','LastName','Email','ContactNumber','Message'
+        'FirstName','LastName','Email','ContactNumber','Message','subject'
     ];
 }

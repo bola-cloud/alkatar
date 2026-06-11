@@ -526,6 +526,18 @@ if (!function_exists('getSocialLink')) {
         return SocialLink::first();
     }
 }
+if (!function_exists('format_social_url')) {
+    function format_social_url($url)
+    {
+        if (empty($url)) {
+            return '#';
+        }
+        if (!preg_match("~^(?:f|ht)tps?://~i", $url)) {
+            return "https://" . ltrim($url, '/');
+        }
+        return $url;
+    }
+}
 if (!function_exists('footerInformation')) {
     function footerInformation()
     {

@@ -134,186 +134,334 @@
                 </p>
             </div>
 
-            <!-- Featured Offer Card -->
-            <div class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12 hover:shadow-md transition-all duration-300">
-                
-                <!-- Left Column (Text & details) - rendered on the Left in RTL, Right in LTR -->
-                <div class="lg:col-span-6 p-8 lg:p-12 flex flex-col justify-between text-start order-2 lg:order-1">
-                    <div>
-                        <h2 class="text-2xl lg:text-3xl font-black text-[#1A4231] mb-2">
-                            {{ __('new_design.monthly_offers.featured_title') }}
-                        </h2>
-                        <p class="text-gray-500 font-bold text-sm lg:text-base mb-8">
-                            {{ __('new_design.monthly_offers.featured_subtitle') }}
-                        </p>
+            @if($packages->isNotEmpty())
+                @php
+                    $featuredPackage = $packages->first();
+                    $otherPackages = $packages->skip(1);
+                    $featuredLines = array_filter(explode("\n", str_replace("\r", "", $featuredPackage->localized_about)));
+                @endphp
 
-                        <!-- Features Timeline List -->
-                        <div class="relative flex flex-col gap-8 text-start my-6">
-                            <!-- Vertical connector line -->
-                            <div class="absolute right-[18px] rtl:right-[18px] ltr:right-auto ltr:left-[18px] top-4 bottom-4 w-[2px] bg-gray-200"></div>
+                <!-- Featured Offer Card -->
+                <div class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12 hover:shadow-md transition-all duration-300">
+                    
+                    <!-- Left Column (Text & details) - rendered on the Left in RTL, Right in LTR -->
+                    <div class="lg:col-span-6 p-8 lg:p-12 flex flex-col justify-between text-start order-2 lg:order-1">
+                        <div>
+                            <h2 class="text-2xl lg:text-3xl font-black text-[#1A4231] mb-2">
+                                {{ $featuredPackage->localized_name }}
+                            </h2>
+                            <p class="text-gray-500 font-bold text-sm lg:text-base mb-8">
+                                {{ __('new_design.monthly_offers.featured_subtitle') }}
+                            </p>
 
-                            <!-- Feature 1: Origin -->
-                            <div class="flex items-start gap-4 relative pr-10 rtl:pr-10 ltr:pr-0 ltr:pl-10 text-start">
-                                <!-- Icon Circle -->
-                                <div class="absolute right-0 rtl:right-0 ltr:right-auto ltr:left-0 w-9 h-9 rounded-full bg-[#F3F4F6] flex items-center justify-center border-2 border-white shadow-sm z-10">
-                                    <svg class="w-4 h-4 text-[#1A4231]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 002 2h2a2.5 2.5 0 002.5-2.5V10a2.5 2.5 0 00-2.5-2.5h-.5A2.5 2.5 0 0014 5V3.935M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-black text-[#1A4231]">
-                                        {{ __('new_design.monthly_offers.feat_origin_lbl') }}
-                                    </h4>
-                                    <p class="text-xs text-gray-500 font-semibold mt-1 leading-relaxed">
-                                        {{ __('new_design.monthly_offers.feat_origin_val') }}
-                                    </p>
-                                </div>
-                            </div>
+                            <!-- Features Timeline List -->
+                            <div class="relative flex flex-col gap-6 text-start my-6">
+                                <!-- Vertical connector line -->
+                                <div class="absolute right-[18px] rtl:right-[18px] ltr:right-auto ltr:left-[18px] top-4 bottom-4 w-[2px] bg-gray-200"></div>
 
-                            <!-- Feature 2: Roast -->
-                            <div class="flex items-start gap-4 relative pr-10 rtl:pr-10 ltr:pr-0 ltr:pl-10 text-start">
-                                <!-- Icon Circle -->
-                                <div class="absolute right-0 rtl:right-0 ltr:right-auto ltr:left-0 w-9 h-9 rounded-full bg-[#F3F4F6] flex items-center justify-center border-2 border-white shadow-sm z-10">
-                                    <svg class="w-4 h-4 text-[#1A4231]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-black text-[#1A4231]">
-                                        {{ __('new_design.monthly_offers.feat_roast_lbl') }}
-                                    </h4>
-                                    <p class="text-xs text-gray-500 font-semibold mt-1 leading-relaxed">
-                                        {{ __('new_design.monthly_offers.feat_roast_val') }}
-                                    </p>
-                                </div>
-                            </div>
+                                @foreach($featuredLines as $line)
+                                    <div class="flex items-start gap-4 relative pr-10 rtl:pr-10 ltr:pr-0 ltr:pl-10 text-start">
+                                        <!-- Icon Circle -->
+                                        <div class="absolute right-0 rtl:right-0 ltr:right-auto ltr:left-0 w-9 h-9 rounded-full bg-[#F3F4F6] flex items-center justify-center border-2 border-white shadow-sm z-10">
+                                            <svg class="w-4 h-4 text-[#1A4231]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm text-gray-600 font-semibold leading-relaxed">
+                                                {{ $line }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                @endforeach
 
-                            <!-- Feature 3: Price -->
-                            <div class="flex items-start gap-4 relative pr-10 rtl:pr-10 ltr:pr-0 ltr:pl-10 text-start">
-                                <!-- Icon Circle -->
-                                <div class="absolute right-0 rtl:right-0 ltr:right-auto ltr:left-0 w-9 h-9 rounded-full bg-[#F3F4F6] flex items-center justify-center border-2 border-white shadow-sm z-10">
-                                    <svg class="w-4 h-4 text-[#1A4231]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 7h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-black text-[#1A4231]">
-                                        {{ __('new_design.monthly_offers.feat_price_lbl') }}
-                                    </h4>
-                                    <div class="flex items-baseline gap-3 mt-1">
-                                        <span class="text-2xl font-black text-[#1A4231]">
-                                            {{ __('new_design.monthly_offers.feat_price_val') }}
-                                        </span>
-                                        <span class="text-sm text-gray-400 line-through">
-                                            {{ __('new_design.monthly_offers.feat_price_old') }}
-                                        </span>
+                                <!-- Price Feature -->
+                                <div class="flex items-start gap-4 relative pr-10 rtl:pr-10 ltr:pr-0 ltr:pl-10 text-start">
+                                    <!-- Icon Circle -->
+                                    <div class="absolute right-0 rtl:right-0 ltr:right-auto ltr:left-0 w-9 h-9 rounded-full bg-[#F3F4F6] flex items-center justify-center border-2 border-white shadow-sm z-10">
+                                        <svg class="w-4 h-4 text-[#1A4231]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 7h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-bold text-gray-400">
+                                            {{ __('new_design.monthly_offers.feat_price_lbl') }}
+                                        </h4>
+                                        <div class="flex items-baseline gap-3 mt-1">
+                                            <span class="text-2xl font-black text-[#1A4231]">
+                                                {{ function_exists('currencyConverter') ? currencyConverter($featuredPackage->Discount_Price) : number_format($featuredPackage->Discount_Price, 3) }}
+                                            </span>
+                                            @if($featuredPackage->Price > $featuredPackage->Discount_Price)
+                                            <span class="text-sm text-gray-400 line-through">
+                                                {{ function_exists('currencyConverter') ? currencyConverter($featuredPackage->Price) : number_format($featuredPackage->Price, 3) }}
+                                            </span>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- CTA Button -->
+                        <button onclick="addToCart({{ $featuredPackage->id }}, {{ $featuredPackage->Discount_Price }})" class="inline-flex items-center justify-center gap-2 bg-[#1A4231] hover:bg-[#235841] text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 w-full lg:w-fit mt-6 hover:scale-[1.02] active:scale-[0.98]">
+                            <span>{{ __('new_design.monthly_offers.btn_purchase') }}</span>
+                            <svg class="w-4 h-4 transform rotate-180 rtl:rotate-180 ltr:rotate-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                            </svg>
+                        </button>
                     </div>
 
-                    <!-- CTA Button -->
-                    <a href="#" class="inline-flex items-center justify-center gap-2 bg-[#1A4231] hover:bg-[#235841] text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 w-full lg:w-fit mt-6 hover:scale-[1.02] active:scale-[0.98]">
-                        <span>{{ __('new_design.monthly_offers.btn_purchase') }}</span>
-                        <svg class="w-4 h-4 transform rotate-180 rtl:rotate-180 ltr:rotate-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                        </svg>
-                    </a>
+                    <!-- Right Column (Image with Tag) - rendered on the Right in RTL, Left in LTR -->
+                    <div class="lg:col-span-6 relative h-64 lg:h-auto min-h-[380px] order-1 lg:order-2">
+                        <img src="{{ asset(ProductImage() . $featuredPackage->Primary_Image) }}" alt="{{ $featuredPackage->localized_name }}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='{{ asset(ProductImage() . 'prod.png') }}';">
+                        <!-- Offer of the Month Badge -->
+                        <div class="absolute bottom-6 right-6 bg-white/95 text-[#1A4231] font-black text-xs px-4 py-2.5 rounded-full shadow-md">
+                            {{ __('new_design.monthly_offers.featured_tag') }}
+                        </div>
+                    </div>
+
                 </div>
 
-                <!-- Right Column (Image with Tag) - rendered on the Right in RTL, Left in LTR -->
-                <div class="lg:col-span-6 relative h-64 lg:h-auto min-h-[380px] order-1 lg:order-2">
-                    <img src="{{ asset('assets/elketar/featured_coffee_crop.png') }}" alt="Featured Crop" class="w-full h-full object-cover">
-                    <!-- Offer of the Month Badge -->
-                    <div class="absolute bottom-6 right-6 bg-white/95 text-[#1A4231] font-black text-xs px-4 py-2.5 rounded-full shadow-md">
-                        {{ __('new_design.monthly_offers.featured_tag') }}
-                    </div>
-                </div>
+                @if($otherPackages->isNotEmpty())
+                    <!-- Side-by-Side Small Offers Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
+                        @foreach($otherPackages as $other)
+                            @php
+                                $otherLines = array_filter(explode("\n", str_replace("\r", "", $other->localized_about)));
+                            @endphp
+                            <div class="bg-white rounded-[24px] border border-gray-200 shadow-sm p-6 relative hover:shadow-md transition-all duration-300 flex flex-col justify-between min-h-[320px]">
+                                <!-- Image at the top of the card -->
+                                <div class="w-full h-44 rounded-xl overflow-hidden mb-4">
+                                    <img src="{{ asset(ProductImage() . $other->Primary_Image) }}" alt="{{ $other->localized_name }}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='{{ asset(ProductImage() . 'prod.png') }}';">
+                                </div>
+                                
+                                @if($other->Discount > 0)
+                                <div class="absolute left-6 rtl:left-6 ltr:left-auto ltr:right-6 -top-3 bg-amber-50 text-amber-700 border border-amber-200/50 text-[10px] font-bold px-3 py-1 rounded-full">
+                                    {{ round($other->Discount) }}% {{ __('new_design.monthly_offers.discount_tag') ?? 'خصم' }}
+                                </div>
+                                @endif
 
-            </div>
+                                <!-- Content -->
+                                <div class="text-start mb-4">
+                                    <h3 class="text-xl font-bold text-[#1A4231] mb-2">
+                                        {{ $other->localized_name }}
+                                    </h3>
+                                    <div class="text-gray-500 text-xs font-semibold leading-relaxed">
+                                        @foreach($otherLines as $line)
+                                            <div class="flex items-center gap-1.5 mb-1">
+                                                <svg class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                                <span>{{ $line }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
 
-            <!-- Two Side-by-Side Small Offers Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
-                
-                <!-- Card 1: Colombia Supremo (Right Card in RTL) -->
-                <div class="bg-white rounded-[24px] border border-gray-200 shadow-sm p-6 relative hover:shadow-md transition-all duration-300 flex flex-col justify-between min-h-[220px] order-1 md:order-2">
-                    <!-- Icon badge top-right -->
-                    <div class="absolute right-6 rtl:right-6 ltr:right-auto ltr:left-6 -top-4 w-9 h-9 rounded-full bg-[#F3F4F6] flex items-center justify-center border-2 border-white shadow-sm">
-                        <!-- Coffee cup icon -->
-                        <svg class="w-4 h-4 text-[#1A4231]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
-                        </svg>
+                                <!-- Footer -->
+                                <div class="flex items-center justify-between border-t border-gray-50 pt-4 mt-auto">
+                                    <div class="flex flex-col">
+                                        @if($other->Price > $other->Discount_Price)
+                                        <span class="text-xs text-gray-400 line-through">
+                                            {{ function_exists('currencyConverter') ? currencyConverter($other->Price) : number_format($other->Price, 3) }}
+                                        </span>
+                                        @endif
+                                        <span class="text-lg font-black text-[#1A4231]">
+                                            {{ function_exists('currencyConverter') ? currencyConverter($other->Discount_Price) : number_format($other->Discount_Price, 3) }}
+                                        </span>
+                                    </div>
+                                    <button onclick="addToCart({{ $other->id }}, {{ $other->Discount_Price }})" class="bg-[#1A4231] hover:bg-[#235841] text-white font-bold text-xs py-2.5 px-5 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+                                        {{ __('new_design.monthly_offers.btn_shop_now') }}
+                                    </button>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
-                    <!-- Status tag top-left -->
-                    <div class="absolute left-6 rtl:left-6 ltr:left-auto ltr:right-6 -top-3 bg-amber-50 text-amber-700 border border-amber-200/50 text-[10px] font-bold px-3 py-1 rounded-full">
-                        {{ __('new_design.monthly_offers.card1_tag') }}
-                    </div>
+                @endif
 
-                    <!-- Content -->
-                    <div class="mt-4 text-start">
-                        <h3 class="text-xl font-bold text-[#1A4231] mb-2">
-                            {{ __('new_design.monthly_offers.card1_title') }}
-                        </h3>
-                        <p class="text-gray-500 text-xs font-semibold leading-relaxed mb-6">
-                            {{ __('new_design.monthly_offers.card1_subtitle') }}
-                        </p>
-                    </div>
+            @else
+                <!-- Fallback Static Template Content if no packages are configured in admin panel -->
+                <!-- Featured Offer Card -->
+                <div class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12 hover:shadow-md transition-all duration-300">
+                    
+                    <!-- Left Column (Text & details) - rendered on the Left in RTL, Right in LTR -->
+                    <div class="lg:col-span-6 p-8 lg:p-12 flex flex-col justify-between text-start order-2 lg:order-1">
+                        <div>
+                            <h2 class="text-2xl lg:text-3xl font-black text-[#1A4231] mb-2">
+                                {{ __('new_design.monthly_offers.featured_title') }}
+                            </h2>
+                            <p class="text-gray-500 font-bold text-sm lg:text-base mb-8">
+                                {{ __('new_design.monthly_offers.featured_subtitle') }}
+                            </p>
 
-                    <!-- Footer -->
-                    <div class="flex items-center justify-between border-t border-gray-50 pt-4 mt-2">
-                        <span class="text-lg font-black text-[#1A4231]">
-                            {{ __('new_design.monthly_offers.card1_price') }}
-                        </span>
-                        <a href="#" class="text-[#1A4231] font-bold text-xs hover:underline transition-all flex items-center gap-1">
-                            <span>{{ __('new_design.monthly_offers.btn_shop_now') }}</span>
-                            <svg class="w-3.5 h-3.5 transform rotate-180 rtl:rotate-180 ltr:rotate-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <!-- Features Timeline List -->
+                            <div class="relative flex flex-col gap-8 text-start my-6">
+                                <!-- Vertical connector line -->
+                                <div class="absolute right-[18px] rtl:right-[18px] ltr:right-auto ltr:left-[18px] top-4 bottom-4 w-[2px] bg-gray-200"></div>
+
+                                <!-- Feature 1: Origin -->
+                                <div class="flex items-start gap-4 relative pr-10 rtl:pr-10 ltr:pr-0 ltr:pl-10 text-start">
+                                    <!-- Icon Circle -->
+                                    <div class="absolute right-0 rtl:right-0 ltr:right-auto ltr:left-0 w-9 h-9 rounded-full bg-[#F3F4F6] flex items-center justify-center border-2 border-white shadow-sm z-10">
+                                        <svg class="w-4 h-4 text-[#1A4231]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 002 2h2a2.5 2.5 0 002.5-2.5V10a2.5 2.5 0 00-2.5-2.5h-.5A2.5 2.5 0 0014 5V3.935M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-black text-[#1A4231]">
+                                            {{ __('new_design.monthly_offers.feat_origin_lbl') }}
+                                        </h4>
+                                        <p class="text-xs text-gray-500 font-semibold mt-1 leading-relaxed">
+                                            {{ __('new_design.monthly_offers.feat_origin_val') }}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Feature 2: Roast -->
+                                <div class="flex items-start gap-4 relative pr-10 rtl:pr-10 ltr:pr-0 ltr:pl-10 text-start">
+                                    <!-- Icon Circle -->
+                                    <div class="absolute right-0 rtl:right-0 ltr:right-auto ltr:left-0 w-9 h-9 rounded-full bg-[#F3F4F6] flex items-center justify-center border-2 border-white shadow-sm z-10">
+                                        <svg class="w-4 h-4 text-[#1A4231]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-black text-[#1A4231]">
+                                            {{ __('new_design.monthly_offers.feat_roast_lbl') }}
+                                        </h4>
+                                        <p class="text-xs text-gray-500 font-semibold mt-1 leading-relaxed">
+                                            {{ __('new_design.monthly_offers.feat_roast_val') }}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Feature 3: Price -->
+                                <div class="flex items-start gap-4 relative pr-10 rtl:pr-10 ltr:pr-0 ltr:pl-10 text-start">
+                                    <!-- Icon Circle -->
+                                    <div class="absolute right-0 rtl:right-0 ltr:right-auto ltr:left-0 w-9 h-9 rounded-full bg-[#F3F4F6] flex items-center justify-center border-2 border-white shadow-sm z-10">
+                                        <svg class="w-4 h-4 text-[#1A4231]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 7h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-black text-[#1A4231]">
+                                            {{ __('new_design.monthly_offers.feat_price_lbl') }}
+                                        </h4>
+                                        <div class="flex items-baseline gap-3 mt-1">
+                                            <span class="text-2xl font-black text-[#1A4231]">
+                                                {{ __('new_design.monthly_offers.feat_price_val') }}
+                                            </span>
+                                            <span class="text-sm text-gray-400 line-through">
+                                                {{ __('new_design.monthly_offers.feat_price_old') }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CTA Button -->
+                        <a href="#" class="inline-flex items-center justify-center gap-2 bg-[#1A4231] hover:bg-[#235841] text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 w-full lg:w-fit mt-6 hover:scale-[1.02] active:scale-[0.98]">
+                            <span>{{ __('new_design.monthly_offers.btn_purchase') }}</span>
+                            <svg class="w-4 h-4 transform rotate-180 rtl:rotate-180 ltr:rotate-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                             </svg>
                         </a>
                     </div>
+
+                    <!-- Right Column (Image with Tag) - rendered on the Right in RTL, Left in LTR -->
+                    <div class="lg:col-span-6 relative h-64 lg:h-auto min-h-[380px] order-1 lg:order-2">
+                        <img src="{{ asset('assets/elketar/featured_coffee_crop.png') }}" alt="Featured Crop" class="w-full h-full object-cover">
+                        <!-- Offer of the Month Badge -->
+                        <div class="absolute bottom-6 right-6 bg-white/95 text-[#1A4231] font-black text-xs px-4 py-2.5 rounded-full shadow-md">
+                            {{ __('new_design.monthly_offers.featured_tag') }}
+                        </div>
+                    </div>
+
                 </div>
 
-                <!-- Card 2: Tasting Box (Left Card in RTL) -->
-                <div class="bg-white rounded-[24px] border border-gray-200 shadow-sm p-6 relative hover:shadow-md transition-all duration-300 flex flex-col justify-between min-h-[220px] order-2 md:order-1">
-                    <!-- Icon badge top-right -->
-                    <div class="absolute right-6 rtl:right-6 ltr:right-auto ltr:left-6 -top-4 w-9 h-9 rounded-full bg-[#F3F4F6] flex items-center justify-center border-2 border-white shadow-sm">
-                        <!-- Sparkles icon -->
-                        <svg class="w-4 h-4 text-[#1A4231]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
-                        </svg>
-                    </div>
-                    <!-- Status tag top-left -->
-                    <div class="absolute left-6 rtl:left-6 ltr:left-auto ltr:right-6 -top-3 bg-emerald-50 text-emerald-700 border border-emerald-200/50 text-[10px] font-bold px-3 py-1 rounded-full">
-                        {{ __('new_design.monthly_offers.card2_tag') }}
-                    </div>
-
-                    <!-- Content -->
-                    <div class="mt-4 text-start">
-                        <h3 class="text-xl font-bold text-[#1A4231] mb-2">
-                            {{ __('new_design.monthly_offers.card2_title') }}
-                        </h3>
-                        <p class="text-gray-500 text-xs font-semibold leading-relaxed mb-6">
-                            {{ __('new_design.monthly_offers.card2_subtitle') }}
-                        </p>
-                    </div>
-
-                    <!-- Footer -->
-                    <div class="flex items-center justify-between border-t border-gray-50 pt-4 mt-2">
-                        <span class="text-lg font-black text-[#1A4231]">
-                            {{ __('new_design.monthly_offers.card2_price') }}
-                        </span>
-                        <a href="#" class="text-[#1A4231] font-bold text-xs hover:underline transition-all flex items-center gap-1">
-                            <span>{{ __('new_design.monthly_offers.btn_shop_now') }}</span>
-                            <svg class="w-3.5 h-3.5 transform rotate-180 rtl:rotate-180 ltr:rotate-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                <!-- Two Side-by-Side Small Offers Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
+                    
+                    <!-- Card 1: Colombia Supremo (Right Card in RTL) -->
+                    <div class="bg-white rounded-[24px] border border-gray-200 shadow-sm p-6 relative hover:shadow-md transition-all duration-300 flex flex-col justify-between min-h-[220px] order-1 md:order-2">
+                        <!-- Icon badge top-right -->
+                        <div class="absolute right-6 rtl:right-6 ltr:right-auto ltr:left-6 -top-4 w-9 h-9 rounded-full bg-[#F3F4F6] flex items-center justify-center border-2 border-white shadow-sm">
+                            <!-- Coffee cup icon -->
+                            <svg class="w-4 h-4 text-[#1A4231]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
                             </svg>
-                        </a>
-                    </div>
-                </div>
+                        </div>
+                        <!-- Status tag top-left -->
+                        <div class="absolute left-6 rtl:left-6 ltr:left-auto ltr:right-6 -top-3 bg-amber-50 text-amber-700 border border-amber-200/50 text-[10px] font-bold px-3 py-1 rounded-full">
+                            {{ __('new_design.monthly_offers.card1_tag') }}
+                        </div>
 
-            </div>
+                        <!-- Content -->
+                        <div class="mt-4 text-start">
+                            <h3 class="text-xl font-bold text-[#1A4231] mb-2">
+                                {{ __('new_design.monthly_offers.card1_title') }}
+                            </h3>
+                            <p class="text-gray-500 text-xs font-semibold leading-relaxed mb-6">
+                                {{ __('new_design.monthly_offers.card1_subtitle') }}
+                            </p>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="flex items-center justify-between border-t border-gray-50 pt-4 mt-2">
+                            <span class="text-lg font-black text-[#1A4231]">
+                                {{ __('new_design.monthly_offers.card1_price') }}
+                            </span>
+                            <a href="#" class="text-[#1A4231] font-bold text-xs hover:underline transition-all flex items-center gap-1">
+                                <span>{{ __('new_design.monthly_offers.btn_shop_now') }}</span>
+                                <svg class="w-3.5 h-3.5 transform rotate-180 rtl:rotate-180 ltr:rotate-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Tasting Box (Left Card in RTL) -->
+                    <div class="bg-white rounded-[24px] border border-gray-200 shadow-sm p-6 relative hover:shadow-md transition-all duration-300 flex flex-col justify-between min-h-[220px] order-2 md:order-1">
+                        <!-- Icon badge top-right -->
+                        <div class="absolute right-6 rtl:right-6 ltr:right-auto ltr:left-6 -top-4 w-9 h-9 rounded-full bg-[#F3F4F6] flex items-center justify-center border-2 border-white shadow-sm">
+                            <!-- Sparkles icon -->
+                            <svg class="w-4 h-4 text-[#1A4231]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                            </svg>
+                        </div>
+                        <!-- Status tag top-left -->
+                        <div class="absolute left-6 rtl:left-6 ltr:left-auto ltr:right-6 -top-3 bg-emerald-50 text-emerald-700 border border-emerald-200/50 text-[10px] font-bold px-3 py-1 rounded-full">
+                            {{ __('new_design.monthly_offers.card2_tag') }}
+                        </div>
+
+                        <!-- Content -->
+                        <div class="mt-4 text-start">
+                            <h3 class="text-xl font-bold text-[#1A4231] mb-2">
+                                {{ __('new_design.monthly_offers.card2_title') }}
+                            </h3>
+                            <p class="text-gray-500 text-xs font-semibold leading-relaxed mb-6">
+                                {{ __('new_design.monthly_offers.card2_subtitle') }}
+                            </p>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="flex items-center justify-between border-t border-gray-50 pt-4 mt-2">
+                            <span class="text-lg font-black text-[#1A4231]">
+                                {{ __('new_design.monthly_offers.card2_price') }}
+                            </span>
+                            <a href="#" class="text-[#1A4231] font-bold text-xs hover:underline transition-all flex items-center gap-1">
+                                <span>{{ __('new_design.monthly_offers.btn_shop_now') }}</span>
+                                <svg class="w-3.5 h-3.5 transform rotate-180 rtl:rotate-180 ltr:rotate-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            @endif
 
             <!-- Newsletter Subscription Banner -->
             <div class="bg-[#1A4231] rounded-[24px] p-8 lg:p-12 text-white relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8 mt-6"

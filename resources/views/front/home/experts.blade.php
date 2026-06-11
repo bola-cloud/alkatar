@@ -143,8 +143,8 @@
                             <span class="block text-xs text-white/60 font-bold uppercase tracking-wider">
                                 {{ __('new_design.experts.sidebar_email_label') }}
                             </span>
-                            <a href="mailto:{{ __('new_design.experts.sidebar_email_val') }}" class="text-sm font-black hover:text-[#FDF9F0] transition-colors">
-                                {{ __('new_design.experts.sidebar_email_val') }}
+                            <a href="mailto:{{ @$allsettings['experts_email'] ?? 'b2b@al-qatar.com' }}" class="text-sm font-black hover:text-[#FDF9F0] transition-colors">
+                                {{ @$allsettings['experts_email'] ?? 'b2b@al-qatar.com' }}
                             </a>
                         </div>
                     </div>
@@ -156,7 +156,7 @@
                         {{ __('new_design.experts.form_title') }}
                     </h3>
 
-                    <form action="#" method="POST" class="flex flex-col gap-6" style="display: flex; flex-direction: column; gap: 24px;">
+                    <form action="{{ route('experts.store') }}" method="POST" class="flex flex-col gap-6" style="display: flex; flex-direction: column; gap: 24px;">
                         @csrf
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <!-- Full Name -->
@@ -225,5 +225,17 @@
     <div class="h-20 bg-white"></div>
 
 </div>
+
+@if($errors->any())
+    @push('scripts')
+        <script>
+            $(document).ready(function() {
+                @foreach($errors->all() as $error)
+                    toastr.error("{{ $error }}");
+                @endforeach
+            });
+        </script>
+    @endpush
+@endif
 
 @endsection

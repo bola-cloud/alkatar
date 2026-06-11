@@ -115,6 +115,14 @@
                             <span>{{ __('Product List') }}</span>
                         </a>
                     </li>
+                    @can('offers-packages-list')
+                    <li class="{{ isset($submenu) && $submenu == 'offers_packages' ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.offers-packages.index') }}">
+                            <i class="fa fa-circle"></i>
+                            <span>{{ __('Offers Packages') }}</span>
+                        </a>
+                    </li>
+                    @endcan
 
                     <li class="{{ isset($submenu) && $submenu == 'product_reviews' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.product.reviews') }}">
@@ -376,27 +384,47 @@
                 </ul>
             </li>
         @endcanany
-        @canany(['crm-list'])
-            <li class="{{ isset($menu) && $menu == 'cms' ? 'mm-active' : '' }}">
+        @canany(['crm-list', 'wholesale-list', 'expert-request-list'])
+            <li class="{{ isset($menu) && $menu == 'crm' ? 'mm-active' : '' }}">
                 <a class="has-arrow" href="#">
                     <i class="fas fa-blog"></i>
                     <span>{{ __('CRM') }}</span>
                 </a>
                 <ul>
+                    @can('crm-list')
                     <li class="{{ isset($submenu) && $submenu == 'contact_us' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.contact.us.index') }}">
                             <i class="fa fa-circle"></i>
                             <span>{{ __('Contact Us') }}</span>
                         </a>
                     </li>
+                    @endcan
+                    @can('wholesale-list')
+                    <li class="{{ isset($submenu) && $submenu == 'wholesale_requests' ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.wholesale.index') }}">
+                            <i class="fa fa-circle"></i>
+                            <span>{{ __('Wholesale Requests') }}</span>
+                        </a>
+                    </li>
+                    @endcan
+                    @can('expert-request-list')
+                    <li class="{{ isset($submenu) && $submenu == 'expert_requests' ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.expert-requests.index') }}">
+                            <i class="fa fa-circle"></i>
+                            <span>{{ __('Expert Requests') }}</span>
+                        </a>
+                    </li>
+                    @endcan
                 </ul>
             </li>
+            @can('crm-list')
             <li class="{{ isset($menu) && $menu == 'subscribers' ? 'mm-active' : '' }}">
                 <a href="{{ route('admin.subscribe.index') }}">
                     <i class="fas fa-envelope"></i>
                     <span>{{ __('Subscribers') }}</span>
                 </a>
             </li>
+            @endcan
         @endcanany
         @canany(['user-list'])
             <li class="{{ isset($menu) && $menu == 'users' ? 'mm-active' : '' }}">

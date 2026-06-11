@@ -198,7 +198,8 @@
                     </div>
 
                     <!-- Main White Form Column -->
-                    <form action="#" class="lg:col-span-8 p-8 lg:p-12 flex flex-col gap-6 text-start">
+                    <form id="wholesale-request-form" action="{{ route('wholesale.orders.store') }}" method="POST" class="lg:col-span-8 p-8 lg:p-12 flex flex-col gap-6 text-start">
+                        @csrf
                         
                         <h3 class="text-2xl lg:text-3xl font-black text-[#1A4231] pb-2 border-b border-gray-100">
                             {{ __('new_design.wholesale.form_title') }}
@@ -210,28 +211,28 @@
                             <!-- input: Company Name -->
                             <div class="flex flex-col gap-2">
                                 <label class="text-sm font-bold text-gray-700">{{ __('new_design.wholesale.input_company') }}</label>
-                                <input type="text" required placeholder="{{ __('new_design.wholesale.input_company') }}" 
+                                <input type="text" name="company_name" required placeholder="{{ __('new_design.wholesale.input_company') }}" 
                                        class="w-full bg-[#F9F8F6] border border-gray-200 rounded-2xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A4231] focus:bg-white transition-all">
                             </div>
 
                             <!-- input: Contact Person -->
                             <div class="flex flex-col gap-2">
                                 <label class="text-sm font-bold text-gray-700">{{ __('new_design.wholesale.input_name') }}</label>
-                                <input type="text" required placeholder="{{ __('new_design.wholesale.input_name') }}" 
+                                <input type="text" name="contact_name" required placeholder="{{ __('new_design.wholesale.input_name') }}" 
                                        class="w-full bg-[#F9F8F6] border border-gray-200 rounded-2xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A4231] focus:bg-white transition-all">
                             </div>
 
                             <!-- input: Contact Phone -->
                             <div class="flex flex-col gap-2">
                                 <label class="text-sm font-bold text-gray-700">{{ __('new_design.wholesale.input_phone') }}</label>
-                                <input type="tel" required placeholder="+966 50 000 0000" 
+                                <input type="tel" name="contact_phone" required placeholder="+966 50 000 0000" 
                                        class="w-full bg-[#F9F8F6] border border-gray-200 rounded-2xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A4231] focus:bg-white transition-all text-start" dir="ltr">
                             </div>
 
                             <!-- input: Est Qty -->
                             <div class="flex flex-col gap-2">
                                 <label class="text-sm font-bold text-gray-700">{{ __('new_design.wholesale.input_qty') }}</label>
-                                <input type="text" required placeholder="{{ $isRtl ? 'بين 50 إلى 200 كجم' : 'Between 50 to 200 kg' }}" 
+                                <input type="text" name="estimated_qty" required placeholder="{{ $isRtl ? 'بين 50 إلى 200 كجم' : 'Between 50 to 200 kg' }}" 
                                        class="w-full bg-[#F9F8F6] border border-gray-200 rounded-2xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A4231] focus:bg-white transition-all">
                             </div>
 
@@ -277,7 +278,7 @@
                         <!-- Notes text area -->
                         <div class="flex flex-col gap-2">
                             <label class="text-sm font-bold text-gray-700">{{ __('new_design.wholesale.input_notes') }}</label>
-                            <textarea rows="4" placeholder="{{ __('new_design.wholesale.input_notes_placeholder') }}" 
+                            <textarea rows="4" name="notes" placeholder="{{ __('new_design.wholesale.input_notes_placeholder') }}" 
                                       class="w-full bg-[#F9F8F6] border border-gray-200 rounded-2xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A4231] focus:bg-white transition-all"></textarea>
                         </div>
 
@@ -299,3 +300,59 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+$(document).ready(function() {
+    $('#wholesale-request-form').on('submit', function(e) {
+        e.preventDefault();
+        
+        var form = $(this);
+        var submitBtn = form.find('button[type="submit"]');
+        var originalBtnHtml = submitBtn.html();
+        
+        // Show loading state
+        submitBtn.prop('disabled', true).html(`
+            <span>{{ $isRtl ? 'جاري الإرسال...' : 'Sending...' }}</span>
+            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style="width: 20px; height: 20px; display: inline-block; animation: spin 1s linear infinite;"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" style="opacity: 0.25;"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" style="opacity: 0.75;"></path></svg>
+        `);
+        
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            success: function(response) {
+                // Restore button
+                submitBtn.prop('disabled', false).html(originalBtnHtml);
+                
+                if (response.success) {
+                    toastr.success(response.message);
+                    form[0].reset();
+                } else {
+                    toastr.error(response.message || "{{ $isRtl ? 'حدث خطأ ما، يرجى المحاولة مرة أخرى.' : 'Something went wrong, please try again.' }}");
+                }
+            },
+            error: function(xhr) {
+                // Restore button
+                submitBtn.prop('disabled', false).html(originalBtnHtml);
+                
+                if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                    var errors = xhr.responseJSON.errors;
+                    Object.keys(errors).forEach(function(key) {
+                        toastr.error(errors[key][0]);
+                    });
+                } else {
+                    toastr.error("{{ $isRtl ? 'حدث خطأ ما، يرجى المحاولة مرة أخرى.' : 'Something went wrong, please try again.' }}");
+                }
+            }
+        });
+    });
+});
+</script>
+<style>
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+</style>
+@endpush

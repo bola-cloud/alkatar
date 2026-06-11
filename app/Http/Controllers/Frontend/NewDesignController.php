@@ -150,6 +150,41 @@ class NewDesignController extends Controller
         return view('front.home.wholesale');
     }
 
+    public function storeWholesaleRequest(Request $request)
+    {
+        $request->validate([
+            'company_name' => 'required|string|max:255',
+            'contact_name' => 'required|string|max:255',
+            'contact_phone' => 'required|string|max:50',
+            'estimated_qty' => 'required|string|max:255',
+            'services' => 'nullable|array',
+            'notes' => 'nullable|string',
+        ]);
+
+        \App\Models\Front\WholesaleRequest::create([
+            'company_name' => $request->company_name,
+            'contact_name' => $request->contact_name,
+            'contact_phone' => $request->contact_phone,
+            'estimated_qty' => $request->estimated_qty,
+            'services' => $request->services,
+            'notes' => $request->notes,
+            'status' => 0, // Pending
+        ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => app()->getLocale() == 'en' 
+                    ? 'Your wholesale order request has been submitted successfully!' 
+                    : 'تم إرسال طلب الجملة الخاص بك بنجاح!',
+            ]);
+        }
+
+        return redirect()->back()->with('success', app()->getLocale() == 'en' 
+            ? 'Your wholesale order request has been submitted successfully!' 
+            : 'تم إرسال طلب الجملة الخاص بك بنجاح!');
+    }
+
     public function become_partner()
     {
         // عرض صفحة كن شريكاً
@@ -226,10 +261,50 @@ class NewDesignController extends Controller
         return view('front.home.experts');
     }
 
+    public function storeExpertRequest(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'company' => 'nullable|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'required|string|max:50',
+            'message' => 'required|string',
+        ]);
+
+        \App\Models\Front\ExpertRequest::create([
+            'name' => $request->name,
+            'company' => $request->company,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'message' => $request->message,
+            'status' => 0, // Pending
+        ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => app()->getLocale() == 'en' 
+                    ? 'Your expert assistance request has been submitted successfully!' 
+                    : 'تم إرسال طلب استشارة الخبير بنجاح!',
+            ]);
+        }
+
+        return redirect()->back()->with('success', app()->getLocale() == 'en' 
+            ? 'Your expert assistance request has been submitted successfully!' 
+            : 'تم إرسال طلب استشارة الخبير بنجاح!');
+    }
+
     public function monthly_offers()
     {
-        // عرض صفحة العروض الشهرية
-        return view('front.home.monthly_offers');
+        $packages = \App\Models\Admin\Product::where('Status', 1)
+            ->available()
+            ->whereHas('category', function ($q) {
+                $q->where('en_Category_Slug', 'packages');
+            })
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return view('front.home.monthly_offers', compact('packages'));
     }
 
     public function gift_cards()
@@ -242,6 +317,36 @@ class NewDesignController extends Controller
     {
         // عرض صفحة تواصل معنا
         return view('front.home.contact_us');
+    }
+
+    public function contact_us_store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string',
+        ]);
+
+        \App\Models\Front\Contactus::create([
+            'FirstName' => $request->name,
+            'Email' => $request->email,
+            'subject' => $request->subject,
+            'Message' => $request->message,
+        ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => app()->getLocale() == 'en' 
+                    ? 'Your message has been sent successfully!' 
+                    : 'تم إرسال رسالتك بنجاح!',
+            ]);
+        }
+
+        return redirect()->back()->with('success', app()->getLocale() == 'en' 
+            ? 'Your message has been sent successfully!' 
+            : 'تم إرسال رسالتك بنجاح!');
     }
 
     public function profile()
