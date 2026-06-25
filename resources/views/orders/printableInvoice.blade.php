@@ -193,7 +193,7 @@
                 @foreach($order->order_details as $item)
                     <tr>
                         <td style="text-align: left; vertical-align: top;">
-                            <span class="item-name">{{ $item->product->en_Product_Name ?? $item->Product_Name }}</span>
+                            <span class="item-name">{{ $item->product?->en_Product_Name ?? $item->Product_Name }}</span>
                         </td>
                         <td style="text-align: center; vertical-align: top;" class="nowrap"><span>{{ number_format($item->Price, 3) }}</span></td>
                         <td style="text-align: center; vertical-align: top;" class="nowrap"><span>{{ (int) $item->Quantity }}<span></td>

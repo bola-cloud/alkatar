@@ -188,7 +188,7 @@
                                     </div>
                                 </div>
                                 <span class="text-xs sm:text-sm font-black text-[#1A4231] whitespace-nowrap dynamic-shipping-fee">
-                                    -- ر.س
+                                    -- <img src="{{ asset('assets/elketar/light..png') }}" alt="ر.ع." class="inline-block align-middle" style="height: 1.2em; width: auto; margin-inline: 2px;">
                                 </span>
                             </label>
 
@@ -207,9 +207,65 @@
                                     </div>
                                 </div>
                                 <span class="text-xs sm:text-sm font-black text-[#1A4231] whitespace-nowrap">
-                                    0.00 ر.س
+                                    0.00 <img src="{{ asset('assets/elketar/light..png') }}" alt="ر.ع." class="inline-block align-middle" style="height: 1.2em; width: auto; margin-inline: 2px;">
                                 </span>
                             </label>
+                        </div>
+                    </div>
+
+                    <!-- Box 2.5: Gifting Options -->
+                    <div class="bg-white border border-gray-150 rounded-[24px] p-5 sm:p-6 shadow-sm">
+                        <div class="flex items-center gap-2 mb-4 text-start">
+                            <span class="text-xl">🎁</span>
+                            <h2 class="text-base sm:text-lg lg:text-xl font-bold text-[#1A4231]">
+                                {{ $isRtl ? 'خيارات الإهداء' : 'Gifting Options' }}
+                            </h2>
+                        </div>
+
+                        <!-- Checkbox to toggle gifting details -->
+                        <label class="flex items-center gap-3 cursor-pointer p-3 border border-gray-200 rounded-xl hover:bg-[#FAF9F5]/40 transition-all text-start">
+                            <input type="checkbox" id="is_gift" name="is_gift" value="1" onchange="toggleGiftFields(this)"
+                                   class="w-4 h-4 text-[#1A4231] focus:ring-[#1A4231] rounded">
+                            <div>
+                                <span class="block text-xs sm:text-sm font-black text-[#1A4231]">
+                                    {{ $isRtl ? 'شراء هذا الطلب كهدية لشخص آخر' : 'Purchase this order as a gift' }}
+                                </span>
+                                <span class="block text-[10px] sm:text-xs text-gray-400 font-semibold mt-0.5">
+                                    {{ $isRtl ? 'سيتم تغليف الطلب وإرساله إلى المستلم مع رسالتك الخاصة' : 'The order will be wrapped and sent to the recipient with your custom message' }}
+                                </span>
+                            </div>
+                        </label>
+
+                        <!-- Gifting Input Fields (Hidden by default) -->
+                        <div id="gift-fields-wrapper" class="hidden flex flex-col gap-4 mt-5 pt-4 border-t border-gray-100 text-start">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <!-- Recipient Name -->
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-xs sm:text-sm font-bold text-gray-400">
+                                        {{ $isRtl ? 'اسم المستلم' : 'Recipient Name' }}
+                                    </label>
+                                    <input type="text" id="gift_recipient_name" name="gift_recipient_name" placeholder="{{ $isRtl ? 'أدخل اسم مستلم الهدية' : 'Enter recipient name' }}"
+                                           class="w-full px-4 py-3 text-xs sm:text-sm font-bold rounded-xl border border-gray-200 outline-none focus:ring-1 focus:ring-[#1A4231] transition-all placeholder:text-gray-300">
+                                </div>
+
+                                <!-- Recipient Phone -->
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-xs sm:text-sm font-bold text-gray-400">
+                                        {{ $isRtl ? 'رقم هاتف المستلم' : 'Recipient Phone Number' }}
+                                    </label>
+                                    <input type="tel" id="gift_recipient_phone" name="gift_recipient_phone" placeholder="968xxxxxxx"
+                                           class="w-full px-4 py-3 text-xs sm:text-sm font-bold rounded-xl border border-gray-200 outline-none focus:ring-1 focus:ring-[#1A4231] transition-all placeholder:text-gray-300 text-start" dir="ltr">
+                                </div>
+                            </div>
+
+                            <!-- Gift Message -->
+                            <div class="flex flex-col gap-2">
+                                <label class="text-xs sm:text-sm font-bold text-gray-400">
+                                    {{ $isRtl ? 'رسالة الإهداء (تظهر على كرت الإهداء)' : 'Gift Message (will print on gift card)' }}
+                                </label>
+                                <textarea id="gift_message" name="gift_message" rows="3" placeholder="{{ $isRtl ? 'اكتب رسالتك هنا للمستلم...' : 'Write your message to the recipient here...' }}"
+                                          class="w-full px-4 py-3 text-xs sm:text-sm font-bold rounded-xl border border-gray-200 outline-none focus:ring-1 focus:ring-[#1A4231] transition-all placeholder:text-gray-300"></textarea>
+                            </div>
                         </div>
                     </div>
 
@@ -318,9 +374,15 @@
                                     <div class="flex items-center gap-4 py-4 border-b border-gray-100 last:border-0">
                                         <!-- Image -->
                                         <div class="w-[60px] h-[60px] rounded-xl overflow-hidden shrink-0 bg-gray-50 border border-gray-100">
-                                            <img src="{{ !empty($item->options->image) ? asset(ProductImage() . $item->options->image) : asset('assets/elketar/coffee.png') }}" 
-                                                 alt="{{ $isRtl ? ($item->options->name_ar ?? $item->name) : $item->name }}" 
-                                                 class="w-full h-full object-cover">
+                                            @if(!empty($item->options->is_custom_box) && $item->options->image === 'trail-box.png')
+                                                <img src="{{ asset('assets/elketar/trail-box.png') }}" 
+                                                     alt="{{ $isRtl ? ($item->options->name_ar ?? $item->name) : $item->name }}" 
+                                                     class="w-full h-full object-cover">
+                                            @else
+                                                <img src="{{ resolve_product_image($item->options->image) }}" 
+                                                     alt="{{ $isRtl ? ($item->options->name_ar ?? $item->name) : $item->name }}" 
+                                                     class="w-full h-full object-cover">
+                                            @endif
                                         </div>
                                         <!-- Info -->
                                         <div class="flex-grow flex flex-col justify-between self-stretch py-0.5 text-start">
@@ -333,9 +395,33 @@
                                                         {{ $isRtl ? ($item->options->size_ar ?? $item->options->size) : $item->options->size }}
                                                     @endif
                                                 </p>
+                                                @if(!empty($item->options->is_custom_box))
+                                                    <div class="mt-1 bg-gray-50 p-2 rounded text-[10px] text-gray-500 font-semibold leading-relaxed border border-gray-100">
+                                                        <div>
+                                                            <span class="opacity-75">{{ $isRtl ? 'القالب:' : 'Template:' }}</span> {{ $item->options->template }}
+                                                        </div>
+                                                        <div>
+                                                            <span class="opacity-75">{{ $isRtl ? 'السعة:' : 'Capacity:' }}</span> {{ $item->options->capacity }} {{ $isRtl ? 'محاصيل' : 'Crops' }}
+                                                        </div>
+                                                        @if(!empty($item->options->print_name))
+                                                            <div>
+                                                                <span class="opacity-75">{{ $isRtl ? 'الاسم المطبوع:' : 'Printed Name:' }}</span> {{ $item->options->print_name }}
+                                                            </div>
+                                                        @endif
+                                                        @if(!empty($item->options->gift_message))
+                                                            <div>
+                                                                <span class="opacity-75">{{ $isRtl ? 'الرسالة:' : 'Message:' }}</span> {{ $item->options->gift_message }}
+                                                            </div>
+                                                        @endif
+                                                        <div class="mt-1 border-t border-gray-200/50 pt-1 text-[9px]">
+                                                            <span class="opacity-75 block">{{ $isRtl ? 'المحتويات:' : 'Contents:' }}</span>
+                                                            <span class="font-bold text-gray-600">{{ $item->options->custom_box_details }}</span>
+                                                        </div>
+                                                    </div>
+                                                @endif
                                             </div>
                                             <span class="text-xs sm:text-sm font-black text-[#1A4231] mt-0.5">
-                                                {{ number_format($item->price, 2) }} ر.س
+                                                {{ number_format($item->price, 2) }} <img src="{{ asset('assets/elketar/light..png') }}" alt="ر.ع." class="inline-block align-middle" style="height: 1.2em; width: auto; margin-inline: 2px;">
                                             </span>
                                         </div>
                                         <!-- Qty Badge -->
@@ -367,31 +453,31 @@
                                 <!-- Subtotal -->
                                 <div class="flex justify-between items-center text-xs sm:text-sm font-bold text-gray-400">
                                     <span>{{ __('new_design.cart_page.summary_subtotal') }}</span>
-                                    <span id="summary-subtotal-val">{{ number_format($subtotalVal, 2) }} ر.س</span>
+                                    <span id="summary-subtotal-val">{{ number_format($subtotalVal, 2) }} <img src="{{ asset('assets/elketar/light..png') }}" alt="ر.ع." class="inline-block align-middle" style="height: 1.2em; width: auto; margin-inline: 2px;"></span>
                                 </div>
 
                                 <!-- Shipping -->
                                 <div class="flex justify-between items-center text-xs sm:text-sm font-bold text-gray-400">
                                     <span>الفرعي رسوم الشحن</span>
-                                    <span id="summary-shipping-val">0.00 ر.س</span>
+                                    <span id="summary-shipping-val">0.00 <img src="{{ asset('assets/elketar/light..png') }}" alt="ر.ع." class="inline-block align-middle" style="height: 1.2em; width: auto; margin-inline: 2px;"></span>
                                 </div>
 
                                 <!-- Tax -->
                                 <div class="flex justify-between items-center text-xs sm:text-sm font-bold text-gray-400">
                                     <span>{{ __('new_design.cart_page.summary_tax') }}</span>
-                                    <span id="summary-tax-val">{{ number_format($taxVal, 2) }} ر.س</span>
+                                    <span id="summary-tax-val">{{ number_format($taxVal, 2) }} <img src="{{ asset('assets/elketar/light..png') }}" alt="ر.ع." class="inline-block align-middle" style="height: 1.2em; width: auto; margin-inline: 2px;"></span>
                                 </div>
 
                                 <!-- Coupon Discount (Hidden initially) -->
                                 <div id="summary-discount-row" class="flex justify-between items-center text-xs sm:text-sm font-bold text-red-500 hidden">
                                     <span>خصم الكوبون</span>
-                                    <span id="summary-discount-val">-0.00 ر.س</span>
+                                    <span id="summary-discount-val">-0.00 <img src="{{ asset('assets/elketar/light..png') }}" alt="ر.ع." class="inline-block align-middle" style="height: 1.2em; width: auto; margin-inline: 2px;"></span>
                                 </div>
 
                                 <!-- Grand Total -->
                                 <div class="pt-4 border-t border-gray-100 flex justify-between items-center text-[#1A4231]">
                                     <span class="text-base sm:text-lg font-black">{{ __('new_design.cart_page.summary_total') }}</span>
-                                    <span id="summary-total-val" class="text-lg sm:text-xl font-black">{{ number_format($grandTotalVal, 2) }} ر.س</span>
+                                    <span id="summary-total-val" class="text-lg sm:text-xl font-black">{{ number_format($grandTotalVal, 2) }} <img src="{{ asset('assets/elketar/light..png') }}" alt="ر.ع." class="inline-block align-middle" style="height: 1.2em; width: auto; margin-inline: 2px;"></span>
                                 </div>
                             </div>
 
@@ -476,7 +562,7 @@
 
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
     // Toggle active state for payment tabs
     function selectPayment(methodVal, buttonEl) {
@@ -695,11 +781,29 @@
             }
         })
         .catch(err => {
-            console.error('Error applying coupon:', err);
             msgEl.className = "text-[11px] font-bold text-start text-red-500 mt-1";
             msgEl.innerText = "حدث خطأ أثناء تطبيق كود الخصم";
             msgEl.classList.remove('hidden');
         });
     }
+
+    function toggleGiftFields(checkbox) {
+        const wrapper = document.getElementById('gift-fields-wrapper');
+        const nameInput = document.getElementById('gift_recipient_name');
+        const phoneInput = document.getElementById('gift_recipient_phone');
+        
+        if (checkbox.checked) {
+            wrapper.classList.remove('hidden');
+            nameInput.required = true;
+            phoneInput.required = true;
+        } else {
+            wrapper.classList.add('hidden');
+            nameInput.required = false;
+            phoneInput.required = false;
+            nameInput.value = '';
+            phoneInput.value = '';
+            document.getElementById('gift_message').value = '';
+        }
+    }
 </script>
-@endsection
+@endpush

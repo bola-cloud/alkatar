@@ -11,17 +11,18 @@
             
             <!-- Right: Logo (in RTL) -->
             <div class="flex items-center gap-2 shrink-0">
-                <a href="{{ route('front') }}" class="flex items-center">
+                <a href="{{ route('front.store') }}" class="flex items-center">
                     <img src="{{ isset($allsettings['main_logo']) ? asset(IMG_LOGO_PATH . $allsettings['main_logo']) : asset('assets/elketar/logo.png') }}" alt="Logo" class="h-10 lg:h-14 object-contain">
                 </a>
             </div>
 
             <!-- Center: Navigation Links (Hidden on Mobile) -->
             <nav class="hidden lg:flex items-center gap-8 text-[#1A4231] font-bold text-base" style="font-family: 'Cairo', sans-serif;">
-                <a href="{{ route('front') }}" class="hover:opacity-85 transition-opacity">{{ $isRtl ? 'الرئيسية' : 'Home' }}</a>
+                <a href="{{ route('front.store') }}" class="hover:opacity-85 transition-opacity">{{ $isRtl ? 'الرئيسية' : 'Home' }}</a>
                 <a href="{{ route('coffee.crops') }}" class="hover:opacity-85 transition-opacity">{{ $isRtl ? 'المحاصيل' : 'Crops' }}</a>
                 <a href="{{ route('technical.tools') }}" class="hover:opacity-85 transition-opacity">{{ $isRtl ? 'معدات التحضير' : 'Brewing Equipment' }}</a>
                 <a href="{{ route('trial.boxes') }}" class="hover:opacity-85 transition-opacity">{{ $isRtl ? 'بوكسات التجربة' : 'Experience Boxes' }}</a>
+                <a href="{{ route('custom.box') }}" class="hover:opacity-85 transition-opacity">{{ $isRtl ? 'البوكس المخصص' : 'Custom Box' }}</a>
             </nav>
 
             <!-- Left: Actions & Buttons (in RTL) -->
@@ -64,7 +65,7 @@
                 @endauth
 
                 <!-- Qatar Community Pill Button -->
-                <a href="#" class="hidden sm:inline-block bg-white text-[#1A4231] border border-[#1A4231] px-5 lg:px-7 py-2 lg:py-2.5 rounded-full text-sm font-extrabold hover:bg-gray-50 transition-all whitespace-nowrap" style="font-family: 'Cairo', sans-serif;">
+                <a href="{{ route('front') }}" class="hidden sm:inline-block bg-white text-[#1A4231] border border-[#1A4231] px-5 lg:px-7 py-2 lg:py-2.5 rounded-full text-sm font-extrabold hover:bg-gray-50 transition-all whitespace-nowrap" style="font-family: 'Cairo', sans-serif;">
                     {{ $isRtl ? 'مجتمع القطار' : 'Qatar Community' }}
                 </a>
 
@@ -85,7 +86,7 @@
         <!-- Mobile Menu Slider -->
         <div x-show="mobileMenu" x-transition class="lg:hidden mt-4 pb-4 border-t border-gray-200/50">
             <div class="mt-4 flex flex-col gap-4 text-start font-bold text-sm px-2">
-                <a href="{{ route('front') }}" class="text-[#1A4231] py-3 border-b border-gray-200/30 flex items-center justify-between">
+                <a href="{{ route('front.store') }}" class="text-[#1A4231] py-3 border-b border-gray-200/30 flex items-center justify-between">
                     <span>{{ $isRtl ? 'الرئيسية' : 'Home' }}</span>
                 </a>
                 <a href="{{ route('coffee.crops') }}" class="text-[#1A4231] py-3 border-b border-gray-200/30 flex items-center justify-between">
@@ -96,6 +97,9 @@
                 </a>
                 <a href="{{ route('trial.boxes') }}" class="text-[#1A4231] py-3 border-b border-gray-200/30 flex items-center justify-between">
                     <span>{{ $isRtl ? 'بوكسات التجربة' : 'Experience Boxes' }}</span>
+                </a>
+                <a href="{{ route('custom.box') }}" class="text-[#1A4231] py-3 border-b border-gray-200/30 flex items-center justify-between">
+                    <span>{{ $isRtl ? 'البوكس المخصص' : 'Custom Box' }}</span>
                 </a>
 
                 <!-- Mobile Actions -->
@@ -109,7 +113,7 @@
                             {{ $isRtl ? 'تسجيل الدخول' : 'Login' }}
                         </a>
                     @endauth
-                    <a href="#" class="w-full text-center bg-white text-[#1A4231] border border-[#1A4231] py-3 rounded-full font-bold">
+                    <a href="{{ route('front') }}" class="w-full text-center bg-white text-[#1A4231] border border-[#1A4231] py-3 rounded-full font-bold">
                         {{ $isRtl ? 'مجتمع القطار' : 'Qatar Community' }}
                     </a>
                 </div>

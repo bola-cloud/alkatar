@@ -265,7 +265,7 @@
             let subtotal = 0;
             $('.product-row').each(function() {
                 let qty = parseFloat($(this).find('.product-qty').val()) || 0;
-                let price = parseFloat($(this).find('.product-price').data('price')) || 0;
+                let price = parseFloat($(this).find('.product-price').val()) || 0;
                 let total = qty * price;
                 $(this).find('.product-total').text(total.toFixed(3));
                 subtotal += total;
@@ -407,7 +407,9 @@
                             ${name}
                             <input type="hidden" name="products[${productIndex}][id]" value="${id}">
                         </td>
-                        <td class="product-price" data-price="${price}">${parseFloat(price).toFixed(3)}</td>
+                        <td>
+                            <input type="number" step="0.001" min="0" name="products[${productIndex}][price]" class="form-control product-price" value="${parseFloat(price).toFixed(3)}" style="width: 100px;">
+                        </td>
                         <td>
                             <input type="number" name="products[${productIndex}][quantity]" class="form-control product-qty" value="1" min="1" style="width: 80px;">
                         </td>
@@ -425,7 +427,7 @@
             updateTotals();
         });
 
-        $(document).on('input', '.product-qty', updateTotals);
+        $(document).on('input', '.product-qty, .product-price', updateTotals);
         $(document).on('click', '.remove-product', function() {
             $(this).closest('tr').remove();
             updateTotals();

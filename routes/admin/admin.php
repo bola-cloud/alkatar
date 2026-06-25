@@ -130,6 +130,11 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'is_admin'], '
         Route::post('/update-status/{id}', [\App\Http\Controllers\Admin\ExpertRequestController::class, 'updateStatus'])->name('expert-requests.update_status')->middleware(['permission:expert-request-edit']);
         Route::get('/delete/{id}', [\App\Http\Controllers\Admin\ExpertRequestController::class, 'destroy'])->name('expert-requests.delete')->middleware(['permission:expert-request-delete']);
     });
+    Route::group(['prefix' => 'partner-requests'], function () {
+        Route::get('/index', [\App\Http\Controllers\Admin\PartnerRequestController::class, 'index'])->name('partner-requests.index')->middleware(['permission:expert-request-list']);
+        Route::post('/update-status/{id}', [\App\Http\Controllers\Admin\PartnerRequestController::class, 'updateStatus'])->name('partner-requests.update_status')->middleware(['permission:expert-request-edit']);
+        Route::get('/delete/{id}', [\App\Http\Controllers\Admin\PartnerRequestController::class, 'destroy'])->name('partner-requests.delete')->middleware(['permission:expert-request-delete']);
+    });
     Route::group(['prefix' => 'general-settings'], function () {
         Route::get('', [GeneralSettingsController::class, 'GeneralSettings'])->name('general.settings')->middleware(['permission:cms-list|cms-create|cms-edit|cms-delete']);
         Route::get('/edit/{id}', [GeneralSettingsController::class, 'GeneralSettingsEdit'])->name('general.settings.edit')->middleware(['permission:cms-edit']);
@@ -512,7 +517,42 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'is_admin'], '
         Route::post('/store', [\App\Http\Controllers\Admin\DeliveryManController::class, 'store'])->name('delivery_man.store');
         Route::get('/edit/{id}', [\App\Http\Controllers\Admin\DeliveryManController::class, 'edit'])->name('delivery_man.edit');
         Route::post('/update/{id}', [\App\Http\Controllers\Admin\DeliveryManController::class, 'update'])->name('delivery_man.update');
-        Route::get('/delete/{id}', [\App\Http\Controllers\Admin\DeliveryManController::class, 'delete'])->name('delivery_man.delete');
+    });
+    
+    // CSR Initiatives routes
+    Route::group(['prefix' => 'csr', 'as' => 'csr.'], function () {
+        Route::get('/', [\App\Http\Controllers\Admin\CsrInitiativeController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Admin\CsrInitiativeController::class, 'create'])->name('create');
+        Route::post('/store', [\App\Http\Controllers\Admin\CsrInitiativeController::class, 'store'])->name('store');
+        Route::get('/edit/{id}', [\App\Http\Controllers\Admin\CsrInitiativeController::class, 'edit'])->name('edit');
+        Route::post('/update/{id}', [\App\Http\Controllers\Admin\CsrInitiativeController::class, 'update'])->name('update');
+        Route::get('/delete/{id}', [\App\Http\Controllers\Admin\CsrInitiativeController::class, 'destroy'])->name('delete');
+    });
+
+    // Gift Card Packages routes
+    Route::group(['prefix' => 'gift-card-packages', 'as' => 'gift_card_packages.'], function () {
+        Route::get('/', [\App\Http\Controllers\Admin\GiftCardPackageController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Admin\GiftCardPackageController::class, 'create'])->name('create');
+        Route::post('/store', [\App\Http\Controllers\Admin\GiftCardPackageController::class, 'store'])->name('store');
+        Route::get('/edit/{id}', [\App\Http\Controllers\Admin\GiftCardPackageController::class, 'edit'])->name('edit');
+        Route::post('/update/{id}', [\App\Http\Controllers\Admin\GiftCardPackageController::class, 'update'])->name('update');
+        Route::get('/delete/{id}', [\App\Http\Controllers\Admin\GiftCardPackageController::class, 'destroy'])->name('delete');
+    });
+
+    // Custom Box Templates routes
+    Route::group(['prefix' => 'custom-box-templates', 'as' => 'custom_box_templates.'], function () {
+        Route::get('/', [\App\Http\Controllers\Admin\CustomBoxTemplateController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Admin\CustomBoxTemplateController::class, 'create'])->name('create');
+        Route::post('/store', [\App\Http\Controllers\Admin\CustomBoxTemplateController::class, 'store'])->name('store');
+        Route::get('/edit/{id}', [\App\Http\Controllers\Admin\CustomBoxTemplateController::class, 'edit'])->name('edit');
+        Route::post('/update/{id}', [\App\Http\Controllers\Admin\CustomBoxTemplateController::class, 'update'])->name('update');
+        Route::get('/delete/{id}', [\App\Http\Controllers\Admin\CustomBoxTemplateController::class, 'destroy'])->name('delete');
+    });
+
+    // Custom Box Orders tracking routes
+    Route::group(['prefix' => 'custom-box-orders', 'as' => 'custom_box_orders.'], function () {
+        Route::get('/', [\App\Http\Controllers\Admin\CustomBoxOrderController::class, 'index'])->name('index');
+        Route::post('/update-status/{id}', [\App\Http\Controllers\Admin\CustomBoxOrderController::class, 'updateStatus'])->name('update_status');
     });
 });
 

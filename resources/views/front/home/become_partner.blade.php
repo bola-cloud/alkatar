@@ -248,8 +248,8 @@
                     </div>
 
                     <!-- Main White Form Column -->
-                    <form action="#" class="lg:col-span-8 p-8 lg:p-12 flex flex-col gap-6 text-start">
-                        
+                    <form action="{{ route('become.partner.store') }}" method="POST" class="lg:col-span-8 p-8 lg:p-12 flex flex-col gap-6 text-start">
+                        @csrf
                         <h3 class="text-2xl lg:text-3xl font-black text-[#1A4231] pb-2 border-b border-gray-100">
                             {{ __('new_design.become_partner.form_title') }}
                         </h3>
@@ -260,28 +260,28 @@
                             <!-- input: Name -->
                             <div class="flex flex-col gap-2">
                                 <label class="text-sm font-bold text-gray-700">{{ __('new_design.become_partner.input_name') }}</label>
-                                <input type="text" required placeholder="{{ __('new_design.become_partner.input_name_placeholder') }}" 
+                                <input type="text" name="name" required placeholder="{{ __('new_design.become_partner.input_name_placeholder') }}" 
                                        class="w-full bg-[#F9F8F6] border border-gray-200 rounded-2xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A4231] focus:bg-white transition-all">
                             </div>
 
                             <!-- input: Company Name -->
                             <div class="flex flex-col gap-2">
                                 <label class="text-sm font-bold text-gray-700">{{ __('new_design.become_partner.input_company') }}</label>
-                                <input type="text" required placeholder="{{ __('new_design.become_partner.input_company_placeholder') }}" 
+                                <input type="text" name="company" required placeholder="{{ __('new_design.become_partner.input_company_placeholder') }}" 
                                        class="w-full bg-[#F9F8F6] border border-gray-200 rounded-2xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A4231] focus:bg-white transition-all">
                             </div>
 
                             <!-- input: Contact Phone -->
                             <div class="flex flex-col gap-2">
                                 <label class="text-sm font-bold text-gray-700">{{ __('new_design.become_partner.input_phone') }}</label>
-                                <input type="tel" required placeholder="{{ __('new_design.become_partner.input_phone_placeholder') }}" 
+                                <input type="tel" name="phone" required placeholder="{{ __('new_design.become_partner.input_phone_placeholder') }}" 
                                        class="w-full bg-[#F9F8F6] border border-gray-200 rounded-2xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A4231] focus:bg-white transition-all text-start" dir="ltr">
                             </div>
 
                             <!-- input: Email Address -->
                             <div class="flex flex-col gap-2">
                                 <label class="text-sm font-bold text-gray-700">{{ __('new_design.become_partner.input_email') }}</label>
-                                <input type="email" required placeholder="{{ __('new_design.become_partner.input_email_placeholder') }}" 
+                                <input type="email" name="email" required placeholder="{{ __('new_design.become_partner.input_email_placeholder') }}" 
                                        class="w-full bg-[#F9F8F6] border border-gray-200 rounded-2xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A4231] focus:bg-white transition-all text-start" dir="ltr">
                             </div>
 
@@ -290,7 +290,7 @@
                         <!-- Notes text area -->
                         <div class="flex flex-col gap-2">
                             <label class="text-sm font-bold text-gray-700">{{ __('new_design.become_partner.input_notes') }}</label>
-                            <textarea rows="4" placeholder="{{ __('new_design.become_partner.input_notes_placeholder') }}" 
+                            <textarea name="message" rows="4" placeholder="{{ __('new_design.become_partner.input_notes_placeholder') }}" 
                                       class="w-full bg-[#F9F8F6] border border-gray-200 rounded-2xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A4231] focus:bg-white transition-all"></textarea>
                         </div>
 
@@ -313,5 +313,17 @@
     <div class="w-full h-16 lg:h-24 bg-white"></div>
 
 </div>
+
+@if($errors->any())
+    @push('scripts')
+        <script>
+            $(document).ready(function() {
+                @foreach($errors->all() as $error)
+                    toastr.error("{{ $error }}");
+                @endforeach
+            });
+        </script>
+    @endpush
+@endif
 
 @endsection

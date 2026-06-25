@@ -213,7 +213,7 @@
 
                     <!-- Right Column (Image with Tag) - rendered on the Right in RTL, Left in LTR -->
                     <div class="lg:col-span-6 relative h-64 lg:h-auto min-h-[380px] order-1 lg:order-2">
-                        <img src="{{ asset(ProductImage() . $featuredPackage->Primary_Image) }}" alt="{{ $featuredPackage->localized_name }}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='{{ asset(ProductImage() . 'prod.png') }}';">
+                        <img src="{{ resolve_product_image($featuredPackage->Primary_Image) }}" alt="{{ $featuredPackage->localized_name }}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='{{ asset('assets/elketar/coffee.png') }}';">
                         <!-- Offer of the Month Badge -->
                         <div class="absolute bottom-6 right-6 bg-white/95 text-[#1A4231] font-black text-xs px-4 py-2.5 rounded-full shadow-md">
                             {{ __('new_design.monthly_offers.featured_tag') }}
@@ -232,7 +232,7 @@
                             <div class="bg-white rounded-[24px] border border-gray-200 shadow-sm p-6 relative hover:shadow-md transition-all duration-300 flex flex-col justify-between min-h-[320px]">
                                 <!-- Image at the top of the card -->
                                 <div class="w-full h-44 rounded-xl overflow-hidden mb-4">
-                                    <img src="{{ asset(ProductImage() . $other->Primary_Image) }}" alt="{{ $other->localized_name }}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='{{ asset(ProductImage() . 'prod.png') }}';">
+                                    <img src="{{ resolve_product_image($other->Primary_Image) }}" alt="{{ $other->localized_name }}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='{{ asset('assets/elketar/coffee.png') }}';">
                                 </div>
                                 
                                 @if($other->Discount > 0)

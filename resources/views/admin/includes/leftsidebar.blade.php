@@ -109,6 +109,12 @@
                             <span>{{ __('Add Product') }}</span>
                         </a>
                     </li>
+                    <li class="{{ isset($submenu) && $submenu == 'add_monthly_offer' ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.physical.product.create', ['category_slug' => 'packages']) }}">
+                            <i class="fa fa-circle"></i>
+                            <span>{{ __('Add Monthly Offer') }}</span>
+                        </a>
+                    </li>
                     <li class="{{ isset($submenu) && $submenu == 'product_list' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.product') }}">
                             <i class="fa fa-circle"></i>
@@ -244,6 +250,12 @@
                         <a href="{{ route('admin.reports.delivery_men.index') }}">
                             <i class="fa fa-circle"></i>
                             <span>{{ __('Delivery Men Report') }}</span>
+                        </a>
+                    </li>
+                    <li class="{{ isset($menu) && $menu == 'custom_box_orders' ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.custom_box_orders.index') }}">
+                            <i class="fa fa-circle"></i>
+                            <span>{{ __('Custom Box Orders') }}</span>
                         </a>
                     </li>
                 </ul>
@@ -414,6 +426,12 @@
                             <span>{{ __('Expert Requests') }}</span>
                         </a>
                     </li>
+                    <li class="{{ isset($submenu) && $submenu == 'partner_requests' ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.partner-requests.index') }}">
+                            <i class="fa fa-circle"></i>
+                            <span>{{ __('Partner Requests') }}</span>
+                        </a>
+                    </li>
                     @endcan
                 </ul>
             </li>
@@ -517,10 +535,28 @@
                                                 <span>{{ __('Testimonial') }}</span>
                                             </a>
                                         </li> -->
-                    <li class="{{ isset($submenu) && $submenu == 'languages' ? 'mm-active' : '' }}">
+                    <!-- <li class="{{ isset($submenu) && $submenu == 'languages' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.language_list') }}">
                             <i class="fa fa-circle"></i>
                             <span>{{ __('Languages') }}</span>
+                        </a>
+                    </li> -->
+                    <li class="{{ isset($submenu) && $submenu == 'csr' ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.csr.index') }}">
+                            <i class="fa fa-circle"></i>
+                            <span>{{ __('CSR Initiatives') }}</span>
+                        </a>
+                    </li>
+                    <li class="{{ isset($submenu) && $submenu == 'gift_card_packages' ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.gift_card_packages.index') }}">
+                            <i class="fa fa-circle"></i>
+                            <span>{{ __('Gift Card Packages') }}</span>
+                        </a>
+                    </li>
+                    <li class="{{ isset($submenu) && $submenu == 'custom_box_templates' ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.custom_box_templates.index') }}">
+                            <i class="fa fa-circle"></i>
+                            <span>{{ __('Custom Box Templates') }}</span>
                         </a>
                     </li>
                 </ul>
@@ -586,7 +622,7 @@
                 </li> --}}
             </ul>
         </li> -->
-        @canany(['cms-create', 'cms-edit'])
+        <!-- @canany(['cms-create', 'cms-edit'])
             <li class="{{ isset($menu) && $menu == 'seo' ? 'mm-active' : '' }}">
                 <a class="has-arrow" href="#">
                     <i class="fas fa-cube"></i>
@@ -673,7 +709,7 @@
                     </li> --}}
                 </ul>
             </li>
-        @endcanany
+        @endcanany -->
 
         @canany(['cms-list'])
             <li class="{{ isset($menu) && $menu == 'company' ? 'mm-active' : '' }}">

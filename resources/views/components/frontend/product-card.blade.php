@@ -7,9 +7,9 @@
 <div class="single-grid-product ms-1 md:ms-4 h-100 d-flex flex-column" data-product-id="{{ $product->id }}">
     <div class="product-top">
         <a href="{{ route('single.product', $product->en_Product_Slug) }}">
-            <img class="product-thumbnal" src="{{ asset(ProductImage() . $product->Primary_Image) }}"
+            <img class="product-thumbnal" src="{{ resolve_product_image($product->Primary_Image) }}"
                 alt="{{ __('product') }}" style="height:160px; object-fit:contain;"
-                onerror="this.onerror=null;this.src='{{ asset(ProductImage() . 'prod.png') }}';" />
+                onerror="this.onerror=null;this.src='{{ asset('assets/elketar/coffee.png') }}';" />
         </a>
         <div class="product-flags">
             @foreach ($product->product_tags as $ppt)

@@ -57,8 +57,19 @@
                                             <div class="input__group mb-25">
                                                 <label for="exampleInputEmail1">{{ __('Category Name') }} *</label>
                                                 <select class="form-control" id="en_category_name" name="en_category_name">
+                                                    @php
+                                                        $selectedCategoryId = null;
+                                                        if (request()->has('category_slug')) {
+                                                            $slugCategory = \App\Models\Admin\Category::where('en_Category_Slug', request()->get('category_slug'))
+                                                                ->orWhere('fr_Category_Slug', request()->get('category_slug'))
+                                                                ->first();
+                                                            if ($slugCategory) {
+                                                                $selectedCategoryId = $slugCategory->id;
+                                                            }
+                                                        }
+                                                    @endphp
                                                     @foreach ($category as $item)
-                                                        <option value="{{ $item->id }}">
+                                                        <option value="{{ $item->id }}" {{ (old('en_category_name') == $item->id || $selectedCategoryId == $item->id) ? 'selected' : '' }}>
                                                             {{ $item?->fr_Category_Name ?? "--" }}
                                                         </option>
                                                     @endforeach
@@ -275,72 +286,6 @@
                                                 @enderror
                                             </div>
 
-                                            <div class="input__group mb-25">
-                                                <div class="custom-control custom-switch">
-                                                    <input type="checkbox" value="1" name="status"
-                                                        class="custom-control-input" id="customSwitch1">
-                                                    <label class="custom-control-label"
-                                                        for="customSwitch1">{{ __('Active') }}</label>
-                                                </div>
-                                                @error('status')
-                                                    <span class="text-danger">{{ $message }}</span>
-                                                @enderror
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <div class="custom-control custom-switch">
-                                                    <input type="checkbox" value="1" name="feature"
-                                                        class="custom-control-input" id="customSwitch2">
-                                                    <label class="custom-control-label"
-                                                        for="customSwitch2">{{ __('Popular') }}</label>
-                                                </div>
-                                                @error('feature')
-                                                    <span class="text-danger">{{ $message }}</span>
-                                                @enderror
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <div class="custom-control custom-switch">
-                                                    <input type="checkbox" value="1" name="best_sale"
-                                                        class="custom-control-input" id="customSwitch3">
-                                                    <label class="custom-control-label"
-                                                        for="customSwitch3">{{ __('Best Selling') }}</label>
-                                                </div>
-                                                @error('best_sale')
-                                                    <span class="text-danger">{{ $message }}</span>
-                                                @enderror
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <div class="custom-control custom-switch">
-                                                    <input type="checkbox" value="1" name="on_sale"
-                                                        class="custom-control-input" id="customSwitch4">
-                                                    <label class="custom-control-label"
-                                                        for="customSwitch4">{{ __('On Sale') }}</label>
-                                                </div>
-                                                @error('on_sale')
-                                                    <span class="text-danger">{{ $message }}</span>
-                                                @enderror
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <div class="custom-control custom-switch">
-                                                    <input type="checkbox" value="1" name="on_arrival"
-                                                        class="custom-control-input" id="customSwitch5">
-                                                    <label class="custom-control-label"
-                                                        for="customSwitch5">{{ __('New Arrival') }}</label>
-                                                </div>
-                                                @error('on_arrival')
-                                                    <span class="text-danger">{{ $message }}</span>
-                                                @enderror
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <div class="custom-control custom-switch">
-                                                    <input type="checkbox" value="1" name="today_special"
-                                                        class="custom-control-input" id="customSwitchTodaySpecial">
-                                                    <label class="custom-control-label"
-                                                        for="customSwitchTodaySpecial">{{ __('Today Special') }}</label>
-                                                </div>
-                                                @error('today_special')
-                                                    <span class="text-danger">{{ $message }}</span>
-                                                @enderror
-                                            </div>
 
                                         </div>
                                     </div>
@@ -523,29 +468,34 @@
 
 
     <script>
-        $(document).ready(function () {
-            $('#en_category_name').change(function () {
-                var categoryId = $(this).val();
-                if (categoryId) {
-                    $.ajax({
-                        url: '{{ route("admin.subcategory.all") }}',
-                        type: 'GET',
-                        data: { category_id: categoryId },
-                        success: function (data) {
-                            $('#subcategory_id').empty();
-                            $('#subcategory_id').append('<option value="">{{ __("Select Subcategory") }}</option>');
-                            $.each(data, function (key, value) {
-                                $('#subcategory_id').append('<option value="' + value.id + '">' + value.name_ar + '</option>');
-                            });
-                        }
-                    });
-                } else {
-                    $('#subcategory_id').empty();
-                    $('#subcategory_id').append('<option value="">{{ __("Select Subcategory") }}</option>');
-                }
-            });
-        });
-    </script>
+                                        $(document).ready(function () {
+                                            $('#en_category_name').change(function () {
+                                                var categoryId = $(this).val();
+                                                if (categoryId) {
+                                                    $.ajax({
+                                                        url: '{{ route("admin.subcategory.all") }}',
+                                                        type: 'GET',
+                                                        data: { category_id: categoryId },
+                                                        success: function (data) {
+                                                            $('#subcategory_id').empty();
+                                                            $('#subcategory_id').append('<option value="">{{ __("Select Subcategory") }}</option>');
+                                                            $.each(data, function (key, value) {
+                                                                $('#subcategory_id').append('<option value="' + value.id + '">' + value.name_ar + '</option>');
+                                                            });
+                                                        }
+                                                    });
+                                                } else {
+                                                    $('#subcategory_id').empty();
+                                                    $('#subcategory_id').append('<option value="">{{ __("Select Subcategory") }}</option>');
+                                                }
+                                            });
+
+                                            // Trigger change on page load to fetch subcategories if category is preselected
+                                            if ($('#en_category_name').val()) {
+                                                $('#en_category_name').trigger('change');
+                                            }
+                                        });
+                                    </script>
 
 
 @endpush

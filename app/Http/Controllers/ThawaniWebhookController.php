@@ -88,6 +88,25 @@ class ThawaniWebhookController extends Controller
                 'verified_ref' => $clientRef
             ]);
 
+            if ($clientRef && str_starts_with($clientRef, 'GIFT_')) {
+                Log::info('Thawani webhook: Processing Gift Card payment', ['client_ref' => $clientRef, 'status' => $paymentStatus]);
+                if ($paymentStatus === 'paid' || $paymentStatus === 'succeeded') {
+                    $metadata = $verifiedPaymentData['metadata'] ?? [];
+                    if (!empty($metadata)) {
+                        app(\App\Http\Controllers\Frontend\NewDesignController::class)->generateAndSendGiftCard(
+                            $metadata['recipient_name'] ?? 'Recipient',
+                            $metadata['recipient_phone'] ?? '',
+                            $metadata['recipient_email'] ?? '',
+                            $metadata['send_method'] ?? 'email',
+                            $metadata['gift_message'] ?? '',
+                            (float) ($metadata['gift_amount'] ?? 10.000),
+                            $clientRef
+                        );
+                    }
+                }
+                return response()->json(['status' => 'success', 'message' => 'Gift card processed via webhook'], 200);
+            }
+
             // Find order by multiple identifiers
             $order = $this->findOrder($clientRef, $sessionId);
 

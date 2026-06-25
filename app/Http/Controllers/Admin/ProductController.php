@@ -24,7 +24,18 @@ class ProductController extends Controller
         if ($request->ajax()) {
             // load sizes & weights so we can compute a fallback price when `Price` is empty
             // Also eager load combo relationships
-            $data = Product::query()->with('category', 'brand', 'sizes', 'weights', 'comboItems', 'parentCombos')->orderByDesc('id')->get();
+            // Exclude packages/offers and combo products from standard product list
+            $data = Product::query()
+                ->where(function ($query) {
+                    $query->whereHas('category', function ($q) {
+                        $q->whereNotIn('en_Category_Slug', ['packages', 'offers']);
+                    })
+                    ->orWhereNull('Category_Id');
+                })
+                ->whereNotIn('product_type', ['Combo', 'تجميعي', 'combo'])
+                ->with('category', 'brand', 'sizes', 'weights', 'comboItems', 'parentCombos')
+                ->orderByDesc('id')
+                ->get();
             return DataTables::of($data)
                 ->addColumn('select', function ($data) {
                     return '<div class="form-check"><input type="checkbox" class="form-check-input product-select" value="' . $data->id . '"></div>';
@@ -60,8 +71,8 @@ class ProductController extends Controller
                     return $btn;
                 })
                 ->editColumn('PrimaryImage', function ($data) {
-                    $url = asset(ProductImage() . $data->Primary_Image);
-                    return '<img src=' . $url . ' border="0" width="50" class="img-rounded" align="center" onerror="this.onerror=null;this.src=\'' . asset(ProductImage() . 'prod.png') . '\';" />';
+                    $url = resolve_product_image($data->Primary_Image);
+                    return '<img src="' . $url . '" border="0" width="50" class="img-rounded" align="center" onerror="this.onerror=null;this.src=\'' . asset('assets/elketar/coffee.png') . '\';" />';
                 })
                 ->editColumn('ProductName', function ($data) {
                     return $data->localized_name;
@@ -236,12 +247,12 @@ class ProductController extends Controller
             // return redirect()->back()->with('error', __('Image is  required'));
         }
 
-        $data['status'] = checkBoxValue($request->status);
-        $data['feature'] = checkBoxValue($request->feature);
-        $data['best_sale'] = checkBoxValue($request->best_sale);
-        $data['on_sale'] = checkBoxValue($request->on_sale);
-        $data['on_arrival'] = checkBoxValue($request->on_arrival);
-        $data['today_special'] = checkBoxValue($request->today_special);
+        $data['status'] = 1;
+        $data['feature'] = 0;
+        $data['best_sale'] = 0;
+        $data['on_sale'] = 0;
+        $data['on_arrival'] = 0;
+        $data['today_special'] = 0;
 
         // Ensure text fields that have NOT NULL DB constraints are set to a non-null default
         $data['en_description'] = $data['en_description'] ?? '';

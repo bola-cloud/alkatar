@@ -43,14 +43,20 @@ Route::group(['middleware' => ['is_user']], function () {
     Route::get('/wholesale-orders', [NewDesignController::class, 'wholesale'])->name('wholesale.orders');
     Route::post('/wholesale-orders', [NewDesignController::class, 'storeWholesaleRequest'])->name('wholesale.orders.store');
     Route::get('/become-partner', [NewDesignController::class, 'become_partner'])->name('become.partner');
+    Route::post('/become-partner', [NewDesignController::class, 'storePartnerRequest'])->name('become.partner.store');
     Route::get('/social-responsibility', [NewDesignController::class, 'social_responsibility'])->name('social.responsibility');
     Route::get('/trial-boxes', [NewDesignController::class, 'trial_boxes'])->name('trial.boxes');
+    Route::get('/subscriptions', [NewDesignController::class, 'subscriptions'])->name('subscriptions');
+    Route::get('/custom-box', [NewDesignController::class, 'custom_box'])->name('custom.box');
     Route::get('/coffee-crops', [NewDesignController::class, 'coffee_crops'])->name('coffee.crops');
     Route::get('/technical-tools', [NewDesignController::class, 'technical_tools'])->name('technical.tools');
     Route::get('/experts', [NewDesignController::class, 'experts'])->name('experts');
     Route::post('/experts', [NewDesignController::class, 'storeExpertRequest'])->name('experts.store');
     Route::get('/monthly-offers', [NewDesignController::class, 'monthly_offers'])->name('monthly.offers');
     Route::get('/gift-cards', [NewDesignController::class, 'gift_cards'])->name('gift.cards');
+    Route::post('/gift-card/purchase', [NewDesignController::class, 'purchaseGiftCard'])->name('gift_card.purchase');
+    Route::get('/gift-card/success', [NewDesignController::class, 'giftCardSuccess'])->name('gift_card.success');
+    Route::get('/gift-card/cancel', [NewDesignController::class, 'giftCardCancel'])->name('gift_card.cancel');
     Route::get('/contact-us', [NewDesignController::class, 'contact_us'])->name('contact.us');
     Route::post('/contact-us', [NewDesignController::class, 'contact_us_store'])->name('contact.us.store');
     Route::get('/login', [NewDesignController::class, 'login'])->name('login');
@@ -162,6 +168,7 @@ Route::group(['middleware' => ['is_user']], function () {
 
     Route::group(['prefix' => 'cart'], function () {
         Route::post('add', [CartController::class, 'addToCart'])->name('add.to.cart');
+        Route::post('add-custom-box', [CartController::class, 'addCustomBoxToCart'])->name('add.custom.box');
         Route::get('/content', [CartController::class, 'cartContent'])->name('cart.content');
         Route::get('/delete', [CartController::class, 'cartDelete'])->name('cart.delete');
         Route::get('/decrease', [CartController::class, 'cartDecrease'])->name('cart.decrease');

@@ -471,6 +471,10 @@ class CheckoutController extends Controller
             Session::put('shipping_address', $shipping_address);
             Session::put('checkout_email', $billing_address['email']);
             Session::put('collection_method', $request->collection_method);
+            Session::put('is_gift', $request->has('is_gift') ? 1 : 0);
+            Session::put('gift_recipient_name', $request->input('gift_recipient_name'));
+            Session::put('gift_recipient_phone', $request->input('gift_recipient_phone'));
+            Session::put('gift_message', $request->input('gift_message'));
 
             if ($isLoggedIn && is_null($admin_id)) {
                 Session::put('billing_id', $billing_create->id);
@@ -763,6 +767,10 @@ class CheckoutController extends Controller
         Session::put('billing_address', $billing_address);
         Session::put('shipping_address', $shipping_addresss);
         Session::put('checkout_email', $request->billing_email);
+        Session::put('is_gift', $request->has('is_gift') ? 1 : 0);
+        Session::put('gift_recipient_name', $request->input('gift_recipient_name'));
+        Session::put('gift_recipient_phone', $request->input('gift_recipient_phone'));
+        Session::put('gift_message', $request->input('gift_message'));
 
         $subtotal = subtotal();
         // Resolve billing country for guests as well (ID -> name) to calculate tax correctly
@@ -1110,6 +1118,10 @@ class CheckoutController extends Controller
                 'Order_Status' => $initial_order_status,
                 'txn' => $txn != null ? $txn : randomString(8),
                 'order_source' => 'web',
+                'is_gift' => Session::get('is_gift', 0),
+                'gift_recipient_name' => Session::get('gift_recipient_name'),
+                'gift_recipient_phone' => Session::get('gift_recipient_phone'),
+                'gift_message' => Session::get('gift_message'),
             ]);
 
 
@@ -1122,10 +1134,19 @@ class CheckoutController extends Controller
                 $content = Cart::content();
                 foreach ($content as $item) {
                     $this->subQtyProduct($item->id, $item->qty);
+                    
+                    $prodName = $item->name;
+                    if (isset($item->options->print_name) && !empty($item->options->print_name)) {
+                        $prodName .= ' [' . (__('Printed Name') ?: 'Printed Name') . ': ' . $item->options->print_name . ']';
+                    }
+                    if (isset($item->options->custom_box_details) && !empty($item->options->custom_box_details)) {
+                        $prodName .= ' (' . $item->options->custom_box_details . ')';
+                    }
+
                     OrderDetails::create([
                         'Order_Id' => $order->id,
-                        'Product_Id' => $item->id,
-                        'Product_Name' => $item->name,
+                        'Product_Id' => is_numeric($item->id) ? $item->id : null,
+                        'Product_Name' => $prodName,
                         'Image' => $item->options->image,
                         'Price' => $item->price,
                         'Color' => $item->options->color,
@@ -1133,6 +1154,19 @@ class CheckoutController extends Controller
                         'Quantity' => $item->qty,
                         'Total_Price' => $item->price * $item->qty,
                     ]);
+
+                    if (isset($item->options->is_custom_box) && $item->options->is_custom_box) {
+                        \App\Models\CustomBoxOrder::create([
+                            'order_id' => $order->id,
+                            'template_name' => $item->options->template ?? 'Custom Box',
+                            'capacity' => $item->options->capacity ?? 4,
+                            'print_name' => $item->options->print_name ?? null,
+                            'gift_message' => $item->options->gift_message ?? null,
+                            'details' => $item->options->custom_box_details ?? '',
+                            'price' => $item->price,
+                            'prep_status' => 'pending',
+                        ]);
+                    }
                 }
 
                 if ($shouldBroadcast && $order->Order_Status == ORDER_PROCESSING) {

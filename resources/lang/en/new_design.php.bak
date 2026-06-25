@@ -33,6 +33,8 @@ return [
         'technical_tools' => 'Technical Tools',
         'wholesale_orders' => 'Wholesale Orders',
         'experience_boxes' => 'Experience Boxes',
+        'subscriptions' => 'Subscriptions',
+        'custom_box' => 'Custom Box',
         'experts' => 'Experts',
         'social_responsibility' => 'Social Responsibility',
         'monthly_offers' => 'Monthly Offers',

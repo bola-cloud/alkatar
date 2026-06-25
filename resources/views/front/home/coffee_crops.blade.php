@@ -251,10 +251,9 @@
                     <!-- Image -->
                     <a href="{{ route('single.product.new', $product->en_Product_Slug) }}" class="w-full lg:w-2/5 shrink-0 h-[240px] lg:h-auto min-h-[320px] relative block overflow-hidden group">
                         @php
-                            $prodImg = $product->Primary_Image;
-                            $imgSrc = (strpos($prodImg, 'http') === 0) ? $prodImg : asset(ProductImage().$prodImg);
+                            $imgSrc = resolve_product_image($product->Primary_Image);
                         @endphp
-                        <img src="{{ $imgSrc }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="{{ $product->localized_name }}" onerror="this.onerror=null;this.src='{{ asset(ProductImage() . 'prod.png') }}';">
+                        <img src="{{ $imgSrc }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="{{ $product->localized_name }}" onerror="this.onerror=null;this.src='{{ asset('assets/elketar/coffee.png') }}';">
                     </a>
                     
                     <!-- Content Details -->

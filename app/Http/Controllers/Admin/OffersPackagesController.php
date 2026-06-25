@@ -96,7 +96,7 @@ class OffersPackagesController extends Controller
             'Quantity' => $request->qty,
             'Category_Id' => $category->id,
             'Primary_Image' => $primaryImageName,
-            'Status' => $request->has('status') ? 1 : 0,
+            'Status' => 1,
             'product_type' => 'Standard',
             'Voucher' => Str::upper(Str::random(6)),
             'type' => 1, // Physical Product

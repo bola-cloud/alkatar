@@ -45,6 +45,10 @@ class Order extends Model
         'smartlife_synced_at',
         'is_printed',
         'collection_method',
+        'is_gift',
+        'gift_recipient_name',
+        'gift_recipient_phone',
+        'gift_message',
     ];
 
     protected $casts = [

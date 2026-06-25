@@ -671,6 +671,10 @@ class SmartLifeErpService
      */
     public function submitOrder($order)
     {
+        // SmartLife Sync is disabled by User Request
+        return null;
+
+        /*
         try {
             $products = [];
             $customerId = $order->user ? $order->user->smartlife_customer_id : null;
@@ -851,5 +855,6 @@ class SmartLifeErpService
             Log::error('SmartLife submitOrder failed', ['error' => $e->getMessage()]);
             return null;
         }
+        */
     }
 }

@@ -94,15 +94,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="input__group mb-25">
-                                        <div class="custom-control custom-switch">
-                                            <input type="checkbox" value="1" name="status" class="custom-control-input" id="statusSwitch" checked>
-                                            <label class="custom-control-label" for="statusSwitch">{{ __('Status') }} ({{ __('Active') }})</label>
-                                        </div>
-                                        @error('status')
-                                            <span class="text-danger">{{ $message }}</span>
-                                        @enderror
-                                    </div>
+
 
                                     <div class="input__button mt-30">
                                         <button type="submit" class="btn btn-blue">{{ __('Submit') }}</button>

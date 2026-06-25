@@ -24,6 +24,6 @@ class AboutUsController extends Controller
         $data['about'] = AboutUsPage::where('Location', 'about_us')->first();
 
         // Use the newdesign blade which reads $about and $testimonials
-        return view('front.pages.aboutus.newdesign', $data);
+        return view('front.home.about', $data);
     }
 }

@@ -42,6 +42,24 @@ class CartController extends Controller
                 return response()->json(['error' => $msg], 422);
             }
 
+            // Experience Box limit check: Max 1 experience box per customer
+            $trialBoxesCatId = DB::table('categories')
+                ->where('en_Category_Slug', 'trial-boxes')
+                ->orWhere('fr_Category_Slug', 'trial-boxes')
+                ->value('id');
+            if ($product->Category_Id == $trialBoxesCatId) {
+                $trialBoxesInCartCount = 0;
+                foreach (Cart::content() as $cItem) {
+                    $cartItemProd = Product::find($cItem->id);
+                    if ($cartItemProd && $cartItemProd->Category_Id == $trialBoxesCatId) {
+                        $trialBoxesInCartCount += $cItem->qty;
+                    }
+                }
+                if (($trialBoxesInCartCount + $request->quantity) > 1) {
+                    return response()->json(['error' => __('Only 1 experience box is allowed per customer.')], 422);
+                }
+            }
+
             // Check if exact same item (with same options) already in cart
             foreach (Cart::content() as $cart) {
                 if ($cart->id == $product->id && ($request->selectedSize == ($cart->options->selectedSize ?? null)) && ($request->weight_id == ($cart->options->selectedWeightId ?? null))) {
@@ -175,7 +193,18 @@ class CartController extends Controller
             if ($cart->rowId == $id) {
                 // Check Stock Validation
                 $product = Product::with('comboItems')->find($cart->id); // optimize: eager load comboItems
-                $availableStock = $product->virtual_stock;
+                
+                if ($product) {
+                    $trialBoxesCatId = DB::table('categories')
+                        ->where('en_Category_Slug', 'trial-boxes')
+                        ->orWhere('fr_Category_Slug', 'trial-boxes')
+                        ->value('id');
+                    if ($product->Category_Id == $trialBoxesCatId) {
+                        return response()->json(['error' => __('Only 1 experience box is allowed per customer.')], 422);
+                    }
+                }
+
+                $availableStock = $product ? $product->virtual_stock : 999;
 
                 if (($cart->qty + 1) > $availableStock) {
                     return response()->json(['error' => __('Max stock reached')], 422);
@@ -212,5 +241,96 @@ class CartController extends Controller
     public function currencySymbol()
     {
         return currencySymbol()[currency()];
+    }
+
+    public function addCustomBoxToCart(Request $request)
+    {
+        $request->validate([
+            'template' => 'required|string',
+            'capacity' => 'required|integer|in:4,6',
+            'products' => 'required|array',
+            'print_name' => 'nullable|string|max:100',
+            'gift_message' => 'nullable|string|max:500',
+        ]);
+
+        $dbTemplate = \App\Models\CustomBoxTemplate::where('name_en', $request->template)
+            ->orWhere('name_ar', $request->template)
+            ->first();
+        
+        $basePrice = $dbTemplate ? (float) $dbTemplate->price : 2.000;
+        $totalPrice = $basePrice;
+        $totalQty = 0;
+        $firstImage = 'trail-box.png'; // default image
+
+        // Validate items and compute price
+        foreach ($request->products as $productId => $qty) {
+            $qty = intval($qty);
+            if ($qty <= 0) continue;
+            
+            $product = Product::find($productId);
+            if (!$product || $product->Status != 1) {
+                return response()->json(['error' => __('Selected product is invalid or unavailable')], 422);
+            }
+
+            // Verify virtual stock
+            if ($qty > $product->virtual_stock) {
+                return response()->json(['error' => __('Insufficient stock for ') . (app()->getLocale() == 'en' ? $product->en_Product_Name : $product->fr_Product_Name)], 422);
+            }
+
+            $totalPrice += $product->Price * $qty;
+            $totalQty += $qty;
+            
+            $itemName = app()->getLocale() == 'en' ? $product->en_Product_Name : $product->fr_Product_Name;
+            $itemsDetails[] = "{$qty}x {$itemName}";
+
+            if ($firstImage == 'trail-box.png' && $product->Primary_Image) {
+                $firstImage = $product->Primary_Image;
+            }
+        }
+
+        if ($totalQty > $request->capacity) {
+            return response()->json(['error' => __('Selected items exceed the box capacity of :capacity', ['capacity' => $request->capacity])], 422);
+        }
+
+        if ($totalQty <= 0) {
+            return response()->json(['error' => __('Please select at least one item to fill the box')], 422);
+        }
+
+        $boxName = app()->getLocale() == 'en' 
+            ? "Custom Coffee Box ({$request->template})" 
+            : "بوكس قهوة مخصص ({$request->template})";
+
+        $customDetailsStr = implode(', ', $itemsDetails);
+
+        $cartItem = Cart::add([
+            'id' => 'custom_box_' . uniqid(),
+            'name' => $boxName,
+            'qty' => 1,
+            'price' => $totalPrice,
+            'weight' => 0, // 0 for base shipping weight rules or generic estimation
+            'options' => [
+                'name_ar' => "بوكس قهوة مخصص ({$request->template})",
+                'image' => $firstImage,
+                'is_custom_box' => true,
+                'template' => $request->template,
+                'capacity' => $request->capacity,
+                'print_name' => $request->print_name,
+                'gift_message' => $request->gift_message,
+                'custom_box_details' => $customDetailsStr,
+                'slug' => 'custom-box',
+                'discount_price' => $totalPrice,
+            ]
+        ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'cart_count' => Cart::count(),
+                'cart_total' => Cart::total(),
+                'message' => __('Custom Box added to cart successfully')
+            ]);
+        }
+
+        return redirect()->route('cart.content')->with('success', __('Custom Box added to cart successfully'));
     }
 }

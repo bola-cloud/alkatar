@@ -165,15 +165,14 @@
                         $descLines = [$product->localized_description];
                     }
                     
-                    $prodImg = $product->Primary_Image;
-                    $imgSrc = (strpos($prodImg, 'http') === 0) ? $prodImg : asset(ProductImage().$prodImg);
+                    $imgSrc = resolve_product_image($product->Primary_Image);
                 @endphp
                 
                 <div class="product-item bg-white border border-gray-150 rounded-[32px] shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between" data-category="sub-{{ $product->subcategory_id }}">
                     <!-- Image Area -->
                     <div class="h-[260px] relative w-full overflow-hidden shrink-0">
                         <a href="{{ route('single.product.new', $product->en_Product_Slug) }}" class="block w-full h-full">
-                            <img src="{{ $imgSrc }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" alt="{{ $product->localized_name }}" onerror="this.onerror=null;this.src='{{ asset(ProductImage() . 'prod.png') }}';">
+                            <img src="{{ $imgSrc }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" alt="{{ $product->localized_name }}" onerror="this.onerror=null;this.src='{{ asset('assets/elketar/coffee.png') }}';">
                         </a>
                         @if($tagText)
                             <!-- Badge -->

@@ -163,42 +163,6 @@
                                                 </div>
                                             </div>
 
-                                            <div class="input__group mb-25">
-                                                <div class="custom-control custom-switch">
-                                                    <input type="checkbox"  value="1" name="status" class="custom-control-input" id="customSwitch1">
-                                                    <label class="custom-control-label" for="customSwitch1">{{__('Status')}}</label>
-                                                </div>
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <div class="custom-control custom-switch">
-                                                    <input type="checkbox" value="1" name="feature" class="custom-control-input" id="customSwitch2">
-                                                    <label class="custom-control-label" for="customSwitch2">{{__('Featured Product')}}</label>
-                                                </div>
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <div class="custom-control custom-switch">
-                                                    <input type="checkbox" value="1" name="best_sale" class="custom-control-input" id="customSwitch3">
-                                                    <label class="custom-control-label" for="customSwitch3">{{__('Best Selling')}}</label>
-                                                </div>
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <div class="custom-control custom-switch">
-                                                    <input type="checkbox" value="1" name="on_sale" class="custom-control-input" id="customSwitch4">
-                                                    <label class="custom-control-label" for="customSwitch4">{{__('On Sale')}}</label>
-                                                </div>
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <div class="custom-control custom-switch">
-                                                    <input type="checkbox" value="1" name="on_arrival" class="custom-control-input" id="customSwitch5">
-                                                    <label class="custom-control-label" for="customSwitch5">{{__('New Arrival')}}</label>
-                                                </div>
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <div class="custom-control custom-switch">
-                                                    <input type="checkbox" value="1" name="today_special" class="custom-control-input" id="customSwitchTodaySpecial">
-                                                    <label class="custom-control-label" for="customSwitchTodaySpecial">{{__('Today Special')}}</label>
-                                                </div>
-                                            </div>
                                             <div class="input__button">
                                                 <button type="submit" class="btn btn-blue">{{ __('Add')}}</button>
                                             </div>

@@ -92,6 +92,25 @@
             color: #1A4231 !important;
             opacity: 1 !important;
         }
+        
+        /* Currency logo styles */
+        .currency-logo {
+            display: inline-block;
+            vertical-align: middle;
+            height: 1.2em;
+            width: auto;
+            margin-inline: 2px;
+            /* Default: dark green color (#1A4231) via SVG/PNG filter override */
+            filter: brightness(0) saturate(100%) invert(18%) sepia(30%) saturate(1210%) hue-rotate(98deg) brightness(97%) contrast(94%);
+        }
+        .currency-logo-light {
+            /* Keeps the white color of light..png */
+            filter: none !important;
+        }
+        .currency-logo-dark {
+            /* Forces dark green color */
+            filter: brightness(0) saturate(100%) invert(18%) sepia(30%) saturate(1210%) hue-rotate(98deg) brightness(97%) contrast(94%) !important;
+        }
     </style>
 </head>
 <body class="bg-katar-cream text-katar-dark font-arabic overflow-x-hidden">
@@ -173,6 +192,99 @@
         function openRatingModal(id) {
             toastr.info("{{ __('Rating System Coming Soon') }}");
         }
+
+        function replaceCurrencySymbols(rootNode = document.body) {
+            const symbolUrl = "{{ asset('assets/elketar/light..png') }}";
+            const walk = document.createTreeWalker(
+                rootNode,
+                NodeFilter.SHOW_TEXT,
+                {
+                    acceptNode: function(node) {
+                        if (node.parentElement && (
+                            node.parentElement.tagName === 'SCRIPT' || 
+                            node.parentElement.tagName === 'STYLE' || 
+                            node.parentElement.tagName === 'TEXTAREA' || 
+                            node.parentElement.tagName === 'INPUT' || 
+                            node.parentElement.tagName === 'SELECT' || 
+                            node.parentElement.tagName === 'OPTION'
+                        )) {
+                            return NodeFilter.FILTER_REJECT;
+                        }
+                        const text = node.nodeValue;
+                        if (text && (
+                            text.includes('OMR') || 
+                            text.includes('ر.ع.') || 
+                            text.includes('ر.ع') || 
+                            text.includes('ر.س') || 
+                            text.includes('SAR')
+                        )) {
+                            return NodeFilter.FILTER_ACCEPT;
+                        }
+                        return NodeFilter.FILTER_SKIP;
+                    }
+                },
+                false
+            );
+
+            let node;
+            const nodesToReplace = [];
+            while(node = walk.nextNode()) {
+                nodesToReplace.push(node);
+            }
+
+            nodesToReplace.forEach(textNode => {
+                const parent = textNode.parentNode;
+                if (!parent) return;
+                
+                let text = textNode.nodeValue;
+                const tempDiv = document.createElement('div');
+                const escapedText = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                
+                // Inspect parent text color to apply high-contrast logo classes dynamically
+                const parentStyle = window.getComputedStyle(parent);
+                const parentColor = parentStyle.color;
+                let isLightText = false;
+                const rgbMatch = parentColor.match(/\d+/g);
+                if (rgbMatch) {
+                    const r = parseInt(rgbMatch[0]);
+                    const g = parseInt(rgbMatch[1]);
+                    const b = parseInt(rgbMatch[2]);
+                    // YIQ formula
+                    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                    if (brightness > 180) {
+                        isLightText = true;
+                    }
+                }
+                
+                const logoClass = isLightText ? 'currency-logo currency-logo-light' : 'currency-logo';
+                const imgHtml = `<img src="${symbolUrl}" alt="ر.ع." class="${logoClass}">`;
+                const newHtml = escapedText.replace(/(OMR|ر\.ع\.|ر\.ع|ر\.س|SAR)/g, imgHtml);
+                
+                tempDiv.innerHTML = newHtml;
+                
+                while (tempDiv.firstChild) {
+                    parent.insertBefore(tempDiv.firstChild, textNode);
+                }
+                parent.removeChild(textNode);
+            });
+        }
+
+        // Run on DOM loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            replaceCurrencySymbols();
+            
+            // Observe DOM changes for AJAX/Alpine
+            let observerTimeout = null;
+            const observer = new MutationObserver((mutations) => {
+                if (observerTimeout) clearTimeout(observerTimeout);
+                observerTimeout = setTimeout(() => {
+                    observer.disconnect();
+                    replaceCurrencySymbols();
+                    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+                }, 50);
+            });
+            observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+        });
     </script>
 
     @stack('scripts')

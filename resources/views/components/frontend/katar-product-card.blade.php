@@ -4,12 +4,12 @@
     <!-- Image -->
     <div class="relative h-64 mb-6 overflow-hidden rounded-2xl bg-katar-cream/30">
         @php 
-            $prodImg = $product->Primary_Image;
-            $imgSrc = (strpos($prodImg, 'http') === 0) ? $prodImg : asset(ProductImage().$prodImg);
+            $imgSrc = resolve_product_image($product->Primary_Image);
         @endphp
         <img src="{{ $imgSrc }}" 
              alt="{{ $product->en_Product_Name }}" 
-             class="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-700">
+             class="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-700"
+             onerror="this.onerror=null;this.src='{{ asset('assets/elketar/coffee.png') }}';">
         
         <!-- Hover Actions -->
         <div class="absolute inset-0 bg-katar-green/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">

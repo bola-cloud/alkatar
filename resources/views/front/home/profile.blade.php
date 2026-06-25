@@ -142,7 +142,7 @@
             'feedback' => $review->feedback,
             'product_id' => $review->product_id,
             'product_name' => $isRtl ? ($review->product->fr_Product_Name ?? $review->product->en_Product_Name ?? 'منتج') : ($review->product->en_Product_Name ?? 'Product'),
-            'product_image' => !empty($review->product->Primary_Image) ? asset(ProductImage().$review->product->Primary_Image) : (!empty($review->product->image) ? asset($review->product->image) : 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=300&auto=format&fit=crop'),
+            'product_image' => resolve_product_image($review->product->Primary_Image),
             'product_slug' => $review->product->en_Product_Slug ?? '#',
             'date' => \Carbon\Carbon::parse($review->created_at)->format('M d, Y')
         ];
@@ -186,6 +186,21 @@
                     </div>
                     <h2 class="text-xl font-bold text-[#1A4231]">{{ $user->name ?? 'Alex Johnson' }}</h2>
                     <p class="text-slate-500 text-sm font-semibold mt-1">{{ $user->email ?? 'alex.j@example.com' }}</p>
+                    
+                    <div class="mt-4 pt-4 border-t border-gray-100 w-full flex flex-col gap-2 text-start">
+                        <div class="flex justify-between items-center text-xs sm:text-sm font-semibold text-gray-700">
+                            <span>{{ $isRtl ? 'رصيد المحفظة:' : 'Wallet Balance:' }}</span>
+                            <span class="font-bold text-[#1A4231]">{{ number_format($user->balance ?? 0, 3) }} <img src="{{ asset('assets/elketar/light..png') }}" alt="ر.ع." class="inline-block align-middle" style="height: 1.2em; width: auto; margin-inline: 2px;"></span>
+                        </div>
+                        @if(isset($activeSubscription))
+                            <div class="flex justify-between items-center text-xs sm:text-sm font-semibold text-gray-700">
+                                <span>{{ $isRtl ? 'الباقة النشطة:' : 'Active Plan:' }}</span>
+                                <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#387C5F]/10 text-[#387C5F]">
+                                    {{ $activeSubscription->subscription->name }}
+                                </span>
+                            </div>
+                        @endif
+                    </div>
                 </div>
 
                 <!-- Navigation Tabs Menu -->
@@ -209,6 +224,16 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                         </svg>
                         <span>{{ $t['my_orders'] }}</span>
+                    </button>
+
+                    <!-- Tab: Subscriptions -->
+                    <button @click="activeTab = 'subscriptions'" 
+                            :class="activeTab === 'subscriptions' ? 'active' : ''"
+                            class="profile-nav-btn">
+                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{{ $isRtl ? 'اشتراكاتي' : 'My Subscriptions' }}</span>
                     </button>
 
                     <!-- Tab: Addresses -->
@@ -414,6 +439,108 @@
                 </div>
 
 
+                <!-- PANEL: Subscriptions -->
+                <div x-show="activeTab === 'subscriptions'" class="flex flex-col gap-8" x-cloak>
+                    <!-- Title & Header -->
+                    <div class="bg-white rounded-[24px] border border-gray-200/80 p-6 lg:p-8 shadow-sm text-start">
+                        <h1 class="text-2xl font-black text-[#1A4231]">{{ $isRtl ? 'باقة اشتراكي' : 'My Subscription Plan' }}</h1>
+                        <p class="text-slate-500 text-sm font-semibold mt-2">
+                            {{ $isRtl ? 'إدارة وتفاصيل باقة اشتراكك الحالية والمزايا النشطة لحسابك.' : 'Manage and view your current subscription details and active account benefits.' }}
+                        </p>
+                    </div>
+
+                    @if(isset($activeSubscription))
+                        <!-- Active Subscription Details Card -->
+                        <div class="bg-white rounded-[24px] border border-gray-200/80 p-6 lg:p-8 shadow-sm text-start flex flex-col gap-6">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100">
+                                <div>
+                                    <span class="inline-flex px-3 py-1 rounded-full text-xs font-bold bg-[#387C5F]/10 text-[#387C5F] mb-2">
+                                        {{ $isRtl ? '✓ اشتراك نشط' : '✓ Active Subscription' }}
+                                    </span>
+                                    <h3 class="text-2xl font-black text-[#1A4231]">{{ $activeSubscription->subscription->name }}</h3>
+                                </div>
+                                <div class="text-start sm:text-end">
+                                    <span class="block text-xs font-semibold text-slate-400 uppercase">{{ $isRtl ? 'تاريخ التجديد القادم' : 'NEXT RENEWAL DATE' }}</span>
+                                    <span class="block text-base font-bold text-gray-700 mt-1">
+                                        {{ \Carbon\Carbon::parse($activeSubscription->end_at)->format('M d, Y') }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Subscription Perks list -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="flex flex-col gap-4">
+                                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest">{{ $isRtl ? 'المزايا النشطة لحسابك' : 'ACTIVE PERKS FOR YOUR ACCOUNT' }}</h4>
+                                    
+                                    <ul class="space-y-3">
+                                        @if($activeSubscription->subscription->discount_percent > 0)
+                                            <li class="flex items-center gap-3 text-sm font-semibold text-gray-700">
+                                                <span class="w-5 h-5 rounded-full bg-green-50 text-green-600 flex items-center justify-center text-xs shrink-0">✓</span>
+                                                <span>{{ $isRtl ? 'خصم تلقائي بقيمة ' . $activeSubscription->subscription->discount_percent . '% على سلتك' : 'Automatic ' . $activeSubscription->subscription->discount_percent . '% discount on your cart' }}</span>
+                                            </li>
+                                        @endif
+
+                                        @if($activeSubscription->subscription->max_discount_amount > 0)
+                                            <li class="flex items-center gap-3 text-sm font-semibold text-gray-700">
+                                                <span class="w-5 h-5 rounded-full bg-green-50 text-green-600 flex items-center justify-center text-xs shrink-0">✓</span>
+                                                <span>{{ $isRtl ? 'حد أقصى للخصم: ' . number_format($activeSubscription->subscription->max_discount_amount, 3) . ' ر.ع.' : 'Max discount amount: ' . number_format($activeSubscription->subscription->max_discount_amount, 3) . ' OMR' }}</span>
+                                            </li>
+                                        @endif
+
+                                        @if($activeSubscription->subscription->free_shipping)
+                                            <li class="flex items-center gap-3 text-sm font-semibold text-gray-700">
+                                                <span class="w-5 h-5 rounded-full bg-green-50 text-green-600 flex items-center justify-center text-xs shrink-0">✓</span>
+                                                <span>{{ $isRtl ? 'شحن وتوصيل مجاني بالكامل لجميع الطلبات' : 'Fully free shipping and delivery on all orders' }}</span>
+                                            </li>
+                                        @endif
+
+                                        @if($activeSubscription->subscription->tax_exempt)
+                                            <li class="flex items-center gap-3 text-sm font-semibold text-gray-700">
+                                                <span class="w-5 h-5 rounded-full bg-green-50 text-green-600 flex items-center justify-center text-xs shrink-0">✓</span>
+                                                <span>{{ $isRtl ? 'إعفاء ضريبي كامل على المشتريات' : 'Full tax exemption on purchases' }}</span>
+                                            </li>
+                                        @endif
+                                    </ul>
+                                </div>
+
+                                <div class="bg-[#FAF9F5] border border-gray-150 rounded-[20px] p-5 flex flex-col justify-between">
+                                    <div>
+                                        <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">{{ $isRtl ? 'تفاصيل تجديد الاشتراك' : 'SUBSCRIPTION RENEWAL' }}</h4>
+                                        <p class="text-xs text-slate-500 leading-relaxed font-semibold">
+                                            {{ $isRtl 
+                                                ? 'يتم تجديد اشتراكك تلقائياً بقيمة رسوم الباقة لضمان استمرار المزايا والأسعار المخفضة الحصرية طوال فترة اشتراكك.' 
+                                                : 'Your subscription is renewed automatically with the package fee to ensure the continuation of active perks and exclusive discounted prices.' }}
+                                        </p>
+                                    </div>
+                                    <div class="mt-4 pt-4 border-t border-gray-200/60 flex justify-between items-center text-sm font-bold text-[#1A4231]">
+                                        <span>{{ $isRtl ? 'رسوم الاشتراك الدوري:' : 'Recurring Subscription Fee:' }}</span>
+                                        <span>{{ number_format($activeSubscription->subscription->price, 3) }} <img src="{{ asset('assets/elketar/light..png') }}" alt="ر.ع." class="inline-block align-middle" style="height: 1.2em; width: auto; margin-inline: 2px;"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <!-- No Active Subscription Card -->
+                        <div class="bg-[#FAF9F5] border border-gray-150 rounded-[32px] p-6 lg:p-8 text-center flex flex-col items-center gap-6 shadow-sm">
+                            <div class="w-16 h-16 rounded-full bg-[#1A4231]/5 flex items-center justify-center text-3xl">
+                                💎
+                            </div>
+                            <div class="max-w-xl">
+                                <h3 class="text-xl font-black text-[#1A4231]">{{ $isRtl ? 'لا يوجد اشتراك نشط حالياً' : 'No Active Subscription' }}</h3>
+                                <p class="text-slate-500 text-sm font-semibold mt-2 leading-relaxed">
+                                    {{ $isRtl 
+                                        ? 'اشترك في إحدى باقات بن القطار المتميزة للحصول على خصومات حصرية وتوصيل مجاني وتجربة تسوق فريدة بأسعار حصرية للأعضاء المميزين!' 
+                                        : 'Subscribe to one of El Katar\'s premium tiers to get exclusive discounts, free shipping, and a unique shopping experience with exclusive member-only prices!' }}
+                                </p>
+                            </div>
+                            <a href="{{ route('subscriptions') }}" class="bg-[#1A4231] hover:bg-[#133224] text-white font-bold text-sm py-3.5 px-8 rounded-full shadow-md transition-all">
+                                {{ $isRtl ? 'استعراض الباقات والاشتراك الآن' : 'Explore Tiers & Subscribe Now' }}
+                            </a>
+                        </div>
+                    @endif
+                </div>
+
+
                 <!-- PANEL: Orders -->
                 <div x-show="activeTab === 'orders'" class="flex flex-col gap-8" x-cloak>
                     <!-- LIST VIEW -->
@@ -506,7 +633,7 @@
                                                 </td>
                                                 <!-- Total -->
                                                 <td class="py-4 px-6 text-start">
-                                                    <span class="font-extrabold text-[#1A4231]">{{ number_format($order->Grand_Total, 2) }} {{ $isRtl ? 'ر.ع.' : 'OMR' }}</span>
+                                                    <span class="font-extrabold text-[#1A4231]">{{ number_format($order->Grand_Total, 2) }} <img src="{{ asset('assets/elketar/light..png') }}" alt="ر.ع." class="inline-block align-middle" style="height: 1.2em; width: auto; margin-inline: 2px;"></span>
                                                 </td>
                                                 <!-- Status badge -->
                                                 <td class="py-4 px-6 text-start">

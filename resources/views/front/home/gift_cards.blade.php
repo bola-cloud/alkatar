@@ -16,6 +16,28 @@
 
     <div class="container mx-auto px-4 lg:px-8 pb-24 max-w-6xl flex flex-col gap-12">
         
+        @if(session('success'))
+            <div class="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-2xl font-bold text-sm shadow-sm" style="color: #1A4231; border-color: #E2ECE9; background-color: #F4FAF7;">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-2xl font-bold text-sm shadow-sm" style="color: #8C2E2E; border-color: #FBEBEB; background-color: #FEF6F6;">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-2xl font-bold text-sm shadow-sm" style="color: #8C2E2E; border-color: #FBEBEB; background-color: #FEF6F6;">
+                <ul class="list-disc pl-5">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+        
         <!-- Premium Hero Banner -->
         <section class="bg-[#1A4231] rounded-3xl p-8 lg:p-12 text-white relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8"
                  style="background-image: url('{{ asset('assets/elketar/Background.png') }}'); background-size: cover; background-position: center; background-blend-mode: multiply; background-color: #1A4231;">
@@ -41,7 +63,15 @@
         </section>
 
         <!-- Interactive Gift Card Selection Section -->
-        <section x-data="{ selectedPackage: 'gold', sendMethod: 'whatsapp' }" class="flex flex-col gap-8">
+        @php
+            $bgColors = [
+                'gold' => '#C29F38',
+                'silver' => '#9CA9B8',
+                'bronze' => '#A85A28',
+            ];
+            $defaultBg = '#1A4231';
+        @endphp
+        <section x-data="{ selectedPackage: '{{ $packages->first()->key ?? 'gold' }}', sendMethod: 'whatsapp' }" class="flex flex-col gap-8">
             
             <!-- Section Title & Info -->
             <div class="flex items-center justify-between border-b border-gray-100 pb-4">
@@ -53,134 +83,66 @@
                 </span>
             </div>
 
-            <!-- 3 Packages Cards Row -->
+            <!-- Dynamic Packages Cards Row -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
-                <!-- Package 1: Gold (500 SAR) -->
-                <div class="flex flex-col items-center gap-4">
-                    <div x-on:click="selectedPackage = 'gold'" 
-                         class="w-full rounded-2xl p-6 text-white cursor-pointer relative transition-all duration-300 shadow-md hover:shadow-lg min-h-[160px] flex flex-col justify-between"
-                         style="background-color: #C29F38;"
-                         :class="selectedPackage === 'gold' ? 'ring-4 ring-[#1A4231]/30 scale-[1.02]' : 'opacity-90 hover:opacity-100'">
-                        
-                        <!-- Top Row: Price & Icon -->
-                        <div class="flex items-center justify-between w-full">
-                            <span class="text-2xl font-black">
-                                {{ __('new_design.gift_cards.gold_price') }}
-                            </span>
-                            <!-- Medal icon -->
-                            <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
-                                </svg>
+                @foreach($packages as $package)
+                    @php
+                        $key = strtolower($package->key);
+                        $bgColor = $bgColors[$key] ?? $defaultBg;
+                    @endphp
+                    <div class="flex flex-col items-center gap-4">
+                        <div x-on:click="selectedPackage = '{{ $package->key }}'" 
+                             class="w-full rounded-2xl p-6 text-white cursor-pointer relative transition-all duration-300 shadow-md hover:shadow-lg min-h-[160px] flex flex-col justify-between"
+                             style="background-color: {{ $bgColor }};"
+                             :class="selectedPackage === '{{ $package->key }}' ? 'ring-4 ring-[#1A4231]/30 scale-[1.02]' : 'opacity-90 hover:opacity-100'">
+                            
+                            <!-- Top Row: Price & Icon -->
+                            <div class="flex items-center justify-between w-full">
+                                <span class="text-2xl font-black">
+                                    {{ number_format($package->price, 3) }} {{ __('OMR') }}
+                                </span>
+                                <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                                    @if($key === 'gold')
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                                        </svg>
+                                    @elseif($key === 'silver')
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                                        </svg>
+                                    @else
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <!-- Bottom Row: Package Title & Desc -->
+                            <div class="text-start mt-6">
+                                <h3 class="text-sm font-bold text-white/80">
+                                    {{ $package->localized_name }}
+                                </h3>
+                                <p class="text-base font-black">
+                                    {{ $package->localized_description }}
+                                </p>
                             </div>
                         </div>
-
-                        <!-- Bottom Row: Package Title & Desc -->
-                        <div class="text-start mt-6">
-                            <h3 class="text-sm font-bold text-white/80">
-                                {{ __('new_design.gift_cards.gold_title') }}
-                            </h3>
-                            <p class="text-base font-black">
-                                {{ __('new_design.gift_cards.gold_desc') }}
-                            </p>
-                        </div>
-                    </div>
-                    <!-- Custom Checkbox Selector -->
-                    <label class="flex items-center gap-2 cursor-pointer font-bold text-sm text-[#1A4231] select-none" x-on:click="selectedPackage = 'gold'">
-                        <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all"
-                             :class="selectedPackage === 'gold' ? 'border-[#1A4231] bg-[#1A4231]' : ''">
-                            <div class="w-2 h-2 rounded-full bg-white" x-show="selectedPackage === 'gold'"></div>
-                        </div>
-                        <span>{{ __('new_design.gift_cards.select_package') }}</span>
-                    </label>
-                </div>
-
-                <!-- Package 2: Silver (250 SAR) -->
-                <div class="flex flex-col items-center gap-4">
-                    <div x-on:click="selectedPackage = 'silver'" 
-                         class="w-full rounded-2xl p-6 text-white cursor-pointer relative transition-all duration-300 shadow-md hover:shadow-lg min-h-[160px] flex flex-col justify-between"
-                         style="background-color: #9CA9B8;"
-                         :class="selectedPackage === 'silver' ? 'ring-4 ring-[#1A4231]/30 scale-[1.02]' : 'opacity-90 hover:opacity-100'">
-                        
-                        <!-- Top Row: Price & Icon -->
-                        <div class="flex items-center justify-between w-full">
-                            <span class="text-2xl font-black">
-                                {{ __('new_design.gift_cards.silver_price') }}
-                            </span>
-                            <!-- Coffee cup icon -->
-                            <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
-                                </svg>
+                        <!-- Custom Checkbox Selector -->
+                        <label class="flex items-center gap-2 cursor-pointer font-bold text-sm text-[#1A4231] select-none" x-on:click="selectedPackage = '{{ $package->key }}'">
+                            <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all"
+                                 :class="selectedPackage === '{{ $package->key }}' ? 'border-[#1A4231] bg-[#1A4231]' : ''">
+                                <div class="w-2 h-2 rounded-full bg-white" x-show="selectedPackage === '{{ $package->key }}'"></div>
                             </div>
-                        </div>
-
-                        <!-- Bottom Row: Package Title & Desc -->
-                        <div class="text-start mt-6">
-                            <h3 class="text-sm font-bold text-white/80">
-                                {{ __('new_design.gift_cards.silver_title') }}
-                            </h3>
-                            <p class="text-base font-black">
-                                {{ __('new_design.gift_cards.silver_desc') }}
-                            </p>
-                        </div>
+                            <span>{{ __('new_design.gift_cards.select_package') }}</span>
+                        </label>
                     </div>
-                    <!-- Custom Checkbox Selector -->
-                    <label class="flex items-center gap-2 cursor-pointer font-bold text-sm text-[#1A4231] select-none" x-on:click="selectedPackage = 'silver'">
-                        <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all"
-                             :class="selectedPackage === 'silver' ? 'border-[#1A4231] bg-[#1A4231]' : ''">
-                            <div class="w-2 h-2 rounded-full bg-white" x-show="selectedPackage === 'silver'"></div>
-                        </div>
-                        <span>{{ __('new_design.gift_cards.select_package') }}</span>
-                    </label>
-                </div>
-
-                <!-- Package 3: Bronze (100 SAR) -->
-                <div class="flex flex-col items-center gap-4">
-                    <div x-on:click="selectedPackage = 'bronze'" 
-                         class="w-full rounded-2xl p-6 text-white cursor-pointer relative transition-all duration-300 shadow-md hover:shadow-lg min-h-[160px] flex flex-col justify-between"
-                         style="background-color: #A85A28;"
-                         :class="selectedPackage === 'bronze' ? 'ring-4 ring-[#1A4231]/30 scale-[1.02]' : 'opacity-90 hover:opacity-100'">
-                        
-                        <!-- Top Row: Price & Icon -->
-                        <div class="flex items-center justify-between w-full">
-                            <span class="text-2xl font-black">
-                                {{ __('new_design.gift_cards.bronze_price') }}
-                            </span>
-                            <!-- Gift box icon -->
-                            <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                                </svg>
-                            </div>
-                        </div>
-
-                        <!-- Bottom Row: Package Title & Desc -->
-                        <div class="text-start mt-6">
-                            <h3 class="text-sm font-bold text-white/80">
-                                {{ __('new_design.gift_cards.bronze_title') }}
-                            </h3>
-                            <p class="text-base font-black">
-                                {{ __('new_design.gift_cards.bronze_desc') }}
-                            </p>
-                        </div>
-                    </div>
-                    <!-- Custom Checkbox Selector -->
-                    <label class="flex items-center gap-2 cursor-pointer font-bold text-sm text-[#1A4231] select-none" x-on:click="selectedPackage = 'bronze'">
-                        <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all"
-                             :class="selectedPackage === 'bronze' ? 'border-[#1A4231] bg-[#1A4231]' : ''">
-                            <div class="w-2 h-2 rounded-full bg-white" x-show="selectedPackage === 'bronze'"></div>
-                        </div>
-                        <span>{{ __('new_design.gift_cards.select_package') }}</span>
-                    </label>
-                </div>
-
+                @endforeach
             </div>
 
             <!-- Form Card Container -->
-            <form action="#" method="POST" class="bg-white rounded-3xl border border-gray-200 p-6 lg:p-12 grid grid-cols-1 lg:grid-cols-2 gap-12 shadow-sm mt-6">
+            <form action="{{ route('gift_card.purchase') }}" method="POST" class="bg-white rounded-3xl border border-gray-200 p-6 lg:p-12 grid grid-cols-1 lg:grid-cols-2 gap-12 shadow-sm mt-6">
                 @csrf
                 <input type="hidden" name="package" :value="selectedPackage">
                 <input type="hidden" name="method" :value="sendMethod">

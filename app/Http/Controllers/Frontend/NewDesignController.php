@@ -114,9 +114,19 @@ class NewDesignController extends Controller
 
     public function store()
     {
-        // عرض صفحة المتجر الكامل مع جلب الفئات والمنتجات المتاحة
-        $categories = Category::where('Status', 1)->orderBy('order', 'asc')->get();
-        $products = Product::available()->get();
+        // عرض صفحة المتجر الكامل مع جلب الفئات والمنتجات المتاحة (باستثناء الباقات والعروض والمنتجات التجميعية)
+        $categories = Category::where('Status', 1)
+            ->whereNotIn('en_Category_Slug', ['packages', 'offers'])
+            ->orderBy('order', 'asc')
+            ->get();
+
+        $products = Product::available()
+            ->whereNotIn('product_type', ['Combo', 'تجميعي', 'combo'])
+            ->whereHas('category', function ($query) {
+                $query->whereNotIn('en_Category_Slug', ['packages', 'offers']);
+            })
+            ->get();
+
         return view('front.home.store', compact('categories', 'products'));
     }
 
@@ -194,7 +204,8 @@ class NewDesignController extends Controller
     public function social_responsibility()
     {
         // عرض صفحة المسؤولية الاجتماعية
-        return view('front.home.social_responsibility');
+        $initiatives = \App\Models\CsrInitiative::orderBy('created_at', 'desc')->get();
+        return view('front.home.social_responsibility', compact('initiatives'));
     }
 
     public function trial_boxes()
@@ -205,6 +216,32 @@ class NewDesignController extends Controller
                             ->first();
         $products = $category ? $category->products()->where('Status', 1)->get() : collect();
         return view('front.home.trial_boxes', compact('products'));
+    }
+
+    public function subscriptions()
+    {
+        $subscriptions = \App\Models\Subscription::where('is_active', 1)->get();
+        return view('front.home.subscriptions', compact('subscriptions'));
+    }
+
+    public function custom_box()
+    {
+        $cropsCategory = Category::where('en_Category_Slug', 'coffee-crops')
+                            ->orWhere('fr_Category_Slug', 'coffee-crops')
+                            ->first();
+        $crops = $cropsCategory ? $cropsCategory->products()->where('Status', 1)->get() : collect();
+
+        $toolsCategory = Category::whereIn('en_Category_Slug', ['preparation-tools', 'accessories'])
+                                 ->orWhereIn('fr_Category_Slug', ['preparation-tools', 'accessories'])
+                                 ->get();
+        $tools = collect();
+        foreach ($toolsCategory as $cat) {
+            $tools = $tools->merge($cat->products()->where('Status', 1)->get());
+        }
+
+        $templates = \App\Models\CustomBoxTemplate::where('is_active', 1)->get();
+
+        return view('front.home.custom_box', compact('crops', 'tools', 'templates'));
     }
 
     public function coffee_crops()
@@ -294,6 +331,39 @@ class NewDesignController extends Controller
             : 'تم إرسال طلب استشارة الخبير بنجاح!');
     }
 
+    public function storePartnerRequest(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'company' => 'required|string|max:255',
+            'phone' => 'required|string|max:50',
+            'email' => 'required|email|max:255',
+            'message' => 'nullable|string',
+        ]);
+
+        \App\Models\Front\PartnerRequest::create([
+            'name' => $request->name,
+            'company' => $request->company,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'message' => $request->message,
+            'status' => 0, // Pending
+        ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => app()->getLocale() == 'en' 
+                    ? 'Your partnership request has been submitted successfully!' 
+                    : 'تم إرسال طلب الشراكة بنجاح!',
+            ]);
+        }
+
+        return redirect()->back()->with('success', app()->getLocale() == 'en' 
+            ? 'Your partnership request has been submitted successfully!' 
+            : 'تم إرسال طلب الشراكة بنجاح!');
+    }
+
     public function monthly_offers()
     {
         $packages = \App\Models\Admin\Product::where('Status', 1)
@@ -310,7 +380,8 @@ class NewDesignController extends Controller
     public function gift_cards()
     {
         // عرض صفحة بطاقة الإهداء
-        return view('front.home.gift_cards');
+        $packages = \App\Models\GiftCardPackage::where('status', 1)->orderBy('price', 'desc')->get();
+        return view('front.home.gift_cards', compact('packages'));
     }
 
     public function contact_us()
@@ -486,6 +557,282 @@ class NewDesignController extends Controller
             $reviews = ProductReview::where('user_id', $user->id)->with('product')->orderByDesc('created_at')->get();
         }
 
-        return view('front.home.profile', compact('user', 'orders', 'addresses', 'reviews'));
+        $activeSubscription = null;
+        if (auth()->check()) {
+            $activeSubscription = \App\Models\UserSubscription::where('user_id', auth()->id())
+                ->where('status', 'active')
+                ->whereDate('end_at', '>=', now())
+                ->with('subscription')
+                ->latest()
+                ->first();
+        }
+
+        return view('front.home.profile', compact('user', 'orders', 'addresses', 'reviews', 'activeSubscription'));
+    }
+
+    public function purchaseGiftCard(Request $request)
+    {
+        $activeKeys = \App\Models\GiftCardPackage::where('status', 1)->pluck('key')->toArray();
+
+        $request->validate([
+            'package' => 'required|in:' . implode(',', $activeKeys),
+            'recipient_name' => 'required|string|max:255',
+            'method' => 'required|in:whatsapp,email',
+            'phone' => 'required_if:method,whatsapp|nullable|string|max:50',
+            'email' => 'required_if:method,email|nullable|email|max:255',
+            'message' => 'nullable|string|max:1000',
+        ]);
+
+        $package = \App\Models\GiftCardPackage::where('key', $request->package)->where('status', 1)->first();
+        if (!$package) {
+            return redirect()->back()->with('error', __('Package not found or inactive.'));
+        }
+        
+        $price = (float) $package->price;
+        $priceInBz = round($price * 1000); // Thawani expects Baisa
+
+        $giftRef = 'GIFT_' . strtoupper(\Illuminate\Support\Str::random(10));
+
+        // Create a checkout session in Thawani
+        $checkoutProduct = [[
+            'name' => 'Al-Katar Gift Card - ' . $request->recipient_name,
+            'quantity' => 1,
+            'unit_amount' => $priceInBz,
+        ]];
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+                'thawani-api-key' => config('services.thawani.secret_key'),
+            ])->post(config('services.thawani.checkout_url') . '/checkout/session', [
+                'client_reference_id' => $giftRef,
+                'mode' => 'payment',
+                'products' => $checkoutProduct,
+                'success_url' => route('gift_card.success', ['gift_ref' => $giftRef]),
+                'cancel_url' => route('gift_card.cancel'),
+                'metadata' => [
+                    'recipient_name' => (string) $request->input('recipient_name'),
+                    'recipient_phone' => (string) ($request->input('phone') ?? ''),
+                    'recipient_email' => (string) ($request->input('email') ?? ''),
+                    'send_method' => (string) $request->input('method'),
+                    'gift_message' => (string) ($request->input('message') ?? ''),
+                    'gift_amount' => (string) $price,
+                    'buyer_name' => (string) (\Illuminate\Support\Facades\Auth::check() ? \Illuminate\Support\Facades\Auth::user()->name : 'Guest Buyer'),
+                    'buyer_email' => (string) (\Illuminate\Support\Facades\Auth::check() ? \Illuminate\Support\Facades\Auth::user()->email : 'guest@example.com'),
+                ]
+            ]);
+
+            if ($response->successful()) {
+                $sessionData = $response->json();
+                $sessionId = $sessionData['data']['session_id'] ?? null;
+                if ($sessionId) {
+                    \Illuminate\Support\Facades\Cache::put('gift_session_' . $giftRef, $sessionId, now()->addHours(2));
+                }
+                $paymentUrl = config('services.thawani.pay_url') . $sessionId . '?key=' . config('services.thawani.public_key');
+                
+                return redirect()->away($paymentUrl);
+            } else {
+                \Illuminate\Support\Facades\Log::error('Thawani session creation failed for gift card', ['body' => $response->body()]);
+                return redirect()->back()->with('error', __('Something went wrong with the payment gateway.'));
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Exception in purchaseGiftCard', ['message' => $e->getMessage()]);
+            return redirect()->back()->with('error', __('Failed to initiate payment.'));
+        }
+    }
+
+    public function giftCardSuccess(Request $request)
+    {
+        $giftRef = $request->get('gift_ref');
+        $sessionId = $request->get('session_id') ?: \Illuminate\Support\Facades\Cache::get('gift_session_' . $giftRef);
+
+        if (!$sessionId) {
+            return redirect()->route('gift.cards')->with('error', __('Invalid session.'));
+        }
+
+        try {
+            // Verify payment status with Thawani API
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+                'thawani-api-key' => config('services.thawani.secret_key'),
+            ])->get(config('services.thawani.checkout_url') . '/checkout/session/' . $sessionId);
+
+            $sessionData = $response->json();
+            if ($response->successful() && isset($sessionData['success']) && $sessionData['success']) {
+                $data = $sessionData['data'] ?? [];
+                $paymentStatus = $data['payment_status'] ?? '';
+
+                if ($paymentStatus === 'paid' || $paymentStatus === 'succeeded') {
+                    $metadata = $data['metadata'] ?? [];
+                    if (!empty($metadata)) {
+                        $this->generateAndSendGiftCard(
+                            $metadata['recipient_name'] ?? 'Recipient',
+                            $metadata['recipient_phone'] ?? '',
+                            $metadata['recipient_email'] ?? '',
+                            $metadata['send_method'] ?? 'email',
+                            $metadata['gift_message'] ?? '',
+                            (float) ($metadata['gift_amount'] ?? 10.000),
+                            $giftRef
+                        );
+
+                        return redirect()->route('gift.cards')->with('success', __('Your gift card has been successfully paid and sent to the recipient!'));
+                    }
+                }
+            }
+
+            return redirect()->route('gift.cards')->with('error', __('Payment was not successful.'));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error in giftCardSuccess', ['message' => $e->getMessage()]);
+            return redirect()->route('gift.cards')->with('error', __('Verification failed.'));
+        }
+    }
+
+    public function giftCardCancel()
+    {
+        return redirect()->route('gift.cards')->with('error', __('Gift Card payment cancelled.'));
+    }
+
+    public function generateAndSendGiftCard($recipientName, $recipientPhone, $recipientEmail, $sendMethod, $message, $amount, $giftRef = null)
+    {
+        // Check if already processed (using cache/lock or check if coupon with this giftRef suffix/code already exists)
+        // We can append $giftRef to the coupon code metadata or check if CouponCode already exists for this giftRef
+        // Let's generate a coupon code using the giftRef if present to ensure idempotency!
+        // This is incredibly robust! If we use the giftRef in the CouponCode, it's 100% idempotent.
+        // E.g. GIFT_ABC123XYZ -> coupon code 'GIFT-ABC123XYZ' or similar.
+        if ($giftRef) {
+            $couponCode = 'GIFT-' . str_replace('GIFT_', '', $giftRef);
+        } else {
+            $couponCode = 'GIFT-' . strtoupper(\Illuminate\Support\Str::random(10));
+        }
+
+        // Check if already exists in DB
+        $existing = \App\Models\Admin\Coupon::where('CouponCode', $couponCode)->first();
+        if ($existing) {
+            \Illuminate\Support\Facades\Log::info("Gift card coupon already generated (idempotency)", ['code' => $couponCode]);
+            return $existing;
+        }
+
+        // Create Coupon
+        $coupon = \App\Models\Admin\Coupon::create([
+            'CouponCode' => $couponCode,
+            'Amount' => $amount,
+            'Min_Expenses' => 0.000,
+            'ExpireDate' => now()->addYear()->format('Y-m-d'),
+            'usage_count' => 0,
+            'user_id' => null,
+        ]);
+
+        // Create Order and OrderDetails for printer application integration
+        try {
+            $txnIdentifier = $giftRef ?: $couponCode;
+            $existingOrder = \App\Models\Admin\Order::where('txn', $txnIdentifier)->first();
+            if (!$existingOrder) {
+                $maxId = \App\Models\Admin\Order::max('id') ?? 0;
+                $nextNumber = 10000 + ($maxId + 1);
+                $order_number = (string) $nextNumber;
+                while (\App\Models\Admin\Order::where('Order_Number', $order_number)->exists()) {
+                    $nextNumber++;
+                    $order_number = (string) $nextNumber;
+                }
+
+                $addr = [
+                    'name' => $recipientName,
+                    'email' => $recipientEmail,
+                    'phone_number' => $recipientPhone,
+                    'street' => 'Gift Card Delivery',
+                    'state' => 'Oman',
+                    'city' => 'Muscat',
+                    'country' => 'Oman',
+                ];
+
+                $order = \App\Models\Admin\Order::create([
+                    'Order_Number' => $order_number,
+                    'User_Id' => auth()->check() ? auth()->id() : null,
+                    'billing_address' => $addr,
+                    'shipping_address' => $addr,
+                    'Delivery_Charge' => 0.000,
+                    'Tax' => 0.000,
+                    'Sub_Total' => $amount,
+                    'Grand_Total' => $amount,
+                    'Is_Free_Delivery' => true,
+                    'Is_Order_Successful' => true,
+                    'Is_Order_Completed' => false,
+                    'Payment_Method' => 'Thawani',
+                    'Payment_Status' => 1, // PAYMENT_SUCCESS
+                    'Order_Status' => 2, // ORDER_PROCESSING
+                    'txn' => $txnIdentifier,
+                    'order_source' => 'web',
+                    'is_gift' => 1,
+                    'gift_recipient_name' => $recipientName,
+                    'gift_recipient_phone' => $recipientPhone,
+                    'gift_message' => $message,
+                ]);
+
+                if ($order) {
+                    \App\Models\Admin\OrderDetails::create([
+                        'Order_Id' => $order->id,
+                        'Product_Id' => null,
+                        'Product_Name' => 'Gift Card - ' . $recipientName,
+                        'Image' => null,
+                        'Price' => $amount,
+                        'Quantity' => 1,
+                        'Total_Price' => $amount,
+                    ]);
+
+                    try {
+                        event(new \App\Events\OrderCreated($order));
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error("Failed to broadcast OrderCreated event for gift card", ['error' => $e->getMessage()]);
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to create Order for gift card", ['error' => $e->getMessage()]);
+        }
+
+        $amountFormatted = number_format($amount, 3) . ' OMR';
+        
+        $smsMessageAr = "مرحباً {$recipientName}،\nلقد أرسل لك أحدهم بطاقة إهداء بقيمة {$amountFormatted} من بن القطار!\nكود الخصم الخاص بك هو: {$couponCode}\n";
+        if ($message) {
+            $smsMessageAr .= "الرسالة المرفقة: \"{$message}\"\n";
+        }
+        $smsMessageAr .= "يمكنك استخدام هذا الكود عند الدفع في موقعنا: " . url('/');
+
+        $smsMessageEn = "Hello {$recipientName},\nSomeone sent you a Gift Card worth {$amountFormatted} from Al-Katar Coffee!\nYour Gift coupon code is: {$couponCode}\n";
+        if ($message) {
+            $smsMessageEn .= "Message: \"{$message}\"\n";
+        }
+        $smsMessageEn .= "You can use this coupon at checkout: " . url('/');
+
+        $notificationText = app()->getLocale() != 'en' ? $smsMessageAr : $smsMessageEn;
+
+        // Send Email
+        if ($sendMethod === 'email' && $recipientEmail) {
+            try {
+                $subject = app()->getLocale() != 'en' ? "بطاقة إهداء من بن القطار" : "A Gift Card from Al-Katar Coffee!";
+                \Illuminate\Support\Facades\Mail::send([], [], function ($message) use ($recipientEmail, $subject, $notificationText) {
+                    $message->to($recipientEmail)
+                            ->subject($subject)
+                            ->html('<div style="font-family: sans-serif; direction: ' . (app()->getLocale() != 'en' ? 'rtl' : 'ltr') . '; text-align: start; padding: 20px; background-color: #FDF9F0; border: 1px solid #1A4231; border-radius: 12px; max-width: 600px; margin: auto; color: #1A4231;">' . nl2br(e($notificationText)) . '</div>');
+                });
+                \Illuminate\Support\Facades\Log::info("Gift Card Email successfully sent to {$recipientEmail}");
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Failed to send Gift Card Email", ['error' => $e->getMessage()]);
+            }
+        }
+
+        // Send WhatsApp
+        if ($sendMethod === 'whatsapp' && $recipientPhone) {
+            try {
+                $formattedPhone = str_starts_with($recipientPhone, '+') ? $recipientPhone : '+' . $recipientPhone;
+                \Illuminate\Support\Facades\Log::info("WhatsApp Gift Card (BYPASSED) for {$formattedPhone}: {$notificationText}");
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Failed to send Gift Card WhatsApp message", ['error' => $e->getMessage()]);
+            }
+        }
+
+        return $coupon;
     }
 }

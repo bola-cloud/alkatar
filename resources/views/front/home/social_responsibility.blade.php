@@ -137,131 +137,51 @@
                 <div class="w-16 h-1 bg-[#1A4231] mx-auto mt-4 rounded-full"></div>
             </div>
 
-            <!-- Initiatives Cards Grid (RTL/LTR Aware layout) -->
+            <!-- Initiatives Cards Grid (Dynamic Loop) -->
             <div class="initiatives-grid">
-                
-                @if($isRtl)
-                    <!-- CARD 1 (Right in RTL / Support Local Farmers) -->
+                @forelse($initiatives as $initiative)
                     <div class="bg-white rounded-[32px] overflow-hidden shadow-xl hover:scale-[1.03] transition-all duration-300 border border-gray-100/50 flex flex-col group">
                         <div class="relative h-60 overflow-hidden">
-                            <img src="{{ asset('assets/elketar/card1.png') }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Supporting Local Farmers">
-                            <span class="absolute top-4 right-4 bg-[#1A4231] text-[#FBF0D8] font-bold text-xs px-3.5 py-1.5 rounded-full shadow-md">
-                                {{ __('new_design.social_responsibility.card1_badge') }}
+                            <img src="{{ asset('uploaded_files/csr/' . $initiative->image) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="{{ $initiative->localized_title }}">
+                            @php
+                                $badgeColor = '#1A4231';
+                                if($initiative->type == 'initiative') $badgeColor = '#0F5A8C';
+                                if($initiative->type == 'video') $badgeColor = '#C23A2B';
+                            @endphp
+                            <span class="absolute top-4 {{ $isRtl ? 'right-4' : 'left-4' }} text-white font-bold text-xs px-3.5 py-1.5 rounded-full shadow-md" style="background-color: {{ $badgeColor }};">
+                                {{ __($initiative->type) }}
                             </span>
                         </div>
                         <div class="p-8 flex flex-col justify-between flex-grow text-start">
                             <div>
-                                <h3 class="text-xl font-bold text-[#1A4231] mb-3 group-hover:text-[#387C5F] transition-colors">{{ __('new_design.social_responsibility.card1_title') }}</h3>
-                                <p class="text-[#6B7280] text-sm lg:text-base font-medium leading-relaxed mb-6">{{ __('new_design.social_responsibility.card1_desc') }}</p>
+                                <h3 class="text-xl font-bold text-[#1A4231] mb-3 group-hover:text-[#387C5F] transition-colors">{{ $initiative->localized_title }}</h3>
+                                <p class="text-[#6B7280] text-sm lg:text-base font-medium leading-relaxed mb-6">{{ $initiative->localized_description }}</p>
                             </div>
-                            <a href="#" class="inline-flex items-center gap-2 text-sm font-bold text-[#1A4231] hover:underline self-start">
-                                <span>{{ __('new_design.social_responsibility.card1_more') }}</span>
-                                <svg class="w-4 h-4 transform group-hover:translate-x-1.5 transition-transform duration-300 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                            </a>
+                            
+                            @if($initiative->type == 'video' && $initiative->video_url)
+                                <button onclick="openVideoModal('{{ $initiative->video_url }}')" class="inline-flex items-center gap-2 text-sm font-bold text-[#C23A2B] hover:underline self-start">
+                                    <span class="w-8 h-8 rounded-full bg-[#C23A2B]/10 flex items-center justify-center shrink-0">
+                                        <svg class="w-4 h-4 fill-current text-[#C23A2B]" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                    </span>
+                                    <span>{{ __('Watch Video') }}</span>
+                                </button>
+                            @elseif($initiative->pdf_file)
+                                <a href="{{ asset('uploaded_files/csr/' . $initiative->pdf_file) }}" download class="inline-flex items-center gap-2 text-sm font-bold text-[#1A4231] hover:underline self-start">
+                                    <span class="w-8 h-8 rounded-full bg-[#1A4231]/10 flex items-center justify-center shrink-0">
+                                        <svg class="w-4 h-4 text-[#1A4231]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                    </span>
+                                    <span>{{ __('Download Report') }}</span>
+                                </a>
+                            @else
+                                <span class="text-xs text-gray-400 font-medium">{{ __('Project details') }}</span>
+                            @endif
                         </div>
                     </div>
-
-                    <!-- CARD 2 (Middle in RTL / Water Harvesting Initiative) -->
-                    <div class="bg-white rounded-[32px] overflow-hidden shadow-xl hover:scale-[1.03] transition-all duration-300 border border-gray-100/50 flex flex-col group">
-                        <div class="relative h-60 overflow-hidden">
-                            <img src="{{ asset('assets/elketar/card2.png') }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Water Harvesting Initiative">
-                            <span class="absolute top-4 right-4 bg-[#0F5A8C] text-white font-bold text-xs px-3.5 py-1.5 rounded-full shadow-md">
-                                {{ __('new_design.social_responsibility.card2_badge') }}
-                            </span>
-                        </div>
-                        <div class="p-8 flex flex-col justify-between flex-grow text-start">
-                            <div>
-                                <h3 class="text-xl font-bold text-[#1A4231] mb-3 group-hover:text-[#387C5F] transition-colors">{{ __('new_design.social_responsibility.card2_title') }}</h3>
-                                <p class="text-[#6B7280] text-sm lg:text-base font-medium leading-relaxed mb-6">{{ __('new_design.social_responsibility.card2_desc') }}</p>
-                            </div>
-                            <a href="#" class="inline-flex items-center gap-2 text-sm font-bold text-[#1A4231] hover:underline self-start">
-                                <span>{{ __('new_design.social_responsibility.card2_more') }}</span>
-                                <svg class="w-4 h-4 transform group-hover:translate-x-1.5 transition-transform duration-300 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                            </a>
-                        </div>
+                @empty
+                    <div class="col-span-full text-center py-12">
+                        <p class="text-gray-500 font-bold text-lg">{{ __('No initiatives found yet.') }}</p>
                     </div>
-
-                    <!-- CARD 3 (Left in RTL / Family Empowerment Project) -->
-                    <div class="bg-white rounded-[32px] overflow-hidden shadow-xl hover:scale-[1.03] transition-all duration-300 border border-gray-100/50 flex flex-col group">
-                        <div class="relative h-60 overflow-hidden">
-                            <img src="{{ asset('assets/elketar/card3.png') }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Family Empowerment Project">
-                            <span class="absolute top-4 right-4 bg-[#146B6B] text-white font-bold text-xs px-3.5 py-1.5 rounded-full shadow-md">
-                                {{ __('new_design.social_responsibility.card3_badge') }}
-                            </span>
-                        </div>
-                        <div class="p-8 flex flex-col justify-between flex-grow text-start">
-                            <div>
-                                <h3 class="text-xl font-bold text-[#1A4231] mb-3 group-hover:text-[#387C5F] transition-colors">{{ __('new_design.social_responsibility.card3_title') }}</h3>
-                                <p class="text-[#6B7280] text-sm lg:text-base font-medium leading-relaxed mb-6">{{ __('new_design.social_responsibility.card3_desc') }}</p>
-                            </div>
-                            <a href="#" class="inline-flex items-center gap-2 text-sm font-bold text-[#1A4231] hover:underline self-start">
-                                <span>{{ __('new_design.social_responsibility.card3_more') }}</span>
-                                <svg class="w-4 h-4 transform group-hover:translate-x-1.5 transition-transform duration-300 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                            </a>
-                        </div>
-                    </div>
-                @else
-                    <!-- CARD 3 (Left in LTR -> Family Empowerment) -->
-                    <div class="bg-white rounded-[32px] overflow-hidden shadow-xl hover:scale-[1.03] transition-all duration-300 border border-gray-100/50 flex flex-col group">
-                        <div class="relative h-60 overflow-hidden">
-                            <img src="{{ asset('assets/elketar/card3.png') }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Family Empowerment Project">
-                            <span class="absolute top-4 right-4 bg-[#146B6B] text-white font-bold text-xs px-3.5 py-1.5 rounded-full shadow-md">
-                                {{ __('new_design.social_responsibility.card3_badge') }}
-                            </span>
-                        </div>
-                        <div class="p-8 flex flex-col justify-between flex-grow text-start">
-                            <div>
-                                <h3 class="text-xl font-bold text-[#1A4231] mb-3 group-hover:text-[#387C5F] transition-colors">{{ __('new_design.social_responsibility.card3_title') }}</h3>
-                                <p class="text-[#6B7280] text-sm lg:text-base font-medium leading-relaxed mb-6">{{ __('new_design.social_responsibility.card3_desc') }}</p>
-                            </div>
-                            <a href="#" class="inline-flex items-center gap-2 text-sm font-bold text-[#1A4231] hover:underline self-start">
-                                <span>{{ __('new_design.social_responsibility.card3_more') }}</span>
-                                <svg class="w-4 h-4 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- CARD 2 (Middle in LTR -> Water Harvesting) -->
-                    <div class="bg-white rounded-[32px] overflow-hidden shadow-xl hover:scale-[1.03] transition-all duration-300 border border-gray-100/50 flex flex-col group">
-                        <div class="relative h-60 overflow-hidden">
-                            <img src="{{ asset('assets/elketar/card2.png') }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Water Harvesting Initiative">
-                            <span class="absolute top-4 right-4 bg-[#0F5A8C] text-white font-bold text-xs px-3.5 py-1.5 rounded-full shadow-md">
-                                {{ __('new_design.social_responsibility.card2_badge') }}
-                            </span>
-                        </div>
-                        <div class="p-8 flex flex-col justify-between flex-grow text-start">
-                            <div>
-                                <h3 class="text-xl font-bold text-[#1A4231] mb-3 group-hover:text-[#387C5F] transition-colors">{{ __('new_design.social_responsibility.card2_title') }}</h3>
-                                <p class="text-[#6B7280] text-sm lg:text-base font-medium leading-relaxed mb-6">{{ __('new_design.social_responsibility.card2_desc') }}</p>
-                            </div>
-                            <a href="#" class="inline-flex items-center gap-2 text-sm font-bold text-[#1A4231] hover:underline self-start">
-                                <span>{{ __('new_design.social_responsibility.card2_more') }}</span>
-                                <svg class="w-4 h-4 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- CARD 1 (Right in LTR -> Local Farmers) -->
-                    <div class="bg-white rounded-[32px] overflow-hidden shadow-xl hover:scale-[1.03] transition-all duration-300 border border-gray-100/50 flex flex-col group">
-                        <div class="relative h-60 overflow-hidden">
-                            <img src="{{ asset('assets/elketar/card1.png') }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Supporting Local Farmers">
-                            <span class="absolute top-4 right-4 bg-[#1A4231] text-[#FBF0D8] font-bold text-xs px-3.5 py-1.5 rounded-full shadow-md">
-                                {{ __('new_design.social_responsibility.card1_badge') }}
-                            </span>
-                        </div>
-                        <div class="p-8 flex flex-col justify-between flex-grow text-start">
-                            <div>
-                                <h3 class="text-xl font-bold text-[#1A4231] mb-3 group-hover:text-[#387C5F] transition-colors">{{ __('new_design.social_responsibility.card1_title') }}</h3>
-                                <p class="text-[#6B7280] text-sm lg:text-base font-medium leading-relaxed mb-6">{{ __('new_design.social_responsibility.card1_desc') }}</p>
-                            </div>
-                            <a href="#" class="inline-flex items-center gap-2 text-sm font-bold text-[#1A4231] hover:underline self-start">
-                                <span>{{ __('new_design.social_responsibility.card1_more') }}</span>
-                                <svg class="w-4 h-4 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                            </a>
-                        </div>
-                    </div>
-                @endif
-
+                @endforelse
             </div>
 
         </div>
@@ -386,9 +306,44 @@
         </div>
     </section>
 
+    <!-- Video Modal Overlay -->
+    <div id="videoModal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/80 transition-opacity duration-300">
+        <div class="relative w-full max-w-4xl mx-4">
+            <button onclick="closeVideoModal()" class="absolute -top-12 {{ $isRtl ? 'left-0' : 'right-0' }} text-white hover:text-gray-300 text-4xl font-bold focus:outline-none">&times;</button>
+            <div class="aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
+                <iframe id="videoPlayer" class="w-full h-full" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
     <!-- White spacer before footer -->
     <div class="w-full h-16 lg:h-24 bg-white"></div>
 
 </div>
+
+<script>
+    function openVideoModal(url) {
+        let embedUrl = url;
+        if (url.includes('youtube.com/watch?v=')) {
+            let id = url.split('v=')[1].split('&')[0];
+            embedUrl = 'https://www.youtube.com/embed/' + id + '?autoplay=1';
+        } else if (url.includes('youtu.be/')) {
+            let id = url.split('youtu.be/')[1].split('?')[0];
+            embedUrl = 'https://www.youtube.com/embed/' + id + '?autoplay=1';
+        }
+        
+        document.getElementById('videoPlayer').src = embedUrl;
+        let modal = document.getElementById('videoModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeVideoModal() {
+        document.getElementById('videoPlayer').src = '';
+        let modal = document.getElementById('videoModal');
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
+</script>
 
 @endsection

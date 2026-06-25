@@ -47,7 +47,7 @@
                     <div class="bg-[#FAF9F5] border border-gray-150 rounded-[24px] p-5 flex items-center gap-5 sm:gap-6 shadow-sm hover:shadow-md transition-shadow">
                         <!-- Image -->
                         <div class="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] lg:w-[140px] lg:h-[140px] rounded-[20px] overflow-hidden shrink-0 border border-gray-200/50 bg-white flex items-center justify-center">
-                            <img :src="'/assets/elketar/' + (item.options.image || 'placeholder.png')" :alt="item.name" class="w-full h-full object-cover">
+                            <img :src="resolveProductImage(item.options.image)" :alt="item.name" class="w-full h-full object-cover">
                         </div>
                         <!-- Info & Actions -->
                         <div class="flex-grow flex flex-col justify-between self-stretch py-1 text-start">
@@ -62,6 +62,34 @@
                                         </template>
                                         <template x-if="item.options.weight">
                                             <span class="inline-flex px-2 py-0.5 rounded bg-[#1A4231]/5 text-[#1A4231] text-[10px] font-bold" x-text="'{{ __('Weight') }}: ' + item.options.weight.weight + 'g'"></span>
+                                        </template>
+                                        <template x-if="item.options.is_custom_box">
+                                            <div class="flex flex-col gap-1.5 mt-2 bg-[#1A4231]/5 p-3 rounded-xl border border-[#1A4231]/10 text-xs text-[#1A4231] font-semibold w-full">
+                                                <div>
+                                                    <span class="opacity-75">{{ $isRtl ? 'القالب:' : 'Template:' }}</span> 
+                                                    <span x-text="item.options.template"></span>
+                                                </div>
+                                                <div>
+                                                    <span class="opacity-75">{{ $isRtl ? 'السعة:' : 'Capacity:' }}</span> 
+                                                    <span x-text="item.options.capacity + ' {{ $isRtl ? 'محاصيل' : 'Crops' }}'"></span>
+                                                </div>
+                                                <template x-if="item.options.print_name">
+                                                    <div>
+                                                        <span class="opacity-75">{{ $isRtl ? 'الاسم المطبوع:' : 'Printed Name:' }}</span> 
+                                                        <span x-text="item.options.print_name"></span>
+                                                    </div>
+                                                </template>
+                                                <template x-if="item.options.gift_message">
+                                                    <div>
+                                                        <span class="opacity-75">{{ $isRtl ? 'رسالة الإهداء:' : 'Gift Message:' }}</span> 
+                                                        <span x-text="item.options.gift_message"></span>
+                                                    </div>
+                                                </template>
+                                                <div class="mt-1 border-t border-[#1A4231]/10 pt-1 text-[11px] leading-relaxed">
+                                                    <span class="opacity-75 block mb-0.5">{{ $isRtl ? 'المحتويات:' : 'Contents:' }}</span>
+                                                    <span class="font-bold text-[#1A4231]/90" x-text="item.options.custom_box_details"></span>
+                                                </div>
+                                            </div>
                                         </template>
                                     </div>
                                 </div>
@@ -198,6 +226,24 @@
                 const t = parseFloat(this.tax) || 0;
                 const disc = parseFloat(this.discountAmount) || 0;
                 return Math.max(0, sub + sh + t - disc).toFixed(2);
+            },
+
+            resolveProductImage(img) {
+                if (!img) {
+                    return '/assets/elketar/coffee.png';
+                }
+                if (img.startsWith('http') || img.startsWith('/')) {
+                    return img;
+                }
+                const elketarAssets = [
+                    'card1.png', 'card2.png', 'card3.png', 
+                    'Background.png', 'Background (1).png', 
+                    'trail-box.png', 'ddd.png', 'coffee.png'
+                ];
+                if (elketarAssets.includes(img)) {
+                    return '/assets/elketar/' + img;
+                }
+                return '/uploaded_files/product_image/' + img;
             },
 
             decreaseQty(item) {

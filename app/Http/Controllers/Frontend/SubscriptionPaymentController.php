@@ -196,9 +196,9 @@ class SubscriptionPaymentController extends Controller
 
             $endDate = $startDate->copy();
 
-            if ($subscription->period_type == 'month') {
+            if ($subscription->period_type == 'month' || $subscription->period_type == 'months') {
                 $endDate->addMonths($subscription->period_value);
-            } elseif ($subscription->period_type == 'year') {
+            } elseif ($subscription->period_type == 'year' || $subscription->period_type == 'years') {
                 $endDate->addYears($subscription->period_value);
             } else {
                 $endDate->addDays($subscription->period_value);
@@ -210,12 +210,14 @@ class SubscriptionPaymentController extends Controller
                 'end_at' => $endDate
             ]);
 
-            // Credit the subscription price to user's wallet (User Request)
+            // Wallet top-up disabled: Subscription price is treated as a membership fee (Amazon Prime model)
+            /*
             $user = $userSub->user;
             if ($user) {
                 $user->increment('balance', $subscription->price);
                 \Log::info("User {$user->id} wallet credited with {$subscription->price} for subscription {$subscription->id}");
             }
+            */
 
             return redirect()->route('user.profile')->with('success', __('Subscription activated successfully!'));
         }

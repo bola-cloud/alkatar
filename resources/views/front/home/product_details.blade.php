@@ -99,19 +99,18 @@
             <div class="space-y-4">
                 <div class="aspect-square bg-[#FBF0D8] rounded-[32px] overflow-hidden border border-gray-100 flex items-center justify-center p-8 lg:p-12">
                     @php
-                        $mainImg = $images[0];
-                        $mainImgSrc = (strpos($mainImg, 'http') === 0) ? $mainImg : asset(ProductImage().$mainImg);
+                        $mainImgSrc = resolve_product_image($images[0]);
                     @endphp
-                    <img id="main-product-image" src="{{ $mainImgSrc }}" class="w-full h-full object-contain mix-blend-multiply hover:scale-105 transition-transform duration-500" onerror="this.onerror=null;this.src='{{ asset(ProductImage() . 'prod.png') }}';">
+                    <img id="main-product-image" src="{{ $mainImgSrc }}" class="w-full h-full object-contain mix-blend-multiply hover:scale-105 transition-transform duration-500" onerror="this.onerror=null;this.src='{{ asset('assets/elketar/coffee.png') }}';">
                 </div>
                 @if(count($images) > 1)
                     <div class="grid grid-cols-5 gap-4">
                         @foreach($images as $img)
                             @php
-                                $thumbSrc = (strpos($img, 'http') === 0) ? $img : asset(ProductImage().$img);
+                                $thumbSrc = resolve_product_image($img);
                             @endphp
                             <div onclick="changeMainImage('{{ $thumbSrc }}')" class="aspect-square bg-[#FBF0D8] rounded-2xl border-2 border-transparent hover:border-[#1A4231] cursor-pointer p-3 transition-all flex items-center justify-center">
-                                <img src="{{ $thumbSrc }}" class="w-full h-full object-contain mix-blend-multiply" onerror="this.onerror=null;this.src='{{ asset(ProductImage() . 'prod.png') }}';">
+                                <img src="{{ $thumbSrc }}" class="w-full h-full object-contain mix-blend-multiply" onerror="this.onerror=null;this.src='{{ asset('assets/elketar/coffee.png') }}';">
                             </div>
                         @endforeach
                     </div>
@@ -286,13 +285,12 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     @foreach($related as $rel)
                         @php
-                            $relImg = $rel->Primary_Image ?: 'prod.png';
-                            $relImgSrc = (strpos($relImg, 'http') === 0) ? $relImg : asset(ProductImage().$relImg);
+                            $relImgSrc = resolve_product_image($rel->Primary_Image ?: 'prod.png');
                         @endphp
                         <div class="bg-white rounded-[24px] border border-gray-150 overflow-hidden flex flex-col justify-between hover:shadow-lg transition-all duration-300">
                             <a href="{{ route('single.product.new', $rel->en_Product_Slug) }}" class="block">
                                 <div class="aspect-square bg-gray-50 flex items-center justify-center p-6 relative overflow-hidden">
-                                    <img src="{{ $relImgSrc }}" alt="{{ $rel->localized_name }}" class="max-h-full max-w-full object-contain mix-blend-multiply hover:scale-[1.03] transition-all">
+                                    <img src="{{ $relImgSrc }}" alt="{{ $rel->localized_name }}" class="max-h-full max-w-full object-contain mix-blend-multiply hover:scale-[1.03] transition-all" onerror="this.onerror=null;this.src='{{ asset('assets/elketar/coffee.png') }}';">
                                 </div>
                                 <div class="p-5 flex flex-col text-start gap-2">
                                     <h3 class="font-bold text-[#1A4231] text-base line-clamp-1">

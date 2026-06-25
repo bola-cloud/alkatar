@@ -25,6 +25,11 @@
                     <div class="input__group mb-25">
                         <label>{{ __('Price') }}</label>
                         <input type="number" step="0.01" name="price" class="form-control" value="0">
+                        <small class="text-info font-weight-bold d-block mt-2" style="font-size: 12px; color: #17a2b8; line-height: 1.5;">
+                            💡 <strong>تنبيه:</strong> هذه الباقة تعمل بنظام العضوية المميزة (مثل Amazon Prime). قيمة الاشتراك يدفعها العميل مقابل الحصول على المزايا والخصومات، ولا تُضاف كرصيد في محفظته.
+                            <br>
+                            💡 <strong>Note:</strong> This package operates as a premium membership (like Amazon Prime). The subscription fee is paid for perks/discounts and is not added to the user's wallet.
+                        </small>
                     </div>
                     <div class="input__group mb-25">
                         <label>{{ __('Period Type') }}</label>

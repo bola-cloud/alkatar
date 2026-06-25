@@ -58,8 +58,7 @@ class LanguageController extends Controller
         $keys = $request->keys;
         $values = $request->values;
         foreach (array_combine($keys, $values) as $key => $value) {
-            $n = str_replace("_", " ", $key);
-            $new[$n] = $value;
+            $new[$key] = $value;
         }
         $mydata = json_encode($new);
         file_put_contents(resource_path() . '/lang/' . $data->file, $mydata);

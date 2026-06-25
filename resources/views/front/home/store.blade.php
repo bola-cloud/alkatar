@@ -96,8 +96,7 @@
                         @endif
                         <!-- Product image -->
                         @php
-                            $prodImg = $product->Primary_Image;
-                            $imgSrc = (strpos($prodImg, 'http') === 0) ? $prodImg : asset(ProductImage().$prodImg);
+                            $imgSrc = resolve_product_image($product->Primary_Image);
                         @endphp
                         <img src="{{ $imgSrc }}" alt="{{ $product->localized_name }}" class="w-full h-full object-cover">
                     </div>
@@ -273,29 +272,6 @@ document.addEventListener('DOMContentLoaded', function() {
         allSorted.forEach(card => cardsContainer.appendChild(card));
     }
 });
-
-function addToCart(productId, price) {
-    $.ajax({
-        url: "{{ route('add.to.cart') }}",
-        type: "POST",
-        data: {
-            product_id: productId,
-            quantity: 1,
-            price: price,
-            _token: "{{ csrf_token() }}"
-        },
-        success: function(data) {
-            window.showCartSuccess(data);
-        },
-        error: function(xhr) {
-            if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.error) {
-                toastr.error(xhr.responseJSON.error);
-            } else {
-                toastr.error("{{ __('Failed to add product to cart') }}");
-            }
-        }
-    });
-}
 </script>
 
 @endsection

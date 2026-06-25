@@ -18,6 +18,28 @@ class BuyNowController extends Controller
         if (Auth::check()){
             if ($request->ajax()) {
                 $product=Product::with('colors','sizes',)->where('id',$request->product_id)->first();
+                if (!$product) {
+                    return response()->json(['error' => 'Product not found'], 404);
+                }
+
+                // Experience Box limit check: Max 1 experience box per customer
+                $trialBoxesCatId = DB::table('categories')
+                    ->where('en_Category_Slug', 'trial-boxes')
+                    ->orWhere('fr_Category_Slug', 'trial-boxes')
+                    ->value('id');
+                if ($product->Category_Id == $trialBoxesCatId) {
+                    $trialBoxesInCartCount = 0;
+                    foreach (Cart::content() as $cItem) {
+                        $cartItemProd = Product::find($cItem->id);
+                        if ($cartItemProd && $cartItemProd->Category_Id == $trialBoxesCatId) {
+                            $trialBoxesInCartCount += $cItem->qty;
+                        }
+                    }
+                    if (($trialBoxesInCartCount + $request->quantity) > 1) {
+                        return response()->json(['error' => __('Only 1 experience box is allowed per customer.')], 422);
+                    }
+                }
+
                 $color_id = DB::table('color_product')->where('Product_Id', $request->product_id)->where('Color_Id', $request->color_id)->count();
                 $size_id = DB::table('size_product')->where('Product_Id', $request->product_id)->where('Size_Id', $request->size_id)->count();
                 if($color_id == 0 ){

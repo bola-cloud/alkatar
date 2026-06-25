@@ -113,6 +113,7 @@
                     <a href="{{ route('technical.tools') }}" class="text-gray-600 font-bold py-3 border-b border-gray-100">{{ __('new_design.menu.technical_tools') }}</a>
                     <a href="{{ route('wholesale.orders') }}" class="text-gray-600 font-bold py-3 border-b border-gray-100">{{ __('new_design.menu.wholesale_orders') }}</a>
                     <a href="{{ route('trial.boxes') }}" class="text-gray-600 font-bold py-3 border-b border-gray-100">{{ __('new_design.menu.experience_boxes') }}</a>
+                    <a href="{{ route('custom.box') }}" class="text-gray-600 font-bold py-3 border-b border-gray-100">{{ $isRtl ? 'البوكس المخصص' : 'Custom Box' }}</a>
                     <a href="{{ route('experts') }}" class="text-gray-600 font-bold py-3 border-b border-gray-100">{{ __('new_design.menu.experts') }}</a>
                     <a href="{{ route('social.responsibility') }}" class="text-gray-600 font-bold py-3 border-b border-gray-100">{{ __('new_design.menu.social_responsibility') }}</a>
                     <a href="{{ route('monthly.offers') }}" class="text-gray-600 font-bold py-3 border-b border-gray-100">{{ __('new_design.menu.monthly_offers') }}</a>
@@ -152,12 +153,13 @@
 </style>
 <nav class="hidden lg:block py-3.5" dir="{{ $dir }}" style="background: linear-gradient(to right, #1A4231, #387C5F);">
     <div class="container mx-auto px-4">
-        <ul class="flex items-center justify-start lg:justify-center gap-4 lg:gap-6 text-white font-medium overflow-x-auto no-scrollbar" style="font-family: 'Cairo', sans-serif; font-size: 18px; line-height: 27px; scrollbar-width: none; -ms-overflow-style: none;">
+        <ul class="flex items-center justify-start lg:justify-center gap-4 lg:gap-6 text-white font-medium overflow-x-auto no-scrollbar" style="font-family: 'Cairo', sans-serif; font-size: 18px; line-height: 27px; scrollbar-width: none; -ms-overflow-style: none; justify-content: safe center;">
             <li><a href="{{ route('front') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.home') }}</a></li>
             <li><a href="{{ route('coffee.crops') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.coffee_crops') }}</a></li>
             <li><a href="{{ route('technical.tools') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.technical_tools') }}</a></li>
             <li><a href="{{ route('wholesale.orders') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.wholesale_orders') }}</a></li>
             <li><a href="{{ route('trial.boxes') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.experience_boxes') }}</a></li>
+            <li><a href="{{ route('custom.box') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ $isRtl ? 'البوكس المخصص' : 'Custom Box' }}</a></li>
             <li><a href="{{ route('experts') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.experts') }}</a></li>
             <li><a href="{{ route('social.responsibility') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.social_responsibility') }}</a></li>
             <li><a href="{{ route('monthly.offers') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.monthly_offers') }}</a></li>

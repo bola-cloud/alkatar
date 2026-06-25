@@ -35,6 +35,9 @@ class UserSubscriptionObserver
 
     protected function processWalletTopUp(UserSubscription $userSubscription)
     {
+        // Wallet top-up disabled: Subscription price is treated as a membership fee (Amazon Prime model)
+        return;
+
         // Only proceed if subscription is active
         if ($userSubscription->status != 1) {
             return;

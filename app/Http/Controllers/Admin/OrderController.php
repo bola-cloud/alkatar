@@ -46,6 +46,7 @@ class OrderController extends Controller
             'products' => 'required|array',
             'products.*.id' => 'required|exists:products,id',
             'products.*.quantity' => 'required|integer|min:1',
+            'products.*.price' => 'nullable|numeric|min:0',
             'payment_method' => 'required|string',
             'shipping_charge' => 'nullable|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
@@ -65,9 +66,13 @@ class OrderController extends Controller
         $subtotal = 0;
         foreach ($request->products as $item) {
             $product = \App\Models\Admin\Product::find($item['id']);
-            $price = $product->Price;
-            if ($product->Discount) {
-                $price -= ($product->Discount / 100) * $price;
+            if (isset($item['price']) && is_numeric($item['price'])) {
+                $price = floatval($item['price']);
+            } else {
+                $price = $product->Price;
+                if ($product->Discount) {
+                    $price -= ($product->Discount / 100) * $price;
+                }
             }
             $subtotal += $price * $item['quantity'];
         }
@@ -109,13 +114,13 @@ class OrderController extends Controller
             'street' => $request->street_address,
             'state' => $request->state_id,
             'state_en' => $state->name_en ?? '',
-            'state_ar' => $state->name_ar ?? '',
+            'state_ar' => $state->name_fr ?? '',
             'city' => $request->city_id,
             'city_en' => $city->name_en ?? '',
-            'city_ar' => $city->name_ar ?? '',
+            'city_ar' => $city->name_fr ?? '',
             'area' => $request->area_id,
             'area_en' => $area->name_en ?? '',
-            'area_ar' => $area->name_ar ?? '',
+            'area_ar' => $area->name_fr ?? '',
             'zipcode' => '',
             'country' => 'Oman',
         ];
@@ -163,21 +168,28 @@ class OrderController extends Controller
             $order->Grand_Total = $grand_total;
         }
         
-        $order->Order_Status = ORDER_PENDING;
+        // Admin created orders should always start as ORDER_PROCESSING (قيد المعالجة)
+        // to ensure they appear in the mobile application immediately.
+        $order->Order_Status = ORDER_PROCESSING;
         $order->order_source = 'admin';
         $order->txn = 'ADMIN-'.time();
         $order->save();
 
         foreach ($request->products as $item) {
             $product = \App\Models\Admin\Product::find($item['id']);
-            $price = $product->Price;
-            if ($product->Discount) {
-                $price -= ($product->Discount / 100) * $price;
+            if (isset($item['price']) && is_numeric($item['price'])) {
+                $price = floatval($item['price']);
+            } else {
+                $price = $product->Price;
+                if ($product->Discount) {
+                    $price -= ($product->Discount / 100) * $price;
+                }
             }
             OrderDetails::create([
                 'Order_Id' => $order->id,
                 'Product_Id' => $product->id,
                 'Product_Name' => $product->en_Product_Name,
+                'Image' => $product->Primary_Image,
                 'Price' => $price,
                 'Quantity' => $item['quantity'],
                 'Total_Price' => $price * $item['quantity'],
@@ -201,9 +213,13 @@ class OrderController extends Controller
                 $discountAmount = $discount;
                 foreach ($request->products as $item) {
                     $product = \App\Models\Admin\Product::find($item['id']);
-                    $price = $product->Price;
-                    if ($product->Discount) {
-                        $price -= ($product->Discount / 100) * $price;
+                    if (isset($item['price']) && is_numeric($item['price'])) {
+                        $price = floatval($item['price']);
+                    } else {
+                        $price = $product->Price;
+                        if ($product->Discount) {
+                            $price -= ($product->Discount / 100) * $price;
+                        }
                     }
                     
                     if ($subtotal > 0) {

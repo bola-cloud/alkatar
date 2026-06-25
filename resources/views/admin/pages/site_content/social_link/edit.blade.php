@@ -49,18 +49,13 @@
                                                 <input type="text" class="form-control" id="linkedin" name="linkedin"
                                                     value="{{ $edit->Linkedin }}" placeholder="{{ __('Linkedin') }}">
                                             </div>
-                                            <div class="input__group mb-25">
-                                                <label for="exampleInputEmail1">{{ __('Skype') }}</label>
-                                                <input type="text" class="form-control" id="skype" name="skype"
-                                                    value="{{ $edit->Skype }}" placeholder="{{ __('Skype') }}">
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <label for="exampleInputEmail1">{{ __('Instagram') }}</label>
-                                                <input type="text" class="form-control" id="instagram" name="instagram"
-                                                    value="{{ $edit->Instagram }}"
-                                                    placeholder="{{ __('Instagram') }}">
-                                            </div>
-                                            <div class="input__button">
+                                             <div class="input__group mb-25">
+                                                 <label for="exampleInputEmail1">{{ __('Instagram') }}</label>
+                                                 <input type="text" class="form-control" id="instagram" name="instagram"
+                                                     value="{{ $edit->Instagram }}"
+                                                     placeholder="{{ __('Instagram') }}">
+                                             </div>
+                                             <div class="input__button">
                                                 <button type="submit" class="btn btn-blue">{{ __('Update') }}</button>
                                             </div>
                                         </form>

@@ -104,12 +104,14 @@
         </form>
 
         <!-- Google Login -->
+        {{--
         <div class="mt-6 flex justify-center">
             <a href="{{ route('user.redirect_google') }}" class="bg-transparent border border-gray-300 px-6 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-50 transition-all">
                 <span class="text-[11px] font-bold text-gray-700">Google</span>
                 <img src="https://www.svgrepo.com/show/355037/google.svg" class="w-4 h-4">
             </a>
         </div>
+        --}}
 
         <!-- Footer -->
         <p class="mt-8 text-center text-[12px] font-semibold text-gray-500">

@@ -47,10 +47,10 @@ if (!function_exists('fileUpload')) {
         // saving image in target path
         $imgName = $defaultFileName ? $defaultFileName . '.' . $img->getClientOriginalExtension() : uniqid() . time() . '.' . $img->getClientOriginalExtension();
         $imgPath = public_path($path . $imgName);
-        // If this is an SVG (or similar vector) file, skip GD/Image processing
+        // If this is an SVG (or similar vector) or PDF file, skip GD/Image processing
         $mime = $img->getClientMimeType();
         $ext = strtolower($img->getClientOriginalExtension());
-        if (str_contains($mime, 'svg') || in_array($ext, ['svg', 'svgz'])) {
+        if (str_contains($mime, 'svg') || in_array($ext, ['svg', 'svgz']) || str_contains($mime, 'pdf') || $ext === 'pdf') {
             // move uploaded file as-is into the public folder
             $moved = $img->move(public_path($path), $imgName);
             if ($moved) {
@@ -254,6 +254,25 @@ if (!function_exists('ProductImage')) {
     function ProductImage()
     {
         return 'uploaded_files/product_image/';
+    }
+}
+
+if (!function_exists('resolve_product_image')) {
+    function resolve_product_image($prodImg)
+    {
+        if (empty($prodImg)) {
+            return asset('assets/elketar/coffee.png');
+        }
+        if (strpos($prodImg, 'http') === 0) {
+            return $prodImg;
+        }
+        if (file_exists(public_path('uploaded_files/product_image/' . $prodImg))) {
+            return asset('uploaded_files/product_image/' . $prodImg);
+        }
+        if (file_exists(public_path('assets/elketar/' . $prodImg))) {
+            return asset('assets/elketar/' . $prodImg);
+        }
+        return asset('assets/elketar/coffee.png');
     }
 }
 
