@@ -134,14 +134,19 @@ class CityController extends Controller
         // Copying logic from getCityCharge but adapting for Area.
 
         $subtotal = floatval(subtotal());
-        $countryNameForTax = null;
-        if ($delivery_area && $delivery_area->state && $delivery_area->state->country) {
-            $countryNameForTax = $delivery_area->state->country->id; // Use ID for helper
-        } elseif ($delivery_area && $delivery_area->city && $delivery_area->city->state && $delivery_area->city->state->country) {
-            $countryNameForTax = $delivery_area->city->state->country->id; // Use ID for helper
+        $countryNameForTax = 'Oman';
+        if ($delivery_area) {
+            if (!empty($delivery_area->country)) {
+                $countryNameForTax = $delivery_area->country;
+            } elseif ($delivery_area->area && $delivery_area->area->city && $delivery_area->area->city->state && $delivery_area->area->city->state->country) {
+                $countryNameForTax = $delivery_area->area->city->state->country->name_en ?? $delivery_area->area->city->state->country->name;
+            } elseif ($delivery_area->city && $delivery_area->city->state && $delivery_area->city->state->country) {
+                $countryNameForTax = $delivery_area->city->state->country->name_en ?? $delivery_area->city->state->country->name;
+            } elseif ($delivery_area->state && $delivery_area->state->country) {
+                $countryNameForTax = $delivery_area->state->country->name_en ?? $delivery_area->state->country->name;
+            }
         }
 
-        $tax = tax_amount($subtotal, $countryNameForTax);
         $coupon = Session::get('CouponAmount', 0);
         $weight_charge = $this->calculateExtraWeightFees();
 
@@ -177,9 +182,6 @@ class CityController extends Controller
                     $weight_charge = 0;
                     $charge = 0;
                 }
-                if ($activeSubscription->subscription->tax_exempt) {
-                    $tax = 0;
-                }
             }
         }
 
@@ -203,7 +205,17 @@ class CityController extends Controller
         $subscription_discount = 0;
         if (!empty($activeSubscription) && $activeSubscription->subscription && $activeSubscription->subscription->discount_percent > 0) {
             $subscription_discount = ($subtotal_After_offer * $activeSubscription->subscription->discount_percent) / 100;
+            $maxDiscountAmount = $activeSubscription->subscription->max_discount_amount ?? PHP_INT_MAX;
+            $subscription_discount = min($subscription_discount, $maxDiscountAmount);
             $subtotal_After_offer -= $subscription_discount;
+        }
+
+        // Tax Calculation based on subtotal after subscription/offer discounts
+        $tax = tax_amount($subtotal_After_offer, $countryNameForTax);
+        $tax_rate = tax_rate($countryNameForTax);
+        if ($activeSubscription && $activeSubscription->subscription && $activeSubscription->subscription->tax_exempt) {
+            $tax = 0;
+            $tax_rate = 0;
         }
 
         $gross_total = $subtotal_After_offer + $charge + $weight_charge + $tax - $coupon;
@@ -229,6 +241,7 @@ class CityController extends Controller
             'formatted_charge' => currencyConverter($charge),
             'tax' => $tax,
             'tax_show' => currencyConverter($tax),
+            'tax_rate' => $tax_rate,
             'weight_charge' => $weight_charge,
             'weight_charge_show' => currencyConverter($weight_charge),
             'total_cost' => currencyConverter($gross_total), // Gross Total
@@ -237,8 +250,10 @@ class CityController extends Controller
             'subtotal' => currencyConverter($subtotal),
             'is_offer' => $is_offer,
             'offer_Discount' => currencyConverter($offer_Discount_value),
-            'subscription_discount' => currencyConverter($subscription_discount),
+            'subscription_discount' => $subscription_discount,
+            'subscription_discount_show' => currencyConverter($subscription_discount),
             'wallet_used' => currencyConverter($wallet_used),
+            'coupon_amount' => $coupon,
         ]);
 
     }
@@ -250,12 +265,17 @@ class CityController extends Controller
 
         $charge = $delivery_city ? $delivery_city->charge : 0;
         $subtotal = floatval(subtotal());
-        $countryNameForTax = null;
-        if ($delivery_city && $delivery_city->state && $delivery_city->state->country) {
-            $countryNameForTax = $delivery_city->state->country->id; // Use ID for helper
+        $countryNameForTax = 'Oman';
+        if ($delivery_city) {
+            if (!empty($delivery_city->country)) {
+                $countryNameForTax = $delivery_city->country;
+            } elseif ($delivery_city->city && $delivery_city->city->state && $delivery_city->city->state->country) {
+                $countryNameForTax = $delivery_city->city->state->country->name_en ?? $delivery_city->city->state->country->name;
+            } elseif ($delivery_city->state && $delivery_city->state->country) {
+                $countryNameForTax = $delivery_city->state->country->name_en ?? $delivery_city->state->country->name;
+            }
         }
 
-        $tax = tax_amount($subtotal, $countryNameForTax);
         $coupon = Session::get('CouponAmount', 0);
         $weight_charge = $this->calculateExtraWeightFees();
 
@@ -280,9 +300,10 @@ class CityController extends Controller
         }
 
         // Check for User Subscription (Active and valid date)
+        $activeSubscription = null;
         if (auth()->check()) {
             $activeSubscription = \App\Models\UserSubscription::where('user_id', auth()->id())
-                ->where('status', 1)
+                ->where('status', 'active')
                 ->whereDate('end_at', '>=', now())
                 ->with('subscription')
                 ->latest()
@@ -292,9 +313,6 @@ class CityController extends Controller
                 if ($activeSubscription->subscription->free_shipping) {
                     $weight_charge = 0;
                     $charge = 0;
-                }
-                if ($activeSubscription->subscription->tax_exempt) {
-                    $tax = 0;
                 }
             }
         }
@@ -316,6 +334,23 @@ class CityController extends Controller
                 break;
             }
         }
+
+        $subscription_discount = 0;
+        if (!empty($activeSubscription) && $activeSubscription->subscription && $activeSubscription->subscription->discount_percent > 0) {
+            $subscription_discount = ($subtotal_After_offer * $activeSubscription->subscription->discount_percent) / 100;
+            $maxDiscountAmount = $activeSubscription->subscription->max_discount_amount ?? PHP_INT_MAX;
+            $subscription_discount = min($subscription_discount, $maxDiscountAmount);
+            $subtotal_After_offer -= $subscription_discount;
+        }
+
+        // Tax Calculation based on subtotal after subscription/offer discounts
+        $tax = tax_amount($subtotal_After_offer, $countryNameForTax);
+        $tax_rate = tax_rate($countryNameForTax);
+        if ($activeSubscription && $activeSubscription->subscription && $activeSubscription->subscription->tax_exempt) {
+            $tax = 0;
+            $tax_rate = 0;
+        }
+
         $total_cost = $subtotal_After_offer + $charge + $weight_charge + $tax - $coupon;
 
         // Wallet Deduction
@@ -338,6 +373,7 @@ class CityController extends Controller
             'formatted_charge' => currencyConverter($charge),
             'tax' => $tax,
             'tax_show' => currencyConverter($tax),
+            'tax_rate' => $tax_rate,
             'weight_charge' => $weight_charge,
             'weight_charge_show' => currencyConverter($weight_charge),
             'total_cost' => currencyConverter($total_cost),
@@ -345,7 +381,10 @@ class CityController extends Controller
             'subtotal' => currencyConverter($subtotal),
             'is_offer' => $is_offer,
             'offer_Discount' => $offer_Discount_value . '%',
+            'subscription_discount' => $subscription_discount,
+            'subscription_discount_show' => currencyConverter($subscription_discount),
             'wallet_used' => currencyConverter($wallet_used),
+            'coupon_amount' => $coupon,
         ]);
 
     }

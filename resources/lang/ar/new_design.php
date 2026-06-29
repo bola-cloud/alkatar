@@ -556,7 +556,7 @@ return [
         'summary_title' => 'ملخص الطلب',
         'summary_subtotal' => 'المجموع',
         'summary_shipping' => 'الفرعي الشحن (تقديري)',
-        'summary_tax' => 'الضريبة (15%)',
+        'summary_tax' => 'الضريبة',
         'summary_total' => 'الإجمالي',
         'summary_discount_lbl' => 'كود الخصم',
         'summary_discount_placeholder' => 'أدخل الكود',

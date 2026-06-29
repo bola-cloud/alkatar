@@ -676,7 +676,7 @@
     "new_design.cart_page.summary_title": "ملخص الطلب",
     "new_design.cart_page.summary_subtotal": "المجموع",
     "new_design.cart_page.summary_shipping": "الفرعي الشحن (تقديري)",
-    "new_design.cart_page.summary_tax": "الضريبة (15%)",
+    "new_design.cart_page.summary_tax": "الضريبة",
     "new_design.cart_page.summary_total": "الإجمالي",
     "new_design.cart_page.summary_discount_lbl": "كود الخصم",
     "new_design.cart_page.summary_discount_placeholder": "أدخل الكود",

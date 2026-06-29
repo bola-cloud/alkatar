@@ -814,7 +814,7 @@
     "new_design.cart_page.summary_title": "Order Summary",
     "new_design.cart_page.summary_subtotal": "Subtotal",
     "new_design.cart_page.summary_shipping": "Shipping (Estimated)",
-    "new_design.cart_page.summary_tax": "Tax (15%)",
+    "new_design.cart_page.summary_tax": "Tax",
     "new_design.cart_page.summary_total": "Total",
     "new_design.cart_page.summary_discount_lbl": "Discount Code",
     "new_design.cart_page.summary_discount_placeholder": "Enter Code",

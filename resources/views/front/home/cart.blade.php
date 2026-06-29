@@ -7,6 +7,45 @@
 @php
     $isRtl = app()->getLocale() != 'en';
     $dir = $isRtl ? 'rtl' : 'ltr';
+
+    // Fetch active subscription & tax details
+    $countryNameForTax = session()->get('billing_country', null) ?? 'Oman'; // Default to Oman
+    
+    if (auth()->check()) {
+        $defaultAddress = auth()->user()->addresses()->where('is_default', 1)->first() 
+            ?? auth()->user()->addresses()->first();
+        if ($defaultAddress && $defaultAddress->country_id) {
+            $countryNameForTax = $defaultAddress->country_id;
+        }
+    }
+    
+    $taxRate = tax_rate($countryNameForTax) / 100;
+
+    $activeSubscription = null;
+    $subDiscountPercent = 0;
+    $subDiscountAmount = 0;
+    $maxDiscountAmount = PHP_INT_MAX;
+
+    if (auth()->check()) {
+        $activeSubscription = \App\Models\UserSubscription::where('user_id', auth()->id())
+            ->where('status', 'active')
+            ->whereDate('end_at', '>=', now())
+            ->with('subscription')
+            ->latest()
+            ->first();
+
+        if ($activeSubscription && $activeSubscription->subscription) {
+            if ($activeSubscription->subscription->tax_exempt) {
+                $taxRate = 0;
+            }
+            $subDiscountPercent = $activeSubscription->subscription->discount_percent ?? 0;
+            $maxDiscountAmount = $activeSubscription->subscription->max_discount_amount ?? PHP_INT_MAX;
+            
+            $subtotalVal = floatval(subtotal());
+            $calculatedSubDiscount = ($subDiscountPercent / 100) * $subtotalVal;
+            $subDiscountAmount = min($calculatedSubDiscount, $maxDiscountAmount);
+        }
+    }
 @endphp
 
 <!-- Main Wrapper with White Background -->
@@ -138,10 +177,18 @@
                             <span class="font-extrabold text-[#1A4231]" x-text="shipping.toFixed(2) + ' ' + currencySymbol"></span>
                         </div>
                         <div class="flex justify-between items-center text-sm lg:text-base font-bold text-gray-500">
-                            <span>{{ __('new_design.cart_page.summary_tax') }}</span>
+                            <span>{{ __('new_design.cart_page.summary_tax') }} (<span x-text="(taxRate * 100).toFixed(0) + '%'"></span>)</span>
                             <span class="font-extrabold text-[#1A4231]" x-text="tax.toFixed(2) + ' ' + currencySymbol"></span>
                         </div>
                         
+                        <!-- Subscription Discount (If any) -->
+                        <template x-if="subscriptionDiscount > 0">
+                            <div class="flex justify-between items-center text-sm lg:text-base font-bold text-green-600">
+                                <span>{{ $isRtl ? 'خصم الاشتراك' : 'Subscription Discount' }}</span>
+                                <span class="font-extrabold" x-text="'-' + subscriptionDiscount.toFixed(2) + ' ' + currencySymbol"></span>
+                            </div>
+                        </template>
+
                         <!-- Discount (If any) -->
                         <template x-if="discountAmount > 0">
                             <div class="flex justify-between items-center text-sm lg:text-base font-bold text-red-500">
@@ -213,19 +260,28 @@
         Alpine.data('cartComponent', () => ({
             items: @json(Cart::content()->values()),
             subtotal: {{ floatval(subtotal()) }},
-            tax: {{ floatval(subtotal() * 0.15) }},
+            taxRate: {{ floatval($taxRate) }},
+            subscriptionDiscountPercent: {{ floatval($subDiscountPercent) }},
+            subscriptionDiscount: {{ floatval($subDiscountAmount) }},
             shipping: 25.00, 
             discountCode: '{{ session("couponCode", "") }}',
             discountAmount: {{ floatval(session("CouponAmount", 0)) }},
             currencySymbol: '{{ __('new_design.coffee_crops.currency') }}',
             locale: '{{ app()->getLocale() }}',
 
+            get tax() {
+                const sub = parseFloat(this.subtotal) || 0;
+                const subDisc = parseFloat(this.subscriptionDiscount) || 0;
+                return Math.max(0, sub - subDisc) * this.taxRate;
+            },
+
             get total() {
                 const sub = parseFloat(this.subtotal) || 0;
                 const sh = parseFloat(this.shipping) || 0;
                 const t = parseFloat(this.tax) || 0;
+                const subDisc = parseFloat(this.subscriptionDiscount) || 0;
                 const disc = parseFloat(this.discountAmount) || 0;
-                return Math.max(0, sub + sh + t - disc).toFixed(2);
+                return Math.max(0, sub + sh + t - subDisc - disc).toFixed(2);
             },
 
             resolveProductImage(img) {
@@ -301,7 +357,15 @@
                 const cartItemsObj = data[2];
                 this.items = Object.values(cartItemsObj);
                 this.subtotal = parseFloat(data[1]) || 0;
-                this.tax = this.subtotal * 0.15;
+                
+                // Calculate subscription discount dynamically in JS
+                if (this.subscriptionDiscountPercent > 0) {
+                    const maxDiscount = {{ floatval($maxDiscountAmount) }};
+                    const calculatedSubDiscount = (this.subtotal * this.subscriptionDiscountPercent) / 100;
+                    this.subscriptionDiscount = Math.min(calculatedSubDiscount, maxDiscount);
+                } else {
+                    this.subscriptionDiscount = 0;
+                }
                 
                 // Update global headers
                 $(".totalCountItem").html(data[0]);

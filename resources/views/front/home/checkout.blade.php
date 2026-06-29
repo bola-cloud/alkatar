@@ -8,9 +8,46 @@
     $isRtl = app()->getLocale() != 'en';
     $dir = $isRtl ? 'rtl' : 'ltr';
     $subtotalVal = subtotal();
-    // Default tax rate or calculation based on Oman
-    $taxVal = tax_amount($subtotalVal, 'Oman');
-    $grandTotalVal = $subtotalVal + $taxVal;
+
+    $activeSubscription = null;
+    $subDiscountPercent = 0;
+    $subDiscountAmount = 0;
+    $maxDiscountAmount = PHP_INT_MAX;
+    $countryNameForTax = session()->get('billing_country', null) ?? 'Oman';
+    if (auth()->check()) {
+        $defaultAddress = auth()->user()->addresses()->where('is_default', 1)->first() 
+            ?? auth()->user()->addresses()->first();
+        if ($defaultAddress && $defaultAddress->country_id) {
+            $countryNameForTax = $defaultAddress->country_id;
+        }
+    }
+    $taxRate = tax_rate($countryNameForTax) / 100;
+
+    if (auth()->check()) {
+        $activeSubscription = \App\Models\UserSubscription::where('user_id', auth()->id())
+            ->where('status', 'active')
+            ->whereDate('end_at', '>=', now())
+            ->with('subscription')
+            ->latest()
+            ->first();
+
+        if ($activeSubscription && $activeSubscription->subscription) {
+            if ($activeSubscription->subscription->tax_exempt) {
+                $taxRate = 0;
+            }
+            $subDiscountPercent = $activeSubscription->subscription->discount_percent ?? 0;
+            $maxDiscountAmount = $activeSubscription->subscription->max_discount_amount ?? PHP_INT_MAX;
+            
+            $calculatedSubDiscount = ($subDiscountPercent / 100) * $subtotalVal;
+            $subDiscountAmount = min($calculatedSubDiscount, $maxDiscountAmount);
+        }
+    }
+
+    $subtotalAfterSub = $subtotalVal - $subDiscountAmount;
+    $taxVal = $subtotalAfterSub * $taxRate;
+    
+    $couponAmount = session()->get('CouponAmount', 0);
+    $grandTotalVal = $subtotalAfterSub + $taxVal - $couponAmount;
 @endphp
 
 <!-- Main Wrapper with White Background -->
@@ -464,14 +501,20 @@
 
                                 <!-- Tax -->
                                 <div class="flex justify-between items-center text-xs sm:text-sm font-bold text-gray-400">
-                                    <span>{{ __('new_design.cart_page.summary_tax') }}</span>
+                                    <span>{{ __('new_design.cart_page.summary_tax') }} (<span id="summary-tax-rate">{{ number_format($taxRate * 100, 0) }}</span>%)</span>
                                     <span id="summary-tax-val">{{ number_format($taxVal, 2) }} <img src="{{ asset('assets/elketar/light..png') }}" alt="ر.ع." class="inline-block align-middle" style="height: 1.2em; width: auto; margin-inline: 2px;"></span>
                                 </div>
 
+                                <!-- Subscription Discount -->
+                                <div id="summary-sub-discount-row" class="flex justify-between items-center text-xs sm:text-sm font-bold text-green-600 {{ $subDiscountAmount > 0 ? '' : 'hidden' }}">
+                                    <span>{{ $isRtl ? 'خصم الاشتراك' : 'Subscription Discount' }}</span>
+                                    <span id="summary-sub-discount-val">-{{ number_format($subDiscountAmount, 2) }} <img src="{{ asset('assets/elketar/light..png') }}" alt="ر.ع." class="inline-block align-middle" style="height: 1.2em; width: auto; margin-inline: 2px;"></span>
+                                </div>
+
                                 <!-- Coupon Discount (Hidden initially) -->
-                                <div id="summary-discount-row" class="flex justify-between items-center text-xs sm:text-sm font-bold text-red-500 hidden">
+                                <div id="summary-discount-row" class="flex justify-between items-center text-xs sm:text-sm font-bold text-red-500 {{ $couponAmount > 0 ? '' : 'hidden' }}">
                                     <span>خصم الكوبون</span>
-                                    <span id="summary-discount-val">-0.00 <img src="{{ asset('assets/elketar/light..png') }}" alt="ر.ع." class="inline-block align-middle" style="height: 1.2em; width: auto; margin-inline: 2px;"></span>
+                                    <span id="summary-discount-val">-{{ number_format($couponAmount, 2) }} <img src="{{ asset('assets/elketar/light..png') }}" alt="ر.ع." class="inline-block align-middle" style="height: 1.2em; width: auto; margin-inline: 2px;"></span>
                                 </div>
 
                                 <!-- Grand Total -->
@@ -681,7 +724,7 @@
                 .then(res => res.json())
                 .then(data => {
                     // Update Shipping elements
-                    const formattedCharge = data.formatted_charge || `${data.delivery_charge.toFixed(2)} ر.س`;
+                    const formattedCharge = data.formatted_charge || `${data.delivery_charge.toFixed(2)} ر.ع.`;
                     document.getElementById('summary-shipping-val').innerText = formattedCharge;
                     
                     // Update dynamic badge in fast shipping option
@@ -693,15 +736,32 @@
                     if (data.tax_show) {
                         document.getElementById('summary-tax-val').innerText = data.tax_show;
                     }
+                    if (data.tax_rate !== undefined) {
+                        const taxRateEl = document.getElementById('summary-tax-rate');
+                        if (taxRateEl) {
+                            taxRateEl.innerText = (data.tax_rate * 100).toFixed(0);
+                        }
+                    }
                     if (data.total_cost) {
                         document.getElementById('summary-total-val').innerText = data.total_cost;
+                    }
+
+                    // Handle subscription discount row
+                    const subDiscountRow = document.getElementById('summary-sub-discount-row');
+                    if (data.subscription_discount && data.subscription_discount > 0) {
+                        subDiscountRow.classList.remove('hidden');
+                        document.getElementById('summary-sub-discount-val').innerText = `-${data.subscription_discount_show}`;
+                    } else {
+                        subDiscountRow.classList.add('hidden');
                     }
 
                     // Handle coupon discount if active
                     const discountRow = document.getElementById('summary-discount-row');
                     if (data.coupon_amount && data.coupon_amount > 0) {
                         discountRow.classList.remove('hidden');
-                        document.getElementById('summary-discount-val').innerText = `-${data.coupon_amount.toFixed(2)} ر.س`;
+                        document.getElementById('summary-discount-val').innerText = `-${data.coupon_amount.toFixed(2)} ر.ع.`;
+                    } else {
+                        discountRow.classList.add('hidden');
                     }
                 })
                 .catch(err => console.error('Error fetching area charge:', err));
@@ -726,10 +786,29 @@
 
                 if (isPickup) {
                     // Force shipping to 0 and recalculate total
-                    document.getElementById('summary-shipping-val').innerText = '0.00 ر.س';
+                    document.getElementById('summary-shipping-val').innerText = '0.00 ر.ع.';
+                    
                     const subtotal = parseFloat("{{ $subtotalVal }}");
-                    const tax = parseFloat("{{ $taxVal }}");
-                    document.getElementById('summary-total-val').innerText = (subtotal + tax).toFixed(2) + ' ر.س';
+                    
+                    // Subscription discount
+                    const subPercent = parseFloat("{{ $subDiscountPercent }}") || 0;
+                    const maxSubDiscount = parseFloat("{{ $maxDiscountAmount }}") || 0;
+                    let subDiscount = (subtotal * subPercent) / 100;
+                    subDiscount = Math.min(subDiscount, maxSubDiscount);
+                    
+                    const subtotalAfterSub = subtotal - subDiscount;
+                    
+                    // Tax
+                    const taxRate = parseFloat("{{ $taxRate }}") || 0;
+                    const tax = subtotalAfterSub * taxRate;
+                    
+                    // Coupon
+                    const couponValStr = document.getElementById('summary-discount-val')?.innerText || '0';
+                    const coupon = parseFloat(couponValStr.replace(/[^0-9.]/g, '')) || 0;
+                    
+                    const total = Math.max(0, subtotalAfterSub + tax - coupon);
+                    
+                    document.getElementById('summary-total-val').innerText = total.toFixed(2) + ' ر.ع.';
                 } else {
                     // Restore area selection charge
                     const selectedArea = areaSelect.value;
