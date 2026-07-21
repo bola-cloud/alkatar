@@ -47,11 +47,7 @@
                                                 <input type="text" id="order" name="order" value="{{ old('order') }}"
                                                     placeholder="Order">
                                             </div>
-                                            <div class="input__group mb-25 d-flex align-items-center">
-                                                <input type="checkbox" id="show_on_home" name="show_on_home" value="1" {{ old('show_on_home') ? 'checked' : '' }}
-                                                    style="width: 20px; height: 20px; margin-right: 10px;">
-                                                <label for="show_on_home" class="mb-0">{{ __('Show on Home')}}</label>
-                                            </div>
+
                                             <div class="input__group mb-25">
                                                 <label>{{ __('Icon')}} (200x200)</label>
                                                 <input type="file" id="icon" name="icon" accept="image/*">

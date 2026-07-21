@@ -18,7 +18,7 @@ class NewDesignController extends Controller
      */
     public function index()
     {
-        $relations = ['sizes', 'weights', 'additions', 'comboItems'];
+        $relations = ['sizes', 'weights', 'additions'];
 
         // Only show admin-selected Today Special products in the special offers carousel.
         $products = Product::where('Status', 1)
@@ -120,14 +120,25 @@ class NewDesignController extends Controller
             ->orderBy('order', 'asc')
             ->get();
 
-        $products = Product::available()
-            ->whereNotIn('product_type', ['Combo', 'تجميعي', 'combo'])
+        $subcategories = \App\Models\Subcategory::where('status', 1)->get();
+
+        $products = Product::with(['subcategory', 'sizes', 'weights'])
+            ->available()
             ->whereHas('category', function ($query) {
                 $query->whereNotIn('en_Category_Slug', ['packages', 'offers']);
             })
             ->get();
 
-        return view('front.home.store', compact('categories', 'products'));
+        // Collect all unique sizes (weights) associated with available products
+        $availableSizes = collect();
+        foreach ($products as $product) {
+            foreach ($product->sizes as $size) {
+                $availableSizes->push($size);
+            }
+        }
+        $sizes = $availableSizes->unique('id')->values();
+
+        return view('front.home.store', compact('categories', 'products', 'subcategories', 'sizes'));
     }
 
     public function login()
@@ -156,12 +167,69 @@ class NewDesignController extends Controller
 
     public function wholesale()
     {
-        // عرض صفحة طلبات الجملة
-        return view('front.home.wholesale');
+        $is_approved = false;
+        $is_pending = false;
+        $request_status = null;
+        $products = collect();
+
+        if (auth()->check()) {
+            $user = auth()->user();
+            // Find request by user_id, or fallback to matching by phone number
+            $wholesaleReq = \App\Models\Front\WholesaleRequest::where('user_id', $user->id)
+                ->orWhere(function($query) use ($user) {
+                    if ($user->Number) {
+                        $query->where('contact_phone', $user->Number);
+                    } else {
+                        $query->whereRaw('1=0');
+                    }
+                })
+                ->first();
+
+            if ($wholesaleReq) {
+                $request_status = $wholesaleReq->status;
+                if ($wholesaleReq->status == 1) {
+                    $is_approved = true;
+                    // Link user_id if it wasn't linked already
+                    if (!$wholesaleReq->user_id) {
+                        $wholesaleReq->update(['user_id' => $user->id]);
+                    }
+                } elseif ($wholesaleReq->status == 0) {
+                    $is_pending = true;
+                }
+            }
+        }
+
+        if ($is_approved) {
+            // Load wholesale products (e.g. coffee crops & preparation tools)
+            $relations = ['sizes', 'weights', 'additions'];
+            $products = Product::where('Status', 1)
+                ->available()
+                ->whereHas('category', function ($query) {
+                    $query->whereIn('en_Category_Slug', ['coffee-crops']);
+                })
+                ->with($relations)
+                ->get();
+        }
+
+        return view('front.home.wholesale', compact('is_approved', 'is_pending', 'request_status', 'products'));
     }
 
     public function storeWholesaleRequest(Request $request)
     {
+        if (!auth()->check()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => app()->getLocale() == 'en' 
+                        ? 'You must be logged in to submit a wholesale request.' 
+                        : 'يجب عليك تسجيل الدخول أولاً لتقديم طلب الجملة.',
+                ], 401);
+            }
+            return redirect()->route('login')->with('error', app()->getLocale() == 'en' 
+                ? 'You must be logged in to submit a wholesale request.' 
+                : 'يجب عليك تسجيل الدخول أولاً لتقديم طلب الجملة.');
+        }
+
         $request->validate([
             'company_name' => 'required|string|max:255',
             'contact_name' => 'required|string|max:255',
@@ -169,15 +237,34 @@ class NewDesignController extends Controller
             'estimated_qty' => 'required|string|max:255',
             'services' => 'nullable|array',
             'notes' => 'nullable|string',
+            'cr_or_signboard' => 'required|file|mimes:pdf,jpeg,png,jpg,gif|max:10240', // 10MB limit
         ]);
 
+        $existing = \App\Models\Front\WholesaleRequest::where('user_id', auth()->id())->first();
+        if ($existing && $existing->status != 2) {
+            $msg = $existing->status == 1 
+                ? (app()->getLocale() == 'en' ? 'You are already approved for wholesale!' : 'لقد تمت الموافقة على طلب الجملة الخاص بك بالفعل!')
+                : (app()->getLocale() == 'en' ? 'You already have a pending wholesale request.' : 'لديك بالفعل طلب جملة معلق قيد المراجعة.');
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg]);
+            }
+            return redirect()->back()->with('error', $msg);
+        }
+
+        $docName = null;
+        if ($request->hasFile('cr_or_signboard')) {
+            $docName = fileUpload($request->file('cr_or_signboard'), 'uploaded_files/wholesale/');
+        }
+
         \App\Models\Front\WholesaleRequest::create([
+            'user_id' => auth()->id(),
             'company_name' => $request->company_name,
             'contact_name' => $request->contact_name,
             'contact_phone' => $request->contact_phone,
             'estimated_qty' => $request->estimated_qty,
             'services' => $request->services,
             'notes' => $request->notes,
+            'cr_or_signboard' => $docName,
             'status' => 0, // Pending
         ]);
 
@@ -185,14 +272,14 @@ class NewDesignController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => app()->getLocale() == 'en' 
-                    ? 'Your wholesale order request has been submitted successfully!' 
-                    : 'تم إرسال طلب الجملة الخاص بك بنجاح!',
+                    ? 'Your wholesale request has been submitted successfully and is pending review!' 
+                    : 'تم إرسال طلب الجملة الخاص بك بنجاح وهو قيد المراجعة حالياً!',
             ]);
         }
 
         return redirect()->back()->with('success', app()->getLocale() == 'en' 
-            ? 'Your wholesale order request has been submitted successfully!' 
-            : 'تم إرسال طلب الجملة الخاص بك بنجاح!');
+            ? 'Your wholesale request has been submitted successfully and is pending review!' 
+            : 'تم إرسال طلب الجملة الخاص بك بنجاح وهو قيد المراجعة حالياً!');
     }
 
     public function become_partner()
@@ -782,7 +869,7 @@ class NewDesignController extends Controller
                     ]);
 
                     try {
-                        event(new \App\Events\OrderCreated($order));
+                        // event(new \App\Events\OrderCreated($order));
                     } catch (\Exception $e) {
                         \Illuminate\Support\Facades\Log::error("Failed to broadcast OrderCreated event for gift card", ['error' => $e->getMessage()]);
                     }

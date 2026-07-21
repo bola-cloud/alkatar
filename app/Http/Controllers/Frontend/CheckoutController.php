@@ -261,7 +261,7 @@ class CheckoutController extends Controller
 
         // Final Stock Validation
         foreach (Cart::content() as $cItem) {
-            $product = Product::with('comboItems')->find($cItem->id);
+            $product = Product::find($cItem->id);
             if ($product) {
                 $available = $product->virtual_stock;
                 if ($cItem->qty > $available) {
@@ -1170,7 +1170,7 @@ class CheckoutController extends Controller
                 }
 
                 if ($shouldBroadcast && $order->Order_Status == ORDER_PROCESSING) {
-                    event(new \App\Events\OrderCreated($order));
+                    // event(new \App\Events\OrderCreated($order));
                 }
 
                 // Sync Order to Smart ERP immediately as UNPAID (Two-step sync approach)
@@ -1223,38 +1223,12 @@ class CheckoutController extends Controller
 
     public function subQtyProduct($product_id, $qty)
     {
-        $product = Product::with('comboItems')->whereId($product_id)->first();
+        $product = Product::find($product_id);
 
-        if (($product->product_type === 'Combo' || $product->product_type === 'تجميعي') && $product->comboItems->isNotEmpty()) {
-            $isSingleItemCombo = $product->comboItems->count() === 1;
-
-            foreach ($product->comboItems as $component) {
-                // Calculate deduction based on multiplier: (Quantity in Combo * Combo Qty Sold)
-                // This covers both 1:1 (where qty=1) and Packs (where qty>1)
-                $qtyToDeduct = $component->pivot->quantity * $qty;
-
-                $componentObj = Product::find($component->id);
-                if ($componentObj) {
-                    $new_comp_qty = $componentObj->Quantity - $qtyToDeduct;
-                    $nn_comp_qty = $new_comp_qty < 0 ? 0 : $new_comp_qty;
-
-                    $componentObj->update([
-                        'Quantity' => $nn_comp_qty,
-                    ]);
-                }
-            }
-            // Logic for combo product itself - usually we don't deduct stock if it's virtual, 
-            // but if it has a stock tracking, we might. 
-            // Assuming for now combo stock is virtual/calculated so we don't touch its quantity column 
-            // unless we want to keep it in sync (which requires complex observer).
-            // Let's just deduct components as requested.
-        } else {
+        if ($product) {
             $new_qty = $product->Quantity - $qty;
-            if ($new_qty < 1) {
-                $nn_qty = 0;
-            } else {
-                $nn_qty = $new_qty;
-            }
+            $nn_qty = $new_qty < 1 ? 0 : $new_qty;
+            
             $product->update([
                 'Quantity' => $nn_qty,
             ]);
@@ -1468,7 +1442,8 @@ class CheckoutController extends Controller
         $order->is_paid = 1;
 
         $order->save();
-        event(new \App\Events\OrderCreated($order));
+        // Broadcast Order Created Event (To print/delivery apps)
+        // event(new \App\Events\OrderCreated($order));
         
         // Two-Step Sync: Update the existing SmartLife invoice to "Paid"
         if (config('smartlife.sync_enabled')) {

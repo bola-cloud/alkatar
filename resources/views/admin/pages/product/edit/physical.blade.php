@@ -153,6 +153,7 @@
                                                 </div>
                                                 @if(!$product->synced_from_smartlife && empty($product->smartlife_id))
                                                 <button type="button" class="btn btn-primary" id="add-size-btn">اضافة خيار</button>
+                                                <small class="text-info d-block mt-2"><i class="fas fa-info-circle"></i> يرجى التأكد من إدخال السعر الخاص بكل خيار/حجم تقوم بإضافته لتجنب أي أخطاء أثناء الحفظ.</small>
                                                 @endif
                                             </div>
 
@@ -172,7 +173,7 @@
                                                 <input type="text" class="form-control" id="qty" name="qty"
                                                     value="{{ $product->Quantity }}" @if($product->synced_from_smartlife || !empty($product->smartlife_id)) readonly @endif>
                                                 @if($product->synced_from_smartlife || !empty($product->smartlife_id))
-                                                    <small class="text-muted">{{ __('Quantity is managed by SmartLife ERP sync and cannot be edited manually.') }}</small>
+                                                    <small class="text-muted">{{ __('Quantity must be tracked correctly.') }}</small>
                                                 @endif
                                             </div>
                                             <div class="input__group mb-25">
@@ -432,7 +433,7 @@
                 
                 const sizeRow = `
              <div class="row mb-3" id="size-row-${sizeCounter}">
-                <div class="col-md-5">
+                <div class="col-md-4">
                     <label for="size-${sizeCounter}">الخيار:</label>
                     <select class="form-control" name="size[]" id="size-${sizeCounter}" ${disabledAttr}>
                         @foreach ($sizes as $item)
@@ -441,10 +442,15 @@
                     </select>
                     ${isSynced ? `<input type="hidden" name="size[]" value="${sizeId}">` : ''} 
                 </div>
-                <div class="col-md-5">
+                <div class="col-md-4">
                     <label for="price-${sizeCounter}">السعر:</label>
-                    <input type="text" class="form-control" id="price-${sizeCounter}" name="size_price[]" placeholder="السعر" value="${price || ''}" ${disabledAttr}>
+                    <input type="number" step="0.01" class="form-control" id="price-${sizeCounter}" name="size_price[]" placeholder="السعر" value="${price || ''}" ${disabledAttr}>
                     ${isSynced ? `<input type="hidden" name="size_price[]" value="${price || ''}">` : ''}
+                </div>
+                <div class="col-md-3">
+                    <label for="weight-${sizeCounter}">الوزن (اختياري):</label>
+                    <input type="number" step="0.01" class="form-control" id="weight-${sizeCounter}" name="size_weight[]" placeholder="الوزن" value="${weight || ''}" ${disabledAttr}>
+                    ${isSynced ? `<input type="hidden" name="size_weight[]" value="${weight || ''}">` : ''}
                 </div>
                 <div class="col-md-1">
                     <label class="d-block">&nbsp;</label>

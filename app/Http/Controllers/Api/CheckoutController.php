@@ -211,7 +211,7 @@ class CheckoutController extends Controller
 
         // Trigger OneSignal/Delivery Notification and return for COD orders
         if (strtoupper($payment_method) == 'COD') {
-            event(new \App\Events\OrderCreated($order));
+            // event(new \App\Events\OrderCreated($order));
             $this->sendOrderNotification($order->id);
             return response()->json([
                 'success' => true,
@@ -536,33 +536,12 @@ class CheckoutController extends Controller
 
     public function subQtyProduct($product_id, $qty)
     {
-        $product = Product::with('comboItems')->whereId($product_id)->first();
+        $product = Product::find($product_id);
 
-        if (($product->product_type === 'Combo' || $product->product_type === 'تجميعي') && $product->comboItems->isNotEmpty()) {
-            $isSingleItemCombo = $product->comboItems->count() === 1;
-
-            foreach ($product->comboItems as $component) {
-                // Calculate deduction based on multiplier: (Quantity in Combo * Combo Qty Sold)
-                // This covers both 1:1 (where qty=1) and Packs (where qty>1)
-                $qtyToDeduct = $component->pivot->quantity * $qty;
-
-                $componentObj = Product::find($component->id);
-                if ($componentObj) {
-                    $new_comp_qty = $componentObj->Quantity - $qtyToDeduct;
-                    $nn_comp_qty = $new_comp_qty < 0 ? 0 : $new_comp_qty;
-
-                    $componentObj->update([
-                        'Quantity' => $nn_comp_qty,
-                    ]);
-                }
-            }
-        } else {
+        if ($product) {
             $new_qty = $product->Quantity - $qty;
-            if ($new_qty < 1) {
-                $nn_qty = 0;
-            } else {
-                $nn_qty = $new_qty;
-            }
+            $nn_qty = $new_qty < 1 ? 0 : $new_qty;
+            
             $product->update([
                 'Quantity' => $nn_qty,
             ]);
@@ -641,7 +620,7 @@ class CheckoutController extends Controller
                 Log::error('SmartLife update sync failed in API success', ['error' => $e->getMessage()]);
             }
         }
-        event(new \App\Events\OrderCreated($order));
+        // event(new \App\Events\OrderCreated($order));
 
         try {
             $this->sendOrderNotification($order->id);

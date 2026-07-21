@@ -35,11 +35,9 @@
                                             <input type="hidden" name="id" value="{{$edit->id}}">
                                             <div class="input__group mb-25">
                                                 <label>{{ __('Category Name ' . langString('en'))}} <span
-                                                        class="text-danger">*</span> <span
-                                                        class="text-muted small">({{ __('Source from ERP') }})</span></label>
+                                                        class="text-danger">*</span></label>
                                                 <input type="text" id="en_category_name" name="en_category_name"
-                                                    value="{{$edit->en_Category_Name}}" placeholder="Name (English)"
-                                                    readonly style="background-color: #f8f9fa; cursor: not-allowed;">
+                                                    value="{{$edit->en_Category_Name}}" placeholder="Name (English)" class="form-control">
                                             </div>
                                             <div class="input__group mb-25">
                                                 <label>{{ __('Category Name ' . langString('fr'))}} <span
@@ -54,11 +52,7 @@
                                                 <input type="text" id="order" name="order" value="{{ $edit->order }}"
                                                     placeholder="{{ __('Order') }}">
                                             </div>
-                                            <div class="input__group mb-25 d-flex align-items-center">
-                                                <input type="checkbox" id="show_on_home" name="show_on_home" value="1" {{ $edit->show_on_home ? 'checked' : '' }}
-                                                    style="width: 20px; height: 20px; margin-right: 10px;">
-                                                <label for="show_on_home" class="mb-0">{{ __('Show on Home')}}</label>
-                                            </div>
+
                                             <div class="input__group mb-25">
                                                 <label>{{ __('Icon')}} (200x200)</label>
                                                 <input type="file" id="icon" name="icon" accept="image/*">

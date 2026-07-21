@@ -87,7 +87,7 @@
             <!-- Hidden Fields for Backend Compatibility -->
             <input type="hidden" name="billing_country" value="Oman">
             <input type="hidden" name="billing_zipcode" value="00000">
-            <input type="hidden" id="payment_method_input" name="payment" value="paypal">
+            <input type="hidden" id="payment_method_input" name="payment" value="thawani">
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 
@@ -316,35 +316,17 @@
                         </div>
 
                         <!-- Horizontal Tabs -->
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-                            <!-- Tab 1: Mada / Card -->
-                            <button type="button" onclick="selectPayment('paypal', this)"
+                        <div class="grid grid-cols-2 gap-3 mb-6">
+                            <!-- Tab 1: Thawani Pay -->
+                            <button type="button" onclick="selectPayment('thawani', this)"
                                     class="payment-tab-btn flex flex-col items-center justify-center p-4 border-2 border-[#1A4231] bg-[#FAF9F5] rounded-2xl transition-all gap-2 text-[#1A4231]">
                                 <span class="text-lg">💳</span>
                                 <span class="text-xs font-bold text-center leading-tight">
-                                    {{ __('new_design.checkout_page.mada_card') }}
+                                    {{ $isRtl ? 'دفع إلكتروني (ثواني)' : 'Online Payment (Thawani)' }}
                                 </span>
                             </button>
 
-                            <!-- Tab 2: Apple Pay -->
-                            <button type="button" onclick="selectPayment('paypal', this)"
-                                    class="payment-tab-btn flex flex-col items-center justify-center p-4 border border-gray-200 bg-white rounded-2xl transition-all gap-2 text-gray-500 hover:border-[#1A4231] hover:bg-[#FAF9F5]/40">
-                                <span class="text-lg">📱</span>
-                                <span class="text-xs font-bold text-center leading-tight">
-                                    Apple Pay
-                                </span>
-                            </button>
-
-                            <!-- Tab 3: STC Pay -->
-                            <button type="button" onclick="selectPayment('paypal', this)"
-                                    class="payment-tab-btn flex flex-col items-center justify-center p-4 border border-gray-200 bg-white rounded-2xl transition-all gap-2 text-gray-500 hover:border-[#1A4231] hover:bg-[#FAF9F5]/40">
-                                <span class="text-lg">💼</span>
-                                <span class="text-xs font-bold text-center leading-tight">
-                                    STC Pay
-                                </span>
-                            </button>
-
-                            <!-- Tab 4: Cash on Delivery -->
+                            <!-- Tab 2: Cash on Delivery -->
                             <button type="button" onclick="selectPayment('COD', this)"
                                     class="payment-tab-btn flex flex-col items-center justify-center p-4 border border-gray-200 bg-white rounded-2xl transition-all gap-2 text-gray-500 hover:border-[#1A4231] hover:bg-[#FAF9F5]/40">
                                 <span class="text-lg">🤝</span>
@@ -352,39 +334,6 @@
                                     {{ __('new_design.checkout_page.cod') }}
                                 </span>
                             </button>
-                        </div>
-
-                        <!-- Card Fields (Visible only for Online Cards) -->
-                        <div id="card-fields-box" class="flex flex-col gap-4 border-t border-gray-100 pt-5 text-start">
-                            <!-- Card Number -->
-                            <div class="flex flex-col gap-2">
-                                <label class="text-xs sm:text-sm font-bold text-gray-400">
-                                    {{ __('new_design.checkout_page.card_number') }}
-                                </label>
-                                <input type="text" placeholder="0000 0000 0000 0000" id="mada_card_number"
-                                       class="w-full px-4 py-3 text-xs sm:text-sm font-bold rounded-xl border border-gray-200 outline-none focus:ring-1 focus:ring-[#1A4231] transition-all placeholder:text-gray-300">
-                            </div>
-
-                            <!-- Expiry & CVV in 2 columns -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <!-- Expiry Date -->
-                                <div class="flex flex-col gap-2">
-                                    <label class="text-xs sm:text-sm font-bold text-gray-400">
-                                        {{ __('new_design.checkout_page.expiry_date') }}
-                                    </label>
-                                    <input type="text" placeholder="MM/YY" id="mada_card_expiry"
-                                           class="w-full px-4 py-3 text-xs sm:text-sm font-bold rounded-xl border border-gray-200 outline-none focus:ring-1 focus:ring-[#1A4231] transition-all placeholder:text-gray-300">
-                                </div>
-
-                                <!-- CVV -->
-                                <div class="flex flex-col gap-2">
-                                    <label class="text-xs sm:text-sm font-bold text-gray-400">
-                                        {{ __('new_design.checkout_page.cvv') }}
-                                    </label>
-                                    <input type="text" placeholder="123" id="mada_card_cvv"
-                                           class="w-full px-4 py-3 text-xs sm:text-sm font-bold rounded-xl border border-gray-200 outline-none focus:ring-1 focus:ring-[#1A4231] transition-all placeholder:text-gray-300">
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -621,20 +570,6 @@
         // Add active styling to clicked button
         buttonEl.classList.remove('border-gray-200', 'bg-white', 'text-gray-500');
         buttonEl.classList.add('border-2', 'border-[#1A4231]', 'bg-[#FAF9F5]', 'text-[#1A4231]');
-
-        // Show/hide Card details box based on selected method
-        const cardBox = document.getElementById('card-fields-box');
-        if (methodVal === 'paypal') {
-            cardBox.style.display = 'flex';
-            document.getElementById('mada_card_number').required = true;
-            document.getElementById('mada_card_expiry').required = true;
-            document.getElementById('mada_card_cvv').required = true;
-        } else {
-            cardBox.style.display = 'none';
-            document.getElementById('mada_card_number').required = false;
-            document.getElementById('mada_card_expiry').required = false;
-            document.getElementById('mada_card_cvv').required = false;
-        }
     }
 
     // Dynamic state, city and area loader with shipping rate recalculation

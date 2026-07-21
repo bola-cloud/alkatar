@@ -156,6 +156,7 @@
                                                 </div>
                                                 <button type="button" class="btn btn-primary" id="add-size-btn">اضافة
                                                     خيار</button>
+                                                <small class="text-info d-block mt-2"><i class="fas fa-info-circle"></i> يرجى التأكد من إدخال السعر الخاص بكل خيار/حجم تقوم بإضافته لتجنب أي أخطاء أثناء الحفظ.</small>
                                             </div>
 
 
@@ -422,7 +423,7 @@
                 sizeCounter++;
                 const sizeRow = `
                                                                                                                                 <div class="row mb-3" id="size-row-${sizeCounter}">
-                                                                                                                                    <div class="col-md-5">
+                                                                                                                                    <div class="col-md-4">
                                                                                                                                          <label for="size-${sizeCounter}"> الخيار:</label>
                                                         <select class="form-control" name="size[]" id="size-${sizeCounter}">
                                                                                                                                             @foreach (productSize() as $item)
@@ -430,13 +431,18 @@
                                                                                                                                             @endforeach
                                                                                                                                         </select>
                                                                                                                                     </div>
-                                                                                                                                     <div class="col-md-5">
+                                                                                                                                     <div class="col-md-4">
                                                                                                                                                      <label for="price-${sizeCounter}">السعر:</label>
 
-                                                                                                                                        <input type="text" class="form-control" required name="size_price[]"  id="price-${sizeCounter}" placeholder="ادخل السعر" value="${price || ''}">
+                                                                                                                                        <input type="number" step="0.01" class="form-control" required name="size_price[]"  id="price-${sizeCounter}" placeholder="ادخل السعر" value="${price || ''}">
+                                                                                                                                    </div>
+                                                                                                                                    <div class="col-md-3">
+                                                                                                                                                     <label for="weight-${sizeCounter}">الوزن (اختياري):</label>
+                                                                                                                                        <input type="number" step="0.01" class="form-control" name="size_weight[]"  id="weight-${sizeCounter}" placeholder="الوزن" value="${weight || ''}">
                                                                                                                                     </div>
 
                                                                                                                                     <div class="col-md-1">
+                                                                                                                                        <label class="d-block">&nbsp;</label>
                                                                                                                                         <button type="button" class="btn btn-danger remove-size-row" data-row-id="size-row-${sizeCounter}">
                                                                                                                                             <i class="fa fa-times"></i>
                                                                                                                                         </button>

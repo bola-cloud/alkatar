@@ -165,7 +165,6 @@ class WhatsappStoreController extends Controller
             'product_tags',
             'product_reviews',
             'product_reviews.user',
-            'comboItems',
         ])->available()->find($id);
 
         if (!$product) {
@@ -571,7 +570,7 @@ class WhatsappStoreController extends Controller
         }
 
         // For COD, Bank Transfer, In-Store Pickup: trigger notifications
-        event(new \App\Events\OrderCreated($order));
+        // event(new \App\Events\OrderCreated($order));
 
         return response()->json([
             'message' => 'Order created successfully',

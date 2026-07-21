@@ -59,14 +59,14 @@
                 </a>
             </li>
         @endcan
-        {{-- @can('category-list')
+        @can('category-list')
         <li class="{{ isset($submenu) && $submenu == 'subcategory' ? 'mm-active' : '' }}">
             <a href="{{ route('admin.subcategory') }}">
                 <i class="fa fa-circle"></i>
                 <span>{{ __('Subcategory') }}</span>
             </a>
         </li>
-        @endcan --}}
+        @endcan
         {{-- @canany(['category-list'])
         <li class="{{ isset($menu) && $menu == 'catbad' ? 'mm-active' : '' }}">
 
@@ -150,12 +150,12 @@
                             <span>{{ __('Product Color') }}</span>
                         </a>
                     </li> --}}
-                    {{-- <li class="{{ isset($submenu) && $submenu == 'size' ? 'mm-active' : '' }}">
+                    <li class="{{ isset($submenu) && $submenu == 'size' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.product.size') }}">
                             <i class="fa fa-circle"></i>
                             <span>{{ __('Product Size') }}</span>
                         </a>
-                    </li> --}}
+                    </li>
                 </ul>
             </li>
         @endcanany
@@ -246,12 +246,12 @@
                             <span>{{ __('Orders Report') }}</span>
                         </a>
                     </li>
-                    <li class="{{ isset($submenu) && $submenu == 'delivery_men_report' ? 'mm-active' : '' }}">
+                    {{-- <li class="{{ isset($submenu) && $submenu == 'delivery_men_report' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.reports.delivery_men.index') }}">
                             <i class="fa fa-circle"></i>
                             <span>{{ __('Delivery Men Report') }}</span>
                         </a>
-                    </li>
+                    </li> --}}
                     <li class="{{ isset($menu) && $menu == 'custom_box_orders' ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.custom_box_orders.index') }}">
                             <i class="fa fa-circle"></i>
@@ -460,7 +460,7 @@
                 </ul>
             </li>
         @endcanany
-        @canany(['user-list'])
+        {{-- @canany(['user-list'])
             <li class="{{ isset($menu) && $menu == 'delivery_man' ? 'mm-active' : '' }}">
                 <a class="has-arrow" href="#">
                     <i class="fas fa-truck"></i>
@@ -481,7 +481,7 @@
                     </li>
                 </ul>
             </li>
-        @endcanany
+        @endcanany --}}
         @canany(['cms-list'])
             <li class="{{ isset($menu) && $menu == 'site_content' ? 'mm-active' : '' }}">
                 <a class="has-arrow" href="#">
@@ -792,12 +792,12 @@
                 </ul>
             </li>
         @endcanany -->
-        <li class="{{ isset($menu) && $menu == 'delivery_charge_report' ? 'mm-active' : '' }}">
+        {{-- <li class="{{ isset($menu) && $menu == 'delivery_charge_report' ? 'mm-active' : '' }}">
             <a href="{{ route('admin.delivery.charge.report') }}">
                 <i class="fas fa-chart-line"></i>
                 <span>{{ __('Delivery Charge Report') }}</span>
             </a>
-        </li>
+        </li> --}}
         {{-- @canany(['cms-list'])
         <li class="{{ isset($menu) && $menu == 'sitemap' ? 'mm-active' : '' }}">
             <a href="{{ route('admin.sitemap_list') }}">

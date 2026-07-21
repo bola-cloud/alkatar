@@ -296,7 +296,7 @@ class ThawaniWebhookController extends Controller
             ]);
 
             // Trigger OneSignal/Delivery Notification (Idempotency handles duplicates)
-            event(new \App\Events\OrderCreated($order));
+            // event(new \App\Events\OrderCreated($order));
 
             try {
                 app(CheckoutController::class)->orderConfirmMail($order);
