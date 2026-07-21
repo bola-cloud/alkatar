@@ -24,7 +24,7 @@ class ExcelProductsSeeder extends Seeder
         }
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        $defaultImage = 'card1.png'; // Sample image path found in DB
+        $defaultImage = 'colombia_supremo.png'; // Sample image path found in DB
 
         // Categories Map
         // 1: Coffee Crops (محاصيل القهوة المختصة)
