@@ -26,25 +26,36 @@ class ExcelProductsSeeder extends Seeder
 
         $defaultImage = 'colombia_supremo.png'; // Sample image path found in DB
 
-        // Categories Map
-        // 1: Coffee Crops (محاصيل القهوة المختصة)
-        // 2: Preparation Tools (معدات القهوة)
-        // 6: Ready coffee (منتجات سريعة التحضير)
+        // Ensure Categories Exist
+        $cropsCategory = \App\Models\Admin\Category::firstOrCreate(
+            ['en_Category_Name' => 'Coffee Crops'],
+            ['fr_Category_Name' => 'محاصيل القهوة المختصة', 'en_Category_Slug' => 'coffee-crops', 'fr_Category_Slug' => 'mhaseel-coffee', 'Status' => 1]
+        );
+        
+        $equipmentCategory = \App\Models\Admin\Category::firstOrCreate(
+            ['en_Category_Name' => 'Preparation Tools'],
+            ['fr_Category_Name' => 'معدات وملحقات القهوة', 'en_Category_Slug' => 'preparation-tools', 'fr_Category_Slug' => 'moaedat-coffee', 'Status' => 1]
+        );
+        
+        $instantCategory = \App\Models\Admin\Category::firstOrCreate(
+            ['en_Category_Name' => 'Ready coffee'],
+            ['fr_Category_Name' => 'منتجات سريعة التحضير', 'en_Category_Slug' => 'ready-coffee', 'fr_Category_Slug' => 'ready-coffee-ar', 'Status' => 1]
+        );
 
         $files = [
             [
                 'path' => public_path('محاصيل القهوة المختصة 3.xlsx'),
-                'category_id' => 1, 
+                'category_id' => $cropsCategory->id, 
                 'type' => 'crops'
             ],
             [
                 'path' => public_path('معدات القهوة (1).xlsx'),
-                'category_id' => 2, 
+                'category_id' => $equipmentCategory->id, 
                 'type' => 'equipment'
             ],
             [
                 'path' => public_path('منتجات سريعة التحضير.xlsx'),
-                'category_id' => 6, 
+                'category_id' => $instantCategory->id, 
                 'type' => 'instant'
             ]
         ];
