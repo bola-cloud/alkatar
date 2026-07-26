@@ -340,7 +340,7 @@
             <!-- Laravel Pagination Links -->
             <div class="w-full mt-12 flex justify-center" dir="ltr">
                 @if($products instanceof \Illuminate\Pagination\LengthAwarePaginator)
-                    {{ $products->appends(request()->query())->links() }}
+                    {{ $products->appends(request()->query())->links('pagination::bootstrap-5') }}
                 @endif
             </div>
             
