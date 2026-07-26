@@ -337,11 +337,11 @@
                 
             </div>
             
-            <!-- Load More Button Container -->
-            <div id="load-more-container" class="w-full flex justify-center mt-12 hidden">
-                <button id="load-more-btn" class="px-8 py-3.5 bg-gray-100 hover:bg-gray-200 text-[#1A4231] font-extrabold rounded-[16px] text-sm transition-all shadow-sm active:scale-95">
-                    {{ __('new_design.coffee_crops.btn_load_more') ?? 'عرض المزيد' }}
-                </button>
+            <!-- Laravel Pagination Links -->
+            <div class="w-full mt-12 flex justify-center" dir="ltr">
+                @if($products instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                    {{ $products->appends(request()->query())->links() }}
+                @endif
             </div>
             
         </div>
@@ -576,12 +576,7 @@
 
         const productCards = document.querySelectorAll('.crop-product-card');
 
-        let visibleCount = 6;
-
         function applyFilters() {
-            let visibleMatchedCount = 0;
-            let totalMatchedCount = 0;
-
             productCards.forEach(card => {
                 const cardCategory = card.getAttribute('data-category');
                 const cardCountry = card.getAttribute('data-country');
@@ -590,68 +585,22 @@
 
                 let isMatch = true;
 
-                // 1. Category Pill Filter
-                if (activeCategoryPill !== 'all' && cardCategory !== activeCategoryPill) {
-                    isMatch = false;
-                }
-
-                // 2. Search Query Filter
-                if (isMatch && searchQuery && !cardName.includes(searchQuery)) {
-                    isMatch = false;
-                }
-
-                // 3. Modal Country Filter
-                if (isMatch && selectedCountries.length > 0 && !selectedCountries.includes(cardCountry)) {
-                    isMatch = false;
-                }
-
-                // 4. Modal Category Filter
-                if (isMatch && selectedCategories.length > 0 && !selectedCategories.includes(cardCategory)) {
-                    isMatch = false;
-                }
-
-                // 5. Modal Size Filter
+                if (activeCategoryPill !== 'all' && cardCategory !== activeCategoryPill) isMatch = false;
+                if (isMatch && searchQuery && !cardName.includes(searchQuery)) isMatch = false;
+                if (isMatch && selectedCountries.length > 0 && !selectedCountries.includes(cardCountry)) isMatch = false;
+                if (isMatch && selectedCategories.length > 0 && !selectedCategories.includes(cardCategory)) isMatch = false;
                 const cardSizes = card.getAttribute('data-sizes') ? card.getAttribute('data-sizes').split(',') : [];
                 if (isMatch && selectedSizes.length > 0) {
                     const hasMatch = selectedSizes.some(s => cardSizes.includes(s));
-                    if (!hasMatch) {
-                        isMatch = false;
-                    }
+                    if (!hasMatch) isMatch = false;
                 }
-
-                // 6. Modal Rating Filter
-                if (isMatch && selectedStars > 0 && cardRating < selectedStars) {
-                    isMatch = false;
-                }
+                if (isMatch && selectedStars > 0 && cardRating < selectedStars) isMatch = false;
 
                 if (isMatch) {
-                    totalMatchedCount++;
-                    if (visibleMatchedCount < visibleCount) {
-                        card.style.setProperty('display', 'flex', 'important');
-                        visibleMatchedCount++;
-                    } else {
-                        card.style.setProperty('display', 'none', 'important');
-                    }
+                    card.style.setProperty('display', 'flex', 'important');
                 } else {
                     card.style.setProperty('display', 'none', 'important');
                 }
-            });
-
-            // Update Load More button visibility
-            const loadMoreContainer = document.getElementById('load-more-container');
-            if (totalMatchedCount > visibleCount) {
-                loadMoreContainer.classList.remove('hidden');
-            } else {
-                loadMoreContainer.classList.add('hidden');
-            }
-        }
-
-        // Load More Button Event
-        const loadMoreBtn = document.getElementById('load-more-btn');
-        if(loadMoreBtn) {
-            loadMoreBtn.addEventListener('click', () => {
-                visibleCount += 6;
-                applyFilters();
             });
         }
 

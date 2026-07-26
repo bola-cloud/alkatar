@@ -223,11 +223,11 @@
                 @endforeach
         </div>
         
-        <!-- Load More Button Container -->
-        <div id="load-more-container-tools" class="w-full flex justify-center mt-12 hidden">
-            <button id="load-more-btn-tools" class="px-8 py-3.5 bg-gray-100 hover:bg-gray-200 text-[#1A4231] font-extrabold rounded-[16px] text-sm transition-all shadow-sm active:scale-95">
-                {{ __('new_design.coffee_crops.btn_load_more') ?? 'عرض المزيد' }}
-            </button>
+        <!-- Laravel Pagination Links -->
+        <div class="w-full mt-12 flex justify-center" dir="ltr">
+            @if($products instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                {{ $products->appends(request()->query())->links() }}
+            @endif
         </div>
         
     </section>
@@ -460,35 +460,16 @@
                 btn.classList.add('bg-[#1A4231]', 'text-white', 'shadow-md');
                 btn.classList.remove('border', 'border-gray-200', 'text-gray-600', 'hover:bg-gray-50');
 
-        let visibleCount = 9; // Grid is 3 cols, so 9 is a good number
-
         function applyToolsFilter(filterValue) {
-            let visibleMatchedCount = 0;
-            let totalMatchedCount = 0;
-
             productItems.forEach(item => {
                 if (filterValue === 'all' || item.getAttribute('data-category') === filterValue) {
-                    totalMatchedCount++;
-                    if (visibleMatchedCount < visibleCount) {
-                        item.style.setProperty('display', 'flex', 'important');
-                        item.classList.add('animate-fade-in');
-                        visibleMatchedCount++;
-                    } else {
-                        item.style.setProperty('display', 'none', 'important');
-                        item.classList.remove('animate-fade-in');
-                    }
+                    item.style.setProperty('display', 'flex', 'important');
+                    item.classList.add('animate-fade-in');
                 } else {
                     item.style.setProperty('display', 'none', 'important');
                     item.classList.remove('animate-fade-in');
                 }
             });
-
-            const loadMoreContainer = document.getElementById('load-more-container-tools');
-            if (totalMatchedCount > visibleCount) {
-                loadMoreContainer.classList.remove('hidden');
-            } else {
-                loadMoreContainer.classList.add('hidden');
-            }
         }
 
         let currentFilterValue = 'all';
@@ -504,20 +485,10 @@
                 btn.classList.remove('border', 'border-gray-200', 'text-gray-600', 'hover:bg-gray-50');
 
                 currentFilterValue = btn.getAttribute('data-filter');
-                visibleCount = 9; // Reset to initial count on filter change
                 applyToolsFilter(currentFilterValue);
             });
         });
 
-        // Load More Button Event
-        const loadMoreBtn = document.getElementById('load-more-btn-tools');
-        if(loadMoreBtn) {
-            loadMoreBtn.addEventListener('click', () => {
-                visibleCount += 9;
-                applyToolsFilter(currentFilterValue);
-            });
-        }
-        
         // Initial setup for the first load
         applyToolsFilter('all');
     });

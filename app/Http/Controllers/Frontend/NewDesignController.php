@@ -337,7 +337,7 @@ class NewDesignController extends Controller
         $category = Category::where('en_Category_Slug', 'coffee-crops')
                             ->orWhere('fr_Category_Slug', 'coffee-crops')
                             ->first();
-        $products = $category ? $category->products()->where('Status', 1)->get() : collect();
+        $products = $category ? $category->products()->where('Status', 1)->paginate(6) : collect();
         $subcategories = $category ? $category->subCategories()->where('status', 1)->get() : collect();
         
         $advertises = \App\Models\Admin\Advertise::where('status', 1)
@@ -361,7 +361,7 @@ class NewDesignController extends Controller
         $category = Category::where('en_Category_Slug', 'preparation-tools')
                             ->orWhere('fr_Category_Slug', 'preparation-tools')
                             ->first();
-        $products = $category ? $category->products()->where('Status', 1)->get() : collect();
+        $products = $category ? $category->products()->where('Status', 1)->paginate(6) : collect();
         $subcategories = $category ? $category->subCategories()->where('status', 1)->get() : collect();
 
         $advertises = \App\Models\Admin\Advertise::where('status', 1)
