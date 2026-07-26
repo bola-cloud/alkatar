@@ -278,7 +278,7 @@
                                 </span>
                                 <div>
                                     <span class="font-bold text-[#1A4231]">{{ __('new_design.coffee_crops.attr_origin_lbl') }}:</span>
-                                    <span class="text-[#6B7280] font-semibold">{{ $parsed['origin'] }}</span>
+                                    <span class="text-[#6B7280] font-semibold">{!! $parsed['origin'] !!}</span>
                                 </div>
                             </li>
                             <li class="flex items-start gap-3">
@@ -287,7 +287,7 @@
                                 </span>
                                 <div>
                                     <span class="font-bold text-[#1A4231]">{{ __('new_design.coffee_crops.attr_roast_lbl') }}:</span>
-                                    <span class="text-[#6B7280] font-semibold">{{ $parsed['roast'] }}</span>
+                                    <span class="text-[#6B7280] font-semibold">{!! $parsed['roast'] !!}</span>
                                 </div>
                             </li>
                             <li class="flex items-start gap-3">
@@ -296,7 +296,7 @@
                                 </span>
                                 <div>
                                     <span class="font-bold text-[#1A4231]">{{ __('new_design.coffee_crops.attr_type_lbl') }}:</span>
-                                    <span class="text-[#6B7280] font-semibold">{{ $parsed['type'] }}</span>
+                                    <span class="text-[#6B7280] font-semibold">{!! $parsed['type'] !!}</span>
                                 </div>
                             </li>
                             <li class="flex items-start gap-3">
@@ -305,7 +305,7 @@
                                 </span>
                                 <div>
                                     <span class="font-bold text-[#1A4231]">{{ __('new_design.coffee_crops.attr_notes_lbl') }}:</span>
-                                    <span class="text-[#6B7280] font-semibold">{{ $parsed['notes'] }}</span>
+                                    <span class="text-[#6B7280] font-semibold">{!! $parsed['notes'] !!}</span>
                                 </div>
                             </li>
                             <li class="flex items-start gap-3">
@@ -314,7 +314,7 @@
                                 </span>
                                 <div>
                                     <span class="font-bold text-[#1A4231]">{{ __('new_design.coffee_crops.attr_desc_lbl') }}:</span>
-                                    <span class="text-[#6B7280] font-semibold">{{ $parsed['mainDesc'] }}</span>
+                                    <span class="text-[#6B7280] font-semibold leading-relaxed block">{!! $parsed['mainDesc'] !!}</span>
                                 </div>
                             </li>
                         </ul>
