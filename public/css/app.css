@@ -1157,6 +1157,9 @@ input:checked + .toggle-bg {
 .z-\[1000\] {
   z-index: 1000;
 }
+.z-\[1001\] {
+  z-index: 1001;
+}
 .z-\[9999\] {
   z-index: 9999;
 }
@@ -1687,6 +1690,12 @@ input:checked + .toggle-bg {
 .w-\[60px\] {
   width: 60px;
 }
+.w-\[80\%\] {
+  width: 80%;
+}
+.w-\[90\%\] {
+  width: 90%;
+}
 .w-\[92\%\] {
   width: 92%;
 }
@@ -1701,6 +1710,9 @@ input:checked + .toggle-bg {
 }
 .min-w-\[110px\] {
   min-width: 110px;
+}
+.min-w-\[120px\] {
+  min-width: 120px;
 }
 .min-w-\[140px\] {
   min-width: 140px;
@@ -1928,6 +1940,12 @@ input:checked + .toggle-bg {
 .resize {
   resize: both;
 }
+.snap-x {
+  scroll-snap-type: x var(--tw-scroll-snap-strictness);
+}
+.snap-start {
+  scroll-snap-align: start;
+}
 .list-inside {
   list-style-position: inside;
 }
@@ -2095,9 +2113,6 @@ input:checked + .toggle-bg {
 }
 .self-start {
   align-self: flex-start;
-}
-.self-end {
-  align-self: flex-end;
 }
 .self-stretch {
   align-self: stretch;
@@ -2284,9 +2299,6 @@ input:checked + .toggle-bg {
 .border-gray-200\/30 {
   border-color: rgb(229 231 235 / 0.3);
 }
-.border-gray-200\/40 {
-  border-color: rgb(229 231 235 / 0.4);
-}
 .border-gray-200\/50 {
   border-color: rgb(229 231 235 / 0.5);
 }
@@ -2392,6 +2404,9 @@ input:checked + .toggle-bg {
 .bg-\[\#25D366\] {
   --tw-bg-opacity: 1;
   background-color: rgb(37 211 102 / var(--tw-bg-opacity));
+}
+.bg-\[\#25D366\]\/10 {
+  background-color: rgb(37 211 102 / 0.1);
 }
 .bg-\[\#387C5F\] {
   --tw-bg-opacity: 1;
@@ -2633,6 +2648,11 @@ input:checked + .toggle-bg {
 }
 .from-black\/20 {
   --tw-gradient-from: rgb(0 0 0 / 0.2) var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(0 0 0 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+.from-black\/50 {
+  --tw-gradient-from: rgb(0 0 0 / 0.5) var(--tw-gradient-from-position);
   --tw-gradient-to: rgb(0 0 0 / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
@@ -3082,6 +3102,10 @@ input:checked + .toggle-bg {
 .tracking-widest {
   letter-spacing: 0.1em;
 }
+.text-\[\#128C7E\] {
+  --tw-text-opacity: 1;
+  color: rgb(18 140 126 / var(--tw-text-opacity));
+}
 .text-\[\#1A4231\] {
   --tw-text-opacity: 1;
   color: rgb(26 66 49 / var(--tw-text-opacity));
@@ -3446,6 +3470,11 @@ input:checked + .toggle-bg {
 }
 .filter {
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+.backdrop-blur {
+  --tw-backdrop-blur: blur(8px);
+  -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+          backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
 }
 .backdrop-blur-\[1px\] {
   --tw-backdrop-blur: blur(1px);
@@ -5237,6 +5266,11 @@ h3 {
   background-color: rgb(35 88 65 / var(--tw-bg-opacity));
 }
 
+.hover\:bg-\[\#25D366\]:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(37 211 102 / var(--tw-bg-opacity));
+}
+
 .hover\:bg-\[\#2C624A\]:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(44 98 74 / var(--tw-bg-opacity));
@@ -5341,11 +5375,6 @@ h3 {
 .hover\:text-\[\#1A4231\]:hover {
   --tw-text-opacity: 1;
   color: rgb(26 66 49 / var(--tw-text-opacity));
-}
-
-.hover\:text-\[\#C5A880\]:hover {
-  --tw-text-opacity: 1;
-  color: rgb(197 168 128 / var(--tw-text-opacity));
 }
 
 .hover\:text-\[\#FBF0D8\]:hover {
@@ -5805,10 +5834,6 @@ h3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .sm\:grid-cols-4 {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
   .sm\:flex-row {
     flex-direction: row;
   }
@@ -5953,10 +5978,6 @@ h3 {
     width: 15rem;
   }
 
-  .md\:w-auto {
-    width: auto;
-  }
-
   .md\:w-fit {
     width: -moz-fit-content;
     width: fit-content;
@@ -5996,10 +6017,6 @@ h3 {
 
   .md\:gap-4 {
     gap: 1rem;
-  }
-
-  .md\:self-auto {
-    align-self: auto;
   }
 
   .md\:border-x {

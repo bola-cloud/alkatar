@@ -317,26 +317,14 @@
                                     <span class="text-[#6B7280] font-semibold">{{ $parsed['mainDesc'] }}</span>
                                 </div>
                             </li>
-                            <li class="flex items-center gap-3">
-                                <span class="w-5 h-5 rounded-full bg-[#1A4231]/5 flex items-center justify-center shrink-0 border border-[#1A4231]/10">
-                                    <svg class="w-3.5 h-3.5 text-[#1A4231]" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M12 16v1M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/></svg>
-                                </span>
-                                <div class="flex items-center gap-2">
-                                    <span class="font-bold text-[#1A4231]">{{ __('new_design.coffee_crops.price_exclusive') }}:</span>
-                                    <span class="text-xl font-extrabold text-[#1A4231]">{{ floatval($product->Price) }} {{ __('new_design.coffee_crops.currency') }}</span>
-                                    @if($product->Discount > 0)
-                                    <span class="text-sm font-semibold text-gray-400 line-through">{{ floatval($product->Discount_Price) }} {{ __('new_design.coffee_crops.currency') }}</span>
-                                    @endif
-                                </div>
-                            </li>
                         </ul>
 
                         <!-- Card Action Buttons -->
                         <div class="flex items-center gap-3 w-full">
-                            <button onclick="addToCart({{ $product->id }}, {{ $product->Discount > 0 ? ($product->Price - ($product->Price * $product->Discount / 100)) : $product->Price }})" class="flex-1 py-3 px-4 rounded-[14px] text-sm font-bold transition-all shadow-md text-white bg-[#1A4231] flex items-center justify-center gap-2 hover:bg-[#387C5F]">
-                                <span>{{ __('new_design.coffee_crops.btn_buy') }}</span>
+                            <a href="{{ route('single.product.new', $product->en_Product_Slug) }}" class="flex-1 py-3 px-4 rounded-[14px] text-sm font-bold transition-all shadow-md text-white bg-[#1A4231] flex items-center justify-center gap-2 hover:bg-[#387C5F]">
+                                <span>{{ __('new_design.technical_tools.btn_view_in_store') ?? 'عرض في المتجر' }}</span>
                                 <svg class="w-4 h-4 transform {{ $isRtl ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                            </button>
+                            </a>
                             <button onclick="openRatingModal({{ $product->id }})" class="flex-1 py-3 px-4 rounded-[14px] text-sm font-bold transition-all border border-gray-200 text-gray-700 bg-white flex items-center justify-center gap-2 hover:bg-gray-50">
                                 <span>{{ __('new_design.coffee_crops.btn_rate') }}</span>
                                 <svg class="w-4 h-4 transform {{ $isRtl ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
@@ -348,6 +336,14 @@
 
                 
             </div>
+            
+            <!-- Load More Button Container -->
+            <div id="load-more-container" class="w-full flex justify-center mt-12 hidden">
+                <button id="load-more-btn" class="px-8 py-3.5 bg-gray-100 hover:bg-gray-200 text-[#1A4231] font-extrabold rounded-[16px] text-sm transition-all shadow-sm active:scale-95">
+                    {{ __('new_design.coffee_crops.btn_load_more') ?? 'عرض المزيد' }}
+                </button>
+            </div>
+            
         </div>
     </section>
 
@@ -580,55 +576,82 @@
 
         const productCards = document.querySelectorAll('.crop-product-card');
 
+        let visibleCount = 12;
+
         function applyFilters() {
+            let visibleMatchedCount = 0;
+            let totalMatchedCount = 0;
+
             productCards.forEach(card => {
                 const cardCategory = card.getAttribute('data-category');
                 const cardCountry = card.getAttribute('data-country');
                 const cardName = (card.getAttribute('data-name') || '').toLowerCase().trim();
                 const cardRating = parseInt(card.getAttribute('data-rating') || '0');
 
+                let isMatch = true;
+
                 // 1. Category Pill Filter
                 if (activeCategoryPill !== 'all' && cardCategory !== activeCategoryPill) {
-                    card.style.setProperty('display', 'none', 'important');
-                    return;
+                    isMatch = false;
                 }
 
                 // 2. Search Query Filter
-                if (searchQuery && !cardName.includes(searchQuery)) {
-                    card.style.setProperty('display', 'none', 'important');
-                    return;
+                if (isMatch && searchQuery && !cardName.includes(searchQuery)) {
+                    isMatch = false;
                 }
 
                 // 3. Modal Country Filter
-                if (selectedCountries.length > 0 && !selectedCountries.includes(cardCountry)) {
-                    card.style.setProperty('display', 'none', 'important');
-                    return;
+                if (isMatch && selectedCountries.length > 0 && !selectedCountries.includes(cardCountry)) {
+                    isMatch = false;
                 }
 
                 // 4. Modal Category Filter
-                if (selectedCategories.length > 0 && !selectedCategories.includes(cardCategory)) {
-                    card.style.setProperty('display', 'none', 'important');
-                    return;
+                if (isMatch && selectedCategories.length > 0 && !selectedCategories.includes(cardCategory)) {
+                    isMatch = false;
                 }
 
                 // 5. Modal Size Filter
                 const cardSizes = card.getAttribute('data-sizes') ? card.getAttribute('data-sizes').split(',') : [];
-                if (selectedSizes.length > 0) {
+                if (isMatch && selectedSizes.length > 0) {
                     const hasMatch = selectedSizes.some(s => cardSizes.includes(s));
                     if (!hasMatch) {
-                        card.style.setProperty('display', 'none', 'important');
-                        return;
+                        isMatch = false;
                     }
                 }
 
                 // 6. Modal Rating Filter
-                if (selectedStars > 0 && cardRating < selectedStars) {
-                    card.style.setProperty('display', 'none', 'important');
-                    return;
+                if (isMatch && selectedStars > 0 && cardRating < selectedStars) {
+                    isMatch = false;
                 }
 
-                // Show matching card
-                card.style.display = 'flex';
+                if (isMatch) {
+                    totalMatchedCount++;
+                    if (visibleMatchedCount < visibleCount) {
+                        card.style.setProperty('display', 'flex', 'important');
+                        visibleMatchedCount++;
+                    } else {
+                        card.style.setProperty('display', 'none', 'important');
+                    }
+                } else {
+                    card.style.setProperty('display', 'none', 'important');
+                }
+            });
+
+            // Update Load More button visibility
+            const loadMoreContainer = document.getElementById('load-more-container');
+            if (totalMatchedCount > visibleCount) {
+                loadMoreContainer.classList.remove('hidden');
+            } else {
+                loadMoreContainer.classList.add('hidden');
+            }
+        }
+
+        // Load More Button Event
+        const loadMoreBtn = document.getElementById('load-more-btn');
+        if(loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', () => {
+                visibleCount += 12;
+                applyFilters();
             });
         }
 

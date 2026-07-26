@@ -185,16 +185,12 @@
                     <!-- Content Details -->
                     <div class="p-6 lg:p-8 flex flex-col justify-between flex-grow gap-6">
                         <div class="flex flex-col gap-3">
-                            <div class="flex items-baseline justify-between gap-2">
+                            <div class="flex items-baseline justify-start gap-2">
                                 <h3 class="text-xl lg:text-2xl font-black text-[#1A4231] leading-snug">
                                     <a href="{{ route('single.product.new', $product->en_Product_Slug) }}" class="hover:underline">
                                         {{ $product->localized_name }}
                                     </a>
                                 </h3>
-                                <div class="text-[#1A4231] font-extrabold flex items-baseline gap-0.5 whitespace-nowrap shrink-0">
-                                    <span class="text-2xl font-black">{{ number_format($product->Price) }}</span>
-                                    <span class="text-sm font-bold">{{ __('new_design.coffee_crops.currency') }}</span>
-                                </div>
                             </div>
                             <p class="text-xs lg:text-sm font-semibold text-gray-500 leading-relaxed">
                                 {{ $product->localized_about }}
@@ -226,6 +222,14 @@
                 </div>
                 @endforeach
         </div>
+        
+        <!-- Load More Button Container -->
+        <div id="load-more-container-tools" class="w-full flex justify-center mt-12 hidden">
+            <button id="load-more-btn-tools" class="px-8 py-3.5 bg-gray-100 hover:bg-gray-200 text-[#1A4231] font-extrabold rounded-[16px] text-sm transition-all shadow-sm active:scale-95">
+                {{ __('new_design.coffee_crops.btn_load_more') ?? 'عرض المزيد' }}
+            </button>
+        </div>
+        
     </section>
 
     <!-- Section 2: Complete Bundles (باقات متكاملة) -->
@@ -279,13 +283,7 @@
 
                     <!-- Price & Action Row -->
                     <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-8 border-t border-gray-100 pt-6">
-                        <div class="flex flex-col">
-                            <span class="text-xs text-gray-400 font-bold uppercase">{{ __('new_design.coffee_crops.price_exclusive') }}</span>
-                            <div class="text-[#1A4231] font-black text-3xl flex items-baseline gap-1 mt-0.5">
-                                <span>1,850</span>
-                                <span class="text-base font-bold">{{ __('new_design.coffee_crops.currency') }}</span>
-                            </div>
-                        </div>
+                        <div></div>
                         <a href="{{ route('front.store') }}" class="w-full sm:w-auto px-8 py-3.5 rounded-[16px] bg-[#1A4231] hover:bg-[#2C624A] text-white font-extrabold text-sm transition-all shadow-md active:scale-95 text-center">
                             {{ __('new_design.technical_tools.btn_order_now') }}
                         </a>
@@ -318,16 +316,7 @@
 
                     <!-- Price & Action Row -->
                     <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-8 border-t border-white/10 pt-6">
-                        <div class="flex flex-col">
-                            <span class="text-xs text-white/50 font-bold uppercase">{{ __('new_design.coffee_crops.price_exclusive') }}</span>
-                            <div class="flex items-baseline gap-2 mt-0.5">
-                                <div class="text-[#FBF0D8] font-black text-3xl flex items-baseline gap-1">
-                                    <span>280</span>
-                                    <span class="text-base font-bold">{{ __('new_design.coffee_crops.currency') }}</span>
-                                </div>
-                                <span class="text-sm font-semibold text-white/40 line-through">350 {{ __('new_design.coffee_crops.currency') }}</span>
-                            </div>
-                        </div>
+                        <div></div>
                         <a href="{{ route('front.store') }}" class="w-full sm:w-auto px-8 py-3.5 rounded-[16px] bg-white hover:bg-gray-50 text-[#1A4231] font-extrabold text-sm transition-all shadow-md active:scale-95 text-center">
                             {{ __('new_design.technical_tools.btn_order_now') }}
                         </a>
@@ -471,19 +460,66 @@
                 btn.classList.add('bg-[#1A4231]', 'text-white', 'shadow-md');
                 btn.classList.remove('border', 'border-gray-200', 'text-gray-600', 'hover:bg-gray-50');
 
-                const filterValue = btn.getAttribute('data-filter');
+        let visibleCount = 9; // Grid is 3 cols, so 9 is a good number
 
-                productItems.forEach(item => {
-                    if (filterValue === 'all' || item.getAttribute('data-category') === filterValue) {
-                        item.style.display = 'flex';
-                        // Add fade-in effect dynamically
+        function applyToolsFilter(filterValue) {
+            let visibleMatchedCount = 0;
+            let totalMatchedCount = 0;
+
+            productItems.forEach(item => {
+                if (filterValue === 'all' || item.getAttribute('data-category') === filterValue) {
+                    totalMatchedCount++;
+                    if (visibleMatchedCount < visibleCount) {
+                        item.style.setProperty('display', 'flex', 'important');
                         item.classList.add('animate-fade-in');
+                        visibleMatchedCount++;
                     } else {
-                        item.style.display = 'none';
+                        item.style.setProperty('display', 'none', 'important');
+                        item.classList.remove('animate-fade-in');
                     }
+                } else {
+                    item.style.setProperty('display', 'none', 'important');
+                    item.classList.remove('animate-fade-in');
+                }
+            });
+
+            const loadMoreContainer = document.getElementById('load-more-container-tools');
+            if (totalMatchedCount > visibleCount) {
+                loadMoreContainer.classList.remove('hidden');
+            } else {
+                loadMoreContainer.classList.add('hidden');
+            }
+        }
+
+        let currentFilterValue = 'all';
+
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterButtons.forEach(b => {
+                    b.classList.remove('bg-[#1A4231]', 'text-white', 'shadow-md');
+                    b.classList.add('border', 'border-gray-200', 'text-gray-600');
                 });
+
+                btn.classList.add('bg-[#1A4231]', 'text-white', 'shadow-md');
+                btn.classList.remove('border', 'border-gray-200', 'text-gray-600', 'hover:bg-gray-50');
+
+                currentFilterValue = btn.getAttribute('data-filter');
+                visibleCount = 9; // Reset to initial count on filter change
+                applyToolsFilter(currentFilterValue);
             });
         });
+
+        // Load More Button Event
+        const loadMoreBtn = document.getElementById('load-more-btn-tools');
+        if(loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', () => {
+                visibleCount += 9;
+                applyToolsFilter(currentFilterValue);
+            });
+        }
+        
+        // Initial setup for the first load
+        applyToolsFilter('all');
     });
 </script>
 
