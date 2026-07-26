@@ -779,6 +779,9 @@
             applyFilters();
             closeModal();
         });
+
+        // Apply filters on initial load to enforce pagination
+        applyFilters();
     });
 </script>
 
