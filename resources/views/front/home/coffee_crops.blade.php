@@ -576,7 +576,7 @@
 
         const productCards = document.querySelectorAll('.crop-product-card');
 
-        let visibleCount = 12;
+        let visibleCount = 6;
 
         function applyFilters() {
             let visibleMatchedCount = 0;
@@ -650,7 +650,7 @@
         const loadMoreBtn = document.getElementById('load-more-btn');
         if(loadMoreBtn) {
             loadMoreBtn.addEventListener('click', () => {
-                visibleCount += 12;
+                visibleCount += 6;
                 applyFilters();
             });
         }
