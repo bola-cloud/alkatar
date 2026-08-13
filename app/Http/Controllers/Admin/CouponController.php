@@ -113,7 +113,7 @@ class CouponController extends Controller
             'Amount' => is_null($request->amount) ? $coupon->Amount : $request->amount,
             'Min_Expenses' => is_null($request->min_expenses) ? $coupon->Min_Expenses : $request->min_expenses,
             'ExpireDate' => is_null($request->expire_date) ? $coupon->ExpireDate : $request->expire_date,
-            'usage_count' =>   $request->user_id ? 1 : (is_null($request->usage_count) ? $coupon->usage_count : $request->usage_count),
+            'usage_count' => is_null($request->usage_count) ? $coupon->usage_count : $request->usage_count,
             'user_id' => $request->user_id
 
         ]);

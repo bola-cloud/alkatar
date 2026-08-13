@@ -28,12 +28,42 @@
             <!-- Left: Actions & Buttons (in RTL) -->
             <div class="flex items-center gap-3 lg:gap-5 shrink-0">
                 
-                <!-- Search Icon -->
-                <button class="text-[#1A4231] hover:opacity-80 transition-opacity p-1.5 rounded-full hover:bg-white/10 hidden md:block">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                </button>
+                <!-- Search Form -->
+                <div x-data="searchSuggest()" class="relative hidden md:flex items-center">
+                    <form action="{{ route('front.store') }}" method="GET" class="w-full" @click.away="isOpen = false">
+                        <input type="text" name="search" placeholder="{{ $searchText }}" value="{{ request('search') }}" 
+                               x-model="query" 
+                               @input.debounce.300ms="fetchSuggestions" 
+                               @focus="query.length > 1 ? isOpen = true : null"
+                               class="w-32 lg:w-48 bg-white/50 border border-gray-200 rounded-full py-1.5 px-4 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-[#1A4231] text-[#1A4231] transition-all focus:bg-white focus:w-48 lg:focus:w-64">
+                        <button type="submit" class="absolute {{ $isRtl ? 'left-1' : 'right-1' }} text-[#1A4231] hover:opacity-80 transition-opacity p-1.5 rounded-full hover:bg-white/10 bg-transparent border-none cursor-pointer">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </button>
+                        <!-- Suggestions Dropdown -->
+                        <div x-show="isOpen" x-cloak x-transition class="absolute top-full {{ $isRtl ? 'left-0' : 'right-0' }} mt-2 w-64 lg:w-80 bg-white border border-gray-100 rounded-2xl shadow-xl overflow-hidden z-50">
+                            <ul class="max-h-80 overflow-y-auto">
+                                <li x-show="isLoading" class="p-4 text-center text-gray-400 text-sm">
+                                    <svg class="animate-spin h-5 w-5 mx-auto text-[#1A4231]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                </li>
+                                <li x-show="!isLoading && suggestions.length === 0" class="p-4 text-center text-sm font-bold text-gray-500">
+                                    {{ __('new_design.coffee_crops.no_products_found') ?? 'لا يوجد منتجات مطابقة للبحث' }}
+                                </li>
+                                <template x-for="item in suggestions" :key="item.id">
+                                    <li>
+                                        <a :href="`{{ route('single.product.new', '') }}/${item.en_Product_Slug}`" class="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors border-b border-gray-50">
+                                            <img :src="item.Primary_Image" class="w-10 h-10 object-cover rounded-lg bg-gray-100 shrink-0">
+                                            <div class="flex flex-col text-start">
+                                                <span class="text-sm font-extrabold text-[#1A4231]" x-text="{{ $isRtl ? 'item.fr_Product_Name' : 'item.en_Product_Name' }}"></span>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
 
                 <!-- Profile Icon -->
                 <a href="{{ auth()->check() ? route('user.profile') : route('login') }}" class="text-[#1A4231] hover:opacity-80 transition-opacity p-1.5 rounded-full hover:bg-white/10 hidden md:block">
@@ -122,3 +152,43 @@
 
     </div>
 </header>
+
+<!-- Prevent Alpine JS flicker -->
+<style>
+    [x-cloak] { display: none !important; }
+</style>
+
+<!-- Suggestion Data Logic -->
+<script>
+    document.addEventListener('alpine:init', () => {
+        if (!window.searchSuggestDefined) {
+            window.searchSuggestDefined = true;
+            Alpine.data('searchSuggest', () => ({
+                query: '{{ request('search') }}',
+                suggestions: [],
+                isOpen: false,
+                isLoading: false,
+                fetchSuggestions() {
+                    if (this.query.length < 2) {
+                        this.suggestions = [];
+                        this.isOpen = false;
+                        return;
+                    }
+                    this.isOpen = true;
+                    this.isLoading = true;
+                    
+                    fetch(`{{ route('search.suggest') }}?query=${encodeURIComponent(this.query)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.suggestions = data;
+                            this.isLoading = false;
+                        })
+                        .catch(err => {
+                            this.isLoading = false;
+                            console.error('Search error:', err);
+                        });
+                }
+            }));
+        }
+    });
+</script>

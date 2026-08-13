@@ -138,15 +138,6 @@
                                             </div> --}}
 
                                             <div class="input__group mb-25">
-                                            <!-- <label>{{ __('Product Weight') }}</label>
-                                            <div id="weight-container">
-                                            </div> -->
-                                            @if(!$product->synced_from_smartlife && empty($product->smartlife_id))
-                                            <button type="button" class="btn btn-primary" id="add-weight-btn">اضافة وزن</button>
-                                            @endif
-                                        </div>
-
-                                            <div class="input__group mb-25">
                                                 <label>{{ __('Product Option') }}</label>
                                                 <div id="size-container">
                                                     <!-- Size rows will be added here dynamically -->

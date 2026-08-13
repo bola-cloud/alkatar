@@ -521,12 +521,16 @@ class ProductController extends Controller
             $img = $it->Primary_Image;
             $imgUrl = asset('new-design/images/special-offer.png');
             if ($img) {
-                if (filter_var($img, FILTER_VALIDATE_URL)) {
-                    $imgUrl = str_replace('http://', 'https://', $img);
-                } elseif (strpos($img, 'uploaded_files/') === 0) {
-                    $imgUrl = asset($img);
+                if (function_exists('resolve_product_image')) {
+                    $imgUrl = resolve_product_image($img);
                 } else {
-                    $imgUrl = asset(ProductImage() . $img);
+                    if (filter_var($img, FILTER_VALIDATE_URL)) {
+                        $imgUrl = str_replace('http://', 'https://', $img);
+                    } elseif (strpos($img, 'uploaded_files/') === 0) {
+                        $imgUrl = asset($img);
+                    } else {
+                        $imgUrl = asset(ProductImage() . $img);
+                    }
                 }
             }
             $it->Primary_Image = $imgUrl;

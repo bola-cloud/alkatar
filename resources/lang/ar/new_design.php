@@ -31,7 +31,7 @@ return [
         'home' => 'الرئيسية',
         'coffee_crops' => 'محاصيل القهوة',
         'technical_tools' => 'الأدوات القهوه',
-        'wholesale_orders' => 'طلبات الجمله',
+        'wholesale_orders' => 'الحلول التجارية',
         'experience_boxes' => 'بوكسات التجربه',
         'subscriptions' => 'الاشتراكات',
         'custom_box' => 'صمم بوكسك',
@@ -297,12 +297,14 @@ return [
         
         'btn_buy' => 'انتقل للشراء',
         'btn_rate' => 'للتقييم وإضافة تعليق',
-        'modal_search_title' => 'Search Our Site',
-        'modal_search_placeholder' => 'I\'m looking for...',
+        'modal_search_title' => 'البحث في المتجر',
+        'modal_search_placeholder' => '...أبحث عن',
         'modal_crop_country' => 'بلد المحصول',
         'modal_crop_category' => 'فئة المحصول',
+        'modal_crop_weight' => 'الوزن / الحجم',
         'modal_crop_rating' => 'تقييم المحصول',
         'modal_btn_save' => 'حفظ تغيرات الفلتر',
+        
     ],
     'technical_tools' => [
         'title' => 'معدات التحضير - بن القطار',

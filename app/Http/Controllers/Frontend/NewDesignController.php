@@ -104,11 +104,17 @@ class NewDesignController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
+        // Fetch Sliders for Hero Section from Advertise (location: hero)
+        $sliders = \App\Models\Admin\Advertise::where('status', 1)
+            ->where('location', 'hero')
+            ->orderBy('display_order', 'asc')
+            ->get();
+
         return view('front.home.newdesign', compact(
             'products', 'bestSellers', 'title', 'description', 'keywords', 
             'reviews', 'allCategories', 'featuredCategories',
             'whyChoose', 'features', 'saleBanner', 'brands', 'heroSection', 'statsSection',
-            'packages'
+            'packages', 'sliders'
         ));
     }
 
@@ -122,12 +128,21 @@ class NewDesignController extends Controller
 
         $subcategories = \App\Models\Subcategory::where('status', 1)->get();
 
-        $products = Product::with(['subcategory', 'sizes', 'weights'])
+        $productsQuery = Product::with(['subcategory', 'sizes', 'weights'])
             ->available()
             ->whereHas('category', function ($query) {
                 $query->whereNotIn('en_Category_Slug', ['packages', 'offers']);
-            })
-            ->get();
+            });
+
+        if (request()->has('search') && !empty(request('search'))) {
+            $search = request('search');
+            $productsQuery->where(function ($q) use ($search) {
+                $q->where('en_Product_Name', 'LIKE', "%{$search}%")
+                  ->orWhere('fr_Product_Name', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $products = $productsQuery->get();
 
         // Collect all unique sizes (weights) associated with available products
         $availableSizes = collect();
@@ -211,7 +226,21 @@ class NewDesignController extends Controller
                 ->get();
         }
 
-        return view('front.home.wholesale', compact('is_approved', 'is_pending', 'request_status', 'products'));
+        // Fetch Sliders for Hero Section from Advertise (location: wholesale)
+        $sliders = \App\Models\Admin\Advertise::where('status', 1)
+            ->where('location', 'wholesale')
+            ->orderBy('display_order', 'asc')
+            ->get();
+            
+        // Fallback to hero if wholesale has no specific banners
+        if ($sliders->isEmpty()) {
+            $sliders = \App\Models\Admin\Advertise::where('status', 1)
+                ->where('location', 'hero')
+                ->orderBy('display_order', 'asc')
+                ->get();
+        }
+
+        return view('front.home.wholesale', compact('is_approved', 'is_pending', 'request_status', 'products', 'sliders'));
     }
 
     public function storeWholesaleRequest(Request $request)

@@ -35,7 +35,7 @@ class AdvertiseRequest extends FormRequest
             'ar_small_description' => 'nullable|string',
             'link' => 'nullable|url',
             'display_order' => 'nullable|integer',
-            'status' => 'nullable|boolean',
+            'status' => 'nullable',
             'location' => 'nullable|string|max:100'
         ];
     }

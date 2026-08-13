@@ -98,6 +98,7 @@
             const userSelect = document.getElementById("user_id");
             const usageCount = document.getElementById("usage_count");
 
+            /*
             function toggleUsageCount() {
                 if (userSelect.value) {
                     usageCount.value = 1;
@@ -109,6 +110,7 @@
 
             userSelect.addEventListener("change", toggleUsageCount);
             toggleUsageCount(); // Run on page load
+            */
         });
     </script>
 @endpush

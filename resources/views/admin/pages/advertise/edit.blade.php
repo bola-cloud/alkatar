@@ -57,31 +57,33 @@
                                             <div class="item-top mb-30">
                                                 <h2>{{ __('Content') }}</h2>
                                             </div>
-                                            <div class="input__group mb-25">
-                                                <label for="en_title">{{ __('Title (EN)')}}</label>
-                                                <input type="text" class="form-control" name="en_title" id="en_title" value="{{ $edit->en_title ?? '' }}">
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <label for="en_small_description">{{ __('Small Description (EN)')}}</label>
-                                                <textarea class="form-control" name="en_small_description" id="en_small_description" rows="2">{{ $edit->en_small_description ?? '' }}</textarea>
-                                                <small class="text-muted">{{ __('Suggested: two short lines, e.g. "Sale up to 30% OFF\nFree shipping on all your order."') }}</small>
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <label for="en_subtitle">{{ __('Subtitle (EN)')}}</label>
-                                                <input type="text" class="form-control" name="en_subtitle" id="en_subtitle" value="{{ $edit->en_subtitle ?? '' }}">
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <label for="ar_title">{{ __('Title (AR)')}}</label>
-                                                <input type="text" class="form-control" name="ar_title" id="ar_title" value="{{ $edit->ar_title ?? $edit->fr_title ?? '' }}">
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <label for="ar_subtitle">{{ __('Subtitle (AR)')}}</label>
-                                                <input type="text" class="form-control" name="ar_subtitle" id="ar_subtitle" value="{{ $edit->ar_subtitle ?? $edit->fr_subtitle ?? '' }}">
-                                            </div>
-                                            <div class="input__group mb-25">
-                                                <label for="ar_small_description">{{ __('Small Description (AR)')}}</label>
-                                                <textarea class="form-control" name="ar_small_description" id="ar_small_description" rows="2">{{ $edit->ar_small_description ?? '' }}</textarea>
-                                            </div>
+                                                {{--
+                                                <div class="input__group mb-25">
+                                                    <label for="en_title">{{ __('Title (EN)')}}</label>
+                                                    <input type="text" class="form-control" name="en_title" id="en_title" value="{{ $edit->en_title ?? '' }}">
+                                                </div>
+                                                <div class="input__group mb-25">
+                                                    <label for="en_small_description">{{ __('Small Description (EN)')}}</label>
+                                                    <textarea class="form-control" name="en_small_description" id="en_small_description" rows="2">{{ $edit->en_small_description ?? '' }}</textarea>
+                                                    <small class="text-muted">{{ __('Suggested: two short lines, e.g. "Sale up to 30% OFF\nFree shipping on all your order."') }}</small>
+                                                </div>
+                                                <div class="input__group mb-25">
+                                                    <label for="en_subtitle">{{ __('Subtitle (EN)')}}</label>
+                                                    <input type="text" class="form-control" name="en_subtitle" id="en_subtitle" value="{{ $edit->en_subtitle ?? '' }}">
+                                                </div>
+                                                <div class="input__group mb-25">
+                                                    <label for="ar_title">{{ __('Title (AR)')}}</label>
+                                                    <input type="text" class="form-control" name="ar_title" id="ar_title" value="{{ $edit->ar_title ?? $edit->fr_title ?? '' }}">
+                                                </div>
+                                                <div class="input__group mb-25">
+                                                    <label for="ar_subtitle">{{ __('Subtitle (AR)')}}</label>
+                                                    <input type="text" class="form-control" name="ar_subtitle" id="ar_subtitle" value="{{ $edit->ar_subtitle ?? $edit->fr_subtitle ?? '' }}">
+                                                </div>
+                                                <div class="input__group mb-25">
+                                                    <label for="ar_small_description">{{ __('Small Description (AR)')}}</label>
+                                                    <textarea class="form-control" name="ar_small_description" id="ar_small_description" rows="2">{{ $edit->ar_small_description ?? '' }}</textarea>
+                                                </div>
+                                                --}}
                                             <div class="input__group mb-25">
                                                 <label for="link">{{ __('Link')}}</label>
                                                 <input type="text" class="form-control" name="link" id="link" value="{{ $edit->link ?? $edit->Link_One ?? '' }}">
@@ -100,6 +102,7 @@
                                                 <label for="location">{{ __('Location / Page') }}</label>
                                                 <select class="form-control" name="location" id="location">
                                                     <option value="hero" {{ ($edit->location ?? 'hero') == 'hero' ? 'selected' : '' }}>{{ __('Homepage Hero Slider') }}</option>
+                                                    <option value="wholesale" {{ ($edit->location ?? 'hero') == 'wholesale' ? 'selected' : '' }}>{{ __('Wholesale Slider') }}</option>
                                                     <option value="coffee_crops" {{ ($edit->location ?? 'hero') == 'coffee_crops' ? 'selected' : '' }}>{{ __('Coffee Crops Slider') }}</option>
                                                     <option value="technical_tools" {{ ($edit->location ?? 'hero') == 'technical_tools' ? 'selected' : '' }}>{{ __('Technical Tools Slider') }}</option>
                                                 </select>

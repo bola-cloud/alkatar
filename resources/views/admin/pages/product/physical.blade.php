@@ -141,14 +141,6 @@
                                                 <span class="text-danger">{{ $message }}</span>
                                                 @enderror
                                             </div> --}}
-                                            <!-- <div class="input__group mb-25">
-                                                    <label>{{ __('Product Weight') }}</label>
-                                                    <div id="weight-container">
-                                                    </div>
-                                                    <button type="button" class="btn btn-primary" id="add-weight-btn">اضافة
-                                                        وزن</button>
-                                                </div> -->
-
                                             <div class="input__group mb-25">
                                                 <label>{{ __('Product Option') }}</label>
                                                 <div id="size-container">

@@ -50,6 +50,7 @@
                                         <div class="item-top mb-30">
                                             <h2>{{ __('Content') }}</h2>
                                         </div>
+                                        {{--
                                         <div class="input__group mb-25">
                                             <label for="en_title">{{ __('Title (EN)')}}</label>
                                             <input type="text" class="form-control" name="en_title" id="en_title">
@@ -75,6 +76,7 @@
                                             <label for="ar_small_description">{{ __('Small Description (AR)')}}</label>
                                             <textarea class="form-control" name="ar_small_description" id="ar_small_description" rows="2"></textarea>
                                         </div>
+                                        --}}
                                         <div class="input__group mb-25">
                                             <label for="link">{{ __('Link')}}</label>
                                             <input type="text" class="form-control" name="link" id="link">
@@ -93,6 +95,7 @@
                                             <label for="location">{{ __('Location / Page') }}</label>
                                             <select class="form-control" name="location" id="location">
                                                 <option value="hero" {{ request('location') == 'hero' ? 'selected' : '' }}>{{ __('Homepage Hero Slider') }}</option>
+                                                <option value="wholesale" {{ request('location') == 'wholesale' ? 'selected' : '' }}>{{ __('Wholesale Slider') }}</option>
                                                 <option value="coffee_crops" {{ request('location') == 'coffee_crops' ? 'selected' : '' }}>{{ __('Coffee Crops Slider') }}</option>
                                                 <option value="technical_tools" {{ request('location') == 'technical_tools' ? 'selected' : '' }}>{{ __('Technical Tools Slider') }}</option>
                                             </select>

@@ -87,12 +87,9 @@
                     @endphp
                     @if($imgPublic)
                         <div class="hero-slide">
-                            @if($ad->link)
-                                <a href="{{ $ad->link }}" target="_blank" class="block w-full h-full">
-                            @endif
                             <img src="{{ $imgPublic }}" class="absolute inset-0 w-full h-full object-cover" alt="{{ $isRtl ? $ad->ar_title : $ad->en_title }}">
                             @if($ad->link)
-                                </a>
+                                <a href="{{ $ad->link }}" target="_blank" class="absolute inset-0 z-10 block cursor-pointer"></a>
                             @endif
                         </div>
                     @endif
@@ -147,7 +144,7 @@
             </div>
 
             <!-- Products Grid: 3 Premium Cards (Responsive grid structure) -->
-            <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto px-4">
+            <div id="products-grid" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8 max-w-7xl mx-auto px-2 sm:px-4">
                 
                 @foreach($products as $product)
                 @php
@@ -160,7 +157,7 @@
                         $tagText = $product->ItemTag;
                     }
                     
-                    $descLines = array_filter(explode("\n", str_replace("\r", "", $product->localized_description)));
+                    $descLines = array_filter(explode("\n", str_replace("\r", "", strip_tags($product->localized_description))));
                     if (empty($descLines)) {
                         $descLines = [$product->localized_description];
                     }
@@ -170,7 +167,7 @@
                 
                 <div class="product-item bg-white border border-gray-150 rounded-[32px] shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between" data-category="sub-{{ $product->subcategory_id }}">
                     <!-- Image Area -->
-                    <div class="h-[260px] relative w-full overflow-hidden shrink-0">
+                    <div class="relative w-full overflow-hidden shrink-0" style="aspect-ratio: 2/3;">
                         <a href="{{ route('single.product.new', $product->en_Product_Slug) }}" class="block w-full h-full">
                             <img src="{{ $imgSrc }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" alt="{{ $product->localized_name }}" onerror="this.onerror=null;this.src='{{ asset('assets/elketar/coffee.png') }}';">
                         </a>
@@ -183,10 +180,10 @@
                     </div>
                     
                     <!-- Content Details -->
-                    <div class="p-6 lg:p-8 flex flex-col justify-between flex-grow gap-6">
-                        <div class="flex flex-col gap-3">
+                    <div class="p-4 sm:p-6 lg:p-8 flex flex-col justify-between flex-grow gap-4 sm:gap-6">
+                        <div class="flex flex-col gap-2 sm:gap-3">
                             <div class="flex items-baseline justify-start gap-2">
-                                <h3 class="text-xl lg:text-2xl font-black text-[#1A4231] leading-snug">
+                                <h3 class="text-sm sm:text-xl lg:text-2xl font-black text-[#1A4231] leading-snug">
                                     <a href="{{ route('single.product.new', $product->en_Product_Slug) }}" class="hover:underline">
                                         {{ $product->localized_name }}
                                     </a>
@@ -211,7 +208,7 @@
 
                         <!-- Card Action -->
                         <div class="pt-2">
-                            <a href="{{ route('single.product.new', $product->en_Product_Slug) }}" class="w-full py-4 rounded-[16px] bg-[#1A4231] hover:bg-[#2C624A] active:scale-[0.98] text-white font-extrabold flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all text-sm">
+                            <a href="{{ route('single.product.new', $product->en_Product_Slug) }}" class="w-full py-2.5 sm:py-4 rounded-[16px] bg-[#1A4231] hover:bg-[#2C624A] active:scale-[0.98] text-white font-extrabold flex items-center justify-center gap-2 shadow-sm hover:shadow-xl transition-all text-xs sm:text-sm">
                                 <span>{{ __('new_design.technical_tools.btn_view_in_store') }}</span>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>

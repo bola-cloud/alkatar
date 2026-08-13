@@ -94,7 +94,8 @@
             // Initialize Select2
             $('.select2').select2();
 
-            // Handle user selection change
+            // Remove forced limit to allow admin to enter usage count per user
+            /*
             $('#user_id').on('change', function() {
                 console.log('User selected');
                 if ($(this).val()) {
@@ -103,6 +104,7 @@
                     $('#usage_count').prop('disabled', false);
                 }
             });
+            */
         });
     </script>
 @endpush

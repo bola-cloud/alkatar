@@ -103,27 +103,67 @@
         </section>
 
     @else
-        <!-- Hero Banner Section -->
+    <!-- Hero Banner Section -->
     <section class="py-12 lg:py-16 px-4 sm:px-6 lg:px-8">
         <div class="container mx-auto">
-            <!-- Hero Wavy Card -->
-            <div class="relative overflow-hidden rounded-[40px] shadow-2xl min-h-[400px] lg:min-h-[500px] flex items-end p-8 lg:p-16 text-white" 
-                 style="background-image: url('{{ asset('assets/elketar/gradient_image_b2b.png') }}'); background-size: cover; background-position: center;">
-                
-                <!-- Darkened gradient overlay for perfect readability -->
-                <div class="absolute inset-0 bg-gradient-to-t from-[#1A4231]/95 via-[#1A4231]/40 to-[#1A4231]/10 z-0"></div>
-
-                <div class="relative z-10 max-w-4xl text-start">
-                    <!-- B2B Badge -->
-                    <span class="inline-block bg-[#FBF0D8] text-[#1A4231] font-bold text-xs lg:text-sm px-4 py-1.5 rounded-full mb-4 shadow-md uppercase tracking-wider">
-                        {{ __('new_design.wholesale.hero_badge') }}
-                    </span>
-                    
-                    <!-- Heading -->
-                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-[#FBF0D8] leading-tight mb-4 drop-shadow-sm">
-                        {{ __('new_design.wholesale.hero_title') }}
-                    </h1>
+            <!-- Hero Swiper -->
+            <div class="swiper wholesale-hero-swiper relative overflow-hidden rounded-[40px] shadow-2xl min-h-[400px] lg:min-h-[500px] w-full group">
+                <div class="swiper-wrapper">
+                    @if(isset($sliders) && $sliders->count() > 0)
+                        @foreach($sliders as $slider)
+                            @php
+                                $imgUrl = file_exists(public_path($slider->image)) ? asset($slider->image) : asset(PromotionImage() . $slider->image);
+                            @endphp
+                            <div class="swiper-slide bg-cover bg-center flex items-end p-8 lg:p-16 text-white w-full h-auto min-h-[400px] lg:min-h-[500px]" 
+                                 style="background-image: url('{{ $imgUrl }}'); relative">
+                                @if($slider->link)
+                                    <a href="{{ $slider->link }}" target="_blank" class="absolute inset-0 z-20 cursor-pointer block"></a>
+                                @endif
+                                <div class="absolute inset-0 bg-gradient-to-t from-[#1A4231]/95 via-[#1A4231]/40 to-[#1A4231]/10 z-0 pointer-events-none"></div>
+                                <div class="relative z-10 max-w-4xl text-start">
+                                    @if($slider->{app()->getLocale().'_subtitle'})
+                                        <span class="inline-block bg-[#FBF0D8] text-[#1A4231] font-bold text-xs lg:text-sm px-4 py-1.5 rounded-full mb-4 shadow-md uppercase tracking-wider">
+                                            {{ $slider->{app()->getLocale().'_subtitle'} }}
+                                        </span>
+                                    @endif
+                                    @if($slider->{app()->getLocale().'_title'})
+                                        <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-[#FBF0D8] leading-tight mb-4 drop-shadow-sm">
+                                            {{ $slider->{app()->getLocale().'_title'} }}
+                                        </h1>
+                                    @endif
+                                    @if($slider->{app()->getLocale().'_small_description'})
+                                        <p class="text-white/90 text-sm lg:text-base font-medium mb-6 max-w-2xl leading-relaxed">
+                                            {{ $slider->{app()->getLocale().'_small_description'} }}
+                                        </p>
+                                    @endif
+                                    @if($slider->link)
+                                        <a href="{{ $slider->link }}" class="inline-flex bg-[#1A4231] hover:bg-white text-white hover:text-[#1A4231] px-8 py-3 rounded-full font-bold transition-colors shadow-lg">
+                                            {{ app()->getLocale() == 'en' ? 'Discover More' : 'اكتشف المزيد' }}
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        <!-- Fallback Slide if no sliders exist -->
+                        <div class="swiper-slide bg-cover bg-center flex items-end p-8 lg:p-16 text-white w-full h-auto min-h-[400px] lg:min-h-[500px]" 
+                             style="background-image: url('{{ asset('assets/elketar/gradient_image_b2b.png') }}');">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#1A4231]/95 via-[#1A4231]/40 to-[#1A4231]/10 z-0"></div>
+                            <div class="relative z-10 max-w-4xl text-start">
+                                <span class="inline-block bg-[#FBF0D8] text-[#1A4231] font-bold text-xs lg:text-sm px-4 py-1.5 rounded-full mb-4 shadow-md uppercase tracking-wider">
+                                    {{ __('new_design.wholesale.hero_badge') }}
+                                </span>
+                                <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-[#FBF0D8] leading-tight mb-4 drop-shadow-sm">
+                                    {{ __('new_design.wholesale.hero_title') }}
+                                </h1>
+                            </div>
+                        </div>
+                    @endif
                 </div>
+                <!-- Pagination & Nav -->
+                <div class="swiper-pagination mb-2"></div>
+                <div class="swiper-button-prev !text-white after:!text-xl hidden md:flex w-12 h-12 rounded-full bg-black/20 hover:bg-black/40 backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 {{ $isRtl ? '!right-6' : '!left-6' }}"></div>
+                <div class="swiper-button-next !text-white after:!text-xl hidden md:flex w-12 h-12 rounded-full bg-black/20 hover:bg-black/40 backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 {{ $isRtl ? '!left-6' : '!right-6' }}"></div>
             </div>
         </div>
     </section>
@@ -448,6 +488,27 @@ $(document).ready(function() {
             }
         });
     });
+});
+
+// Initialize Swiper
+const wholesaleSwiper = new Swiper('.wholesale-hero-swiper', {
+    loop: true,
+    autoplay: {
+        delay: 5000,
+        disableOnInteraction: false,
+    },
+    pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+    },
+    navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+    },
+    effect: 'fade',
+    fadeEffect: {
+        crossFade: true
+    }
 });
 </script>
 <style>

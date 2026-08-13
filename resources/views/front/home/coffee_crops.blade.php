@@ -168,12 +168,9 @@
                     @endphp
                     @if($imgPublic)
                         <div class="hero-slide">
-                            @if($ad->link)
-                                <a href="{{ $ad->link }}" target="_blank" class="block w-full h-full">
-                            @endif
                             <img src="{{ $imgPublic }}" class="absolute inset-0 w-full h-full object-cover" alt="{{ $isRtl ? $ad->ar_title : $ad->en_title }}">
                             @if($ad->link)
-                                </a>
+                                <a href="{{ $ad->link }}" target="_blank" class="absolute inset-0 z-10 block cursor-pointer"></a>
                             @endif
                         </div>
                     @endif
@@ -250,7 +247,7 @@
                      data-rating="{{ ($product->id % 2 == 0) ? 5 : 4 }}"
                      data-sizes="{{ implode(',', $product->sizes->pluck('Size')->map('strtolower')->toArray()) }}">
                     <!-- Image -->
-                    <a href="{{ route('single.product.new', $product->en_Product_Slug) }}" class="w-full lg:w-2/5 shrink-0 h-[240px] lg:h-auto min-h-[320px] relative block overflow-hidden group">
+                    <a href="{{ route('single.product.new', $product->en_Product_Slug) }}" class="w-full lg:w-2/5 shrink-0 relative block overflow-hidden group" style="aspect-ratio: 2/3;">
                         @php
                             $imgSrc = resolve_product_image($product->Primary_Image);
                         @endphp

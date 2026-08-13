@@ -145,19 +145,19 @@
                 <div class="grid grid-cols-2 gap-6 mb-10 bg-[#FBF0D8]/50 p-6 rounded-2xl border border-[#FBF0D8]">
                     <div class="flex flex-col gap-1">
                         <span class="text-xs text-slate-500 font-bold">{{ $isRtl ? 'المنطقة:' : 'Region:' }}</span>
-                        <span class="text-[#1A4231] font-extrabold text-sm lg:text-base">{{ $parsed['origin'] }}</span>
+                        <span class="text-[#1A4231] font-extrabold text-sm lg:text-base">{!! strip_tags($parsed['origin'], '<br>') !!}</span>
                     </div>
                     <div class="flex flex-col gap-1">
                         <span class="text-xs text-slate-500 font-bold">{{ $isRtl ? 'المعالجة / قصة التحميص:' : 'Processing / Roast Story:' }}</span>
-                        <span class="text-[#1A4231] font-extrabold text-sm lg:text-base">{{ $parsed['roast'] }}</span>
+                        <span class="text-[#1A4231] font-extrabold text-sm lg:text-base">{!! strip_tags($parsed['roast'], '<br>') !!}</span>
                     </div>
                     <div class="flex flex-col gap-1">
                         <span class="text-xs text-slate-500 font-bold">{{ $isRtl ? 'الإيحاءات:' : 'Notes:' }}</span>
-                        <span class="text-[#1A4231] font-extrabold text-sm lg:text-base">{{ $parsed['notes'] }}</span>
+                        <span class="text-[#1A4231] font-extrabold text-sm lg:text-base">{!! strip_tags($parsed['notes'], '<br>') !!}</span>
                     </div>
                     <div class="flex flex-col gap-1">
                         <span class="text-xs text-slate-500 font-bold">{{ $isRtl ? 'النوع:' : 'Type:' }}</span>
-                        <span class="text-[#1A4231] font-extrabold text-sm lg:text-base">{{ $parsed['type'] }}</span>
+                        <span class="text-[#1A4231] font-extrabold text-sm lg:text-base">{!! strip_tags($parsed['type'], '<br>') !!}</span>
                     </div>
                 </div>
 
@@ -226,7 +226,7 @@
                 <!-- Action Bar -->
                 <div class="flex items-center gap-4 mt-8">
                     <!-- Quantity Counter -->
-                    <div class="flex items-center border-2 border-gray-150 rounded-xl overflow-hidden bg-gray-50 h-14">
+                    <div class="flex items-center border-2 border-gray-150 rounded-xl overflow-hidden bg-gray-50 h-14 {{ $product->Quantity <= 0 ? 'opacity-50 pointer-events-none' : '' }}">
                         <button type="button" onclick="adjustQty(-1)" class="px-5 text-[#1A4231] hover:bg-gray-200 transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
                         </button>
@@ -237,10 +237,17 @@
                     </div>
                     
                     <!-- Add to Cart Button -->
-                    <button type="button" onclick="submitAddToCart()" class="flex-grow bg-[#1A4231] hover:bg-[#2C624A] text-white h-14 rounded-xl font-bold text-lg shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-3">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                        <span>{{ $isRtl ? 'إضافة للسلة' : 'Add to Cart' }}</span>
-                    </button>
+                    @if($product->Quantity <= 0)
+                        <button type="button" disabled class="flex-grow bg-gray-400 text-white h-14 rounded-xl font-bold text-lg shadow-sm cursor-not-allowed opacity-80 flex items-center justify-center gap-3">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728"/></svg>
+                            <span>{{ $isRtl ? 'نفدت الكمية' : 'Out of Stock' }}</span>
+                        </button>
+                    @else
+                        <button type="button" onclick="submitAddToCart()" class="flex-grow bg-[#1A4231] hover:bg-[#2C624A] text-white h-14 rounded-xl font-bold text-lg shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-3">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                            <span>{{ $isRtl ? 'إضافة للسلة' : 'Add to Cart' }}</span>
+                        </button>
+                    @endif
                 </div>
 
                 <!-- Shipping / Quality Benefits -->
@@ -271,7 +278,7 @@
             </div>
             <div class="max-w-4xl prose prose-slate">
                 <p class="text-base lg:text-lg text-slate-600 leading-loose">
-                    {!! nl2br(e($parsed['mainDesc'])) !!}
+                    {!! $parsed['mainDesc'] !!}
                 </p>
             </div>
         </div>

@@ -83,9 +83,9 @@ class AdvertiseController extends Controller
         Advertise::where('location', $location)->where('display_order', '>=', $newOrder)->increment('display_order');
 
         $payload = [
-            'Image_One' => $image_one,
+            'Image_One' => $image_one ?? '',
             'Link_One' => $request->link_one ?? null,
-            'Image_Two' => $image_two,
+            'Image_Two' => $image_two ?? '',
             'image' => $image, // do not accept manual image_path; store uploaded image only
             'en_title' => $request->en_title ?? null,
             'en_subtitle' => $request->en_subtitle ?? null,
@@ -248,9 +248,9 @@ class AdvertiseController extends Controller
         }
 
         $update = Advertise::find($id)->update([
-            'Image_One' => $image_one,
+            'Image_One' => $image_one ?? '',
             'Link_One' => $request->link_one ?? $record->Link_One,
-            'Image_Two' => $image_two,
+            'Image_Two' => $image_two ?? '',
             'image' => $image,
             'en_title' => $request->en_title ?? $record->en_title,
             'en_subtitle' => $request->en_subtitle ?? $record->en_subtitle,

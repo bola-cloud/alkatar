@@ -60,6 +60,12 @@
             <div class="flex flex-wrap items-center justify-between gap-4 w-full bg-white rounded-2xl border border-gray-150 p-4 shadow-sm">
                 
                 <div class="flex flex-wrap items-center gap-3">
+                    <!-- Live Search Input -->
+                    <div class="relative bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1A4231] flex items-center min-w-[200px] lg:min-w-[250px] focus-within:ring-1 focus-within:ring-[#1A4231] focus-within:border-[#1A4231] transition-all">
+                        <svg class="w-4 h-4 text-gray-400 absolute {{ $isRtl ? 'right-3' : 'left-3' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <input type="text" id="liveSearchInput" placeholder="{{ $isRtl ? 'بحث ذكي...' : 'Smart Search...' }}" class="bg-transparent border-none focus:outline-none focus:ring-0 w-full {{ $isRtl ? 'pr-6' : 'pl-6' }} py-0 text-[#1A4231] placeholder-gray-400">
+                    </div>
+
                     <!-- Subcategory Filter -->
                     <div class="relative bg-[#F9FAFB] border border-gray-200 rounded-xl px-3 py-2 text-xs lg:text-sm font-bold text-[#1A4231] cursor-pointer hover:bg-white transition-colors">
                         <select id="subcategoryFilter" class="bg-transparent border-none focus:outline-none focus:ring-0 cursor-pointer pr-6 py-0 text-[#1A4231] w-full min-w-[110px]">
@@ -97,7 +103,7 @@
         </section>
 
         <!-- Product Cards Grid (3 Columns) -->
-        <section class="products-grid grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+        <section class="products-grid grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 lg:gap-8">
             
             @foreach($products as $product)
             @php
@@ -137,11 +143,12 @@
                  data-subcategory="{{ $subcatId }}"
                  data-sizes="{{ $sizeIds }}"
                  data-price="{{ $product->Price }}"
-                 data-created-at="{{ $product->created_at }}">
+                 data-created-at="{{ $product->created_at }}"
+                 data-search-text="{{ strtolower($product->en_Product_Name . ' ' . $product->fr_Product_Name . ' ' . $product->localized_name) }}">
                 
                 <a href="{{ route('single.product.new', $product->en_Product_Slug) }}" class="block hover:opacity-95 transition-opacity">
                     <!-- Product Image Container -->
-                    <div class="relative w-full h-[260px] overflow-hidden">
+                    <div class="relative w-full overflow-hidden" style="aspect-ratio: 2/3;">
                         <!-- Tag -->
                         @if($product->ItemTag)
                         <span class="absolute top-4 {{ $isRtl ? 'right-4' : 'left-4' }} bg-white/95 text-[#1A4231] text-[11px] font-black px-4 py-1.5 rounded-full border border-[#1A4231]/10 shadow-sm backdrop-blur-md z-10">
@@ -156,12 +163,12 @@
                     </div>
 
                     <!-- Product Info -->
-                    <div class="p-6 lg:p-8 flex flex-col text-start gap-4">
-                        <div class="flex items-start justify-between gap-4">
-                            <h3 class="text-lg lg:text-xl font-black text-[#1A4231] leading-tight">
+                    <div class="p-4 sm:p-6 lg:p-8 flex flex-col text-start gap-2 sm:gap-4">
+                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4">
+                            <h3 class="text-sm sm:text-lg lg:text-xl font-black text-[#1A4231] leading-tight">
                                 {{ $product->localized_name }}
                             </h3>
-                            <span class="text-base lg:text-lg font-black text-[#1A4231] whitespace-nowrap">
+                            <span class="text-sm sm:text-base lg:text-lg font-black text-[#1A4231] whitespace-nowrap">
                                 {{ floatval($product->Price) }} {{ __('new_design.coffee_crops.currency') }}
                             </span>
                         </div>
@@ -205,18 +212,25 @@
                 </a>
 
                 <!-- Add to Cart Button -->
-                <div class="px-6 lg:px-8 pb-6 lg:pb-8">
-                    @if($hasOptions)
+                <div class="px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6 lg:pb-8 mt-auto">
+                    @if($product->Quantity <= 0)
+                        <button type="button" disabled class="w-full bg-gray-400 text-white py-2.5 sm:py-4 rounded-full text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 shadow-sm cursor-not-allowed opacity-80">
+                            <span>{{ app()->getLocale() == 'fr' ? 'نفدت الكمية' : 'Out of Stock' }}</span>
+                            <svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728"/>
+                            </svg>
+                        </button>
+                    @elseif($hasOptions)
                         <button type="button" 
                             onclick="openQuickViewModal({{ $product->id }}, '{{ addslashes(htmlspecialchars($product->localized_name, ENT_QUOTES)) }}', '{{ $imgSrc }}', {{ json_encode($productSizes) }}, {{ json_encode($productWeights) }}, {{ floatval($product->Price) }}, {{ floatval($product->Discount) }})" 
-                            class="w-full bg-[#1A4231] hover:bg-[#2C624A] text-white py-4 rounded-full text-sm font-extrabold flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-md">
+                            class="w-full bg-[#1A4231] hover:bg-[#2C624A] text-white py-2.5 sm:py-4 rounded-full text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-md">
                             <span>{{ __('new_design.store_page.add_to_cart') }}</span>
                             <svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                             </svg>
                         </button>
                     @else
-                        <button onclick="addToCart({{ $product->id }}, {{ $product->Discount > 0 ? ($product->Price - ($product->Price * $product->Discount / 100)) : $product->Price }})" class="w-full bg-[#1A4231] hover:bg-[#2C624A] text-white py-4 rounded-full text-sm font-extrabold flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-md">
+                        <button onclick="addToCart({{ $product->id }}, {{ $product->Discount > 0 ? ($product->Price - ($product->Price * $product->Discount / 100)) : $product->Price }})" class="w-full bg-[#1A4231] hover:bg-[#2C624A] text-white py-2.5 sm:py-4 rounded-full text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-md">
                             <span>{{ __('new_design.store_page.add_to_cart') }}</span>
                             <svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
@@ -227,6 +241,22 @@
 
             </div>
             @endforeach
+
+            @if($products->isEmpty())
+                <div class="col-span-1 md:col-span-3 flex flex-col items-center justify-center py-20 text-center">
+                    <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <h3 class="text-xl font-bold text-gray-400">{{ __('new_design.coffee_crops.no_products_found') ?? 'عفواً، لا يوجد منتجات مطابقة للبحث' }}</h3>
+                    @if(request('search'))
+                        <a href="{{ route('front.store') }}" class="mt-4 text-[#1A4231] font-bold underline">{{ $isRtl ? 'العودة للمتجر' : 'Back to Store' }}</a>
+                    @endif
+                </div>
+            @endif
+            
+            <!-- JavaScript Empty State (Hidden initially) -->
+            <div id="js-empty-state" class="col-span-1 md:col-span-3 flex-col items-center justify-center py-20 text-center" style="display: none;">
+                <svg class="w-16 h-16 text-gray-300 mb-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <h3 class="text-xl font-bold text-gray-400">{{ __('new_design.coffee_crops.no_products_found') ?? 'عفواً، لا يوجد منتجات مطابقة للبحث' }}</h3>
+            </div>
 
         </section>
 
@@ -299,6 +329,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const sortSelect = document.getElementById('sortFilter');
     const subcategorySelect = document.getElementById('subcategoryFilter');
     const sizeSelect = document.getElementById('sizeFilter');
+    const searchInput = document.getElementById('liveSearchInput');
+    const jsEmptyState = document.getElementById('js-empty-state');
     
     let currentCategory = 'all';
 
@@ -326,10 +358,18 @@ document.addEventListener('DOMContentLoaded', function() {
     if (sortSelect) sortSelect.addEventListener('change', filterAndSort);
     if (subcategorySelect) subcategorySelect.addEventListener('change', filterAndSort);
     if (sizeSelect) sizeSelect.addEventListener('change', filterAndSort);
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            // Add a small debounce
+            clearTimeout(window.searchTimeout);
+            window.searchTimeout = setTimeout(filterAndSort, 200);
+        });
+    }
 
     function filterAndSort() {
         const selectedSubcategory = subcategorySelect ? subcategorySelect.value : 'all';
         const selectedSize = sizeSelect ? sizeSelect.value : 'all';
+        let hasVisibleCards = false;
 
         // Filter
         cards.forEach(card => {
@@ -350,12 +390,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 matchesSize = sizesArray.includes(selectedSize);
             }
 
-            if (matchesCat && matchesSubcat && matchesSize) {
+            // Search match
+            let matchesSearch = true;
+            if (searchInput && searchInput.value.trim() !== '') {
+                const query = searchInput.value.toLowerCase().trim();
+                const cardSearchText = card.getAttribute('data-search-text');
+                matchesSearch = cardSearchText.includes(query);
+            }
+
+            if (matchesCat && matchesSubcat && matchesSize && matchesSearch) {
                 card.style.display = 'flex';
+                hasVisibleCards = true;
             } else {
                 card.style.display = 'none';
             }
         });
+
+        if (jsEmptyState) {
+            if (!hasVisibleCards && cards.length > 0) {
+                jsEmptyState.style.display = 'flex';
+            } else {
+                jsEmptyState.style.display = 'none';
+            }
+        }
 
         // Sort
         const visibleCards = Array.from(cards).filter(c => c.style.display !== 'none');

@@ -10,21 +10,77 @@
     <!-- White Separator Above -->
     <div class="h-10 bg-white"></div>
 
-    <!-- Hero Section (Exact Figma Match via Single Banner Image or Dynamic Content) -->
+    <!-- Hero Banner Section (Full Width Swiper) -->
     <section class="w-full h-auto bg-[#EDEAE3] relative">
-        @php
-            $heroImg = asset('assets/elketar/ddd.png');
-            if (!empty($heroSection) && !empty($heroSection->image)) {
-                if (file_exists(public_path($heroSection->image))) {
-                    $heroImg = asset($heroSection->image);
-                } elseif (file_exists(public_path(PromotionImage() . $heroSection->image))) {
-                    $heroImg = asset(PromotionImage() . $heroSection->image);
-                } else {
-                    $heroImg = asset(PromotionImage() . $heroSection->image);
-                }
-            }
-        @endphp
-        <img src="{{ $heroImg }}" alt="Hero Banner" class="w-full h-auto block">
+        <!-- Hero Swiper -->
+        <div class="swiper home-hero-swiper relative overflow-hidden w-full h-auto group">
+            <div class="swiper-wrapper">
+                @if(isset($sliders) && $sliders->count() > 0)
+                    @foreach($sliders as $slider)
+                        <div class="swiper-slide w-full h-auto">
+                            <!-- Show Image As-Is Without Cropping -->
+                            @php
+                                $imgUrl = file_exists(public_path($slider->image)) ? asset($slider->image) : asset(PromotionImage() . $slider->image);
+                            @endphp
+                            <img src="{{ $imgUrl }}" class="w-full h-auto block" alt="{{ $slider->{app()->getLocale().'_title'} ?? 'Banner' }}">
+                            
+                            @if($slider->link)
+                                <a href="{{ $slider->link }}" target="_blank" class="absolute inset-0 z-20"></a>
+                            @endif
+                            
+                            <!-- Absolute text overlay only if title/desc exist -->
+                            @if($slider->{app()->getLocale().'_title'} || $slider->{app()->getLocale().'_subtitle'})
+                            <div class="absolute inset-0 bg-black/20 flex flex-col justify-end p-8 lg:p-16 z-10">
+                                <div class="max-w-4xl text-start">
+                                    @if($slider->{app()->getLocale().'_subtitle'})
+                                        <span class="inline-block bg-[#FBF0D8] text-[#1A4231] font-bold text-xs lg:text-sm px-4 py-1.5 rounded-full mb-4 shadow-md uppercase tracking-wider">
+                                            {{ $slider->{app()->getLocale().'_subtitle'} }}
+                                        </span>
+                                    @endif
+                                    @if($slider->{app()->getLocale().'_title'})
+                                        <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-[#FBF0D8] leading-tight mb-4 drop-shadow-sm">
+                                            {{ $slider->{app()->getLocale().'_title'} }}
+                                        </h1>
+                                    @endif
+                                    @if($slider->{app()->getLocale().'_small_description'})
+                                        <p class="text-white/90 text-sm lg:text-base font-medium mb-6 max-w-2xl leading-relaxed">
+                                            {{ $slider->{app()->getLocale().'_small_description'} }}
+                                        </p>
+                                    @endif
+                                    @if($slider->link)
+                                        <a href="{{ $slider->link }}" class="inline-flex bg-[#1A4231] hover:bg-white text-white hover:text-[#1A4231] px-8 py-3 rounded-full font-bold transition-colors shadow-lg">
+                                            {{ app()->getLocale() == 'en' ? 'Discover More' : 'اكتشف المزيد' }}
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                            @endif
+                        </div>
+                    @endforeach
+                @else
+                    <!-- Fallback Slide (Dynamic Content Old Way) -->
+                    @php
+                        $heroImg = asset('assets/elketar/ddd.png');
+                        if (!empty($heroSection) && !empty($heroSection->image)) {
+                            if (file_exists(public_path($heroSection->image))) {
+                                $heroImg = asset($heroSection->image);
+                            } elseif (file_exists(public_path(PromotionImage() . $heroSection->image))) {
+                                $heroImg = asset(PromotionImage() . $heroSection->image);
+                            } else {
+                                $heroImg = asset(PromotionImage() . $heroSection->image);
+                            }
+                        }
+                    @endphp
+                    <div class="swiper-slide w-full h-auto">
+                        <img src="{{ $heroImg }}" alt="Hero Banner" class="w-full h-auto block">
+                    </div>
+                @endif
+            </div>
+            <!-- Pagination & Nav -->
+            <div class="swiper-pagination mb-2"></div>
+            <div class="swiper-button-prev !text-white after:!text-xl hidden md:flex w-12 h-12 rounded-full bg-black/20 hover:bg-black/40 backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 {{ $isRtl ? '!right-6' : '!left-6' }}"></div>
+            <div class="swiper-button-next !text-white after:!text-xl hidden md:flex w-12 h-12 rounded-full bg-black/20 hover:bg-black/40 backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 {{ $isRtl ? '!left-6' : '!right-6' }}"></div>
+        </div>
     </section>
 
     <!-- White Separator Above -->
@@ -472,6 +528,27 @@ $(document).ready(function() {
             }
         });
     });
+});
+
+// Initialize Swiper
+const homeHeroSwiper = new Swiper('.home-hero-swiper', {
+    loop: true,
+    autoplay: {
+        delay: 5000,
+        disableOnInteraction: false,
+    },
+    pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+    },
+    navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+    },
+    effect: 'fade',
+    fadeEffect: {
+        crossFade: true
+    }
 });
 </script>
 @endpush
