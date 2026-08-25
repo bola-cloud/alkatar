@@ -20,9 +20,10 @@
                         <div class="swiper-slide w-full h-auto">
                             <!-- Show Image As-Is Without Cropping -->
                             @php
-                                $imgUrl = file_exists(public_path($slider->image)) ? asset($slider->image) : asset(PromotionImage() . $slider->image);
+                                $imgName = !empty($slider->image) ? $slider->image : $slider->Image_One;
+                                $imgUrl = file_exists(public_path($imgName)) ? asset($imgName) : asset(PromotionImage() . $imgName);
                             @endphp
-                            <img src="{{ $imgUrl }}" class="w-full h-auto block" alt="{{ $slider->{app()->getLocale().'_title'} ?? 'Banner' }}">
+                            <img src="{{ $imgUrl }}" class="w-full max-h-[calc(100vh-140px)] object-cover block" alt="{{ $slider->{app()->getLocale().'_title'} ?? 'Banner' }}">
                             
                             @if($slider->link)
                                 <a href="{{ $slider->link }}" target="_blank" class="absolute inset-0 z-20"></a>
@@ -72,7 +73,7 @@
                         }
                     @endphp
                     <div class="swiper-slide w-full h-auto">
-                        <img src="{{ $heroImg }}" alt="Hero Banner" class="w-full h-auto block">
+                        <img src="{{ $heroImg }}" alt="Hero Banner" class="w-full max-h-[calc(100vh-140px)] object-cover block">
                     </div>
                 @endif
             </div>

@@ -113,7 +113,7 @@
 
     <!-- Main Content Section: Brewing Tools Grid & Filters -->
     <section class="py-12 lg:py-16 bg-white relative">
-        <div class="container mx-auto px-4 lg:px-8 relative z-10">
+        <div class="w-full max-w-[1600px] mx-auto px-4 lg:px-8 relative z-10">
             
             <!-- Section Header (Smart selection pill badge and main headers) -->
             <div class="max-w-3xl mx-auto text-center mb-10 flex flex-col items-center justify-center gap-3">
@@ -144,7 +144,7 @@
             </div>
 
             <!-- Products Grid: 3 Premium Cards (Responsive grid structure) -->
-            <div id="products-grid" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8 max-w-7xl mx-auto px-2 sm:px-4">
+            <div id="products-grid" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8 w-full mx-auto px-2 sm:px-4">
                 
                 @foreach($products as $product)
                 @php
@@ -231,7 +231,7 @@
 
     <!-- Section 2: Complete Bundles (باقات متكاملة) -->
     <section class="py-16 bg-[#FDF9F0]/40 border-y border-gray-100">
-        <div class="container mx-auto px-4 lg:px-8 max-w-7xl">
+        <div class="w-full max-w-[1600px] mx-auto px-4 lg:px-8">
             
             <!-- Section Header (With Left Align link matching Figma layout) -->
             <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-10 gap-4">

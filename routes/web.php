@@ -40,6 +40,7 @@ Route::group(['middleware' => ['is_user']], function () {
     Route::get('/olddesign', [HomeController::class, 'index'])->name('front.olddesign');
     Route::get('/', [NewDesignController::class, 'index'])->name('front');
     Route::get('/store', [NewDesignController::class, 'store'])->name('front.store');
+    Route::get('/store/catalog', [NewDesignController::class, 'storeCatalog'])->name('front.store.catalog');
     Route::get('/wholesale-orders', [NewDesignController::class, 'wholesale'])->name('wholesale.orders');
     Route::post('/wholesale-orders', [NewDesignController::class, 'storeWholesaleRequest'])->name('wholesale.orders.store');
     Route::get('/become-partner', [NewDesignController::class, 'become_partner'])->name('become.partner');

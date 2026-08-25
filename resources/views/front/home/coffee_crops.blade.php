@@ -194,7 +194,7 @@
 
     <!-- Main Content Section: Available Crops (المحاصيل المتاحة) -->
     <section class="py-12 lg:py-16 bg-white relative">
-        <div class="container mx-auto px-4 lg:px-8 relative z-10">
+        <div class="w-full max-w-[1600px] mx-auto px-4 lg:px-8 relative z-10">
             
             <!-- Section Header -->
             <div class="max-w-3xl mx-auto text-center mb-10 flex flex-col items-center justify-center">
@@ -231,7 +231,7 @@
             </div>
 
             <!-- Products Grid/List Container -->
-            <div id="crops-products-container" class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full mt-12 max-w-7xl mx-auto">
+            <div id="crops-products-container" class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full mt-12 mx-auto">
                 @foreach($products as $index => $product)
                 @php
                     $parsed = $parseProductData($product, $isRtl);

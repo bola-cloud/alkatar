@@ -95,6 +95,7 @@
                                             <label for="location">{{ __('Location / Page') }}</label>
                                             <select class="form-control" name="location" id="location">
                                                 <option value="hero" {{ request('location') == 'hero' ? 'selected' : '' }}>{{ __('Homepage Hero Slider') }}</option>
+                                                <option value="store_home" {{ request('location') == 'store_home' ? 'selected' : '' }}>{{ __('Store Homepage Slider') }}</option>
                                                 <option value="wholesale" {{ request('location') == 'wholesale' ? 'selected' : '' }}>{{ __('Wholesale Slider') }}</option>
                                                 <option value="coffee_crops" {{ request('location') == 'coffee_crops' ? 'selected' : '' }}>{{ __('Coffee Crops Slider') }}</option>
                                                 <option value="technical_tools" {{ request('location') == 'technical_tools' ? 'selected' : '' }}>{{ __('Technical Tools Slider') }}</option>

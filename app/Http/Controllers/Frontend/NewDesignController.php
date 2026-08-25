@@ -120,6 +120,58 @@ class NewDesignController extends Controller
 
     public function store()
     {
+        $relations = ['sizes', 'weights'];
+
+        // Sliders for Store Home Section from Advertise
+        $sliders = \App\Models\Admin\Advertise::where('status', 1)
+            ->where('location', 'store_home')
+            ->orderBy('display_order', 'asc')
+            ->get();
+            
+        // Fallback to hero if store_home has no specific banners
+        if ($sliders->isEmpty()) {
+            $sliders = \App\Models\Admin\Advertise::where('status', 1)
+                ->where('location', 'hero')
+                ->orderBy('display_order', 'asc')
+                ->get();
+        }
+
+        // Special Offers (On Sale)
+        $specialOffers = Product::where('Status', 1)
+            ->available()
+            ->where('On_Sale', 1)
+            ->with($relations)
+            ->orderBy('id', 'desc')
+            ->get();
+            
+        // Active Categories for the Categories Grid/Slider
+        $categories = Category::where('Status', 1)
+            ->orderBy('order', 'asc')
+            ->get();
+            
+        // Latest Products
+        $latestProducts = Product::where('Status', 1)
+            ->available()
+            ->with($relations)
+            ->orderBy('id', 'desc')
+            ->take(8)
+            ->get();
+
+        // Monthly Offers (Packages)
+        $monthlyOffers = Product::where('Status', 1)
+            ->available()
+            ->whereHas('category', function ($q) {
+                $q->where('en_Category_Slug', 'packages');
+            })
+            ->with($relations)
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return view('front.home.store_home', compact('sliders', 'specialOffers', 'categories', 'latestProducts', 'monthlyOffers'));
+    }
+
+    public function storeCatalog()
+    {
         // عرض صفحة المتجر الكامل مع جلب الفئات والمنتجات المتاحة (باستثناء الباقات والعروض والمنتجات التجميعية)
         $categories = Category::where('Status', 1)
             ->whereNotIn('en_Category_Slug', ['packages', 'offers'])

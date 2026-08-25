@@ -118,7 +118,7 @@
 </head>
 <body class="bg-katar-cream text-katar-dark font-arabic overflow-x-hidden">
     
-    @if(request()->routeIs('front.store') || request()->routeIs('front.cart') || request()->routeIs('checkout') || request()->routeIs('checkout.thankyou_page') || request()->routeIs('front.product_details') || request()->routeIs('single.product.new') || request()->routeIs('single.product') || request()->routeIs('user.profile') || (isset($isStorePage) && $isStorePage))
+    @if(request()->routeIs('front.store') || request()->routeIs('front.store.catalog') || request()->routeIs('front.cart') || request()->routeIs('checkout') || request()->routeIs('checkout.thankyou_page') || request()->routeIs('front.product_details') || request()->routeIs('single.product.new') || request()->routeIs('single.product') || request()->routeIs('user.profile') || (isset($isStorePage) && $isStorePage))
         @include('front.layouts.include.store_header')
     @else
         @include('front.layouts.include.newdesign_header')

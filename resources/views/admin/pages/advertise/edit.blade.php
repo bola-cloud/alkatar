@@ -102,6 +102,7 @@
                                                 <label for="location">{{ __('Location / Page') }}</label>
                                                 <select class="form-control" name="location" id="location">
                                                     <option value="hero" {{ ($edit->location ?? 'hero') == 'hero' ? 'selected' : '' }}>{{ __('Homepage Hero Slider') }}</option>
+                                                    <option value="store_home" {{ ($edit->location ?? 'hero') == 'store_home' ? 'selected' : '' }}>{{ __('Store Homepage Slider') }}</option>
                                                     <option value="wholesale" {{ ($edit->location ?? 'hero') == 'wholesale' ? 'selected' : '' }}>{{ __('Wholesale Slider') }}</option>
                                                     <option value="coffee_crops" {{ ($edit->location ?? 'hero') == 'coffee_crops' ? 'selected' : '' }}>{{ __('Coffee Crops Slider') }}</option>
                                                     <option value="technical_tools" {{ ($edit->location ?? 'hero') == 'technical_tools' ? 'selected' : '' }}>{{ __('Technical Tools Slider') }}</option>

@@ -30,7 +30,7 @@
                 
                 <!-- Search Form -->
                 <div x-data="searchSuggest()" class="relative hidden md:flex items-center">
-                    <form action="{{ route('front.store') }}" method="GET" class="w-full" @click.away="isOpen = false">
+                    <form action="{{ route('front.store.catalog') }}" method="GET" class="w-full" @click.away="isOpen = false">
                         <input type="text" name="search" placeholder="{{ $searchText }}" value="{{ request('search') }}" 
                                x-model="query" 
                                @input.debounce.300ms="fetchSuggestions" 

@@ -24,7 +24,7 @@
             
             <!-- Right/Left: Search Bar (Hidden on Mobile, shown in menu) -->
             <div class="hidden lg:flex w-1/3 justify-start" x-data="searchSuggest()">
-                <form action="{{ route('front.store') }}" method="GET" class="relative w-full max-w-xs" @click.away="isOpen = false">
+                <form action="{{ route('front.store.catalog') }}" method="GET" class="relative w-full max-w-xs" @click.away="isOpen = false">
                     <input type="text" name="search" placeholder="{{ $searchText }}" value="{{ request('search') }}" 
                            x-model="query" 
                            @input.debounce.300ms="fetchSuggestions" 
@@ -123,7 +123,7 @@
         <!-- Mobile Menu Overlay -->
         <div x-show="mobileMenu" x-transition class="lg:hidden mt-4 pb-4 border-t border-gray-200">
             <div class="mt-4 flex flex-col gap-4">
-                <form action="{{ route('front.store') }}" method="GET" class="relative w-full px-2" x-data="searchSuggest()" @click.away="isOpen = false">
+                <form action="{{ route('front.store.catalog') }}" method="GET" class="relative w-full px-2" x-data="searchSuggest()" @click.away="isOpen = false">
                     <input type="text" name="search" placeholder="{{ $searchText }}" value="{{ request('search') }}" 
                            x-model="query" 
                            @input.debounce.300ms="fetchSuggestions" 
