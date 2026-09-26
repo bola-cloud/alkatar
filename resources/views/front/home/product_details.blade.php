@@ -283,6 +283,22 @@
             </div>
         </div>
 
+        @if($product->localized_about)
+        <!-- Additional Description -->
+        <div class="mt-16 text-start">
+            <div class="border-b border-gray-100 flex gap-8 mb-10">
+                <button class="pb-4 border-b-4 border-[#1A4231] text-[#1A4231] font-extrabold text-xl">
+                    {{ $isRtl ? 'الوصف الإضافي للمنتج' : 'Additional Description' }}
+                </button>
+            </div>
+            <div class="max-w-4xl prose prose-slate">
+                <p class="text-base lg:text-lg text-slate-600 leading-loose">
+                    {!! nl2br(e($product->localized_about)) !!}
+                </p>
+            </div>
+        </div>
+        @endif
+
         <!-- Related Products Section -->
         @if($related && $related->count() > 0)
             <div class="mt-24 border-t border-gray-100 pt-16">

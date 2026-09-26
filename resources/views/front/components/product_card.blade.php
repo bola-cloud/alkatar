@@ -69,37 +69,19 @@
                 {{ $product->localized_about }}
             </p>
 
-            <!-- Product Specs List -->
-            <ul class="flex flex-col gap-3 text-xs font-semibold text-gray-700 leading-normal border-t border-gray-100 pt-4 mt-auto">
-                @php
-                    $descLines = array_filter(array_map('trim', explode('.', strip_tags($product->localized_description))));
-                @endphp
-                @if(count($descLines) > 0)
-                    @foreach(array_slice($descLines, 0, 2) as $line)
-                    @if(!empty($line))
-                    <li class="flex items-start gap-2.5">
-                        <span class="w-5 h-5 rounded-full bg-[#1A4231]/5 flex items-center justify-center shrink-0 border border-[#1A4231]/10 mt-0.5">
-                            <svg class="w-3.5 h-3.5 text-[#1A4231]" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        </span>
-                        <span class="line-clamp-1">{{ $line }}</span>
-                    </li>
+            <!-- Product Specs -->
+            <div class="flex items-start gap-2.5 text-xs font-semibold text-gray-700 leading-normal border-t border-gray-100 pt-4 mt-auto">
+                <span class="w-5 h-5 rounded-full bg-[#1A4231]/5 flex items-center justify-center shrink-0 border border-[#1A4231]/10 mt-0.5">
+                    <svg class="w-3.5 h-3.5 text-[#1A4231]" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                </span>
+                <p class="line-clamp-2">
+                    @if(strip_tags($product->localized_description))
+                        {{ strip_tags($product->localized_description) }}
+                    @else
+                        {{ __('new_design.store_page.hario_feat1') }} {{ __('new_design.store_page.hario_feat2') }}
                     @endif
-                    @endforeach
-                @else
-                    <li class="flex items-start gap-2.5">
-                        <span class="w-5 h-5 rounded-full bg-[#1A4231]/5 flex items-center justify-center shrink-0 border border-[#1A4231]/10 mt-0.5">
-                            <svg class="w-3.5 h-3.5 text-[#1A4231]" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        </span>
-                        <span class="line-clamp-1">{{ __('new_design.store_page.hario_feat1') }}</span>
-                    </li>
-                    <li class="flex items-start gap-2.5">
-                        <span class="w-5 h-5 rounded-full bg-[#1A4231]/5 flex items-center justify-center shrink-0 border border-[#1A4231]/10 mt-0.5">
-                            <svg class="w-3.5 h-3.5 text-[#1A4231]" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        </span>
-                        <span class="line-clamp-1">{{ __('new_design.store_page.hario_feat2') }}</span>
-                    </li>
-                @endif
-            </ul>
+                </p>
+            </div>
         </div>
     </a>
 
