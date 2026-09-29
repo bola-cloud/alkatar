@@ -51,7 +51,7 @@ class ServiceCustomerController extends Controller
        $data['title'] = __('Shipping & Return');
        $data['description'] = $seo->description ?? '';
        $data['keywords'] = $seo->keywords ?? '';
-       return view('front.pages.customer_services.shipping_return_newdesign', $data);
+       return view('front.home.shipping_return', $data);
    }
    public function Faq(){
        $data['faqs'] = Faq::latest()->get();
@@ -61,13 +61,13 @@ class ServiceCustomerController extends Controller
        $data['keywords'] = $seo->keywords ?? '';
 
        // Return the new-design FAQ view which renders admin-managed FAQ entries
-       return view('front.pages.customer_services.faq_newdesign', $data);
+       return view('front.home.faq', $data);
    }
    public function refundPolicy(){
        $seo = SeoSetting::where('slug', 'refund-policy')->first();
        $data['title'] = __('Return Policy');
        $data['description'] = $seo->description ?? '';
        $data['keywords'] = $seo->keywords ?? '';
-       return view('front.pages.customer_services.return_policy_newdesign', $data);
+       return view('front.home.return_policy', $data);
    }
 }

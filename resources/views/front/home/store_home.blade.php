@@ -93,7 +93,7 @@
                                 @php
                                     $catImg = $cat->Category_Icon ? asset(CategoryImage().$cat->Category_Icon) : asset('assets/elketar/placeholder.png');
                                 @endphp
-                                <img src="{{ $catImg }}" alt="{{ $cat->localized_name }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                                <img src="{{ $catImg }}" alt="{{ $cat->localized_name }}" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                                 <div class="absolute bottom-4 left-0 right-0 px-4 text-center">
                                     <h3 class="text-white font-black text-sm sm:text-base lg:text-lg drop-shadow-md">{{ $cat->localized_name }}</h3>
@@ -207,7 +207,7 @@
             
             @if(isset($monthlyOffers) && $monthlyOffers->count() > 0)
             <div class="swiper monthly-swiper relative overflow-hidden w-full !pb-8 !px-2">
-                <div class="swiper-wrapper">
+                <div class="swiper-wrapper !items-stretch">
                     @foreach($monthlyOffers as $product)
                         <div class="swiper-slide !w-auto h-auto">
                             <div class="w-[170px] sm:w-[240px] lg:w-[300px] h-full">
@@ -238,7 +238,7 @@
             
             @if(isset($latestProducts) && $latestProducts->count() > 0)
             <div class="swiper latest-swiper relative overflow-hidden w-full !pb-8 !px-2">
-                <div class="swiper-wrapper">
+                <div class="swiper-wrapper !items-stretch">
                     @foreach($latestProducts as $product)
                         <div class="swiper-slide !w-auto h-auto">
                             <div class="w-[170px] sm:w-[240px] lg:w-[300px] h-full">

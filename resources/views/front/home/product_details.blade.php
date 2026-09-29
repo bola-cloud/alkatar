@@ -302,35 +302,25 @@
         <!-- Related Products Section -->
         @if($related && $related->count() > 0)
             <div class="mt-24 border-t border-gray-100 pt-16">
-                <h2 class="text-3xl font-black text-[#1A4231] mb-10 text-center">
-                    {{ $isRtl ? 'منتجات قد تعجبك' : 'Related Products' }}
-                </h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    @foreach($related as $rel)
-                        @php
-                            $relImgSrc = resolve_product_image($rel->Primary_Image ?: 'prod.png');
-                        @endphp
-                        <div class="bg-white rounded-[24px] border border-gray-150 overflow-hidden flex flex-col justify-between hover:shadow-lg transition-all duration-300">
-                            <a href="{{ route('single.product.new', $rel->en_Product_Slug) }}" class="block">
-                                <div class="aspect-square bg-gray-50 flex items-center justify-center p-6 relative overflow-hidden">
-                                    <img src="{{ $relImgSrc }}" alt="{{ $rel->localized_name }}" class="max-h-full max-w-full object-contain mix-blend-multiply hover:scale-[1.03] transition-all" onerror="this.onerror=null;this.src='{{ asset('assets/elketar/coffee.png') }}';">
+                <div class="flex items-center justify-between mb-10">
+                    <h2 class="text-2xl sm:text-3xl font-black text-[#1A4231]">
+                        {{ $isRtl ? 'منتجات قد تعجبك' : 'Related Products' }}
+                    </h2>
+                </div>
+                
+                <div class="swiper related-swiper relative overflow-hidden w-full !pb-8 !px-2">
+                    <div class="swiper-wrapper !items-stretch">
+                        @foreach($related as $product)
+                            <div class="swiper-slide !w-auto h-auto">
+                                <div class="w-[170px] sm:w-[240px] lg:w-[300px] h-full">
+                                    @include('front.components.product_card', ['product' => $product, 'isRtl' => $isRtl])
                                 </div>
-                                <div class="p-5 flex flex-col text-start gap-2">
-                                    <h3 class="font-bold text-[#1A4231] text-base line-clamp-1">
-                                        {{ $rel->localized_name }}
-                                    </h3>
-                                    <span class="text-sm font-black text-[#1A4231]">
-                                        {{ floatval($rel->Price) }} {{ __('new_design.coffee_crops.currency') }}
-                                    </span>
-                                </div>
-                            </a>
-                            <div class="px-5 pb-5">
-                                <button onclick="addToCart({{ $rel->id }}, {{ $rel->Discount > 0 ? ($rel->Price - ($rel->Price * $rel->Discount / 100)) : $rel->Price }})" class="w-full bg-[#1A4231] hover:bg-[#2C624A] text-white py-3 rounded-xl text-xs font-bold transition-all shadow-sm">
-                                    {{ __('new_design.store_page.add_to_cart') }}
-                                </button>
                             </div>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
+                    <!-- Nav -->
+                    <div class="swiper-button-prev related-prev !text-[#1A4231] after:!text-xl w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 transition-all -left-2 top-1/2 -mt-5"></div>
+                    <div class="swiper-button-next related-next !text-[#1A4231] after:!text-xl w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 transition-all -right-2 top-1/2 -mt-5"></div>
                 </div>
             </div>
         @endif
@@ -467,6 +457,23 @@
             }
         });
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if(document.querySelector('.related-swiper')) {
+            new Swiper('.related-swiper', {
+                slidesPerView: 'auto',
+                spaceBetween: 16,
+                navigation: {
+                    nextEl: '.related-next',
+                    prevEl: '.related-prev',
+                },
+                breakpoints: {
+                    640: { spaceBetween: 24 },
+                    1024: { spaceBetween: 32 }
+                }
+            });
+        }
+    });
 </script>
 
 @endsection

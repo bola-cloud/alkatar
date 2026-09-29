@@ -25,11 +25,9 @@
                 <div>
                     <h4 class="text-lg lg:text-xl font-bold text-white mb-6">{{ __('new_design.footer.explore') }}</h4>
                     <ul class="space-y-4 font-semibold text-white/80">
-                        <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.about') }}</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.farms') }}</a></li>
+                        <li><a href="{{ route('coffee.crops') }}" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.farms') }}</a></li>
                         <li><a href="{{ route('about.us') }}" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.about_us') }}</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.methods') }}</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.tools') }}</a></li>
+                        <li><a href="{{ route('technical.tools') }}" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.tools') }}</a></li>
                     </ul>
                 </div>
 
@@ -37,10 +35,10 @@
                 <div>
                     <h4 class="text-lg lg:text-xl font-bold text-white mb-6">{{ __('new_design.footer.support') }}</h4>
                     <ul class="space-y-4 font-semibold text-white/80">
-                        <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.faq') }}</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.shipping') }}</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.track') }}</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.contact') }}</a></li>
+                        <li><a href="{{ route('faq') }}" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.faq') }}</a></li>
+                        <li><a href="{{ route('shipping.return.new') }}" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.shipping') }}</a></li>
+                        <li><a href="{{ route('refund.policy') }}" class="hover:text-white transition-colors text-sm lg:text-base">{{ app()->getLocale() != 'en' ? 'سياسة الاسترجاع' : 'Return Policy' }}</a></li>
+                        <li><a href="{{ route('contact.us') }}" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.contact') }}</a></li>
                     </ul>
                 </div>
             </div>

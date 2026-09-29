@@ -51,7 +51,7 @@
             @php
                 $imgSrc = resolve_product_image($product->Primary_Image);
             @endphp
-            <img src="{{ $imgSrc }}" alt="{{ $product->localized_name }}" class="w-full h-full object-cover">
+            <img src="{{ $imgSrc }}" alt="{{ $product->localized_name }}" loading="lazy" decoding="async" class="w-full h-full object-cover">
         </div>
 
         <!-- Product Info -->
