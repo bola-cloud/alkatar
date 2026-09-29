@@ -122,8 +122,8 @@
             <div class="swiper products-swiper relative overflow-hidden w-full !pb-8 !px-2">
                 <div class="swiper-wrapper">
                     @foreach($specialOffers as $product)
-                        <div class="swiper-slide !w-auto">
-                            <div class="w-[170px] sm:w-[240px] lg:w-[300px]">
+                        <div class="swiper-slide !w-auto h-auto">
+                            <div class="w-[170px] sm:w-[240px] lg:w-[300px] h-full">
                                 @include('front.components.product_card', ['product' => $product, 'isRtl' => $isRtl])
                             </div>
                         </div>
@@ -150,8 +150,8 @@
             <div class="swiper bestsellers-swiper relative overflow-hidden w-full !pb-8 !px-2">
                 <div class="swiper-wrapper">
                     @foreach($bestSellers as $product)
-                        <div class="swiper-slide !w-auto">
-                            <div class="w-[170px] sm:w-[240px] lg:w-[300px]">
+                        <div class="swiper-slide !w-auto h-auto">
+                            <div class="w-[170px] sm:w-[240px] lg:w-[300px] h-full">
                                 @include('front.components.product_card', ['product' => $product, 'isRtl' => $isRtl])
                             </div>
                         </div>
@@ -178,8 +178,8 @@
             <div class="swiper featured-swiper relative overflow-hidden w-full !pb-8 !px-2">
                 <div class="swiper-wrapper">
                     @foreach($featuredProducts as $product)
-                        <div class="swiper-slide !w-auto">
-                            <div class="w-[170px] sm:w-[240px] lg:w-[300px]">
+                        <div class="swiper-slide !w-auto h-auto">
+                            <div class="w-[170px] sm:w-[240px] lg:w-[300px] h-full">
                                 @include('front.components.product_card', ['product' => $product, 'isRtl' => $isRtl])
                             </div>
                         </div>
@@ -209,8 +209,8 @@
             <div class="swiper monthly-swiper relative overflow-hidden w-full !pb-8 !px-2">
                 <div class="swiper-wrapper">
                     @foreach($monthlyOffers as $product)
-                        <div class="swiper-slide !w-auto">
-                            <div class="w-[170px] sm:w-[240px] lg:w-[300px]">
+                        <div class="swiper-slide !w-auto h-auto">
+                            <div class="w-[170px] sm:w-[240px] lg:w-[300px] h-full">
                                 @include('front.components.product_card', ['product' => $product, 'isRtl' => $isRtl])
                             </div>
                         </div>
@@ -240,8 +240,8 @@
             <div class="swiper latest-swiper relative overflow-hidden w-full !pb-8 !px-2">
                 <div class="swiper-wrapper">
                     @foreach($latestProducts as $product)
-                        <div class="swiper-slide !w-auto">
-                            <div class="w-[170px] sm:w-[240px] lg:w-[300px]">
+                        <div class="swiper-slide !w-auto h-auto">
+                            <div class="w-[170px] sm:w-[240px] lg:w-[300px] h-full">
                                 @include('front.components.product_card', ['product' => $product, 'isRtl' => $isRtl])
                             </div>
                         </div>

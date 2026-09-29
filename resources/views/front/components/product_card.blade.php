@@ -55,8 +55,8 @@
         </div>
 
         <!-- Product Info -->
-        <div class="p-4 sm:p-6 flex flex-col text-start gap-2 sm:gap-4">
-            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4">
+        <div class="p-3 sm:p-6 flex flex-col text-start gap-2 sm:gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-1 sm:gap-4">
                 <h3 class="text-sm sm:text-lg font-black text-[#1A4231] leading-tight line-clamp-2">
                     {{ $product->localized_name }}
                 </h3>
@@ -64,11 +64,11 @@
                     {{ floatval($product->Price) }} {{ __('new_design.coffee_crops.currency') }}
                 </span>
             </div>
-            
-            <p class="text-xs text-gray-500 font-semibold leading-relaxed line-clamp-2 min-h-[2rem]">
+            @if(trim($product->localized_about))
+            <p class="text-xs text-gray-500 font-semibold leading-relaxed line-clamp-2 mt-1">
                 {{ $product->localized_about }}
             </p>
-
+            @endif
         </div>
     </a>
 
