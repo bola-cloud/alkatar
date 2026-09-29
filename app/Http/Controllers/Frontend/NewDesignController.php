@@ -16,6 +16,15 @@ class NewDesignController extends Controller
     /**
      * Display the new design home page.
      */
+    public function preparation_methods()
+    {
+        $seo = SeoSetting::where('slug', 'preparation-methods')->first();
+        $data['title'] = $seo->title ?? __('Preparation Methods');
+        $data['description'] = $seo->description ?? '';
+        $data['keywords'] = $seo->keywords ?? '';
+        return view('front.home.preparation_methods', $data);
+    }
+
     public function index()
     {
         $relations = ['sizes', 'weights', 'additions'];

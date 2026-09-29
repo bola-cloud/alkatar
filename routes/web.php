@@ -51,6 +51,7 @@ Route::group(['middleware' => ['is_user']], function () {
     Route::get('/custom-box', [NewDesignController::class, 'custom_box'])->name('custom.box');
     Route::get('/coffee-crops', [NewDesignController::class, 'coffee_crops'])->name('coffee.crops');
     Route::get('/technical-tools', [NewDesignController::class, 'technical_tools'])->name('technical.tools');
+    Route::get('/preparation-methods', [NewDesignController::class, 'preparation_methods'])->name('preparation.methods');
     Route::get('/experts', [NewDesignController::class, 'experts'])->name('experts');
     Route::post('/experts', [NewDesignController::class, 'storeExpertRequest'])->name('experts.store');
     Route::get('/monthly-offers', [NewDesignController::class, 'monthly_offers'])->name('monthly.offers');
