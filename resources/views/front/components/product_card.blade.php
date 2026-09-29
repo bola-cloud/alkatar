@@ -73,27 +73,27 @@
     </a>
 
     <!-- Add to Cart Button -->
-    <div class="px-4 sm:px-6 pb-4 sm:pb-6 mt-auto">
+    <div class="px-3 sm:px-6 pb-4 sm:pb-6 mt-auto">
         @if($product->Quantity <= 0)
-            <button type="button" disabled class="w-full bg-gray-400 text-white py-2.5 sm:py-3.5 rounded-full text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 shadow-sm cursor-not-allowed opacity-80">
-                <span>{{ app()->getLocale() == 'fr' ? 'نفدت الكمية' : 'Out of Stock' }}</span>
-                <svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+            <button type="button" disabled class="w-full bg-gray-400 text-white py-2 sm:py-3.5 px-2 rounded-full text-[11px] sm:text-sm font-extrabold flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm cursor-not-allowed opacity-80">
+                <span class="whitespace-nowrap">{{ app()->getLocale() == 'fr' ? 'نفدت الكمية' : 'Out of Stock' }}</span>
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728"/>
                 </svg>
             </button>
         @elseif($hasOptions)
             <button type="button" 
                 onclick="openQuickViewModal({{ $product->id }}, '{{ addslashes(htmlspecialchars($product->localized_name, ENT_QUOTES)) }}', '{{ $imgSrc }}', {{ json_encode($productSizes) }}, {{ json_encode($productWeights) }}, {{ floatval($product->Price) }}, {{ floatval($product->Discount) }})" 
-                class="w-full bg-[#1A4231] hover:bg-[#2C624A] text-white py-2.5 sm:py-3.5 rounded-full text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-md">
-                <span>{{ __('new_design.store_page.add_to_cart') }}</span>
-                <svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                class="w-full bg-[#1A4231] hover:bg-[#2C624A] text-white py-2 sm:py-3.5 px-2 rounded-full text-[11px] sm:text-sm font-extrabold flex items-center justify-center gap-1.5 sm:gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-md">
+                <span class="whitespace-nowrap">{{ __('new_design.store_page.add_to_cart') }}</span>
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                 </svg>
             </button>
         @else
-            <button onclick="addToCart({{ $product->id }}, {{ $product->Discount > 0 ? ($product->Price - ($product->Price * $product->Discount / 100)) : $product->Price }})" class="w-full bg-[#1A4231] hover:bg-[#2C624A] text-white py-2.5 sm:py-3.5 rounded-full text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-md">
-                <span>{{ __('new_design.store_page.add_to_cart') }}</span>
-                <svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+            <button onclick="addToCart({{ $product->id }}, {{ $product->Discount > 0 ? ($product->Price - ($product->Price * $product->Discount / 100)) : $product->Price }})" class="w-full bg-[#1A4231] hover:bg-[#2C624A] text-white py-2 sm:py-3.5 px-2 rounded-full text-[11px] sm:text-sm font-extrabold flex items-center justify-center gap-1.5 sm:gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-md">
+                <span class="whitespace-nowrap">{{ __('new_design.store_page.add_to_cart') }}</span>
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                 </svg>
             </button>

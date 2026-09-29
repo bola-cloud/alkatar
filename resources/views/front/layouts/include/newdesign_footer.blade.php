@@ -19,27 +19,30 @@
                 </a>
             </div>
 
-            <!-- Column 2: Explore -->
-            <div>
-                <h4 class="text-lg lg:text-xl font-bold text-white mb-6">{{ __('new_design.footer.explore') }}</h4>
-                <ul class="space-y-4 font-semibold text-white/80">
-                    <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.about') }}</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.farms') }}</a></li>
-                    <li><a href="{{ route('about.us') }}" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.about_us') }}</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.methods') }}</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.tools') }}</a></li>
-                </ul>
-            </div>
+            <!-- Columns 2 & 3: Explore and Support -->
+            <div class="grid grid-cols-2 gap-4 sm:gap-8 md:col-span-2 md:gap-12 lg:gap-16">
+                <!-- Column 2: Explore -->
+                <div>
+                    <h4 class="text-lg lg:text-xl font-bold text-white mb-6">{{ __('new_design.footer.explore') }}</h4>
+                    <ul class="space-y-4 font-semibold text-white/80">
+                        <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.about') }}</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.farms') }}</a></li>
+                        <li><a href="{{ route('about.us') }}" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.about_us') }}</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.methods') }}</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.tools') }}</a></li>
+                    </ul>
+                </div>
 
-            <!-- Column 3: Support -->
-            <div>
-                <h4 class="text-lg lg:text-xl font-bold text-white mb-6">{{ __('new_design.footer.support') }}</h4>
-                <ul class="space-y-4 font-semibold text-white/80">
-                    <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.faq') }}</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.shipping') }}</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.track') }}</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.contact') }}</a></li>
-                </ul>
+                <!-- Column 3: Support -->
+                <div>
+                    <h4 class="text-lg lg:text-xl font-bold text-white mb-6">{{ __('new_design.footer.support') }}</h4>
+                    <ul class="space-y-4 font-semibold text-white/80">
+                        <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.faq') }}</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.shipping') }}</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.track') }}</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors text-sm lg:text-base">{{ __('new_design.footer.contact') }}</a></li>
+                    </ul>
+                </div>
             </div>
 
             <!-- Column 4: Follow Us -->
