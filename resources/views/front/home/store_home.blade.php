@@ -78,29 +78,6 @@
 
     <div class="container mx-auto px-4 lg:px-8 flex flex-col gap-16 max-w-[1400px]">
 
-        <!-- Special Offers Section -->
-        @if(isset($specialOffers) && $specialOffers->count() > 0)
-        <section class="flex flex-col gap-6">
-            <div class="flex items-center justify-between">
-                <h2 class="text-2xl lg:text-4xl font-black text-[#1A4231]">{{ $isRtl ? 'عروض خاصة' : 'Special Offers' }}</h2>
-                <a href="{{ route('front.store.catalog') }}" class="text-[#1A4231] font-bold text-sm lg:text-base border-b-2 border-[#1A4231] hover:opacity-80 transition-opacity">{{ $isRtl ? 'عرض الكل' : 'View All' }}</a>
-            </div>
-            
-            <div class="swiper products-swiper relative overflow-hidden w-full !pb-8 !px-2">
-                <div class="swiper-wrapper">
-                    @foreach($specialOffers as $product)
-                        <div class="swiper-slide !w-auto">
-                            @include('front.components.product_card', ['product' => $product, 'isRtl' => $isRtl])
-                        </div>
-                    @endforeach
-                </div>
-                <!-- Nav -->
-                <div class="swiper-button-prev products-prev !text-[#1A4231] after:!text-xl w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 transition-all -left-2 top-1/2 -mt-5"></div>
-                <div class="swiper-button-next products-next !text-[#1A4231] after:!text-xl w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 transition-all -right-2 top-1/2 -mt-5"></div>
-            </div>
-        </section>
-        @endif
-
         <!-- Categories Section -->
         @if(isset($categories) && $categories->count() > 0)
         <section class="flex flex-col gap-6">
@@ -132,19 +109,110 @@
         </section>
         @endif
 
+        <!-- Special Offers Section -->
+        <section class="flex flex-col gap-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-2xl lg:text-4xl font-black text-[#1A4231]">{{ $isRtl ? 'العروض' : 'Offers' }}</h2>
+                @if(isset($specialOffers) && $specialOffers->count() > 0)
+                <a href="{{ route('front.store.catalog') }}" class="text-[#1A4231] font-bold text-sm lg:text-base border-b-2 border-[#1A4231] hover:opacity-80 transition-opacity">{{ $isRtl ? 'عرض الكل' : 'View All' }}</a>
+                @endif
+            </div>
+            
+            @if(isset($specialOffers) && $specialOffers->count() > 0)
+            <div class="swiper products-swiper relative overflow-hidden w-full !pb-8 !px-2">
+                <div class="swiper-wrapper">
+                    @foreach($specialOffers as $product)
+                        <div class="swiper-slide !w-auto">
+                            <div class="w-[170px] sm:w-[240px] lg:w-[300px]">
+                                @include('front.components.product_card', ['product' => $product, 'isRtl' => $isRtl])
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                <!-- Nav -->
+                <div class="swiper-button-prev products-prev !text-[#1A4231] after:!text-xl w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 transition-all -left-2 top-1/2 -mt-5"></div>
+                <div class="swiper-button-next products-next !text-[#1A4231] after:!text-xl w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 transition-all -right-2 top-1/2 -mt-5"></div>
+            </div>
+            @else
+            <div class="flex items-center justify-center py-16 text-center border-2 border-dashed border-gray-200 rounded-[32px] bg-gray-50/50">
+                <h3 class="text-xl lg:text-2xl font-bold text-gray-400">{{ $isRtl ? 'لا توجد منتجات' : 'No Products Available' }}</h3>
+            </div>
+            @endif
+        </section>
+
+        <!-- Best Sellers Section -->
+        <section class="flex flex-col gap-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-2xl lg:text-4xl font-black text-[#1A4231]">{{ $isRtl ? 'الأكثر مبيعاً' : 'Best Selling' }}</h2>
+            </div>
+            
+            @if(isset($bestSellers) && $bestSellers->count() > 0)
+            <div class="swiper bestsellers-swiper relative overflow-hidden w-full !pb-8 !px-2">
+                <div class="swiper-wrapper">
+                    @foreach($bestSellers as $product)
+                        <div class="swiper-slide !w-auto">
+                            <div class="w-[170px] sm:w-[240px] lg:w-[300px]">
+                                @include('front.components.product_card', ['product' => $product, 'isRtl' => $isRtl])
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                <!-- Nav -->
+                <div class="swiper-button-prev bestsellers-prev !text-[#1A4231] after:!text-xl w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 transition-all -left-2 top-1/2 -mt-5"></div>
+                <div class="swiper-button-next bestsellers-next !text-[#1A4231] after:!text-xl w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 transition-all -right-2 top-1/2 -mt-5"></div>
+            </div>
+            @else
+            <div class="flex items-center justify-center py-16 text-center border-2 border-dashed border-gray-200 rounded-[32px] bg-gray-50/50">
+                <h3 class="text-xl lg:text-2xl font-bold text-gray-400">{{ $isRtl ? 'لا توجد منتجات' : 'No Products Available' }}</h3>
+            </div>
+            @endif
+        </section>
+
+        <!-- Featured Products Section -->
+        <section class="flex flex-col gap-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-2xl lg:text-4xl font-black text-[#1A4231]">{{ $isRtl ? 'منتجات مختارة' : 'Featured Products' }}</h2>
+            </div>
+            
+            @if(isset($featuredProducts) && $featuredProducts->count() > 0)
+            <div class="swiper featured-swiper relative overflow-hidden w-full !pb-8 !px-2">
+                <div class="swiper-wrapper">
+                    @foreach($featuredProducts as $product)
+                        <div class="swiper-slide !w-auto">
+                            <div class="w-[170px] sm:w-[240px] lg:w-[300px]">
+                                @include('front.components.product_card', ['product' => $product, 'isRtl' => $isRtl])
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                <!-- Nav -->
+                <div class="swiper-button-prev featured-prev !text-[#1A4231] after:!text-xl w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 transition-all -left-2 top-1/2 -mt-5"></div>
+                <div class="swiper-button-next featured-next !text-[#1A4231] after:!text-xl w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 transition-all -right-2 top-1/2 -mt-5"></div>
+            </div>
+            @else
+            <div class="flex items-center justify-center py-16 text-center border-2 border-dashed border-gray-200 rounded-[32px] bg-gray-50/50">
+                <h3 class="text-xl lg:text-2xl font-bold text-gray-400">{{ $isRtl ? 'لا توجد منتجات' : 'No Products Available' }}</h3>
+            </div>
+            @endif
+        </section>
+
         <!-- Monthly Offers Section -->
-        @if(isset($monthlyOffers) && $monthlyOffers->count() > 0)
         <section class="flex flex-col gap-6">
             <div class="flex items-center justify-between">
                 <h2 class="text-2xl lg:text-4xl font-black text-[#1A4231]">{{ $isRtl ? 'العروض الشهرية' : 'Monthly Offers' }}</h2>
+                @if(isset($monthlyOffers) && $monthlyOffers->count() > 0)
                 <a href="{{ route('monthly.offers') }}" class="text-[#1A4231] font-bold text-sm lg:text-base border-b-2 border-[#1A4231] hover:opacity-80 transition-opacity">{{ $isRtl ? 'عرض الكل' : 'View All' }}</a>
+                @endif
             </div>
             
+            @if(isset($monthlyOffers) && $monthlyOffers->count() > 0)
             <div class="swiper monthly-swiper relative overflow-hidden w-full !pb-8 !px-2">
                 <div class="swiper-wrapper">
                     @foreach($monthlyOffers as $product)
                         <div class="swiper-slide !w-auto">
-                            @include('front.components.product_card', ['product' => $product, 'isRtl' => $isRtl])
+                            <div class="w-[170px] sm:w-[240px] lg:w-[300px]">
+                                @include('front.components.product_card', ['product' => $product, 'isRtl' => $isRtl])
+                            </div>
                         </div>
                     @endforeach
                 </div>
@@ -152,24 +220,43 @@
                 <div class="swiper-button-prev monthly-prev !text-[#1A4231] after:!text-xl w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 transition-all -left-2 top-1/2 -mt-5"></div>
                 <div class="swiper-button-next monthly-next !text-[#1A4231] after:!text-xl w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 transition-all -right-2 top-1/2 -mt-5"></div>
             </div>
+            @else
+            <div class="flex items-center justify-center py-16 text-center border-2 border-dashed border-gray-200 rounded-[32px] bg-gray-50/50">
+                <h3 class="text-xl lg:text-2xl font-bold text-gray-400">{{ $isRtl ? 'لا توجد منتجات' : 'No Products Available' }}</h3>
+            </div>
+            @endif
         </section>
-        @endif
 
         <!-- Latest Products Section -->
-        @if(isset($latestProducts) && $latestProducts->count() > 0)
         <section class="flex flex-col gap-6">
             <div class="flex items-center justify-between">
-                <h2 class="text-2xl lg:text-4xl font-black text-[#1A4231]">{{ $isRtl ? 'أحدث المنتجات' : 'Latest Products' }}</h2>
+                <h2 class="text-2xl lg:text-4xl font-black text-[#1A4231]">{{ $isRtl ? 'وصل حديثاً' : 'New Arrivals' }}</h2>
+                @if(isset($latestProducts) && $latestProducts->count() > 0)
                 <a href="{{ route('front.store.catalog') }}" class="text-[#1A4231] font-bold text-sm lg:text-base border-b-2 border-[#1A4231] hover:opacity-80 transition-opacity">{{ $isRtl ? 'تصفح كل المنتجات' : 'View All Products' }}</a>
+                @endif
             </div>
             
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-                @foreach($latestProducts as $product)
-                    @include('front.components.product_card', ['product' => $product, 'isRtl' => $isRtl])
-                @endforeach
+            @if(isset($latestProducts) && $latestProducts->count() > 0)
+            <div class="swiper latest-swiper relative overflow-hidden w-full !pb-8 !px-2">
+                <div class="swiper-wrapper">
+                    @foreach($latestProducts as $product)
+                        <div class="swiper-slide !w-auto">
+                            <div class="w-[170px] sm:w-[240px] lg:w-[300px]">
+                                @include('front.components.product_card', ['product' => $product, 'isRtl' => $isRtl])
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                <!-- Nav -->
+                <div class="swiper-button-prev latest-prev !text-[#1A4231] after:!text-xl w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 transition-all -left-2 top-1/2 -mt-5"></div>
+                <div class="swiper-button-next latest-next !text-[#1A4231] after:!text-xl w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 transition-all -right-2 top-1/2 -mt-5"></div>
             </div>
+            @else
+            <div class="flex items-center justify-center py-16 text-center border-2 border-dashed border-gray-200 rounded-[32px] bg-gray-50/50">
+                <h3 class="text-xl lg:text-2xl font-bold text-gray-400">{{ $isRtl ? 'لا توجد منتجات' : 'No Products Available' }}</h3>
+            </div>
+            @endif
         </section>
-        @endif
 
     </div>
 
@@ -249,6 +336,60 @@ document.addEventListener('DOMContentLoaded', function() {
         navigation: {
             nextEl: '.monthly-next',
             prevEl: '.monthly-prev',
+        },
+        breakpoints: {
+            640: {
+                spaceBetween: 24,
+            },
+            1024: {
+                spaceBetween: 32,
+            }
+        }
+    });
+
+    // Best Sellers Swiper
+    const bestSellersSwiper = new Swiper('.bestsellers-swiper', {
+        slidesPerView: 'auto',
+        spaceBetween: 16,
+        navigation: {
+            nextEl: '.bestsellers-next',
+            prevEl: '.bestsellers-prev',
+        },
+        breakpoints: {
+            640: {
+                spaceBetween: 24,
+            },
+            1024: {
+                spaceBetween: 32,
+            }
+        }
+    });
+
+    // Featured Products Swiper
+    const featuredSwiper = new Swiper('.featured-swiper', {
+        slidesPerView: 'auto',
+        spaceBetween: 16,
+        navigation: {
+            nextEl: '.featured-next',
+            prevEl: '.featured-prev',
+        },
+        breakpoints: {
+            640: {
+                spaceBetween: 24,
+            },
+            1024: {
+                spaceBetween: 32,
+            }
+        }
+    });
+
+    // Latest Products Swiper
+    const latestSwiper = new Swiper('.latest-swiper', {
+        slidesPerView: 'auto',
+        spaceBetween: 16,
+        navigation: {
+            nextEl: '.latest-next',
+            prevEl: '.latest-prev',
         },
         breakpoints: {
             640: {

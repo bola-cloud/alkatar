@@ -207,7 +207,7 @@
 </style>
 <nav class="hidden lg:block py-3.5 sticky top-0 z-[1000] shadow-md w-full" dir="{{ $dir }}" style="background: linear-gradient(to right, #1A4231, #387C5F);">
     <div class="container mx-auto px-4">
-        <ul class="flex items-center justify-start lg:justify-center gap-4 lg:gap-6 text-white font-medium overflow-x-auto no-scrollbar" style="font-family: 'Cairo', sans-serif; font-size: 18px; line-height: 27px; scrollbar-width: none; -ms-overflow-style: none; justify-content: safe center;">
+        <ul class="flex flex-wrap items-center justify-center gap-y-3 gap-x-4 lg:gap-x-5 text-white font-medium" style="font-family: 'Cairo', sans-serif; font-size: 16px; line-height: 24px;">
             <li><a href="{{ route('front') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.home') }}</a></li>
             <li><a href="{{ route('coffee.crops') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.coffee_crops') }}</a></li>
             <li><a href="{{ route('technical.tools') }}" class="hover:text-white/80 transition-colors whitespace-nowrap">{{ __('new_design.menu.technical_tools') }}</a></li>

@@ -69,19 +69,6 @@
                 {{ $product->localized_about }}
             </p>
 
-            <!-- Product Specs -->
-            <div class="flex items-start gap-2.5 text-xs font-semibold text-gray-700 leading-normal border-t border-gray-100 pt-4 mt-auto">
-                <span class="w-5 h-5 rounded-full bg-[#1A4231]/5 flex items-center justify-center shrink-0 border border-[#1A4231]/10 mt-0.5">
-                    <svg class="w-3.5 h-3.5 text-[#1A4231]" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                </span>
-                <p class="line-clamp-2">
-                    @if(strip_tags($product->localized_description))
-                        {{ strip_tags($product->localized_description) }}
-                    @else
-                        {{ __('new_design.store_page.hario_feat1') }} {{ __('new_design.store_page.hario_feat2') }}
-                    @endif
-                </p>
-            </div>
         </div>
     </a>
 

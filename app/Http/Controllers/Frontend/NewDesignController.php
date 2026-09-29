@@ -157,6 +157,33 @@ class NewDesignController extends Controller
             ->take(8)
             ->get();
 
+        // Best Sellers
+        $bestSellers = Product::where('Status', 1)
+            ->available()
+            ->where('Sold', '>', 0)
+            ->with($relations)
+            ->orderBy('Sold', 'desc')
+            ->take(8)
+            ->get();
+        if ($bestSellers->isEmpty()) {
+            $bestSellers = Product::where('Status', 1)
+                ->available()
+                ->where('Best_Selling', 1)
+                ->with($relations)
+                ->orderBy('id', 'desc')
+                ->take(8)
+                ->get();
+        }
+
+        // Featured Products
+        $featuredProducts = Product::where('Status', 1)
+            ->available()
+            ->where('Featured_Product', 1)
+            ->with($relations)
+            ->orderBy('id', 'desc')
+            ->take(8)
+            ->get();
+
         // Monthly Offers (Packages)
         $monthlyOffers = Product::where('Status', 1)
             ->available()
@@ -167,7 +194,7 @@ class NewDesignController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-        return view('front.home.store_home', compact('sliders', 'specialOffers', 'categories', 'latestProducts', 'monthlyOffers'));
+        return view('front.home.store_home', compact('sliders', 'specialOffers', 'categories', 'latestProducts', 'bestSellers', 'featuredProducts', 'monthlyOffers'));
     }
 
     public function storeCatalog()
